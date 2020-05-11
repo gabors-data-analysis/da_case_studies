@@ -196,14 +196,18 @@ fancy_scientific <- function(l) {
   parse(text=l)
 }
 
-create_output_if_doesnt_exist<- function(folder=output){
-  if (!dir.exists(output)){
-    dir.create(output)
-    print(paste(output,"folder created."))}
+create_output_if_doesnt_exist<- function(folder){
+  if (!dir.exists(folder)){
+    dir.create(folder)
+    print(paste(folder,"folder created."))}
   else{
-    print(paste(output,"folder already exists"))}
+    print(paste(folder,"folder already exists"))}
 }
-create_output_if_doesnt_exist()
+
+loadLibraries <- function(use_case_dir) {
+  lines <- trimws(readLines(file.path(use_case_dir,"packages.txt")))
+  loaded <- lapply(lines[lines != ""], function(x) library(x, character.only = TRUE))
+}
 
 
 # new stuff for prediction parts
