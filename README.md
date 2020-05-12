@@ -1,8 +1,10 @@
 # da_case_studies
 Codes for case studies for the Bekes-Kezdi Data Analysis textbook
+(c) Cambridge University Press, 2020
 
-It is based on case studies, each case study has a separate folder
-Within case study folders, all codes are contained together. 
-Some intermediaty files may be saved there, too. 
 
-Currently output is not stored here. 
+Organization
+1. Each case study has a separate folder.
+2. Within case study folders, codes in different languages are simply stored together. 
+3. Some intermediary files (csv, dta, rds) may be saved there, too. 
+4. Currently output is not stored here
