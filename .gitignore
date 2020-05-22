@@ -3,4 +3,8 @@
 .RData
 .Ruserdata
 .Renviron
+*/.DS_Store
 *.Rproj
+*/output/
+*.csv
+*.dta
