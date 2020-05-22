@@ -1,7 +1,9 @@
 # da_case_studies
-Codes for case studies for the Bekes-Kezdi Data Analysis textbook
+Data Analysis for Business, Economics, and Policy
 
-(c) Cambridge University Press, 2020
+by Gábor Békés (CEU) and Gábor Kézdi (U. Michigan) 
+
+Graduate textbook forthcoming (December 2020) by Cambridge University Press
 
 ## Organization
 1. Each case study has a separate folder.
