@@ -1,0 +1,667 @@
+############################################################
+#
+# DATA ANALYSIS TEXTBOOK
+# MODEL SELECTION
+# CASE  STUDY
+# Ch 14
+# Airbnb London 2017 march 05 data
+
+# v1.4 2019-09-05
+# v1.5 2020-01-05 Minor changes re missing values, graphics, LASSO
+# v1.6 2020-01-09 Substantial changes to treating missing values
+# v1.7 2020-03-23
+# v1.8 2020-03-27 edits
+# v1.9 2020-04-03 graph edits, cuts
+# v1.9 2020-04-07 minor edits
+# v1.10 2020-04-22 names ok
+# v1.11 2020-04-27 dplyr edits, nvars2
+# v1.12 2020-04-28 y-ypred
+
+############################################################
+#
+# WHAT THIS CODES DOES:
+#
+# Clear memory
+rm(list=ls())
+
+
+# Descriptive statistics and regressions
+library(caret)
+library(tidyverse)
+library(skimr)
+library(ggplot2)
+library(ggthemes)
+library(gridExtra)
+library(grid)
+library(ggplot2)
+library(lattice)
+library(glmnet)
+library(stargazer)
+library(xtable)
+library(directlabels)
+
+
+# Sets the core parent directory
+current_path = rstudioapi::getActiveDocumentContext()$path 
+dir<-paste0(dirname(dirname(dirname(current_path ))),"/")
+
+
+#location folders
+data_in <- paste0(dir,"da_data_repo/airbnb/clean/")
+data_out <- paste0(dir,"da_case_studies/ch14-airbnb-reg/")
+func <- paste0(dir, "da_case_studies/ch00-tech-prep/")
+output <- paste0(dir,"da_case_studies/ch14-airbnb-reg/output/")
+
+source(paste0(func, "theme_bg.R"))
+source(paste0(func, "da_helper_functions.R"))
+options(digits = 3)
+
+
+
+########################################
+# PART I.
+########################################
+
+
+#############
+# Load data #
+#############
+
+# Used area
+area <- "hackney"
+data <-
+  read_csv(paste0(data_in, "airbnb_", area, "_workfile_adj.csv")) %>%
+  mutate_if(is.character, factor)
+
+######################
+# Quick look at data #
+######################
+glimpse(data)
+skim(data)
+
+# where do we have missing variables now?
+to_filter <- sapply(data, function(x) sum(is.na(x)))
+to_filter[to_filter > 0]
+
+# what to do with missing values?
+# 1. drop if no target
+data <- data %>%
+  drop_na(price)
+
+
+# 2. imput when few, not that important
+data <- data %>%
+  mutate(
+    n_bathrooms =  ifelse(is.na(n_bathrooms), median(n_bathrooms, na.rm = T), n_bathrooms), #assume at least 1 bath
+    n_beds = ifelse(is.na(n_beds), n_accommodates, n_beds), #assume n_beds=n_accomodates
+    f_bathroom=ifelse(is.na(f_bathroom),1, f_bathroom),
+    f_minimum_nights=ifelse(is.na(f_minimum_nights),1, f_minimum_nights),
+    f_number_of_reviews=ifelse(is.na(f_number_of_reviews),1, f_number_of_reviews),
+    ln_beds=ifelse(is.na(ln_beds),0, ln_beds),
+    )
+
+# 3. drop columns when many missing not imortant
+to_drop <- c("usd_cleaning_fee", "p_host_response_rate")
+data <- data %>%
+  select(-one_of(to_drop))
+
+to_filter <- sapply(data, function(x) sum(is.na(x)))
+to_filter[to_filter > 0]
+
+
+# 4. Replace missing variables re reviews with zero, when no review + add flags
+data <- data %>%
+  mutate(
+    flag_days_since=ifelse(is.na(n_days_since),1, 0),
+    n_days_since =  ifelse(is.na(n_days_since), median(n_days_since, na.rm = T), n_days_since),
+    flag_review_scores_rating=ifelse(is.na(n_review_scores_rating),1, 0),
+    n_review_scores_rating =  ifelse(is.na(n_review_scores_rating), median(n_review_scores_rating, na.rm = T), n_review_scores_rating),
+    flag_reviews_per_month=ifelse(is.na(n_reviews_per_month),1, 0),
+    n_reviews_per_month =  ifelse(is.na(n_reviews_per_month), median(n_reviews_per_month, na.rm = T), n_reviews_per_month)
+          )
+table(data$flag_days_since)
+
+# redo features
+# Create variables, measuring the time since: squared, cubic, logs
+data <- data %>%
+  mutate(
+    ln_days_since = log(n_days_since+1),
+    ln_days_since2 = log(n_days_since+1)^2,
+    ln_days_since3 = log(n_days_since+1)^3 ,
+    n_days_since2=n_days_since^2,
+    n_days_since3=n_days_since^3,
+    ln_review_scores_rating = log(n_review_scores_rating),
+    ln_days_since=ifelse(is.na(ln_days_since),0, ln_days_since),
+    ln_days_since2=ifelse(is.na(ln_days_since2),0, ln_days_since2),
+    ln_days_since3=ifelse(is.na(ln_days_since3),0, ln_days_since3),
+    )
+
+# Look at data
+skim(data)
+
+# where do we have missing variables now?
+to_filter <- sapply(data, function(x) sum(is.na(x)))
+to_filter[to_filter > 0]
+
+
+###################################
+# Business logic- define our prediction problem
+###################################
+
+# Decision
+# Size, we need a normal apartment
+data <- data %>%
+  filter(n_accommodates < 8)
+
+# save workfile
+write.csv(data, paste0(data_out, "airbnb_hackney_work.csv"), row.names = F)
+
+
+#####################################
+# Look at some descriptive statistics
+#####################################
+
+#How is the average price changing in my district by `property_type`, `room_type` and the `bed_type`?
+data %>%
+  group_by(f_property_type, f_room_type) %>%
+  dplyr::summarize(mean_price = mean(price, na.rm=TRUE))
+
+data %>%
+  group_by(f_bed_type) %>%
+  dplyr::summarize(mean_price = mean(price, na.rm=TRUE))
+
+Hmisc::describe(data$price)
+
+# NB all graphs, we exclude 4 extreme values of price
+
+## Distribution of price by type below 400
+datau <- subset(data, price<=400)
+
+# Histograms
+
+# price
+g1 <- ggplot(data=datau, aes(x=price)) +
+  geom_histogram_da(type="percent", binwidth = 10) +
+  #geom_histogram(aes(y = (..count..)/sum(..count..)), binwidth = 10, center=0,
+  #               color = color.outline, fill = color[1], size = 0.25, alpha = 0.8,  show.legend=F,  na.rm=TRUE) +
+  coord_cartesian(xlim = c(0, 400)) +
+  labs(x = "Price (US dollars)",y = "Percent")+
+  scale_y_continuous(expand = c(0.00,0.00),limits=c(0, 0.15), breaks = seq(0, 0.15, by = 0.05), labels = scales::percent_format(1)) +
+  scale_x_continuous(expand = c(0.00,0.00),breaks = seq(0,400, 50)) +
+  theme_bg() 
+g1
+#save_fig("F14_airbnb_price_R", output, "small")
+save_fig("ch14-figure-3a-airbnb-price", output, "small")
+
+# lnprice
+g2<- ggplot(data=datau, aes(x=ln_price)) +
+  geom_histogram_da(type="percent", binwidth = 0.18) +
+  #  geom_histogram(aes(y = (..count..)/sum(..count..)), binwidth = 0.18,
+  #               color = color.outline, fill = color[1], size = 0.25, alpha = 0.8,  show.legend=F,  na.rm=TRUE) +
+  coord_cartesian(xlim = c(2, 6.5)) +
+  scale_y_continuous(expand = c(0.00,0.00),limits=c(0, 0.15), breaks = seq(0, 0.15, by = 0.05), labels = scales::percent_format(5L)) +
+  scale_x_continuous(expand = c(0.00,0.01),breaks = seq(2,6.5, 0.5)) +
+  labs(x = "ln(price, US dollars)",y = "Percent")+
+  theme_bg() 
+g2
+#save_fig("F14_airbnb_lnprice_R", output, "small")
+save_fig("ch14-figure-3b-airbnb-lnprice", output, "small")
+
+
+
+## Boxplot of price by room type
+g4 <- ggplot(data = datau, aes(x = f_room_type, y = price)) +
+  stat_boxplot(aes(group = f_room_type), geom = "errorbar", width = 0.3,
+               color = c(color[2],color[1], color[3]), size = 0.5, na.rm=T)+
+  geom_boxplot(aes(group = f_room_type),
+               color = c(color[2],color[1], color[3]), fill = c(color[2],color[1], color[3]),
+               size = 0.5, width = 0.6, alpha = 0.3, na.rm=T, outlier.shape = NA) +
+  scale_y_continuous(expand = c(0.01,0.01),limits = c(0,300), breaks = seq(0,300,100)) +
+  labs(x = "Room type",y = "Price (US dollars)")+
+  theme_bg()
+g4
+#save_fig("plot2_R", output, "small")
+save_fig("ch14-figure-4a-airbnb-room", output, "small")
+
+# Boxplot
+g5 <- ggplot(datau, aes(x = factor(n_accommodates), y = price,
+                        fill = factor(f_property_type), color=factor(f_property_type))) +
+  geom_boxplot(alpha=0.8, na.rm=T, outlier.shape = NA, width = 0.8) +
+    stat_boxplot(geom = "errorbar", width = 0.8, size = 0.3, na.rm=T)+
+    scale_color_manual(name="",
+                     values=c(color[2],color[1])) +
+  scale_fill_manual(name="",
+                     values=c(color[2],color[1])) +
+  labs(x = "Accomodates (Persons)",y = "Price (US dollars)")+
+  scale_y_continuous(expand = c(0.01,0.01), limits=c(0, 400), breaks = seq(0,400, 50))+
+  theme_bg() +
+  theme(legend.position = c(0.3,0.8)        )
+g5
+#save_fig("plot3_R", output, "small")
+save_fig("ch14-figure4b-airbnb-accom", output, "small")
+
+
+########################################
+# PART II.
+########################################
+
+
+#####################
+# Setting up models #
+#####################
+
+# Basic Variables
+basic_lev  <- c("n_accommodates", "n_beds", "f_property_type", "f_room_type", "n_days_since", "flag_days_since")
+basic_log <- c("ln_accommodates", "ln_beds", "f_property_type", "f_room_type","ln_days_since", "flag_days_since")
+
+# Factorized variables
+basic_add <- c("f_bathroom","f_cancellation_policy","f_bed_type")
+reviews <- c("f_number_of_reviews","n_review_scores_rating", "flag_review_scores_rating")
+# Higher orders
+poly_lev <- c("n_accommodates2", "n_days_since2", "n_days_since3")
+poly_log <- c("ln_accommodates2","ln_days_since2","ln_days_since3")
+
+#not use p_host_response_rate due to missing obs
+
+# Dummy variables: Extras -> collect all options and create dummies
+amenities <-  grep("^d_.*", names(data), value = TRUE)
+
+#################################################
+# Look for interactions
+################################################
+
+#FIXME: smaller title, legend text, legend color box
+
+#Look up room type interactions
+p1 <- price_diff_by_variables2(data, "f_room_type", "d_familykidfriendly", "Room type", "Family kid friendly")
+p2 <- price_diff_by_variables2(data, "f_room_type", "f_property_type", "Room type", "Property type")
+#Look up canelation policy
+p3 <- price_diff_by_variables2(data, "f_cancellation_policy", "d_familykidfriendly", "Cancellation policy", "Family kid friendly")
+p4 <- price_diff_by_variables2(data, "f_cancellation_policy", "d_tv", "Cancellation policy", "TV")
+#Look up property type
+p5 <- price_diff_by_variables2(data, "f_property_type", "d_cats", "Property type", "Cats")
+p6 <- price_diff_by_variables2(data, "f_property_type", "d_dogs", "Property type", "Dogs")
+
+g_interactions <- plot_grid(p1, p2, p3, p4, p5, p6, nrow=3, ncol=2)
+g_interactions
+#save_fig("ch14_airbnb_interactions",output,"verylarge")
+save_fig("ch14-figure-5-airbnb-interactions",output,"verylarge")
+
+
+
+# dummies suggested by graphs
+X1  <- c("f_room_type*f_property_type",  "f_room_type*d_familykidfriendly")
+
+# Additional interactions of factors and dummies
+X2  <- c("d_airconditioning*f_property_type", "d_cats*f_property_type", "d_dogs*f_property_type")
+X3  <- c(paste0("(f_property_type + f_room_type + f_cancellation_policy + f_bed_type) * (",
+                paste(amenities, collapse=" + "),")"))
+
+# Create models in levels models: 1-8
+modellev1 <- " ~ n_accommodates"
+modellev2 <- paste0(" ~ ",paste(basic_lev,collapse = " + "))
+modellev3 <- paste0(" ~ ",paste(c(basic_lev, basic_add,reviews),collapse = " + "))
+modellev4 <- paste0(" ~ ",paste(c(basic_lev,basic_add,reviews,poly_lev),collapse = " + "))
+modellev5 <- paste0(" ~ ",paste(c(basic_lev,basic_add,reviews,poly_lev,X1),collapse = " + "))
+modellev6 <- paste0(" ~ ",paste(c(basic_lev,basic_add,reviews,poly_lev,X1,X2),collapse = " + "))
+modellev7 <- paste0(" ~ ",paste(c(basic_lev,basic_add,reviews,poly_lev,X1,X2,amenities),collapse = " + "))
+modellev8 <- paste0(" ~ ",paste(c(basic_lev,basic_add,reviews,poly_lev,X1,X2,amenities,X3),collapse = " + "))
+
+# Create models in logs, models: 1-8
+modellog1 <- " ~ ln_accommodates"
+modellog2 <- paste0(" ~ ",paste(basic_log,collapse = " + "))
+modellog3 <- paste0(" ~ ",paste(c(basic_log, basic_add),collapse = " + "))
+modellog4 <- paste0(" ~ ",paste(c(basic_log,basic_add,reviews,poly_log),collapse = " + "))
+modellog5 <- paste0(" ~ ",paste(c(basic_log,basic_add,reviews,poly_log,X1),collapse = " + "))
+modellog6 <- paste0(" ~ ",paste(c(basic_log,basic_add,reviews,poly_log,X1,X2),collapse = " + "))
+modellog7 <- paste0(" ~ ",paste(c(basic_log,basic_add,reviews,poly_log,X1,X2,amenities),collapse = " + "))
+modellog8 <- paste0(" ~ ",paste(c(basic_log,basic_add,reviews,poly_log,X1,X2,amenities,X3),collapse = " + "))
+
+#################################
+# Separate hold-out set #
+#################################
+
+# create a holdout set (20% of observations)
+smp_size <- floor(0.2 * nrow(data))
+
+# Set the random number generator: It will make results reproducable
+set.seed(20180123)
+
+# create ids:
+# 1) seq_len: generate regular sequences
+# 2) sample: select random rows from a table
+holdout_ids <- sample(seq_len(nrow(data)), size = smp_size)
+data$holdout <- 0
+data$holdout[holdout_ids] <- 1
+
+#Hold-out set Set
+data_holdout <- data %>% filter(holdout == 1)
+
+#Working data set
+data_work <- data %>% filter(holdout == 0)
+
+
+##############################
+#      cross validation      #
+##############################
+
+## N = 5
+n_folds=5
+# Create the folds
+set.seed(20180124)
+
+folds_i <- sample(rep(1:n_folds, length.out = nrow(data_work) ))
+# Create results
+model_results_cv <- list()
+
+for (type in c("lev","log")) {
+  for (i in (1:8)){
+    model_name <-  paste0("model",type,i)
+    model_pretty_name <- paste0("(",i,")")
+
+    yvar <- ifelse(type=="lev","price","ln_price")
+    xvars <- eval(parse(text = model_name))
+    formula <- formula(paste0(yvar,xvars))
+
+    # Initialize values
+    rmse_train <- c()
+    rmse_test <- c()
+
+    model_work_data <- lm(formula,data = data_work)
+    BIC <- BIC(model_work_data)
+    nvars <- model_work_data$rank -1
+    r2 <- summary(model_work_data)$r.squared
+
+    # Do the k-fold estimation
+    for (k in 1:n_folds) {
+      test_i <- which(folds_i == k)
+      # Train sample: all except test_i
+      data_train <- data_work[-test_i, ]
+      # Test sample
+      data_test <- data_work[test_i, ]
+      # Estimation and prediction
+      model <- lm(formula,data = data_train)
+      prediction_train <- predict(model, newdata = data_train)
+      prediction_test <- predict(model, newdata = data_test)
+
+      # Criteria evaluation
+      if (type=="lev") {
+        rmse_train[k] <- mse_lev(prediction_train, data_train[,yvar] %>% pull)**(1/2)
+        rmse_test[k] <- mse_lev(prediction_test, data_test[,yvar] %>% pull)**(1/2)
+      } else {
+        rmselog <- mse_lev(prediction_train, data_train[,yvar] %>% pull)**(1/2)
+        rmse_train[k] <- mse_log(prediction_train, data_train[,yvar] %>% pull,rmselog)**(1/2)
+        rmse_test[k] <- mse_log(prediction_test, data_test[,yvar] %>% pull,rmselog)**(1/2)
+      }
+
+    }
+
+    model_results_cv[[model_name]] <- list(yvar=yvar,xvars=xvars,formula=formula,model_work_data=model_work_data,
+                                           rmse_train = rmse_train,rmse_test = rmse_test,BIC = BIC,
+                                           model_name = model_pretty_name, nvars = nvars, r2 = r2)
+  }
+}
+model <- lm(formula,data = data_train)
+prediction_train <- predict(model, newdata = data_train)
+prediction_test <- predict(model, newdata = data_test)
+
+skim(data_train$ln_days_since)
+
+t1 <- imap(model_results_cv,  ~{
+  as.data.frame(.x[c("rmse_test", "rmse_train")]) %>%
+    dplyr::summarise_all(.funs = mean) %>%
+    mutate("model_name" = .y , "model_pretty_name" = .x[["model_name"]] ,
+           "nvars" = .x[["nvars"]], "r2" = .x[["r2"]], "BIC" = .x[["BIC"]])
+}) %>%
+  bind_rows()
+t1
+column_names <- c("Model", "N predictors", "R-squared", "BIC", "Training RMSE",
+                 "Test RMSE")
+
+# Nice table produced and saved as .tex without \beign{table}
+# -R2, BIC on full work data-n.
+# -In sample rmse: average on training data; avg test : average on test data
+
+t14_2 <- t1 %>%
+  filter(grepl("lev",model_name)) %>%
+  select("model_pretty_name", "nvars", "r2" , "BIC", "rmse_train", "rmse_test")
+colnames(t14_2) <- column_names
+print(xtable(t14_2, type = "latex", digits=c(0,0,0,2,0,2,2)), file = paste0(output, "ch14_table_fit_level.tex"),
+      include.rownames=FALSE, booktabs=TRUE, floating = FALSE)
+
+t14_2_log <- t1 %>%
+  filter(grepl("log",model_name)) %>%
+  select("model_pretty_name", "nvars", "r2" , "BIC", "rmse_train", "rmse_test")
+colnames(t14_2_log) <- column_names
+print(xtable(t14_2_log, type = "latex", digits=c(0,0,0,2,0,2,2)), file = paste0(output, "ch14_table_fit_log.tex"),include.rownames=FALSE, booktabs=TRUE, floating = FALSE)
+
+
+# RMSE training vs test graph
+t1_levels <- t1 %>%
+  filter(grepl("lev",model_name)) %>%
+  dplyr::select("nvars", "rmse_train", "rmse_test") %>%
+  gather(var,value, rmse_train:rmse_test) %>%
+  mutate(nvars2=nvars+1) %>%
+  mutate(var = factor(var, levels = c("rmse_train", "rmse_test"),
+                      labels = c("RMSE Training","RMSE Test")))
+
+model_result_plot_levels <- ggplot(data = t1_levels,
+                                   aes(x = factor(nvars2), y = value, color=factor(var), group = var)) +
+  geom_line(size=1,show.legend=FALSE, na.rm = TRUE) +
+  scale_color_manual(name="",
+                     values=c(color[2],color[1])) +
+  scale_y_continuous(name = "RMSE", limits = c(34, 44), breaks = seq(34,44, 2)) +
+  scale_x_discrete( name = "Number of coefficients", expand=c(0.01, 0.01)) +
+  geom_dl(aes(label = var),  method = list("last.points", dl.trans(x=x-1), cex=0.4)) +
+  #scale_colour_discrete(guide = 'none') +
+  theme_bg()
+model_result_plot_levels
+#save_fig("ch14_airbnb_model_result_levels", output, "small")
+save_fig("ch14-figure-7-airbnb-model-result-levels", output, "small")
+
+
+
+#################################
+#           LASSO               #
+#################################
+
+# take model 8 (and find observations where there is no missing data)may
+vars_model_7 <- c("price", basic_lev,basic_add,reviews,poly_lev,X1,X2,amenities)
+vars_model_8 <- c("price", basic_lev,basic_add,reviews,poly_lev,X1,X2,amenities,X3)
+
+# Set lasso tuning parameters
+train_control <- trainControl(method = "cv", number = n_folds)
+tune_grid <- expand.grid("alpha" = c(1), "lambda" = seq(0.05, 1, by = 0.05))
+
+# We use model 7 without the interactions so that it is easy to compare later to post lasso ols
+formula <- formula(paste0("price ~ ", paste(setdiff(vars_model_8, "price"), collapse = " + ")))
+
+set.seed(1234)
+lasso_model <- caret::train(formula,
+                      data = data_work,
+                      method = "glmnet",
+                      preProcess = c("center", "scale"),
+                      trControl = train_control,
+                      tuneGrid = tune_grid)
+
+print(lasso_model$bestTune$lambda)
+
+lasso_coeffs <- coef(lasso_model$finalModel, lasso_model$bestTune$lambda) %>%
+  as.matrix() %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "variable") %>%
+  rename(coefficient = `1`)  # the column has a name "1", to be renamed
+
+print(lasso_coeffs)
+
+# Evaluate model. CV error:
+lasso_cv_rmse <- lasso_model$results %>%
+  filter(lambda == lasso_model$bestTune$lambda) %>%
+  dplyr::select(RMSE)
+print(lasso_cv_rmse[1, 1])
+
+
+
+########################################
+# PART III.
+########################################
+
+
+
+###################################################
+# Diagnsotics #
+###################################################
+model3_level <- model_results_cv[["modellev3"]][["model_work_data"]]
+model7_level <- model_results_cv[["modellev7"]][["model_work_data"]]
+model7_log <- model_results_cv[["modellog7"]][["model_work_data"]]
+
+
+# look at holdout RMSE
+model7_level_work_rmse <- mse_lev(predict(model7_level, newdata = data_work), data_work[,"price"] %>% pull)**(1/2)
+model7_level_holdout_rmse <- mse_lev(predict(model7_level, newdata = data_holdout), data_holdout[,"price"] %>% pull)**(1/2)
+model7_level_holdout_rmse
+
+###################################################
+# FIGURES FOR FITTED VS ACTUAL OUTCOME VARIABLES #
+###################################################
+
+# Target variable
+Ylev <- data_holdout[["price"]]
+
+meanY <-mean(Ylev)
+sdY <- sd(Ylev)
+meanY_m2SE <- meanY -1.96 * sdY
+meanY_p2SE <- meanY + 1.96 * sdY
+Y5p <- quantile(Ylev, 0.05, na.rm=TRUE)
+Y95p <- quantile(Ylev, 0.95, na.rm=TRUE)
+
+# Predicted values
+predictionlev_holdout_pred <- as.data.frame(predict(model7_level, newdata = data_holdout, interval="predict")) %>%
+  rename(pred_lwr = lwr, pred_upr = upr)
+predictionlev_holdout_conf <- as.data.frame(predict(model7_level, newdata = data_holdout, interval="confidence")) %>%
+  rename(conf_lwr = lwr, conf_upr = upr)
+
+predictionlev_holdout <- cbind(data_holdout[,c("price","n_accommodates")],
+                               predictionlev_holdout_pred,
+                               predictionlev_holdout_conf[,c("conf_lwr","conf_upr")])
+
+
+# Create data frame with the real and predicted values
+d <- data.frame(ylev=Ylev, predlev=predictionlev_holdout[,"fit"] )
+# Check the differences
+d$elev <- d$ylev - d$predlev
+
+# FIXME: a problem
+# Logged target variable
+# model log 7 on log price
+Ylog <- data_holdout[["ln_price"]]
+#predictionlog_test <- predict(model7_log, newdata = data_holdout)
+#predictionlog_test2 <- exp(predictionlog_test) * exp((rmselog)^2/2)
+#d <- data.frame(ylev=Ylev, ylog=Ylog, predlev=predictionlev_holdout[,"fit"] , predlog=predictionlog_test2)
+
+
+
+# Plot predicted vs price
+level_vs_pred <- ggplot(data = d) +
+  geom_point(aes(y=ylev, x=predlev), color = color[1], size = 1,
+             shape = 16, alpha = 0.7, show.legend=FALSE, na.rm=TRUE) +
+  #geom_smooth(aes(y=ylev, x=predlev), method="lm", color=color[2], se=F, size=0.8, na.rm=T)+
+  geom_segment(aes(x = 0, y = 0, xend = 350, yend =350), size=0.5, color=color[2], linetype=2) +
+  coord_cartesian(xlim = c(0, 350), ylim = c(0, 350)) +
+  scale_x_continuous(expand = c(0.01,0.01),limits=c(0, 350), breaks=seq(0, 350, by=50)) +
+  scale_y_continuous(expand = c(0.01,0.01),limits=c(0, 350), breaks=seq(0, 350, by=50)) +
+  labs(y = "Price (US dollars)", x = "Predicted price  (US dollars)") +
+  theme_bg() 
+level_vs_pred
+#save_fig("level_vs_pred", output, "small")
+save_fig("ch14-figure-8a-level-vs-pred", output, "small")
+
+# calculate  PI for modellev7 for n_accomodate
+# show a graph with x: n_accomodate, y: price
+# graph: F14_CI_n_accomodate
+
+# Redo predicted values at 80% PI
+predictionlev_holdout_pred <- as.data.frame(predict(model7_level, newdata = data_holdout, interval="predict", level=0.8)) %>%
+  rename(pred_lwr = lwr, pred_upr = upr)
+predictionlev_holdout_conf <- as.data.frame(predict(model7_level, newdata = data_holdout, interval="confidence", level=0.8)) %>%
+  rename(conf_lwr = lwr, conf_upr = upr)
+
+predictionlev_holdout <- cbind(data_holdout[,c("price","n_accommodates")],
+                               predictionlev_holdout_pred,
+                               predictionlev_holdout_conf[,c("conf_lwr","conf_upr")])
+
+summary(predictionlev_holdout_pred)
+
+predictionlev_holdout_summary <-
+  predictionlev_holdout %>%
+  group_by(n_accommodates) %>%
+  dplyr::summarise(fit = mean(fit, na.rm=TRUE), pred_lwr = mean(pred_lwr, na.rm=TRUE), pred_upr = mean(pred_upr, na.rm=TRUE),
+            conf_lwr = mean(conf_lwr, na.rm=TRUE), conf_upr = mean(conf_upr, na.rm=TRUE))
+
+kable(x = predictionlev_holdout_summary, format = "latex", booktabs=TRUE,  digits = 3, row.names = FALSE,
+      linesep = "", col.names = c("Accomodates","Prediction","Pred. interval lower",
+                                  "Pred. interval upper","Conf.interval lower","Conf.interval upper")) %>%
+  cat(.,file= paste0(output, "modellev7_holdout_summary.tex"))
+
+
+F14_CI_n_accomodate <- ggplot(predictionlev_holdout_summary, aes(x=factor(n_accommodates))) +
+  geom_bar(aes(y = fit ), stat="identity",  fill = color[1], alpha=0.7 ) +
+  geom_errorbar(aes(ymin=pred_lwr, ymax=pred_upr, color = "Pred. interval"),width=.2) +
+  #geom_errorbar(aes(ymin=conf_lwr, ymax=conf_upr, color = "Conf. interval"),width=.2) +
+  scale_y_continuous(name = "Price (US dollars)") +
+  scale_x_discrete(name = "Accomodates (Persons)") +
+  scale_color_manual(values=c(color[2], color[2])) +
+  theme_bg() +
+  theme(legend.title= element_blank(),legend.position="none")
+F14_CI_n_accomodate
+#save_fig("F14_CI_n_accomodate", output, "small")
+save_fig("ch14-figure-8b-ci-n-accomodate", output, "small")
+
+#NOT USED
+
+# Density chart
+g3 <- ggplot(data = datau, aes(x=price)) +
+  geom_density(aes(color=f_room_type, fill=f_room_type),  na.rm =TRUE, alpha= 0.3) +
+  labs(x="Price (US dollars)", y="Density", color = "") +
+  scale_color_manual(name="",
+                     values=c(color[2],color[1], color[3]),
+                     labels=c("Entire home/apt","Private room", "Shared room")) +
+  scale_fill_manual(name="",
+                    values=c(color[2],color[1], color[3]),
+                    labels=c("Entire home/apt","Private room", "Shared room")) +
+  theme_bg() 
+  theme(legend.position = c(0.7,0.7),
+        legend.direction = "horizontal",
+        legend.background = element_blank(),
+        legend.box.background = element_rect(color = "white"))
+g3
+
+
+# Barchart
+plot4 <- ggplot(data = datau, aes(x = factor(n_accommodates), color = f_room_type, fill = f_room_type)) +
+  geom_bar(alpha=0.8, na.rm=T, width = 0.8) +
+  scale_color_manual(name="",
+                     values=c(color[2],color[1], color[3])) +
+  scale_fill_manual(name="",
+                    values=c(color[2],color[1],  color[3])) +
+  labs(x = "Accomodates (Persons)",y = "Frequency")+
+  theme_bg() 
+  theme(legend.position = "bottom")
+plot4
+
+
+
+# repeat for log (not used)
+model_result_plot_logs <- ggplot(data = t1_logs, aes(x = factor(nvars), y = value, color=var, group = var)) +
+  geom_line(color=c(color[1],color[2],color[3])) +
+  scale_y_continuous(
+    name = "RMSE",
+    sec.axis = sec_axis(~ . * 100 , name = "BIC"),
+    limits = c(10, 45)) +
+  scale_x_discrete( name = "Number of vars", expand=c(0, 1)) +
+  geom_dl(aes(label = var), method = list("top.points", cex=0.7)) +
+  scale_colour_discrete(guide = 'none') +
+  theme_bg()
+
+#ch14-table-1-levlog-pred
+#ch14-table-3-fit-level
