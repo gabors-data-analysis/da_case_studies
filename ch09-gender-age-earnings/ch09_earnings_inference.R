@@ -1,0 +1,368 @@
+########################################################################
+#
+# DATA ANALYSIS TEXTBOOK
+# FUNDAMENTALS OF REGRESSION ANALYSIS
+# ILLUSTRATION STUDY FOR CHAPTER 9
+#
+# DATA US CENSUS 2014
+
+# v1.8 2019-11-11  adds r_stargazer, huxtable tables and estimarR for robust SE
+# v1.9 2019-11-26 minor edits
+# v2.0 2020-03-21 minor edits re graphs
+# v2.1 2020-04-01 minor edits re graphs save
+# v2.2 2020-04-16 minor edits re graphs
+# v2.3 2020-04-22 names ok
+# v2.4 2020-04-27 minor graph edits
+# v2.4 2020-04-30 minor graph edits
+
+
+########################################################################
+  
+# WHAT THIS CODES DOES:
+  
+# Loads the data csv
+# Filter the dataset and save a sample used in the analysis
+# Transforms variables
+# shows level and log regressions
+# shows non-linear models such as splines
+# shows CI and PI
+# bootstrap
+
+# CLEAR MEMORY
+rm(list=ls())
+
+# Import libraries
+library(lspline)
+library(ggplot2)
+library(cowplot)
+library(boot)
+library(estimatr)
+library(huxtable)
+library(stargazer)
+library(magrittr)
+library(dplyr)
+library(tidyverse)
+
+# CHECK WORKING DIRECTORY - CHANGE IT TO YOUR WORKING DIRECTORY
+# Sets the core parent directory
+current_path = rstudioapi::getActiveDocumentContext()$path 
+dir<-paste0(dirname(dirname(dirname(current_path ))),"/")
+
+#location folders
+data_in  <- paste0(dir,"da_data_repo/cps-earnings/clean/")
+data_out <- paste0(dir,"da_case_studies/ch09-gender-age-earnings/")
+output   <- paste0(dir,"da_case_studies/ch09-gender-age-earnings/output/")
+func     <- paste0(dir,"da_case_studies/ch00-tech-prep/")
+
+#call functions
+source(paste0(func, "theme_bg.R"))
+source(paste0(func, "da_helper_functions.R")) 
+options(digits = 3) 
+
+#import data
+data_all <- read_csv(paste0(data_in,"morg-2014-emp.csv"))
+
+#SELECT OCCUPATION
+# keep only two occupation types: Market research analysts and marketing specialists 
+#and Computer and Mathematical Occupations
+data_all <- data_all %>% mutate(sample=ifelse(occ2012==0735,1,
+                                              ifelse(data_all$occ2012>=1005 & data_all$occ2012<=1240,2,0)))
+
+data_all<- data_all %>% filter(sample==1 | sample==2)
+tabulate(data_all$sample)
+
+#gen female variable
+#gen wage variables
+data_all <- data_all %>% mutate(female=as.numeric(sex==2)) %>%
+                         mutate(w=earnwke/uhours) %>%
+                         mutate(lnw=log(w)) %>%
+                         mutate(agesq=age^2)
+
+
+#SET SAMPLE - Choose one of the occupations!
+#Market research analysts and marketing specialists -1
+#Computer and Mathematical Occupations-2
+i=1
+data <- data_all %>% filter(sample==i)
+
+write_csv(data,paste(data_out,"earnings_inference.csv",sep=""))
+
+#####################
+#DISTRIBUTION OF EARNINGS
+#######################
+data %>% dplyr::select(earnwke,uhours,w) %>% summary()
+
+data %>% filter(w>=1) %>% dplyr::select(earnwke,uhours,w) %>% summary()
+
+tabulate(data$female)
+table(data$occ2012,data$female)
+
+
+##############################
+#linear regressions
+##############################
+
+# First, look at them one by one
+
+# female binary
+reg1<-lm(lnw~female,data) 
+summary(reg1)
+# with robust SE
+reg2 <- lm_robust(lnw ~ female, data = data, se_type = "HC1")
+summary(reg2)
+
+# age
+reg3 <- lm_robust(lnw ~ age, data = data, se_type = "HC1")
+summary(reg3)
+reg4 <- lm_robust(lnw ~ age+agesq, data = data, se_type = "HC1")
+summary(reg4)
+reg5 <- lm_robust(lnw ~ lspline(age, c(30,40)), data = data, se_type = "HC1")
+summary(reg5)
+
+#lowess
+reg6 <- loess(lnw ~ age, data, control = loess.control(surface = "direct"))
+summary(reg6)
+
+
+
+######## create tables
+
+# Quick look at models at once with huxtable
+# Great way to markdown, html
+huxreg(reg1, reg2,
+       statistics = c(N = "nobs", R2 = "r.squared")) 
+huxreg(reg3, reg4, reg5, 
+       statistics = c(N = "nobs", R2 = "r.squared")) 
+
+
+# Print to latex 
+# Solution #1 with huxtable
+huxreg(reg3, reg4, reg5, 
+       statistics = c(N = "nobs", R2 = "r.squared")) %>%
+  quick_latex(file="ch09_reg2")
+huxtable::report_latex_dependencies()
+
+
+#Solution #2 with stargazer, using our modfied version of stargazer_r
+# use plain lm() first, and set robust SE later
+reg2 <- lm(lnw ~ female, data = data)
+reg3 <- lm(lnw ~ age, data = data)
+reg4 <- lm(lnw ~ age+agesq, data = data)
+reg5 <- lm(lnw ~ lspline(age, c(30,40)), data = data)
+# 9.1 
+stargazer_r(list(reg2), se = 'robust', digits=3, out=paste(output,"#ch09-table-2-gendergap-reg1.tex",sep=""))
+# 9.2
+stargazer_r(list(reg3, reg4, reg5), se = 'robust', 
+            float=T, digits=3, out=paste(output,"#ch09-table-2-gendergap-reg2.tex",sep=""))
+
+
+
+stargazer(list(reg3, reg4, reg5), 
+            float=T, digits=3, out=paste(output,"proba.tex",sep=""))
+
+
+
+##############################
+# graphs
+##############################
+
+F09_3a <- ggplot(data = data, aes(x = age, y = lnw)) +
+  geom_point_da() + 
+  geom_smooth_da(method="loess") +
+  scale_x_continuous(expand=c(0.01, 0.01), limits = c(20, 65),   breaks=seq(20, 65,   by=5)) + 
+  scale_y_continuous(expand=c(0.01, 0.01),limits = c(1.5, 4.5), breaks=seq(1.5, 4.5, by=0.50)) +
+  labs(x = "Age (years)",y = "ln(earnings per hour)")+
+  theme_bg() 
+  F09_3a
+  #save_fig("F09_1_R",output, "small")
+  save_fig("ch09-figure-3a-wage-lowess",output, "small")
+
+
+# Confidence intervals
+
+# for polynomial  
+z <- predict(reg4, data, se.fit=TRUE)
+data<- data %>% mutate(lnwpred_ageq=z[[1]],
+                       lnwpred_ageqSE=z[[2]],
+                       lnwpred_ageqCIUP=lnwpred_ageq + 2*lnwpred_ageqSE,
+                       lnwpred_ageqCILO=lnwpred_ageq - 2*lnwpred_ageqSE
+                       ) 
+
+
+
+
+# for spline
+z<-predict(reg5,data,se.fit=TRUE)
+data <- data %>% mutate(lnwpred_agesp=predict(reg5,data),
+                        lnwpred_agespSE=z[[2]],
+                        lnwpred_agespCIUP=lnwpred_agesp + 2*lnwpred_agespSE,
+                        lnwpred_agespCILO=lnwpred_agesp - 2*lnwpred_agespSE
+                       )
+
+# pred values for lowess
+data <- data %>% mutate(lnwpred_agel=predict(reg6, data))
+
+
+# FIXME: 3b, 4 legend, lines solid, dashed, dotted
+
+#graph with the fitted values from the three reg
+F09_3b<- ggplot(data=data,aes(x=age)) +
+  geom_line(aes(y = lnwpred_agel,  color = "Lowess", linetype = "Lowess"), size = 0.8)+
+  geom_line(aes(y = lnwpred_ageq,  color = "Quadratic", linetype = "Quadratic"), size = 0.8)+
+  geom_line(aes(y = lnwpred_agesp, color = "Piecewise linear spline", linetype = "Piecewise linear spline"), size = 0.8)+
+  scale_color_manual(name = "", values=c(color[1], color[2], color[3])) +
+  scale_linetype_manual(name = "", values=c("solid", "dashed", "dotted")) +
+  scale_x_continuous(expand=c(0.01, 0.01), limits = c(20, 65),   breaks=seq(20, 65,   by=5)) +  
+  scale_y_continuous(expand=c(0.01, 0.01), limits = c(2.4, 3.6), breaks=seq(2.4, 3.6, by=0.20)) +
+  labs(x = "Age (years)",y = "ln(earnings per hour)")+
+  theme_bg() +
+  theme(legend.position=c(0.55,0.1),
+        legend.direction = "horizontal",
+        legend.text = element_text(size = 3),
+        legend.key.width = unit(.8, "cm"),
+        legend.key.height = unit(.2, "cm")) + 
+  guides(linetype = guide_legend(override.aes = list(size = 0.6)))
+  F09_3b
+  #save_fig("F09_2_R",output, "small")
+  save_fig("ch09-figure-3b-wage-various",output, "small")
+  
+  
+  Hmisc::describe(data$age)
+  
+  # same but in log scale
+  F09_2b<- ggplot(data=data,aes(x=age)) +
+    geom_line(aes(y = lnwpred_agel,  color = "Lowess", linetype = "Lowess"), size = 0.8)+
+    geom_line(aes(y = lnwpred_ageq,  color = "Quadratic", linetype = "Quadratic"), size = 0.8)+
+    geom_line(aes(y = lnwpred_agesp, color = "Piecewise linear spline", linetype = "Piecewise linear spline"), size = 0.8)+
+    scale_color_manual(name = "", values=c(color[1], color[2], color[3])) +
+    scale_linetype_manual(name = "", values=c("solid", "dashed", "dotted")) +
+    scale_x_continuous(limits = c(20, 65),   breaks=seq(20, 65,   by=5)) +  
+    scale_y_continuous(limits = c(2.302585093, 3.555348061), 
+                       breaks=c(2.302585093, 2.708050201, 2.995732274,3.218875825, 3.401197382, 3.555348061),
+                       labels=c(10, 15, 20, 25, 30, 35))+
+    labs(x = "Age (years)",y = "Earnings per hour (ln scale)")+
+    theme_bg()+
+    theme(legend.position=c(0.65,0.1),
+          legend.direction = "horizontal",
+          legend.text = element_text(size = 4),
+          legend.key.width = unit(.8, "cm"),
+          legend.key.height = unit(.2, "cm")) + 
+  guides(linetype = guide_legend(override.aes = list(size = 0.6)))
+  F09_2b
+  
+    
+#graph with the fitted values from the three reg with CI
+  F09_2_CI <- ggplot(data=data,aes(x=age))+
+  geom_line(aes(y=lnwpred_agel, color="Lowess", linetype="Lowess"),size=1.2)+
+  geom_line(aes(y=lnwpred_ageq, color="Quadratic", linetype="Quadratic"), size=1.2)+
+  geom_line(aes(y=lnwpred_ageqCIUP, color="Quadratic", linetype="Quadratic"), size=0.6)+
+  geom_line(aes(y=lnwpred_ageqCILO, color="Quadratic", linetype="Quadratic"), size=0.6)+
+  geom_ribbon(aes(ymin = lnwpred_ageqCILO, ymax = lnwpred_ageqCIUP), alpha=0.2, bg = color[3]) +
+  geom_line(aes(y=lnwpred_agesp, color="Piecewise linear spline", linetype="Piecewise linear spline") ,size=1.2)+
+  geom_line(aes(y=lnwpred_agespCIUP,color="Piecewise linear spline", linetype="Piecewise linear spline"),size=0.6)+
+  geom_line(aes(y=lnwpred_agespCILO,color="Piecewise linear spline", linetype="Piecewise linear spline"),size=0.6)+
+  geom_ribbon(aes(ymin = lnwpred_agespCILO, ymax = lnwpred_agespCIUP), alpha=0.2,   bg=color[2]) +
+  coord_cartesian(xlim = c(20, 65), ylim = c(2.6, 3.6)) +
+  scale_x_continuous(expand=c(0.01, 0.01), limits = c(20, 65),   breaks=seq(20, 65,   by=5)) +  
+  scale_y_continuous(expand=c(0.01, 0.01), limits = c(2.4, 3.6), breaks=seq(2.4, 3.6, by=0.20)) +
+  labs(x = "Age (years)",y = "ln(earnings per hour)")+
+  scale_color_manual(name = "", values=c(color[1], color[2], color[3])) +
+  scale_linetype_manual(name = "", values=c("solid", "dashed", "dotted")) +
+  theme_bg() +
+  theme(legend.position=c(0.65,0.1),
+        legend.direction = "horizontal",
+        legend.text = element_text(size = 4),
+        legend.key.width = unit(.8, "cm"),
+        legend.key.height = unit(.2, "cm")) + 
+  guides(linetype = guide_legend(override.aes = list(size = 0.6)))
+  F09_2_CI
+  #save_fig("F09_2_CI_R",output, "large")
+  save_fig("ch09-figure-4-wage-age-reg-ci",output, "large")
+
+
+##########################################
+# CI and PI for the linear model
+##########################################
+reg7<-lm(lnw ~ age, data=data[data$sample==1, ])
+predict(reg7,data,se.fit=TRUE)
+
+pred_confidence <- bind_cols(data,as_tibble(predict(reg7, data, interval="confidence",level = 0.95)))
+
+F09_2a_CI<- ggplot(data = pred_confidence %>% filter(data$lnw<4.4 & data$lnw>2), aes(x = age, y = lnw)) +
+  geom_point(color = color[1], size = 1,  shape = 16, alpha = 0.8, show.legend=F, na.rm = TRUE) + 
+  geom_smooth(method="lm", colour=color[2], se=F, size = 0.8, linetype = 1)+
+  geom_line(data = pred_confidence, aes(x = age, y = lwr), size = 0.5, linetype = 2, colour=color[2]) +
+  geom_line(data = pred_confidence, aes(x = age, y = upr), size = 0.5, linetype = 2, colour=color[2]) +
+  coord_cartesian(xlim = c(20, 65), ylim = c(1.5, 4.5)) +
+  scale_x_continuous(expand=c(0.01, 0.01), limits = c(20, 65),   breaks=seq(20, 65,   by=5)) +  
+  scale_y_continuous(expand=c(0.01, 0.01), limits = c(1.5, 4.5), breaks=seq(1.5, 4.5, by=0.50)) +
+  labs(x = "Age (years)",y = "ln(earnings per hour)")+
+  scale_linetype_manual(name = "", values=c(1, 1, 2), 
+                       labels = c("Lowess", "Confidence interval (95%)", "Confidence interval (95%)")) +
+  theme_bg() 
+F09_2a_CI
+#save_fig("F09_4_CI_R",output, "small")
+save_fig("ch09-figure-2a-wage-age-ci",output, "small")
+
+
+# add PI for a linear
+pred_interval <- bind_cols(data,as_tibble(predict(reg7, data, interval="prediction",level = 0.95)))
+
+F09_2b_PI<- ggplot(data=pred_interval %>% filter(lnw<4.4 & lnw>2),aes(x=age,y=lnw)) +  
+  geom_point(color = color[1], size = 1,  shape = 16, alpha = 0.8, show.legend=F, na.rm = TRUE) +
+  geom_smooth(method="lm", colour=color[2], se=F, size = 0.8, linetype = 1)+
+  geom_line(data = pred_interval, aes(y = lwr), size = 0.5, linetype = 2, colour=color[2]) +
+  geom_line(data = pred_interval, aes(y = upr), size = 0.5, linetype = 2, colour=color[2]) +
+  coord_cartesian(xlim = c(20, 65), ylim = c(1.5, 4.5)) +
+  scale_x_continuous(expand=c(0.01, 0.01), limits = c(20, 65),   breaks=seq(20, 65,   by=5)) +  
+  scale_y_continuous(expand=c(0.01, 0.01), limits = c(1.5, 4.5), breaks=seq(1.5, 4.5, by=0.50)) +
+  labs(x = "Age (years)",y = "ln(earnings per hour)") +
+  theme_bg() 
+F09_2b_PI
+#save_fig("F09_4_PI_R",output, "small")
+save_fig("ch09-figure-2b-wage-age-pi",output, "small")
+
+
+#####################################
+# bootstrap
+#####################################
+data <- read_csv(paste0(data_out,"earnings_inference.csv"))
+
+set.seed(201711)
+
+
+# function to obtain regression weights
+bs <- function(formula, data, indices) {
+  d <- data[indices,] # allows boot to select sample
+  fit <- lm(formula, data=d)
+  return(coef(fit))
+}
+
+# bootstrapping with 1000 replications
+results <- boot(data=data, statistic=bs,
+                R=1000, formula=lnw~female)
+
+b_earnings_female <- as.data.frame(results$t)
+colnames(b_earnings_female) <- c('_b_intercept','_b_female')
+
+
+F09_5<- ggplot(data=b_earnings_female, aes(`_b_female`)) +
+geom_histogram(aes(y = (..count..)/sum(..count..)), binwidth = 0.025,  center=0.0125, closed="left", 
+               color = color.outline, fill = color[1],
+               size = 0.2, alpha = 0.8,  show.legend=F, na.rm=TRUE) +
+  geom_segment(aes(x = -0.11, y = 0, xend = -0.11, yend = 0.2), colour = color[2], size = 1)+
+  annotate("text", x = -0.07, y = 0.18, label = "mean", size=2.5) +
+coord_cartesian(xlim = c(-0.3, 0.15), ylim = c(0, 0.2)) +
+  labs(x = "Slope coefficients from bootstrap samples",y = "Percent")+
+  scale_y_continuous(expand = c(0.0,0.0), limits = c(0,0.2), 
+                     labels = scales::percent_format(accuracy = 1)) +
+theme_bg() 
+F09_5
+#save_fig("F09_5_R",output, "small")
+save_fig("ch09-figure-1-bootstrap-dist-wdiff",output, "small")
+
+#ch09-table-3-hotels-extval-time1
+#ch09-table-4-hotels-extval-time2
+#ch09-table-5-hotels-extval-city1
+#ch09-table-6-hotels-extval-type
+
