@@ -5,10 +5,10 @@
 
 Graduate textbook forthcoming (December 2020) by Cambridge University Press
 
-## Code
-1. R
-2. Stata
-3. Python (in preparation)
+## Code language versions
+1. **R** -- We used v3.6.3, but all code should work in v4.0, but some checks may be needed.
+2. **Stata** -- We used version 15, but raw data is saved in Stata 13 and allmost all code should work in version 13 up.
+3. **Python** (in preparation) -- We used Python 3.8.3.
 
 
 ## Organization
