@@ -1,9 +1,15 @@
 # da_case_studies
-Data Analysis for Business, Economics, and Policy
+**Code for Case Studies in**
 
-by Gábor Békés (CEU) and Gábor Kézdi (U. Michigan) 
+**Data Analysis for Business, Economics, and Policy** by Gábor Békés (CEU) and Gábor Kézdi (U. Michigan) 
 
 Graduate textbook forthcoming (December 2020) by Cambridge University Press
+
+## Code
+1. R
+2. Stata
+3. Python (in preparation)
+
 
 ## Organization
 1. Each case study has a separate folder.
