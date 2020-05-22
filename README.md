@@ -28,3 +28,12 @@ Graduate textbook forthcoming (December 2020) by Cambridge University Press
 	- Copy (and rename to `.Renviron`) the `.Renviron_sample` file
 	- Set `DATA_DIR` to the absolute path of the directory that contains the use case data
 	- If you have set up an `Rstudio` project described in Step 1. then just keep the new `.Renviron` file in your project folder. If you do not use `Rstudio` project then make sure some other way that this `.Renviron` file is processed.
+
+## How to run case studies in Stata
+
+(will be added)
+
+## How to run case studies in Python
+
+(will be added)
+
