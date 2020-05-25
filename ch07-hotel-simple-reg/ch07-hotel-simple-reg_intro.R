@@ -34,51 +34,25 @@
 # Performs regression analysis 
 # Creates graphs
 
+
 # CLEAR MEMORY
 rm(list=ls())
 
+source("global.R")
 
+use_case_dir <- file.path("ch07-hotel-simple-reg")
+loadLibraries(use_case_dir)
 
-# Libraries
-#library(plyr)
-require(haven)
-library(ggplot2)
-library(gridExtra)
-library(cowplot)
-library(data.table)
-library(grid)
-library(lspline)
-library(gridExtra)
-# install.packages("ggstatsplot")
-library(ggstatsplot)
-library(scales)
-library(grid)
-library(RColorBrewer)
-library(dplyr)
-library(readr)
+data_in <- file.path(data_dir,"hotels-vienna","clean")
 
+data_out <- use_case_dir
+output <- file.path(use_case_dir,"output")
+create_output_if_doesnt_exist(output)
 
-############################################################  
-# SET YOUR OWN PATH HERE
-############################################################  
-# Sets the core parent directory
-current_path = rstudioapi::getActiveDocumentContext()$path 
-dir<-paste0(dirname(dirname(dirname(current_path ))),"/")
-
-#location folders
-data_in <- paste0(dir,"da_data_repo/hotels-vienna/clean/")
-data_out <-  paste0(dir,"da_case_studies/ch07-hotel-simple-reg/")
-output <- paste0(dir,"da_case_studies/ch07-hotel-simple-reg/output/")
-func <- paste0(dir, "da_case_studies/ch00-tech-prep/")
-
-
-#call function
-source(paste0(func, "theme_bg.R"))
-source(paste0(func, "da_helper_functions.R"))
 
 
 # load vienna
-hotels <- read_csv(paste0(data_in,"hotels-vienna.csv"))
+hotels <- read_csv(paste0(data_in,"/hotels-vienna.csv"))
 
 
 
