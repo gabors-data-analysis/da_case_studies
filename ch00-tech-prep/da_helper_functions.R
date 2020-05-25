@@ -205,7 +205,7 @@ create_output_if_doesnt_exist<- function(folder){
 }
 
 loadLibraries <- function(use_case_dir) {
-  lines <- trimws(readLines(file.path(use_case_dir,"packages.txt")))
+  lines <- trimws(readLines(file.path(use_case_dir,"R_packages.txt")))
   loaded <- lapply(lines[lines != ""], function(x) library(x, character.only = TRUE))
 }
 
