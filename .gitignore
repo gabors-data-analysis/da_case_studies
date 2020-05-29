@@ -8,3 +8,4 @@
 */output/
 *.csv
 *.dta
+*.rds
