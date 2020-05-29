@@ -31,6 +31,8 @@ Graduate textbook forthcoming (December 2020) by Cambridge University Press
 
 ## How to run case studies in Stata
 
+**Stata** is used widely in social science research. [MORE](https://www.stata.com/why-use-stata/)
+
 (will be added)
 
 ## How to run case studies in Python
