@@ -40,19 +40,19 @@ rm(list=ls())
 
 source("global.R")
 
-use_case_dir <- file.path("ch07-hotel-simple-reg")
+use_case_dir <- "ch07-hotel-simple-reg/"
 loadLibraries(use_case_dir)
 
-data_in <- file.path(data_dir,"hotels-vienna","clean")
+data_in <- paste(data_dir,"hotels-vienna","clean", sep = "/")
 
 data_out <- use_case_dir
-output <- file.path(use_case_dir,"output")
+output <- paste0(use_case_dir,"output/")
 create_output_if_doesnt_exist(output)
 
 
 
 # load vienna
-hotels <- read_csv(paste0(data_in,"/hotels-vienna.csv"))
+hotels <- read_csv(paste(data_in,"hotels-vienna.csv", sep = "/"))
 
 
 
