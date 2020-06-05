@@ -9,3 +9,5 @@
 *.csv
 *.dta
 *.rds
+__pycache__/
+.ipynb_checkpoints/
