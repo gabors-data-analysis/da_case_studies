@@ -80,7 +80,7 @@ lab var ever_smoked "Ever smoked"
 
 
 * other variables
-rename eduyears_mod eduyears
+cap rename eduyears_mod eduyears
 gen exerc = br015==1 if br015>0
 replace bmi=. if bmi<0
 summ bmi
@@ -92,7 +92,7 @@ summ eduyears
 compress
 save "$data_out/ch11_share.dta", replace
 
-x
+
 *** Summary stats
 use "$data_out/ch11_share.dta", clear
 sum stayshealthy smoking ever_smoked female age income10 eduyears bmi exerc 
@@ -149,8 +149,8 @@ lowess stayshealthy age, ylab(, grid) xlab(, grid) ///
  more
 
  * linear
- scatter stayshealthy eduyears_mod,  mcolor(dkgreen) msize(small)  ///
- || lfit stayshealthy eduyears_mod,  lcolor(navy) ///
+ scatter stayshealthy eduyears,  mcolor(dkgreen) msize(small)  ///
+ || lfit stayshealthy eduyears,  lcolor(navy) ///
  ylab(, grid) xlab(, grid) ///
  graphregion(fcolor(white) ifcolor(none))  ///
  plotregion(fcolor(white) ifcolor(white))
@@ -401,7 +401,7 @@ preserve
  plotregion(fcolor(white) ifcolor(white))
   graph export "$output\calib_lpm.png", replace
 restore
-
+x
 
 * logit rich model
 egen p_logit_bins = cut(p_logit), at(0(0.05)1.05)
