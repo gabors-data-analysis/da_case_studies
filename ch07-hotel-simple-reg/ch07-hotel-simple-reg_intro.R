@@ -23,6 +23,7 @@
 # v 3.8 2020-04-24 names ok
 # v 3.9 2020-04-27 large graph size edit
 # v 3.10 2020-04-30 large graph size edit
+# v 3.11 2020-06-26 graph 7 color  edit
 
 
 ############################################################  
@@ -351,7 +352,7 @@ Fig7<-   ggplot(data= hotels, aes(x = distance, y = price)) +
   geom_point(data = filter(hotels,reg1_res=="underpriced"), aes(color=factor(reg1_res)), 
              size = 1.3, shape = 16, alpha = 0.6, show.legend=F) +
   geom_point(data = filter(hotels,reg1_res=="bottom5"), aes(color=factor(reg1_res), fill=factor(reg1_res)), 
-             size = 1.3, shape = 21, alpha = 0.9, show.legend=F) +
+             size = 1.5, shape = 21, alpha = 0.8, show.legend=F) +
   geom_point(data = filter(hotels,reg1_res=="top5"), aes(color=factor(reg1_res)), 
              size = 1.3, shape = 16, alpha = 0.6, show.legend=F) +
   geom_smooth_da(method="lm", size=1)+
@@ -362,7 +363,7 @@ Fig7<-   ggplot(data= hotels, aes(x = distance, y = price)) +
   labs(x = "Distance to city center (miles)",y = "Price (US dollars)")+
   scale_color_manual(name="",
                      values =c(color[1], color[1], color[1], color[1])) +
-  scale_fill_manual(name="", values =c(color[2])) +
+  scale_fill_manual(name="", values =c(color[4])) +
   geom_segment(aes(x = 2, y = 25, xend = 1.15, yend = 50), arrow = arrow(length = unit(0.1, "cm")))+
   annotate("text", x = 3, y = 25, label = "Most underpriced hotels", size=3)+
   theme_bg()+

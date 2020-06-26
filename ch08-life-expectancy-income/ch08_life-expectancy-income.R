@@ -14,7 +14,8 @@
 # v 3.4. 2020-03-21 substantial changes, reorder + add histograms
 # v 3.5. 2020-04-08 save fig ERROR 
 # v 3.6 2020-04-22 names ok
-# v 3.6 2020-04-25 numbering edited
+# v 3.7 2020-04-25 numbering edited
+# v 3.8 2020-06-26 7b 9a edited
 
 # WHAT THIS CODES DOES:
   
@@ -179,8 +180,8 @@ ch08_lifeexp_linreg2
 #save_fig("ch08_lifeexp_linreg2", output, "small")
 save_fig("ch08-figure-5a-lifeexp-log", output, "small")
 
-ch08_lifeexp_linreg2
-save_fig("ch08-figure-9a-lifeexp-unweighted", output, "small")
+#ch08_lifeexp_linreg2
+#save_fig("ch08-figure-9a-lifeexp-unweighted", output, "small")
 
 
 ch08_lifeexp_linreg2a<- ggplot(data = xc, 
@@ -196,8 +197,8 @@ ch08_lifeexp_linreg2a
 #save_fig("ch08_lifeexp_linreg2a", output, "small")
 save_fig("ch08-figure-5b-lifeexp-log-scale", output, "small")
 
-
-
+ch08_lifeexp_linreg2a
+save_fig("ch08-figure-9a-lifeexp-unweighted", output, "small")
 
 
 ################################
@@ -293,8 +294,7 @@ ch08_lifeexp_quad<- ggplot(data = xc, aes(x = lngdppc, y = lifeexp)) +
   labs(x = "ln(GDP per capita, thousand US dollars)",y = "Life expectancy  (years)")+
   theme_bg() 
 ch08_lifeexp_quad
-#save_fig("ch08_lifeexp_quad", output, "small")
-save_fig("ch08-figure-7b-lifeexp-quad", output, "small")
+#save_fig("ch08-figure-7b-lifeexp-quad", output, "small")
 
 ch08_lifeexp_quad_level<- ggplot(data = xc, aes(x = gdppc, y = lifeexp)) +
   geom_point_da() +
@@ -305,6 +305,7 @@ ch08_lifeexp_quad_level<- ggplot(data = xc, aes(x = gdppc, y = lifeexp)) +
   labs(x = "GDP per capita, thousand US dollars (ln scale) ",y = "Life expectancy  (years)")+
   theme_bg() 
 ch08_lifeexp_quad_level
+save_fig("ch08-figure-7b-lifeexp-quad", output, "small")
 
 
 ########################################xxx
