@@ -1,11 +1,2 @@
-.Rproj.user
-.Rhistory
-.RData
-.Ruserdata
-.Renviron
-*/.DS_Store
-*.Rproj
-*/output/
-*.csv
-*.dta
-*.rds
+.ipynb_checkpoints
+.csv

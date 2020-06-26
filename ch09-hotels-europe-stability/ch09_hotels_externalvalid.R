@@ -138,7 +138,11 @@ t <-data %>% group_by(date) %>% dplyr::summarize(mean=mean(lnprice),
                                                  max(lnprice),
                                                  n())
 
-
+t %>% as_huxtable(add_colnames=TRUE) %>%
+  set_all_borders(1) %>% 
+  set_number_format(1:5,2:5,2) %>%  
+  set_col_width(c(2,1,1,1,1,1)) %>%
+  set_caption("Price")
 
 # Regressions with three dates for textbook
 # Original regression
