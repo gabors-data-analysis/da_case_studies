@@ -10,13 +10,15 @@
 # v1.4 2020-04-22 names ok
 # v1.5 2020-04-27 label edit
 # v1.5 2020-04-30 label edit
+# v1.6 2020-06-22 calibration curve edit
+
 
 ################################################################################
   
 # WHAT THIS CODES DOES:
-
-# FIXME: 
-# in theme_bg, the legend should be modified to make it transparent, no white background, no boundary
+# runs regressions with binary dependent variable, LPM, logit, probit
+# calculates AME for all models
+# shows predictions, calibration curve
 
   
 ################################################################################
@@ -367,11 +369,8 @@ g5
 save_fig("ch11-figure-5-pred-scatter-3models", output, "small")
 
 stargazer(list(lpm, logit, probit), digits=3, out=paste(output,"T11_reg3_R.html",sep=""))
-# could not save marginals 
 
-#TODO
-# okay, if two tables are produced, no biggie
-# huxtable could work here
+# FIXME:  save marginals 
 # if mfx - could be useful https://github.com/tidymodels/broom/pull/756
 
 ################################################################################
@@ -382,10 +381,6 @@ stargazer(list(lpm, logit, probit), digits=3, out=paste(output,"T11_reg3_R.html"
 # re-estimate the simplest lpm
 lpmbase <- lm(stayshealthy ~ smoking, data=share)
 share$pred_lpmbase <- predict(lpmbase) 
-
-
-#FIXME
-# legend: a jelolo negyzet tul nagy...
 
 
 # DISTRIBUTION OF PREDICTED PROBABILITIES BY OUTCOME
@@ -445,11 +440,11 @@ calibration_d <- actual_vs_predicted %>%
   group_by(predicted_score_group) %>%
   dplyr::summarise(mean_actual = mean(actual), mean_predicted = mean(predicted), num_obs = n())
 
-g_calib <- ggplot(calibration_d,aes(x = mean_actual, y = mean_predicted)) +
+g_calib <- ggplot(calibration_d,aes(y = mean_actual, x = mean_predicted)) +
   geom_point(color=color[1], size=1.5, alpha=0.8) +
   geom_line(color=color[1], size=1, alpha=0.8) +
   geom_abline(intercept = 0, slope = 1, color=color[2]) +
-  labs(x = "Actual event probability", y = "Predicted event probability") +
+  labs(y = "Actual event probability", x = "Predicted event probability") +
   #  ylim(0, 1) + xlim(0, 1) +
   scale_x_continuous(expand = c(0.01,0.01), limits = c(0,1), breaks = seq(0,1,0.1)) +
   scale_y_continuous(expand = c(0.01,0.01), limits = c(0,1), breaks = seq(0,1,0.1)) +
@@ -469,11 +464,11 @@ calibration_d <- actual_vs_predicted %>%
   group_by(predicted_score_group) %>%
   dplyr::summarise(mean_actual = mean(actual), mean_predicted = mean(predicted), num_obs = n())
 
-g_calib <- ggplot(calibration_d,aes(x = mean_actual, y = mean_predicted)) +
+g_calib <- ggplot(calibration_d,aes(y = mean_actual, x = mean_predicted)) +
   geom_point(color=color[1], size=1.5, alpha=0.8) +
   geom_line(color=color[1], size=1, alpha=0.8) +
   geom_abline(intercept = 0, slope = 1, color=color[2]) +
-  labs(x = "Actual event probability", y = "Predicted event probability") +
+  labs(y = "Actual event probability", x = "Predicted event probability") +
   #  ylim(0, 1) + xlim(0, 1) +
   scale_x_continuous(expand = c(0.01,0.01), limits = c(0,1), breaks = seq(0,1,0.1)) +
   scale_y_continuous(expand = c(0.01,0.01), limits = c(0,1), breaks = seq(0,1,0.1)) +
@@ -545,6 +540,7 @@ g4
 #save_fig("logit_probit_curves_R", output, "small")
 save_fig("ch11-figure-4-logit-probit-curves", output, "small")
 
+#TODO save tables
 #ch11-table-1-smoking-reg1
 #ch11-table-2-smoking-reg2
 #ch11-table-3-smoking-reg3
