@@ -1,2 +1,15 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+.Renviron
+*/.DS_Store
+*.Rproj
+*/output/
+*.csv
+*.dta
+*.rds
+__pycache__/
+.ipynb_checkpoints/
 .ipynb_checkpoints
 .csv
