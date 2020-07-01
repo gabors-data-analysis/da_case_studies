@@ -11,6 +11,7 @@
 # v1.5 2020-04-27 label edit
 # v1.5 2020-04-30 label edit
 # v1.6 2020-06-22 calibration curve edit
+# v1.7 2020-06-29 fig 4 color  edit
 
 
 ################################################################################
@@ -353,15 +354,17 @@ print(probit_marg)
 
 # FIXME: looks weird
 g5<-ggplot(data = share) +
-  geom_point(aes(x=pred_lpm, y=pred_probit, color="Probit"), size=0.5,  shape=16) +
-  geom_point(aes(x=pred_lpm, y=pred_logit,  color="Logit"), size=0.5,  shape=16) +
+  geom_point(aes(x=pred_lpm, y=pred_probit, color="Probit"), size=0.4,  shape=16) +
+  geom_point(aes(x=pred_lpm, y=pred_logit,  color="Logit"), size=0.4,  shape=16) +
+  #geom_line(aes(x=pred_lpm, y=pred_probit, color="Probit"), size=0.3) +
+  #geom_line(aes(x=pred_lpm, y=pred_logit,  color="Logit"), size=0.3) +
   geom_line(aes(x=pred_lpm, y=pred_lpm,    color="45 degree line"), size=0.4) +
   labs(x = "Predicted probability of staying healthy (LPM)", y="Predicted probability")+
   scale_y_continuous(expand = c(0.00,0.0), limits = c(0,1), breaks = seq(0,1,0.1)) +
   scale_x_continuous(expand = c(0.00,0.0), limits = c(0,1), breaks = seq(0,1,0.1)) +
-  scale_color_manual(name = "", values=c(color[3],color[2], color[1])) +
+  scale_color_manual(name = "", values=c(color[3], color[1],color[2])) +
   theme_bg()+
-  theme(legend.position=c(0.55,0.06),
+  theme(legend.position=c(0.55,0.08),
         legend.direction = "horizontal",
         legend.text = element_text(size = 4))
 g5
@@ -532,7 +535,7 @@ g4<-ggplot(data = share) +
   ylab("Probability") +
   xlab("z values") +
   scale_y_continuous(expand = c(0.00,0.0), limits = c(0,1), breaks = seq(0,1,0.2)) +
-  scale_color_manual(name="", values=c(color[2],color[1])) +
+  scale_color_manual(name="", values=c(color[1],color[2])) +
 theme_bg() +
   theme(axis.line.y=element_line(color="grey70",size=.1))
 
