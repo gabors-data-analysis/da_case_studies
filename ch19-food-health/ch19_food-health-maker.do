@@ -7,16 +7,17 @@
 * NHANES data, using aggregated features from Emily Oster
 *
 * v1.0. 2019-04-08
+* 1.1 2020-07-01 using corrected data re grams
+
 *************************************************************************
 
 
 * set folders
 *cd "D:\Dropbox (MTA KRTK)\bekes_kezdi_textbook"
-cd "C:\Users\GB\Dropbox (MTA KRTK)\bekes_kezdi_textbook"
+cd "C:\Users\bekes.gabor\Dropbox (MTA KRTK)\bekes_kezdi_textbook"
 * define folders 
-global data_in			"cases_studies_public\food-health\clean"
-global output          	"textbook_work\ch19\food-health\output"
-global data_out			"textbook_work\ch19\food-health\"
+global data_in			"da_data_repo\food-health\clean"
+global data_out			"da_data_repo\food-health\clean"
 
 ********************************************************************************************************-
 ********************************************************************************************************-
@@ -214,113 +215,4 @@ drop sld010h bpxsy1 bpxdi1 lbxtc lbdhdd bmxwt bmxht dmdmartl
 
 save "$data_out/food-health.dta", replace
 
-
-**********************************************************************-
-**********************************************************************-
-*
-* PART II: ANALYSIS 
-*
-**********************************************************************-
-**********************************************************************-
-
-use "$data_out/food-health.dta", clear
-
-*************************************
-* DESCRIPTIVES
-*************************************
-
-
-
-* T1
-tabout age_cat gender income_cat ///
-using "$output/food_descrtable1.tex", replace ///
-style(tex) font(bold) sum npos(tufte) f(1) ///
-c(mean veggies_n_fruits median veggies_n_fruits  p90 veggies_n_fruits mean blood_pressure ) /// 
-h2c(3 1) ltrim(1) h2(veggies_and_fruits(n) blood_pressure(sum)))  ///
-* h2( & \multicolumn{3}{c}{veggies and fruits(n) } & \multicolumn{1}{c}{blood pressure(sum)} \\ )  ///
-clab(mean median top10_% mean ) 
-*title(Table 2: Variation by country, firm owner and size) 
-*fn(Observation shares in brackets. Considering first buyer only. Gabor_2019-03-27)
-
-
-
-
-*************************************
-* REGRESSIONS 
-*
-* FOOD ON HEALTH
-*************************************
-
-
-
-reg blood_pressure c.age##gender c.age2##gender days i.year
-predict blood_pressure_rel, resid
-label var blood_pressure_rel "blood_pressure , relative - compared to age-gender peers"
-
-reg veggies_n_fruits  c.age##gender c.age2##gender days i.year
-predict veggies_n_fruits_rel, resid
-label var veggies_n_fruits_avg_rel "veggies_n_fruits , relative - compared to age-gender peers"
-
-
-***** need to adjust it for a subgroup, and blood pressure ---> TODO
-*** create 3 grapsh, x-y, z-y, z-x
-lpoly blood_pressure veggies_n_fruits , noscat ///
- xtitle("Number of veggies/fruits a day") ///
- ytitle("Blood pressure (sum of two measures)") title("") note("") ///
- graphregion(fcolor(white) ifcolor(none))  ///
- plotregion(fcolor(white) ifcolor(white))
-graph export "$output/bp_veggies.png", as(png) replace
-
-lpoly blood_pressure veggies_n_fruits if age>=30 & age<=60, noscat ///
- xtitle("Number of veggies/fruits a day") ///
- ytitle("Blood pressure (sum of two measures)") title("") note("") ///
- graphregion(fcolor(white) ifcolor(none))  ///
- plotregion(fcolor(white) ifcolor(white))
-graph export "$output/bp_veggies_30_60.png", as(png) replace
-
-
-lpoly veggies_n_fruits  hh_income if age>=30 & age<=60, noscat ///
- xtitle("Income group category") ///
- ytitle("Number of veggies/fruits a day") title("") note("") ///
- graphregion(fcolor(white) ifcolor(none))  ///
- plotregion(fcolor(white) ifcolor(white))
-graph export "$output/income_veggies_lpoly_30_60.png", as(png) replace
-
-lpoly blood_pressure hh_income if age>=30 & age<=60, noscat ///
- xtitle("Blood pressure") ///
- ytitle("Income group category") title("") note("") ///
- graphregion(fcolor(white) ifcolor(none))  ///
- plotregion(fcolor(white) ifcolor(white))
-graph export "$output/blood_income_lpoly_30_60.png", as(png) replace
-
-
- 
-
-* blood  pressure measure
-reg blood_pressure  veggies_n_fruits days i.year  ,r 
-outreg2 using "$output/T_bp_veggies.tex", keep(veggies_n_fruits ) excel  tex bdec(2) addtext(Age-gender, NO, Socio-econ, No, Beef, No, Activity, No, Meds, No) nocons replace
-reg blood_pressure   c.age##gender c.age2##gender days i.year  veggies_n_fruits,r 
-outreg2 using "$output/T_bp_veggies.tex", keep(veggies_n_fruits ) excel  tex bdec(2) addtext(Age-gender, YES, Socio-econ, No, Beef, No, Activity, No, Meds, No) nocons append
-reg blood_pressure c.age##gender c.age2##gender days i.year  i.edu i.race i.hh_income i.hh_size veggies_n_fruits 
-outreg2 using "$output/T_bp_veggies.tex", keep(veggies_n_fruits ) excel  tex bdec(2) addtext(Age-gender, YES, Socio-econ, YES, Beef, No, Activity, No, Meds, No) nocons append
-reg blood_pressure c.age##gender c.age2##gender days i.year  i.edu i.race i.hh_income i.hh_size veggies_n_fruits beef_all smoker sport_days walk_cycle_days
-outreg2 using "$output/T_bp_veggies.tex", keep(veggies_n_fruits ) excel  tex bdec(2) addtext(Age-gender, YES, Socio-econ, YES, Beef, YES, Activity, YES, Meds, No) nocons append
-reg blood_pressure  c.age##gender c.age2##gender days i.year  i.edu i.race i.hh_income i.hh_size veggies_n_fruits beef_all smoker sport_days walk_cycle_days med_*
-outreg2 using "$output/T_bp_veggies.tex", keep(veggies_n_fruits ) excel  tex bdec(2) addtext(Age-gender, YES, Socio-econ, YES, Beef, YES, Activity, YES, Meds, YES) nocons append
-
-
-
-vége
-
-*************************************
-* COFFEE ON SLEEP	
-* total caffeine translated into espresso, at 60mg/cup 
-*************************************
-
-reg sleep_hs c.age##gender c.age2##gender
-predict sleep_rel, resid
-label var sleep_rel "sleep in hs, relative - compared to age-gender peers"
-	
-	
-lpoly sleep_hs	coffee_espressounit , noscat
-lpoly sleep_rel coffee_espressounit , noscat
+export delimited using "$data_out/food-health.csv", replace
