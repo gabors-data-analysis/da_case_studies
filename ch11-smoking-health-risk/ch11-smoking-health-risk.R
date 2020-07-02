@@ -26,44 +26,25 @@
 # SET YOUR DIRECTORY HERE
 ################################################################################
 
-# CLEAR MEMORY
 rm(list=ls())
 
-# Import libraies
-library(haven)
-library(dplyr)
-library(ggplot2)
-library(cowplot)
-library(lspline)
-library(data.table)
-library(mfx) # ?
-library(margins)
-library(stargazer)
-library(psych)
-library(estimatr)
-library(huxtable)
+source("global.R")
 
-# CHECK WORKING DIRECTORY - CHANGE IT TO YOUR WORKING DIRECTORY
-# Sets the core parent directory
-current_path = rstudioapi::getActiveDocumentContext()$path 
-dir<-paste0(dirname(dirname(dirname(current_path ))),"/")
+use_case_dir <- file.path("ch11-smoking-health-risk/")
+loadLibraries(use_case_dir)
 
-#location folders
-data_in <- paste0(dir,"da_data_repo/share-health/clean/")
-data_out <- paste0(dir,"da_case_studies/ch11-smoking-health-risk/")
-func <- paste0(dir, "da_case_studies/ch00-tech-prep/")
-output <- paste0(dir,"da_case_studies/ch11-smoking-health-risk/output/")
+data_in <- paste(data_dir,"share-health","clean", sep = "/")
 
-#call function
-source(paste0(func, "theme_bg.R"))
-source(paste0(func, "da_helper_functions.R"))
+data_out <- use_case_dir
+output <- paste0(use_case_dir,"output/")
+create_output_if_doesnt_exist(output)
 
 ################################################################################
 # 1. PART - CREATE WORKFILE
 ################################################################################
 
 # load in clean and tidy data and create workfile
-share <- read.csv(paste0(data_in,"share-health.csv"),stringsAsFactors = F)
+share <- read.csv(paste(data_in,"share-health.csv", sep = "/"),stringsAsFactors = F)
 
 share$healthy <- ifelse(share$sphus>0 & share$sphus<=5, 
                         ifelse(share$sphus==1 | share$sphus==2, 1, 0), NA)
@@ -431,56 +412,23 @@ rm(logit, logit_marg, logit_marg2, logit2, lpm, lpmbase, probit, probit_marg, dt
 
 # calibration curves
 
-actual_vs_predicted <- share %>%
-  ungroup() %>% 
-  dplyr::select(actual = stayshealthy, 
-                predicted = pred_logit) 
+share %>% 
+  ungroup() %>%
+  create_calibration_plot( 
+    file_name = "ch11-figure-8b-calib-logit", 
+    prob_var = "pred_logit", 
+    actual_var = "stayshealthy", 
+    y_lab = "Actual event probability",
+    n_bins = 10)
 
-num_groups <- 10
-
-calibration_d <- actual_vs_predicted %>%
-  mutate(predicted_score_group = dplyr::ntile(predicted, num_groups))%>%
-  group_by(predicted_score_group) %>%
-  dplyr::summarise(mean_actual = mean(actual), mean_predicted = mean(predicted), num_obs = n())
-
-g_calib <- ggplot(calibration_d,aes(y = mean_actual, x = mean_predicted)) +
-  geom_point(color=color[1], size=1.5, alpha=0.8) +
-  geom_line(color=color[1], size=1, alpha=0.8) +
-  geom_abline(intercept = 0, slope = 1, color=color[2]) +
-  labs(y = "Actual event probability", x = "Predicted event probability") +
-  #  ylim(0, 1) + xlim(0, 1) +
-  scale_x_continuous(expand = c(0.01,0.01), limits = c(0,1), breaks = seq(0,1,0.1)) +
-  scale_y_continuous(expand = c(0.01,0.01), limits = c(0,1), breaks = seq(0,1,0.1)) +
-  theme_bg()
-g_calib
-#save_fig("calib_logit", output, "small")FIXME
-save_fig("ch11-figure-8b-calib-logit", output, "small")
-
-
-actual_vs_predicted <- share %>%
-  ungroup() %>% 
-  dplyr::select(actual = stayshealthy, 
-                predicted = pred_lpm) 
-
-calibration_d <- actual_vs_predicted %>%
-  mutate(predicted_score_group = dplyr::ntile(predicted, num_groups))%>%
-  group_by(predicted_score_group) %>%
-  dplyr::summarise(mean_actual = mean(actual), mean_predicted = mean(predicted), num_obs = n())
-
-g_calib <- ggplot(calibration_d,aes(y = mean_actual, x = mean_predicted)) +
-  geom_point(color=color[1], size=1.5, alpha=0.8) +
-  geom_line(color=color[1], size=1, alpha=0.8) +
-  geom_abline(intercept = 0, slope = 1, color=color[2]) +
-  labs(y = "Actual event probability", x = "Predicted event probability") +
-  #  ylim(0, 1) + xlim(0, 1) +
-  scale_x_continuous(expand = c(0.01,0.01), limits = c(0,1), breaks = seq(0,1,0.1)) +
-  scale_y_continuous(expand = c(0.01,0.01), limits = c(0,1), breaks = seq(0,1,0.1)) +
-  theme_bg()
-g_calib
-#save_fig("calib_lpm", output, "small")
-save_fig("ch11-figure-8a-calib-lpm", output, "small")
-
-
+share %>% 
+  ungroup() %>%
+  create_calibration_plot( 
+    file_name = "ch11-figure-8a-calib-lpm", 
+    prob_var = "pred_lpm", 
+    actual_var = "stayshealthy", 
+    y_lab = "Actual event probability",
+    n_bins = 10)
 
 ################################################################################
 # 7. PART - CONFUSION TABLES

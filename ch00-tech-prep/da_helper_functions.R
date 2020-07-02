@@ -501,3 +501,34 @@ getPointsGraphWithPseudo <- function(data, colors) {
     theme(legend.position = c(0.5,0.1),           legend.background = element_blank(),           legend.box.background = element_rect(color = "white"))+
     theme_bg()
 }
+
+create_calibration_plot <- function(data, file_name, prob_var, actual_var, y_lab , n_bins = 10, breaks = NULL) {
+  
+  if (is.null(breaks)) {
+    breaks <- seq(0,1,length.out = n_bins + 1)
+  }
+
+  binned_data <- data %>%
+    mutate(
+      prob_bin = cut(!!as.name(prob_var), 
+                    breaks = breaks,
+                    include.lowest = TRUE)
+    ) %>%
+    group_by(prob_bin, .drop=FALSE) %>%
+    summarise(mean_prob = mean(!!as.name(prob_var)), mean_actual = mean(!!as.name(actual_var)), n = n())
+
+    p <- ggplot(data = binned_data) +
+      geom_line(aes(mean_prob, mean_actual), color=color[1], size=0.6, show.legend = TRUE) +
+      geom_point(aes(mean_prob,mean_actual), color = color[1], size = 1, shape = 16, alpha = 0.7, show.legend=F, na.rm = TRUE) +
+      geom_segment(x=0.01, xend=0.99, y=0.01, yend=0.99, color=color[2], size=0.3) +
+      theme_bg() +
+      labs(x= "Bins of predicted probaiblities",
+           y= y_lab) +
+      coord_cartesian(xlim=c(0,1), ylim=c(0,1))+
+      expand_limits(x = 0.01, y = 0.01) +
+      scale_y_continuous(expand=c(0.01,0.01),breaks=c(seq(0,1,0.1))) +
+      scale_x_continuous(expand=c(0.01,0.01),breaks=c(seq(0,1,0.1))) 
+
+    save_fig(file_name, output, "small")
+    p
+}
