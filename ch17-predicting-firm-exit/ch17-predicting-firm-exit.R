@@ -181,6 +181,9 @@ dim(data_train)
 dim(data_holdout)
 
 Hmisc::describe(data$default_f)
+Hmisc::describe(data_train$default_f)
+Hmisc::describe(data_holdout
+                $default_f)
 
 #######################################################x
 # PART I PREDICT PROBABILITIES
