@@ -48,7 +48,7 @@ loadLibraries(use_case_dir)
 data_in <- paste(data_dir,"bisnode-firms","clean", sep = "/")
 
 data_out <- use_case_dir
-output <- paste0(use_case_dir,"output/")
+output <- paste0(use_case_dir,"/output/")
 create_output_if_doesnt_exist(output)
 
 
@@ -398,8 +398,8 @@ create_calibration_plot(data_holdout,
   file_name = "ch17-figure-1-logit-m4-calibration", 
   prob_var = "best_logit_no_loss_pred", 
   actual_var = "default", 
-  y_lab = "Predicted event probability",
-  n_bins = 20)
+  y_lab = "Proportion of actual exiting firms",
+  n_bins = 10)
 
 
 #############################################x
