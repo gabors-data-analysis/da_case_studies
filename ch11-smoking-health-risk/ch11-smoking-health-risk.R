@@ -9,9 +9,10 @@
 # v1.3 2020-04-06 minor graphs
 # v1.4 2020-04-22 names ok
 # v1.5 2020-04-27 label edit
-# v1.5 2020-04-30 label edit
-# v1.6 2020-06-22 calibration curve edit
-# v1.7 2020-06-29 fig 4 color  edit
+# v1.6 2020-04-30 label edit
+# v1.7 2020-06-22 calibration curve edit
+# v1.8 2020-06-29 fig 4 color  edit
+# v1.9 2020-07-04 new calibration curves w/ fn
 
 
 ################################################################################
@@ -36,7 +37,7 @@ loadLibraries(use_case_dir)
 data_in <- paste(data_dir,"share-health","clean", sep = "/")
 
 data_out <- use_case_dir
-output <- paste0(use_case_dir,"output/")
+output <- paste0(use_case_dir,"/output/")
 create_output_if_doesnt_exist(output)
 
 ################################################################################
@@ -419,7 +420,9 @@ share %>%
     prob_var = "pred_logit", 
     actual_var = "stayshealthy", 
     y_lab = "Actual event probability",
-    n_bins = 10)
+    breaks = c(0, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 1.05)
+  )  
+
 
 share %>% 
   ungroup() %>%
@@ -428,7 +431,10 @@ share %>%
     prob_var = "pred_lpm", 
     actual_var = "stayshealthy", 
     y_lab = "Actual event probability",
-    n_bins = 10)
+    # n_bins = 10
+    breaks = c(0, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 1.05)
+    )
+
 
 ################################################################################
 # 7. PART - CONFUSION TABLES
