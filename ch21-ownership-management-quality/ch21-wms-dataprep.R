@@ -9,28 +9,26 @@
 
 ######################################################################
 
-# Clear memory
+
+# v1.1 2020-04-20 
+# v1.2 2020-07-14 dplyr edits
+
+################################################################################
+# SET YOUR DIRECTORY HERE
+################################################################################
+
 rm(list=ls())
 
-library(tidyverse)
-library(purrr)
-library(haven)
+source("global.R")
 
+use_case_dir <- file.path("ch21-ownership-management-quality/")
+loadLibraries(use_case_dir)
 
-# CHECK WORKING DIRECTORY - CHANGE IT TO YOUR WORKING DIRECTORY
-# dir <-  "C:/Users/GB/Dropbox (MTA KRTK)/bekes_kezdi_textbook/"
-dir <- "/Users/zholler/Documents/Private/"
+data_in <- paste(data_dir,"wms-management-survey","clean", sep = "/")
 
-#location folders
-data_in <- paste0(dir,"da_data_repo/wms-management-survey/clean/")
-data_out <- paste0(dir,"da_case_studies/ch21-ownership-management-quality/")
-output <- paste0(dir,"da_case_studies/ch21-ownership-management-quality/output/")
-func <- paste0(dir, "da_case_studies/ch00-tech-prep/")
-
-
-#call function
-source(paste0(func, "theme_bg.R"))
-source(paste0(func, "da_helper_functions.R"))
+data_out <- use_case_dir
+output <- paste0(use_case_dir,"/output/")
+create_output_if_doesnt_exist(output)
 
 
 # ***************************************************************
@@ -42,14 +40,7 @@ source(paste0(func, "da_helper_functions.R"))
 
 
 # Load in data -------------------------------------------------------
-data_full <- read_dta(paste(data_in,"wms_da_textbook.dta",sep=""))
-
-# create xsec
-data <- data_full %>%
-	group_by(firmid) %>%
-	filter(wave == max(wave)) %>%
-	ungroup()
-
+data_full <- read_dta(paste(data_in,"wms_da_textbook-xsec.dta",sep=""))
 
 # Ownership: define founder/family owned and drop ownership that's missing or not relevant
 # Ownership
@@ -62,9 +53,9 @@ data %>%
 data$foundfam_owned <- ifelse(
        data$ownership== "Family owned, external CEO" |
        data$ownership== "Family owned, family CEO" |
-       data$ownership== "Founder owned, CEO unknown" |
+       data$ownership== "Family owned, CEO unknown" |
        data$ownership== "Founder owned, external CEO" |
-       data$ownership== "Founder owned, family CEO" |
+       data$ownership== "Founder owned, CEO unknown" |
        data$ownership== "Founder owned, founder CEO" , 1, 0)
 
 # Foundfam owned
@@ -164,7 +155,7 @@ data <- data %>%
 
 # Summary of num. of employment
 data %>%
-  select(emp_firm) %>%
+  dplyr::select(emp_firm) %>%
   summarise(min = min(emp_firm , na.rm=T), 
             max = max(emp_firm , na.rm=T),
             p1 = quantile(emp_firm , probs = 0.01, na.rm=T),

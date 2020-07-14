@@ -7,6 +7,9 @@
 # What this code does:
 # Data preparation
 
+# v1.1 2020-04-20 
+# v1.2 2020-07-14 dplyr edits
+
 ######################################################################
 
 # Clear memory
@@ -17,15 +20,17 @@ library(purrr)
 library(haven)
 
 
-# CHECK WORKING DIRECTORY - CHANGE IT TO YOUR WORKING DIRECTORY
-# dir <-  "C:/Users/GB/Dropbox (MTA KRTK)/bekes_kezdi_textbook/"
-dir <- "/Users/zholler/Documents/Private/"
+# Sets the core parent directory
+current_path = rstudioapi::getActiveDocumentContext()$path 
+dir<-paste0(dirname(dirname(dirname(current_path ))),"/")
+
 
 #location folders
 data_in <- paste0(dir,"da_data_repo/wms-management-survey/clean/")
 data_out <- paste0(dir,"da_case_studies/ch21-ownership-management-quality/")
 output <- paste0(dir,"da_case_studies/ch21-ownership-management-quality/output/")
 func <- paste0(dir, "da_case_studies/ch00-tech-prep/")
+
 
 
 #call function
@@ -42,7 +47,14 @@ source(paste0(func, "da_helper_functions.R"))
 
 
 # Load in data -------------------------------------------------------
-data_full <- read_dta(paste(data_in,"wms_da_textbook-xsec.dta",sep=""))
+data_full <- read_dta(paste(data_in,"wms_da_textbook.dta",sep=""))
+
+# create xsec
+data <- data_full %>%
+	group_by(firmid) %>%
+	filter(wave == max(wave)) %>%
+	ungroup()
+
 
 # Ownership: define founder/family owned and drop ownership that's missing or not relevant
 # Ownership
@@ -55,9 +67,9 @@ data %>%
 data$foundfam_owned <- ifelse(
        data$ownership== "Family owned, external CEO" |
        data$ownership== "Family owned, family CEO" |
-       data$ownership== "Family owned, CEO unknown" |
-       data$ownership== "Founder owned, external CEO" |
        data$ownership== "Founder owned, CEO unknown" |
+       data$ownership== "Founder owned, external CEO" |
+       data$ownership== "Founder owned, family CEO" |
        data$ownership== "Founder owned, founder CEO" , 1, 0)
 
 # Foundfam owned
@@ -157,8 +169,8 @@ data <- data %>%
 
 # Summary of num. of employment
 data %>%
-  select(emp_firm) %>%
-  summarise(min = min(emp_firm , na.rm=T), 
+  dplyr::select(emp_firm) %>%
+  dplyr::summarise(min = min(emp_firm , na.rm=T), 
             max = max(emp_firm , na.rm=T),
             p1 = quantile(emp_firm , probs = 0.01, na.rm=T),
             p50 = quantile(emp_firm , probs = 0.50, na.rm=T),
