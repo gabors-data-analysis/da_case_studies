@@ -520,7 +520,7 @@ create_calibration_plot <- function(data, file_name, prob_var, actual_var, y_lab
     p <- ggplot(data = binned_data) +
       geom_line(aes(mean_prob, mean_actual), color=color[1], size=0.6, show.legend = TRUE) +
       geom_point(aes(mean_prob,mean_actual), color = color[1], size = 1, shape = 16, alpha = 0.7, show.legend=F, na.rm = TRUE) +
-      geom_segment(x=0.01, xend=0.99, y=0.01, yend=0.99, color=color[2], size=0.3) +
+      geom_segment(x=min(breaks), xend=max(breaks), y=min(breaks), yend=max(breaks), color=color[2], size=0.3) +
       theme_bg() +
       labs(x= "Bins of predicted probaiblities",
            y= y_lab) +
