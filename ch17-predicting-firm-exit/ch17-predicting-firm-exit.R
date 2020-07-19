@@ -400,8 +400,7 @@ cm2
 create_calibration_plot(data_holdout, 
   file_name = "ch17-figure-1-logit-m4-calibration", 
   prob_var = "best_logit_no_loss_pred", 
-  actual_var = "default", 
-  y_lab = "Proportion of actual exiting firms",
+  actual_var = "default",
   n_bins = 10)
 
 

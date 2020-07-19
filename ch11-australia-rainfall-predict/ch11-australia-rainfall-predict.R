@@ -36,8 +36,7 @@ data <- data %>%
 create_calibration_plot(data, 
   file_name = "ch11-figure-6-weather-calib", 
   prob_var = "rain_prob_fc", 
-  actual_var = "daily_sum", 
-  y_lab = "Proportion of rainy days",
+  actual_var = "daily_sum",
   breaks=c(0, 0.005, 0.1,0.2,0.3,0.4,0.5,0.6, 0.7, 0.8, 0.9))
 
 Hmisc::describe(data$rain_prob_fc)

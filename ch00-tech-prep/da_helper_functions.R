@@ -502,7 +502,7 @@ getPointsGraphWithPseudo <- function(data, colors) {
     theme_bg()
 }
 
-create_calibration_plot <- function(data, file_name, prob_var, actual_var, y_lab , n_bins = 10, breaks = NULL) {
+create_calibration_plot <- function(data, file_name, prob_var, actual_var, y_lab = "Actual event probability" , n_bins = 10, breaks = NULL) {
   
   if (is.null(breaks)) {
     breaks <- seq(0,1,length.out = n_bins + 1)
@@ -522,7 +522,7 @@ create_calibration_plot <- function(data, file_name, prob_var, actual_var, y_lab
       geom_point(aes(mean_prob,mean_actual), color = color[1], size = 1, shape = 16, alpha = 0.7, show.legend=F, na.rm = TRUE) +
       geom_segment(x=min(breaks), xend=max(breaks), y=min(breaks), yend=max(breaks), color=color[2], size=0.3) +
       theme_bg() +
-      labs(x= "Bins of predicted probaiblities",
+      labs(x= "Predicted event probability",
            y= y_lab) +
       coord_cartesian(xlim=c(0,1), ylim=c(0,1))+
       expand_limits(x = 0.01, y = 0.01) +
