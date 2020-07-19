@@ -321,13 +321,13 @@ save_tree_plot <- function(cart_model, filename, filepath, size, tweak = 1.2) {
   }
   png(filename =paste0(filepath, filename_png),
       width = width, height = height, units = "cm", res = 1200, pointsize = psize)
-  rpart.plot(cart_model, tweak=tweak, digits=-1, extra=1)
+  rpart.plot(cart_model, tweak=tweak, digits=2, extra=107, under = TRUE)
   dev.off()
 
   cairo_ps(filename = paste0(filepath, filename_eps),
            width = eps_width, height = eps_height, pointsize = psize,
            fallback_resolution = 1200)
-  rpart.plot(cart_model, tweak=tweak, digits=-1, extra=1)
+  rpart.plot(cart_model, tweak=tweak, digits=2, extra=107, under = TRUE)
   dev.off()
 }
 

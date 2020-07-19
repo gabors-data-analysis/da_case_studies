@@ -512,15 +512,18 @@ cm3
 # RANDOM FOREST GRAPH EXAMPLE
 # -----------------------------------------------
 
+data_for_graph <- data_train
+levels(data_for_graph$default_f) <- list("stay" = "no_default", "exit" = "default")
+
 set.seed(13505)
 rf_for_graph <-
   rpart(
     formula = default_f ~ sales_mil + profit_loss_year+ foreign_management,
-    data = data_train,
+    data = data_for_graph,
     control = rpart.control(cp = 0.0028, minbucket = 100)
   )
 
-rpart.plot(rf_for_graph, tweak=1, digits=-1, extra=1)
+rpart.plot(rf_for_graph, tweak=1, digits=2, extra=107, under = TRUE)
 save_tree_plot(rf_for_graph, "tree_plot", output, "small", tweak=1)
 
 
