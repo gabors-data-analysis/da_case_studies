@@ -38,39 +38,18 @@
 #
 ###########################################################
 
-# Clear memory
 rm(list=ls())
 
+source("global.R")
 
-library(rattle)
-library(tidyverse)
-library(caret)
-library(glmnet)
-library(purrr)
-library(pROC)
-library(margins)
-library(ranger)
-library(skimr)
-library(kableExtra)
-library(rpart)
-library(partykit)
-library(rpart.plot)
+use_case_dir <- file.path("ch17-predicting-firm-exit/")
+loadLibraries(use_case_dir)
 
-# CHECK WORKING DIRECTORY - CHANGE IT TO YOUR WORKING DIRECTORY
-# Sets the core parent directory
-current_path = rstudioapi::getActiveDocumentContext()$path 
-dir<-paste0(dirname(dirname(dirname(current_path ))),"/")
+data_in <- paste(data_dir,"bisnode-firms","clean", sep = "/")
 
-#location folders
-data_in <- paste0(dir,"da_data_repo/bisnode-firms/clean/")
-data_out <- paste0(dir,"da_case_studies/ch17-predicting-firm-exit/")
-output <- paste0(dir,"da_case_studies/ch17-predicting-firm-exit/output/")
-func <- paste0(dir, "da_case_studies/ch00-tech-prep/")
-
-#call function
-source(paste0(func, "theme_bg.R"))
-source(paste0(func, "da_helper_functions.R"))
-
+data_out <- use_case_dir
+output <- paste0(use_case_dir,"/output/")
+create_output_if_doesnt_exist(output)
 
 
 # THIS IS THE SECOND PART OF THE ch17 CODE
@@ -81,7 +60,7 @@ source(paste0(func, "da_helper_functions.R"))
 
 # Use R format so it keeps factor definitions
 # data <- read_csv(paste0(data_out,"bisnode_firms_clean.csv"))
-data <- read_rds(paste0(data_out,"bisnode_firms_clean.rds"))
+data <- read_rds(paste(data_out,"bisnode_firms_clean.rds", sep = "/"))
 
 summary(data)
 
@@ -202,6 +181,9 @@ dim(data_train)
 dim(data_holdout)
 
 Hmisc::describe(data$default_f)
+Hmisc::describe(data_train$default_f)
+Hmisc::describe(data_holdout
+                $default_f)
 
 #######################################################x
 # PART I PREDICT PROBABILITIES
@@ -414,31 +396,12 @@ cm2
 # Calibration curve -----------------------------------------------------------
 # how well do estimated vs actual event probabilities relate to each other?
 
-actual_vs_predicted_logit <- data_holdout %>%
-  select(actual = default, predicted = best_logit_no_loss_pred)
 
-# CALIBRATION CURVE
-
-# order observations according to predicted score from lowest to highest and group them into
-# roughly equally-sized bins
-num_groups <- 20
-
-calibration_logit <- actual_vs_predicted_logit %>%
-  mutate(predicted_score_group = ntile(predicted, num_groups)) %>%
-  group_by(predicted_score_group) %>%
-  summarise(mean_actual = mean(actual), mean_predicted = mean(predicted), num_obs = n())
-
-logit_calib <- ggplot(calibration_logit,aes(x = mean_actual, y = mean_predicted)) +
-  geom_point(color=color[1], size=2, alpha=0.8) +
-  geom_abline(intercept = 0, slope = 1, color=color[2]) +
-  labs(x = "Actual event probability", y = "Predicted event probability") +
-  scale_x_continuous(expand = c(0.01,0.01), limit=c(0,1), breaks = seq(0,1,0.1)) +
-  scale_y_continuous(expand = c(0.01,0.01), limit=c(0,1), breaks = seq(0,1,0.1)) +
-  theme_bg() 
-logit_calib
-#ggsave(plot = logit_calib, paste0(output, "logit_X4_calibration_plot.png"))
-save_fig("ch17-figure-1-logit-m4-calibration", output, "small")
-
+create_calibration_plot(data_holdout, 
+  file_name = "ch17-figure-1-logit-m4-calibration", 
+  prob_var = "best_logit_no_loss_pred", 
+  actual_var = "default",
+  n_bins = 10)
 
 
 #############################################x
@@ -548,15 +511,18 @@ cm3
 # RANDOM FOREST GRAPH EXAMPLE
 # -----------------------------------------------
 
+data_for_graph <- data_train
+levels(data_for_graph$default_f) <- list("stay" = "no_default", "exit" = "default")
+
 set.seed(13505)
 rf_for_graph <-
   rpart(
     formula = default_f ~ sales_mil + profit_loss_year+ foreign_management,
-    data = data_train,
+    data = data_for_graph,
     control = rpart.control(cp = 0.0028, minbucket = 100)
   )
 
-rpart.plot(rf_for_graph, tweak=1, digits=-1, extra=1)
+rpart.plot(rf_for_graph, tweak=1, digits=2, extra=107, under = TRUE)
 save_tree_plot(rf_for_graph, "tree_plot", output, "small", tweak=1)
 
 

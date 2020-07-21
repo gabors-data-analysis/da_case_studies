@@ -16,41 +16,24 @@
 #
 ###########################################################
 
-# Clear memory, use it in development phase only
 rm(list=ls())
 
-library(tidyverse)
-library(haven)
-library(Hmisc)
-library(ggplot2)
-library(cowplot)
-library(dplyr)
-library(tidyr)
-library(gmodels) #crosstab
-library(lspline)
-library(stargazer)
-library(sandwich)
-library(caret)
-library(glmnet)
+source("global.R")
 
+use_case_dir <- file.path("ch17-predicting-firm-exit/")
+loadLibraries(use_case_dir)
 
-# CHECK WORKING DIRECTORY - CHANGE IT TO YOUR WORKING DIRECTORY
- dir <-  "C:/Users/GB/Dropbox (MTA KRTK)/bekes_kezdi_textbook/"
+data_in <- paste(data_dir,"bisnode-firms","clean", sep = "/")
 
-#location folders
-data_in <-  paste0(dir,"da_data_repo/bisnode-firms/clean/")
-data_out <- paste0(dir,"da_case_studies/ch17-predicting-firm-exit/")
-output <-   paste0(dir,"da_case_studies/ch17-predicting-firm-exit/output/")
-func <-     paste0(dir, "da_case_studies/ch00-tech-prep/")
-
-#call function
-source(paste0(func, "theme_bg.R"))
+data_out <- use_case_dir
+output <- paste0(use_case_dir,"output/")
+create_output_if_doesnt_exist(output)
 
 ###########################################################
 # Import data
 ###########################################################
 
-data <- read_csv(paste(data_in,"cs_bisnode_panel.csv", sep = ""))
+data <- read_csv(paste(data_in,"cs_bisnode_panel.csv", sep = "/"))
 
 # drop variables with many NAs
 data <- data %>%

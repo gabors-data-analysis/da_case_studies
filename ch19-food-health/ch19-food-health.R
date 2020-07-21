@@ -4,7 +4,8 @@
 # v1.2. 2020-01-29, adjust graphs
 # v1.3. 2020-01-30, adjust graphs coordinates
 # v1.4. 2020-04-23 edit graphs
-# v1.1 2020-04-22 names ok
+# v1.5 2020-04-22 names ok
+# v1.6 2020-07-01 rerun on corrected data, change var name
 
 # WHAT THIS CODES DOES:
   # data manage, graphs and simple regressions
@@ -51,7 +52,7 @@ workfile <-  data %>%
   ## Blood pressure (systolic+diastolic)
 
 workfile <- workfile %>%
-  mutate(fv=veggies_n_fruit_g,
+  mutate(fv=veggies_n_fruits_gr,
          bp=blood_pressure)
 
 describe(workfile$fv)
@@ -201,6 +202,8 @@ reg3 <- lm_robust(fv~ exerc, data = workfile)
 summary(reg3)
 reg4 <- lm_robust(fv ~ pchips, data = workfile)
 summary(reg4)
+
+
 
 #ch19-table-food-health-destab
 

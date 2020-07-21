@@ -18,7 +18,7 @@
 * SET YOUR DIRECTORY HERE
 *********************************************************************
 *cd "" /*set your dir*/
-cd "C:/Users/GB/Dropbox (MTA KRTK)/bekes_kezdi_textbook"
+cd "C:/Users/bekes.gabor/Dropbox (MTA KRTK)/bekes_kezdi_textbook"
 * cd "C:\Users\kezdi\Dropbox\bekes_kezdi_textbook"
  * YOU WILL NEED TWO SUBDIRECTORIES
  * textbook_work --- all the codes
@@ -32,11 +32,12 @@ global output     "da_case_studies/ch19-food-health/output"
 
 
 * need to alter all file locations
-use "$data_in/food-health.dta", clear
+use "$data_out/food-health.dta", clear
 keep if age>=30 & age<60
 
 
-gen fv = veggies_n_fruit_g
+*gen fv = veggies_n_fruit_gr
+gen fv= veggies_n_fruits_gr
  lab var fv "Fruit and vegetables per day, grams"
 *drop if fv==0
  
