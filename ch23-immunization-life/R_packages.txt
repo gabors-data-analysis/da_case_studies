@@ -3,3 +3,5 @@ haven
 stargazer
 lmtest
 car
+huxtable
+estimatr

@@ -95,62 +95,80 @@ data_balanced <- data_balanced %>%
     d2_imm = d_imm - lag(d_imm), 
     d_lngdppc= lngdppc- lag(lngdppc),
     d_lnpop = lnpop - lag(lnpop),
-    avgpop = mean(pop) #for weights in xtreg fe
+    avgpop = mean(pop), #for weights in xtreg fe
+    year = factor(year)
   ) %>%
   ungroup()
+
+
 
 # *****************************************************
 # * FE REGRESSSIONS
 
-fe_lm <- lm(surv ~ imm + c + factor(year),
+fe_lm <- lm_robust(surv ~ imm + year,
                 data = data_balanced, 
-                weights = data_balanced$avgpop
-              )
-summary(fe_lm)$coefficients[c('imm'),]
+                weights = avgpop, 
+                se_type = "stata", 
+                fixed_effect =  ~ c ,
+                clusters = c)
 
-fe_lm2 <- plm(surv ~ imm + lngdppc + lnpop + c + factor(year),
+fe_lm2 <- lm_robust(surv ~ imm + lngdppc + lnpop + year,
                 data = data_balanced, 
-                weights = data_balanced$avgpop)
-summary(fe_lm2)
+                weights = avgpop, 
+                se_type = "stata", 
+                fixed_effect =  ~ c ,
+                clusters = c)
+
+
+# ch23-table-2-immun-fe
+huxreg(fe_lm, fe_lm2, 
+  statistics = c(N = "nobs", R2 = "r.squared"), 
+  coefs = c("imm", "lngdppc", "lnpop"))
 
 # *************************
 # ** CLUSTER SE VS BIASED SE 
 
-coeftest(fe_lm2)[c('imm'),]
-## robust significance test, cluster by group
-## (robust vs. serial correlation)
-coeftest(fe_lm2, vcov.=vcovHC)[c('imm'),]
-# coeftest(zz, vcov.=function(x) vcovHC(x, method="arellano", type="HC1"))
+fe_lm3 <- lm_robust(surv ~ imm + lngdppc + lnpop + year,
+                data = data_balanced, 
+                weights = avgpop, 
+                se_type = "stata", 
+                fixed_effect =  ~ c )
+
+# ch23-table-3-immun-fese
+huxreg(list("Clustered SE" = fe_lm2, "Simple SE" = fe_lm3), 
+  statistics = c(N = "nobs", R2 = "r.squared"), 
+  coefs = c("imm", "lngdppc", "lnpop"))
 
 # *************************
-# * FD REGRESSIONS - clustered se?
-
-local maxlag = 5
-local maxlag_1 = maxlag-1
+# * FD REGRESSIONS 
 
 # * basic FD 
-fD_lm <- lm(d_surv ~ d_imm,
+fd_lm <- lm_robust(d_surv ~ d_imm,
                 data = data_balanced, 
-                weights = data_balanced$pop
-              )
-coeftest(fD_lm)[c('d_imm'),]
+                weights = pop,
+                se_type = "stata", 
+                clusters = c)
  
 # * FD, 5 lags
 lags_helper <- paste(paste0("lag(d_imm,", c(0:5), ")"), collapse = " + ")
 fd_lm_5_formula <- as.formula(paste0("d_surv ~ ", lags_helper))
 
-fd_lm_5 <- lm(fd_lm_5_formula,
+fd_lm_5 <- lm_robust(fd_lm_5_formula,
                 data = data_balanced, 
-                weights = data_balanced$pop
+                weights = pop,
+                se_type = "stata", 
+                clusters = c
               )
 
 
 # * FD, 5 lags, cumul
 lags_helper <- paste(paste0("lag(d2_imm,", c(0:4), ")"), collapse = " + ")
 fd_lm_5_cumul_formula <- as.formula(paste0("d_surv ~ lag(d_imm, 5) + ", lags_helper))
-fd_lm_5_cumul <- lm(fd_lm_5_cumul_formula,
+fd_lm_5_cumul <- lm_robust(fd_lm_5_cumul_formula,
                 data = data_balanced, 
-                weights = data_balanced$pop
+                weights = pop,
+                se_type = "stata", 
+                clusters = c
               )
 
 # * FD, 5 lags, cumul, lead
@@ -158,19 +176,29 @@ lags_helper <- paste(paste0("lag(d2_imm,", c(0:4), ")"), collapse = " + ")
 lead_helper <- paste(paste0("lead(d_imm,", c(1:3), ")"), collapse = " + ")
 
 fd_lm_5_cumul_lead_formula <- as.formula(paste0("d_surv ~ lag(d_imm, 5) + ", lags_helper, " + ", lead_helper))
-fd_lm_5_cumul_lead <- lm(fd_lm_5_cumul_lead_formula,
+fd_lm_5_cumul_lead <- lm_robust(fd_lm_5_cumul_lead_formula,
                 data = data_balanced, 
-                weights = data_balanced$pop
+                weights = pop,
+                se_type = "stata", 
+                clusters = c
               )
+
+# h23-table-4-immun-fd1
+huxreg(fd_lm, fd_lm_5, fd_lm_5_cumul, fd_lm_5_cumul_lead,
+  statistics = c(N = "nobs", R2 = "r.squared")
+)
 
 # *************************
 # * AGGREG TREND, CONFOUNDERS, CTRY TRENDS
 # * FD, 5 lags, cumul, aggreg trend
+
 lags_helper <- paste(paste0("lag(d2_imm,", c(0:4), ")"), collapse = " + ")
-fd_lm_5_cumul_trend_formula <- as.formula(paste0("d_surv ~ lag(d_imm, 5) + ", lags_helper, "+ factor(year)"))
-fd_lm_5_cumul_trend <- lm(fd_lm_5_cumul_trend_formula,
+fd_lm_5_cumul_trend_formula <- as.formula(paste0("d_surv ~ lag(d_imm, 5) + ", lags_helper, "+ year"))
+fd_lm_5_cumul_trend <- lm_robust(fd_lm_5_cumul_trend_formula,
                 data = data_balanced, 
-                weights = data_balanced$pop
+                weights = pop,
+                se_type = "stata", 
+                clusters = c
               ) 
 
 # * FD, 5 lags, cumul, aggreg trend, confounders 
@@ -182,10 +210,12 @@ fd_lm_5_cumul_trend_c_formula <- as.formula(paste0("d_surv ~ lag(d_imm, 5) + ",
   lags_helper, "+",
   lags_helper2, "+",
   lags_helper3, "+",
-  "+ factor(year)"))
-fd_lm_5_cumul_trend_c <- lm(fd_lm_5_cumul_trend_c_formula,
+  "+ year"))
+fd_lm_5_cumul_trend_c <- lm_robust(fd_lm_5_cumul_trend_c_formula,
                 data = data_balanced, 
-                weights = data_balanced$pop
+                weights = pop,
+                se_type = "stata", 
+                clusters = c
               ) 
  
 # * check: cumulative coeffs on the confounders
@@ -195,14 +225,34 @@ linearHypothesis(fd_lm_5_cumul_trend_c, paste0(lags_helper3," =0"))
 # * check: it's not the number of obsrevations
 data_balanced_filtered <- data_balanced %>%
   filter(!is.na(d_lngdppc))
-fd_lm_5_cumul_trend2 <- lm(formula = fd_lm_5_cumul_trend_formula,
+fd_lm_5_cumul_trend2 <- lm_robust(formula = fd_lm_5_cumul_trend_formula,
                 data = data_balanced_filtered, 
-                weights = data_balanced_filtered$pop
+                weights = pop,
+                se_type = "stata", 
+                clusters = c
               )
 
-# * FD, 5 lags, cumul, aggreg trend, , country linear trend
-# areg d_surv L`maxlag'.d_imm L(0/`maxlag_1').d2_imm ///
-#   L(0/`maxlag').d_lngdppc L(0/`maxlag').d_lnpop ///
-#   i.year [w=pop], cluster(c) absorb(c)
+# * FD, 5 lags, cumul, aggreg trend, cofounders, country linear trend
+fd_lm_5_cumul_trend_c_country_formula <- as.formula(paste0("d_surv ~ lag(d_imm, 5) + ", 
+  lags_helper, "+",
+  lags_helper2, "+",
+  lags_helper3, "+",
+  "+ year + c"))
+
+fd_lm_5_cumul_trend_c_country <- lm_robust(fd_lm_5_cumul_trend_c_country_formula,
+                data = data_balanced, 
+                weights = pop,
+                se_type = "stata", 
+                clusters = c
+              ) 
+
+# ch23-table-5-immun-fd2
+huxreg(fd_lm_5_cumul_trend, fd_lm_5_cumul_trend_c, fd_lm_5_cumul_trend_c_country,
+  statistics = c(N = "nobs", R2 = "r.squared"), 
+  omit_coefs = c(paste("year", levels(data_balanced$year), sep= ""), paste("c", levels(data_balanced$c), sep= ""))
+)
+
+
+
  
 
