@@ -67,13 +67,13 @@ graph export "$output/wms_Mex_management_hist.eps",replace
 hist emp_firm, percent fcolor(emerald) lcolor(gs12) ///
 graphregion(fcolor(white) ifcolor(none))  ///
  plotregion(fcolor(white) ifcolor(white)) ///
- xlabel(0(500)5000, grid) ylabel(0(5)50, grid) width(200) xtitle("Number of employees") 
+ xlabel(0(500)5000, grid) ylabel(0(10)50, grid) width(200) xtitle("Number of employees") 
 graph export "$output/wms_bra_emp_hist.png",replace
 gen lnemp=ln(emp_firm)
-hist lnemp, percent width(0.3) fcolor(emerald) lcolor(gs12) ///
+hist lnemp, percent width(0.29) fcolor(emerald) lcolor(gs12) ///
 graphregion(fcolor(white) ifcolor(none))  ///
  plotregion(fcolor(white) ifcolor(white)) ///
- ylabel(, grid) xtitle("Ln number of employees") 
+ xlabel(4(1)9, grid) ylabel(, grid) xtitle("Ln number of employees") 
 graph export "$output/wms_Mex_lnemp_hist.eps",replace
 
 
@@ -122,7 +122,7 @@ egen management_emp3bins  = mean(management), by(emp3bins)
 egen management_emp10bins = mean(management), by(emp10bins)
 
 scatter management_emp3bins emp3bins, msize(vlarge) ///
- ylab(2.5(0.2)3.3, grid) xlab(0(500)3500, grid) ///
+ ylab(2.4(0.2)3.4, grid) xlab(0(500)3500, grid) ///
  ytitle("Average management quality score") xtitle("Firm size (# employees), 3 bins") ///
  graphregion(fcolor(white) ifcolor(none))  ///
  plotregion(fcolor(white) ifcolor(white))
@@ -130,7 +130,7 @@ graph export "$output/wms_Mex_management_emp3bins.eps", replace
 graph export "$output/wms_Mex_management_emp3bins.png", as(png) replace
 
 scatter management_emp10bins emp10bins, msize(vlarge) ///
- ylab(2.5(0.2)3.3, grid) xlab(0(500)3500, grid) ///
+ ylab(2.5(0.25)3.5, grid) xlab(0(500)3500, grid) ///
  ytitle("Average management quality score") xtitle("Firm size (# employees), 10 bins") ///
  graphregion(fcolor(white) ifcolor(none))  ///
  plotregion(fcolor(white) ifcolor(white))
@@ -167,13 +167,13 @@ corr management emp_firm
 * by industry
 cap drop industry_broad
 gen industry_broad=""
-replace industry_broad ="food_drinks_tobacco" if sic<220
-replace industry_broad ="textile_apparel_leather_etc" if sic>=220 & sic<240 | sic>=310 & sic<320 | sic>=390 & sic<400
-replace industry_broad ="wood_furniture_paper" if sic>=240& sic<269
-replace industry_broad ="chemicals_etc" if sic>=280 & sic<310
-replace industry_broad ="materials_metals" if sic>=320 & sic<350 
-replace industry_broad ="electronics" if sic>=357 & sic<370
-replace industry_broad ="auto" if sic>=370 & sic<380
+replace industry_broad ="food_drinks_tobacco" if sic<22
+replace industry_broad ="textile_apparel_leather_etc" if sic>=22 & sic<24 | sic>=31 & sic<32 | sic>=39 & sic<40
+replace industry_broad ="wood_furniture_paper" if sic>=24 & sic<=26
+replace industry_broad ="chemicals_etc" if sic>=28 & sic<31
+replace industry_broad ="materials_metals" if sic>=32 & sic<35 
+replace industry_broad ="electronics" if sic>35 & sic<37
+replace industry_broad ="auto" if sic>=37 & sic<38
 tab industry_broad,mis
 
 sort industry_broad
