@@ -18,40 +18,22 @@
 # TODO
 # density + histogram graphs shall have histogram relative freq in percent on y axis
 
-# CLEAR MEMORY
+
 rm(list=ls())
 
-# Import libraries
-library(dplyr)
-library(tidyr)
-library(psych)
-library(ggplot2)
-library(haven)
-library(lspline)
-library(ggstatsplot)
-library(lsr) # cohensD
-library(grid)
+source("global.R")
 
-#----------------------------------------------------------------------------------------------------
-# Sets the core parent directory
-current_path = rstudioapi::getActiveDocumentContext()$path 
-dir<-paste0(dirname(dirname(dirname(current_path ))),"/")
+use_case_dir <- file.path("ch03-distributions-height-income/")
+loadLibraries(use_case_dir)
 
+data_in <- paste(data_dir,"height-income-distributions","clean", sep = "/")
 
-#location folders
-data_in <- paste0(dir,"da_data_repo/height-income-distributions/clean/")
-data_out <-  paste0(dir,"da_case_studies/ch03-distributions-height-income/")
-output <- paste0(dir,"da_case_studies/ch03-distributions-height-income/output/")
-func <- paste0(dir, "da_case_studies/ch00-tech-prep/")
-
-#call function
-source(paste0(func, "theme_bg.R"))
-# Created a helper function with some useful stuff
-source(paste0(func, "da_helper_functions.R"))
-
+data_out <- use_case_dir
+output <- paste0(use_case_dir,"output/")
+create_output_if_doesnt_exist(output)
 
 # load in clean and tidy data and create workfile
-hrs <-  read.csv(paste0(data_in,"hrs_height_income.csv"))
+hrs <-  read.csv(paste(data_in,"hrs_height_income.csv", sep = "/"))
 
 #------------------------------------------------------------------------------------------------------
 
@@ -65,16 +47,17 @@ Hmisc::describe(hrs$rheight)
 
 # graph --height  
 ch03_normal_height <- ggplot(filtered_women, aes(x = rheight)) +
-  geom_histogram(aes(y = ..density..), bins=23, 
+  geom_histogram(aes(y = ..density..), binwidth = 0.025, 
                  fill = color[1], color = color.outline, alpha = 0.8) +
   stat_function(fun = dnorm, colour= color[2],  
     args = with(filtered_women, c(mean = mean(rheight), sd = sd(rheight)))) + 
+  scale_y_continuous("Density", position = "right", expand=c(0,0),
+    sec.axis =  sec_axis(~ . *0.025, name = "Percent", labels = percent_format(accuracy = 1))) + 
   theme_bg() +
-  ylab("Percent / Density") +   xlab("Height (meters)")
+  xlab("Height (meters)")
 ch03_normal_height
 #save_fig("normal_hist_height_R", output, "small")
 save_fig("ch03-figure-10-hist-height", output, "small")
-
 
 #-------------------------------------------------------------------------------------------
 # LOGNORMAL: family income of women age 55-59 
