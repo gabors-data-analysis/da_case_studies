@@ -7,6 +7,7 @@
 # v1.1 2020-03-13 edits to all graphs
 # v1.2 2020-04-06 edits to all graphs
 # v1.3 2020-04-22 names ok
+# v1.4 2020-08-06 edited histogram + density
 
 ###############################################
 
@@ -50,10 +51,10 @@ ch03_normal_height <- ggplot(filtered_women, aes(x = rheight)) +
   geom_histogram(aes(y = ..density..), binwidth = 0.025, 
                  fill = color[1], color = color.outline, alpha = 0.8) +
   stat_function(fun = dnorm, colour= color[2],  
-    args = with(filtered_women, c(mean = mean(rheight), sd = sd(rheight)))) + 
-  scale_y_continuous("Density", position = "right", expand=c(0,0),
-    sec.axis =  sec_axis(~ . *0.025, name = "Percent", labels = percent_format(accuracy = 1))) + 
-  theme_bg() +
+                args = with(filtered_women, c(mean = mean(rheight), sd = sd(rheight)))) + 
+  scale_y_continuous("Density", position = "right", expand=c(0,0), limits = c(0, 6),
+                     sec.axis =  sec_axis(~ . *0.025, name = "Percent",breaks =seq(0,0.15, by=0.025),labels = percent_format(accuracy = 0.1))) + 
+    theme_bg() +
   xlab("Height (meters)")
 ch03_normal_height
 #save_fig("normal_hist_height_R", output, "small")
