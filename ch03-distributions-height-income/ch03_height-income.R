@@ -48,7 +48,7 @@ Hmisc::describe(hrs$rheight)
 
 # graph --height  
 ch03_normal_height <- ggplot(filtered_women, aes(x = rheight)) +
-  geom_histogram(aes(y = ..density..), binwidth = 0.025, 
+  geom_histogram(aes(y = ..density..), binwidth = 0.025, boundary = min(filtered_women$rheight), 
                  fill = color[1], color = color.outline, alpha = 0.8) +
   stat_function(fun = dnorm, colour= color[2],  
                 args = with(filtered_women, c(mean = mean(rheight), sd = sd(rheight)))) + 
