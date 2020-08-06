@@ -11,6 +11,7 @@
 # v1.9 2020-04-22 names ok
 # v1.10 2020-04-27 label edits
 # v2.0 2020-04-28 adds plots for ch03
+# v2.0 2020-08-04 redo hist 1 2a 2b for boundary=0
 
 # using WMS data 2004-2015
 #
@@ -72,8 +73,8 @@ df %>%
   summarise_all(funs(min, max, mean, median, sd, n()))
 
 # Histogram
-g1<-ggplot(data = df, aes (x = management, y = (..count..)/sum(..count..))) +
-  geom_histogram_da(binwidth = 0.25, type="frequency") +
+g1<-ggplot(data = df, aes (x = management)) +
+  geom_histogram_da(binwidth = 0.25, type="percent", boundary = 0) +
   labs(x = "Management score", y = "Percent") +
   #scale_x_continuous(breaks = seq(1, 5, by = 1)) +
   scale_x_continuous(expand = c(0.01,0.01),limits = c(1,5))+
@@ -84,11 +85,11 @@ g1
 save_fig("ch04-figure-1-wms-mex-mgmt-hist",output , "small") 
 
 
-g2<-ggplot(data = df, aes (x = emp_firm, y = (..count..)/sum(..count..))) +
-  geom_histogram_da(binwidth = 200, type="frequency") +
+g2<-ggplot(data = df, aes (x = emp_firm )) +
+  geom_histogram_da(binwidth = 200, type="percent") +
   labs(x = "Firm size (employment)", y = "Percent") +
   scale_x_continuous(expand = c(0.01,0.01),limits=c(0, 5000), breaks = seq(0, 5000, by = 1000)) +
-  scale_y_continuous(expand = c(0.00,0.00),limits=c(0, 0.5), breaks = seq(0, 1, by = 0.1), labels = scales::percent_format(accuracy = 1)) +
+  scale_y_continuous(expand = c(0.00,0.00),limits=c(0, 0.3), breaks = seq(0, 0.3, by = 0.05), labels = scales::percent_format(accuracy = 1)) +
   theme_bg() 
 g2
 #save_fig("wms_Mex_emp_hist_R",output , "small") 
@@ -98,8 +99,8 @@ save_fig("ch04-figure-2a-wms-mex-emp-hist",output , "small")
 df$lnemp = log(df$emp_firm)
 
 # Histogram
-g3<-ggplot(data = df, aes (x = lnemp, y = (..count..)/sum(..count..))) +
-  geom_histogram_da(binwidth = 0.3, type="frequency") +
+g3<-ggplot(data = df, aes (x = lnemp)) +
+  geom_histogram_da(binwidth = 0.3, type="percent") +
   labs(x = "Firm size (ln(employment))", y = "Percent") +
   scale_x_continuous(expand = c(0.01,0.01),limits = c(4,9)) +
   scale_y_continuous(expand = c(0.00,0.00),limits=c(0, 0.2), breaks = seq(0, 0.2, by = 0.04), labels = scales::percent_format(accuracy = 1)) +

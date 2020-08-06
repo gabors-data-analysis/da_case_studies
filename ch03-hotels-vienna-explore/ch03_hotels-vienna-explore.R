@@ -10,7 +10,9 @@
 # v1.2 2020-03-13 labels edited
 # v1.3 2020-03-21 labels edited
 # v1.4 2020-04-06 graphs
-# v1.4. 2020-04-06 minor graphs
+# v1.5 2020-04-06 minor graphs
+# v1.6 2020-08-04 redo with frequency now set w boundary=0
+# v1.7 2020-08-04 redo with axis lines harmonized
 
 
 
@@ -113,7 +115,7 @@ histprice_Vienna1 <- ggplot(data =  vienna_cut, aes (x = price)) +
   labs(x = "Price (US dollars)", y = "Frequency") +
   expand_limits(x = 0.01, y = 0.01) +
   scale_x_continuous(expand = c(0.01,0.01),limits = c(0,500), breaks = seq(0, 500, by = 50)) +
-  scale_y_continuous(expand = c(0.01,0.01)) +
+  scale_y_continuous(expand = c(0.00,0.00)) +
   theme_bg() 
 histprice_Vienna1
 #save_fig("histprice_Vienna1_R", output, "small")
@@ -126,7 +128,7 @@ histprice_Vienna2 <- ggplot(data =  vienna_cut, aes (x = price)) +
   expand_limits(x = 0.01, y = 0.01) +
   coord_cartesian(clip = "off") +
   scale_x_continuous(expand = c(0.01,0.01),limits = c(0,500), breaks = seq(0, 500, by = 50)) +
-  scale_y_continuous(expand = c(0.01,0.01),limits = c(0,45), breaks = seq(0, 45, by =5)) +
+  scale_y_continuous(expand = c(0.00,0.00),limits = c(0,40), breaks = seq(0, 40, by =5)) +
     theme_bg() 
 histprice_Vienna2
 #save_fig("histprice_Vienna2_R", output, "small")
@@ -141,7 +143,7 @@ save_fig("ch03-figure-2b-hist-price", output, "small")
 histprice_Vienna3 <- ggplot(data =  vienna_cut, aes (x = price)) +
   geom_histogram_da(type="frequency", binwidth = 40)+
   labs(x = "Price (US dollars)", y = "Frequency") +
-  scale_x_continuous(expand = c(0.0,0.0), limits = c(0,510), breaks = seq(0, 500, by = 80)) +
+  scale_x_continuous(expand = c(0.01,0.01), limits = c(0,510), breaks = seq(0, 500, by = 80)) +
   scale_y_continuous(expand = c(0.0,0.0), limits = c(0,120), breaks = seq(0, 120, by = 20)) +
     theme_bg() 
 histprice_Vienna3
@@ -152,7 +154,7 @@ save_fig("ch03-figure-3a-hist-price", output, "small")
 histprice_Vienna4 <- ggplot(data =  vienna_cut, aes (x = price)) +
   geom_histogram_da(type="frequency", binwidth = 80)+
   labs(x = "Price (US dollars)", y = "Frequency") +
-  scale_x_continuous(expand = c(0.0,0.0), limits = c(0,510), breaks = seq(0, 500, by = 80)) +
+  scale_x_continuous(expand = c(0.01,0.01), limits = c(0,510), breaks = seq(0, 500, by = 80)) +
   scale_y_continuous(expand = c(0.0,0.0), limits = c(0,160), breaks = seq(0, 150, by = 50)) +
   theme_bg() 
 histprice_Vienna4
@@ -174,8 +176,9 @@ vienna_cut <- vienna %>% filter(accommodation_type=="Hotel") %>%
 histdist_Vienna <- ggplot(data =  vienna_cut, aes (x = distance)) +
   geom_histogram_da(type="frequency", binwidth = 0.5)+
   labs(x = "Distance to city center (miles)", y = "Frequency") +
-  scale_x_continuous(expand = c(0.0,0.0), limits = c(0,14), breaks = seq(0, 14, by = 2)) +
-  scale_y_continuous(expand = c(0.0,0.0), limits = c(0,61), breaks = seq(0, 60, by = 10)) +
+  expand_limits(x = 0.01, y = 0.01) +
+  scale_x_continuous(expand = c(0.01,0.01), limits = c(0,14), breaks = seq(0, 14, by = 2)) +
+  scale_y_continuous(expand = c(0.00,0.00), limits = c(0,61), breaks = seq(0, 60, by = 10)) +
   theme_bg() 
 histdist_Vienna
 #save_fig("histdist_Vienna_R", output, "small")
@@ -186,8 +189,9 @@ save_fig("ch03-figure-4-hist-dist", output, "small")
 histdist_Vienna_annot <- ggplot(data =  vienna_cut, aes (x = distance)) +
   geom_histogram_da(type="frequency", binwidth = 0.5)+
   labs(x = "Distance to city center (miles)", y = "Frequency") +
-  scale_x_continuous(expand = c(0.0,0.0), limits = c(0,14), breaks = seq(0, 14, by = 2)) +
-  scale_y_continuous(expand = c(0.0,0.0), limits = c(0,61), breaks = seq(0, 60, by = 10)) +
+  expand_limits(x = 0.01, y = 0.01) +
+  scale_x_continuous(expand = c(0.01,0.01), limits = c(0,14), breaks = seq(0, 14, by = 2)) +
+  scale_y_continuous(expand = c(0.00,0.00), limits = c(0,61), breaks = seq(0, 60, by = 10)) +
   geom_segment(aes(x = 8.2, y = 0, xend = 8.2, yend = 60), color = color[2], size=1) +
   #geom_segment(aes(x = 10, y = 40, xend = 8.4, yend = 40), arrow = arrow(length = unit(0.2, "cm")))+
   annotate("text", x = 11, y = 29, label = "Too far out", size=2)+
@@ -195,7 +199,7 @@ histdist_Vienna_annot <- ggplot(data =  vienna_cut, aes (x = distance)) +
   theme_bg() 
 histdist_Vienna_annot
 #save_fig("histdist_Vienna_annot_R", output, "small")
-save_fig("ch03-figure-5-hist-dist-annot-large", output, "small")
+save_fig("ch03-figure-5-hist-dist-annot-large", output, "large")
 
 
 # look at actual city
