@@ -18,6 +18,7 @@
 # v1.10 2020-04-05 ads tree saver
 # v1.11 2020-04-09 color edits again
 # v2.0 2020-06-08 final touches
+# v2.1 2020-08-04 redo hist freq w boundary forced=0
 
 
 # Import library
@@ -161,11 +162,11 @@ geom_histogram_da <- function(type='percent',boundary=0, binwidth=NULL, bins=NUL
                               color = color.outline, fill = theme_colors[1],
                               size = 0.2, alpha = 0.8,  show.legend=F, na.rm=TRUE){
   if(type=='percent'){
-    geom_histogram(aes(y = (..count..)/sum(..count..)),binwidth = binwidth, bins=bins,
+    geom_histogram(aes(y = (..count..)/sum(..count..)),binwidth = binwidth, bins=bins, boundary=0,
                    color = color, fill = fill, alpha = alpha)
   }
   else if(type == 'frequency'){
-    geom_histogram(binwidth = binwidth, bins=bins,
+    geom_histogram(binwidth = binwidth, bins=bins, boundary=0,
                    color = color, fill = fill, alpha = alpha)
   }
   else {
