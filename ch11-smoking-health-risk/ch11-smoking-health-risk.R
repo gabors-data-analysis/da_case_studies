@@ -13,6 +13,7 @@
 # v1.7 2020-06-22 calibration curve edit
 # v1.8 2020-06-29 fig 4 color  edit
 # v1.9 2020-07-04 new calibration curves w/ fn
+# v2.0 2020-08-07 histograms edited w boundary, width
 
 
 ################################################################################
@@ -240,7 +241,7 @@ rm(share_pred_lpm)
 
 g3<-ggplot(data=share, aes(x=pred_lpm)) +
   geom_histogram_da(type='percent', binwidth=0.02) +
-  coord_cartesian(xlim = c(0, 1.1)) +
+  coord_cartesian(xlim = c(0, 1.2)) +
   labs(x = "Predicted probability of staying healthy (LPM)",y = "Percent")+
   scale_y_continuous(expand = c(0.00,0.0), limits = c(0,0.07), breaks = seq(0, 0.07, 0.01), labels = scales::percent_format(accuracy = 1)) +
   scale_x_continuous(expand = c(0.001,0.01), limits = c(0,1.1), breaks = seq(0,1.1, 0.2)) +
@@ -371,8 +372,8 @@ share$pred_lpmbase <- predict(lpmbase)
 # DISTRIBUTION OF PREDICTED PROBABILITIES BY OUTCOME
 # LPM simple model
 g7a<-ggplot(data = share,aes(x=pred_lpmbase)) + 
-  geom_histogram(data=subset(share[share$stayshealthy == 1, ]), aes(fill=as.factor(stayshealthy), y = (..count..)/sum(..count..)*100), binwidth = 0.05, alpha=1, color=color[1]) +
-  geom_histogram(data=subset(share[share$stayshealthy == 0, ]), aes(fill=as.factor(stayshealthy), y = (..count..)/sum(..count..)*100), binwidth = 0.05, alpha=0, color=color[2]) +
+  geom_histogram(data=subset(share[share$stayshealthy == 1, ]), aes(fill=as.factor(stayshealthy), y = (..count..)/sum(..count..)*100), binwidth = 0.05, boundary=0, alpha=1, color=color[1]) +
+  geom_histogram(data=subset(share[share$stayshealthy == 0, ]), aes(fill=as.factor(stayshealthy), y = (..count..)/sum(..count..)*100), binwidth = 0.05, boundary=0,alpha=0, color=color[2]) +
   scale_fill_manual(name="", values=c("white",color[1]),labels=c("Did not stay healthy","Stayed healthy")) +
   ylab("Percent") +
   xlab("Fitted values") +
@@ -387,8 +388,8 @@ save_fig("ch11-figure-7a-pred-hist-byoutcome-lpmbase", output, "small")
 
 # LPM rich model
 g7b<-ggplot(data = share,aes(x=pred_lpm)) + 
-  geom_histogram(data=subset(share[share$stayshealthy == 1, ]), aes(fill=as.factor(stayshealthy), y = (..count..)/sum(..count..)*100), binwidth = 0.05, alpha=0.8, color=color[1]) +
-  geom_histogram(data=subset(share[share$stayshealthy == 0, ]), aes(fill=as.factor(stayshealthy), y = (..count..)/sum(..count..)*100), binwidth = 0.05, alpha=0, color=color[2]) +
+  geom_histogram(data=subset(share[share$stayshealthy == 1, ]), aes(fill=as.factor(stayshealthy), y = (..count..)/sum(..count..)*100), binwidth = 0.05, boundary=0, alpha=0.8, color=color[1]) +
+  geom_histogram(data=subset(share[share$stayshealthy == 0, ]), aes(fill=as.factor(stayshealthy), y = (..count..)/sum(..count..)*100), binwidth = 0.05, boundary=0, alpha=0, color=color[2]) +
   scale_fill_manual(name="", values=c("white",color[1]),labels=c("Did not stay healthy","Stayed healthy")) +
   ylab("Percent") +
   xlab("Fitted values") +

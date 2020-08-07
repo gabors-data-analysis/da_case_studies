@@ -16,6 +16,8 @@
 # v1.10 2020-04-22 names ok
 # v1.11 2020-04-27 dplyr edits, nvars2
 # v1.12 2020-04-28 y-ypred
+# v1.13 2020-08-07 hist edits, not ready.
+
 
 ############################################################
 #
@@ -181,13 +183,13 @@ datau <- subset(data, price<=400)
 
 # price
 g1 <- ggplot(data=datau, aes(x=price)) +
-  geom_histogram_da(type="percent", binwidth = 10) +
-  #geom_histogram(aes(y = (..count..)/sum(..count..)), binwidth = 10, center=0,
+  geom_histogram_da(type="percent", binwidth = 10, boundary=20) +
+  #geom_histogram(aes(y = (..count..)/sum(..count..)), binwidth = 10, boundary=0,
   #               color = color.outline, fill = color[1], size = 0.25, alpha = 0.8,  show.legend=F,  na.rm=TRUE) +
-  coord_cartesian(xlim = c(0, 400)) +
+#  coord_cartesian(xlim = c(0, 400)) +
   labs(x = "Price (US dollars)",y = "Percent")+
   scale_y_continuous(expand = c(0.00,0.00),limits=c(0, 0.15), breaks = seq(0, 0.15, by = 0.05), labels = scales::percent_format(1)) +
-  scale_x_continuous(expand = c(0.00,0.00),breaks = seq(0,400, 50)) +
+  scale_x_continuous(expand = c(0.00,0.00),limits=c(0,400), breaks = seq(0,400, 50)) +
   theme_bg() 
 g1
 #save_fig("F14_airbnb_price_R", output, "small")
@@ -195,12 +197,12 @@ save_fig("ch14-figure-3a-airbnb-price", output, "small")
 
 # lnprice
 g2<- ggplot(data=datau, aes(x=ln_price)) +
-  geom_histogram_da(type="percent", binwidth = 0.18) +
+  geom_histogram_da(type="percent", binwidth = 0.2, boundary=0) +
   #  geom_histogram(aes(y = (..count..)/sum(..count..)), binwidth = 0.18,
   #               color = color.outline, fill = color[1], size = 0.25, alpha = 0.8,  show.legend=F,  na.rm=TRUE) +
-  coord_cartesian(xlim = c(2, 6.5)) +
+  coord_cartesian(xlim = c(2.5, 6.5)) +
   scale_y_continuous(expand = c(0.00,0.00),limits=c(0, 0.15), breaks = seq(0, 0.15, by = 0.05), labels = scales::percent_format(5L)) +
-  scale_x_continuous(expand = c(0.00,0.01),breaks = seq(2,6.5, 0.5)) +
+  scale_x_continuous(expand = c(0.00,0.01),breaks = seq(2.4,6.6, 0.6)) +
   labs(x = "ln(price, US dollars)",y = "Percent")+
   theme_bg() 
 g2

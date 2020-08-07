@@ -11,7 +11,8 @@
 # v1.9 2020-04-22 names ok
 # v1.10 2020-04-27 label edits
 # v2.0 2020-04-28 adds plots for ch03
-# v2.0 2020-08-04 redo hist 1 2a 2b for boundary=0
+# v2.1 2020-08-04 redo hist 1 2a 2b for boundary=0
+# v2.2 2020-08-07 redo hist 2b for boundary=0
 
 # using WMS data 2004-2015
 #
@@ -97,10 +98,11 @@ save_fig("ch04-figure-2a-wms-mex-emp-hist",output , "small")
 
 # Generate variable
 df$lnemp = log(df$emp_firm)
+Hmisc::describe(df$lnemp)
 
 # Histogram
 g3<-ggplot(data = df, aes (x = lnemp)) +
-  geom_histogram_da(binwidth = 0.3, type="percent") +
+  geom_histogram_da(binwidth = 0.25, type="percent", boundary=0) +
   labs(x = "Firm size (ln(employment))", y = "Percent") +
   scale_x_continuous(expand = c(0.01,0.01),limits = c(4,9)) +
   scale_y_continuous(expand = c(0.00,0.00),limits=c(0, 0.2), breaks = seq(0, 0.2, by = 0.04), labels = scales::percent_format(accuracy = 1)) +
