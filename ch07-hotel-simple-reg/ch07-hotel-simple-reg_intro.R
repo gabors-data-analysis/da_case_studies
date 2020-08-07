@@ -24,6 +24,7 @@
 # v 3.9 2020-04-27 large graph size edit
 # v 3.10 2020-04-30 large graph size edit
 # v 3.11 2020-06-26 graph 7 color  edit
+# v 3.13 2020-08-07 graph 6 geom_da gond
 
 
 ############################################################  
@@ -311,7 +312,9 @@ save_fig("ch07-figure-6a-resid-scatter", output, "small")
 
 # historgram of residuals
 F07_6b<-   ggplot(data = hotels, aes (x = e)) +
-  geom_histogram_da(binwidth = 20, type='percent')+
+  #geom_histogram_da(binwidth = 20, type='percent')+
+  geom_histogram(aes(y = (..count..)/sum(..count..)), binwidth = 20, color = color.outline, fill = theme_colors[1],
+                 size = 0.2, alpha = 0.8,  show.legend=F, na.rm=TRUE, boundary=1)+
   labs(x = "Residuals", y = "Percent") +
   scale_x_continuous(limits = c(-100, 300), breaks = seq(-100, 300, by = 100)) +
   scale_y_continuous(expand = c(0.0,0.0), limits = c(0, 0.3), breaks = seq(0, 0.3, by = 0.05), 
@@ -319,7 +322,7 @@ F07_6b<-   ggplot(data = hotels, aes (x = e)) +
 theme_bg() 
 F07_6b
 #save_fig("F07_8_R", output, "small")
-save_fig("ch07-figure-6b-resid-hist", output, "small")
+save_fig("ch07-figure-6b-resid-hist-v2", output, "small")
 
 
 # hotels with most negative residuals
