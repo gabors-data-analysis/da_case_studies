@@ -11,6 +11,7 @@
 # v 2.2 2020-03-21  graph axis edits
 # v 2.3 2020-04-08 save_fig
 # v 2.4 2020-04-24 names ok
+# v 2.5 2020-08-09 hist2 adj
 
 # WHAT THIS CODES DOES:
 
@@ -82,13 +83,13 @@ pd1<-subset(pd,abs(pd$diff)<4.999999)
 Hmisc::describe(pd1$diff)
 
 hist2<- ggplot(data=pd, aes(diff))+
-  geom_histogram(binwidth = 0.5, center=0.5,
+  geom_histogram(binwidth = 0.5, boundary=-0,
                  color = color.outline, fill = color[1], size = 0.25, alpha = 0.8,  show.legend=F, na.rm=TRUE) +
   labs(x = "Online - offline price difference (US dollars)", y = "Frequency") +
   theme_bg()+
   expand_limits(x = 0.01, y = 0.01) +
   scale_x_continuous(limits = c(-5, 5), breaks = seq(-5, 5, by = 1)) +
-  scale_y_continuous(expand = c(0.00,0.00))
+  scale_y_continuous(expand = c(0.00,0.00), limits=c(0,5000), breaks = seq(0, 5000, by = 1000))
 hist2
 #save_fig("R_F06_2", output, "small")
 save_fig("ch06-figure-1b-pricediff2", output, "small")

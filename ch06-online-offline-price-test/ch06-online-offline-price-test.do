@@ -50,17 +50,15 @@ count if pd>0
 count if pd<0
 count if pd>=-1 & pd<=1
 
-*TODO MAKE IN NICER
 * Figure 6.1 (a)
-hist pd, percent width(5) ///
-ylab(0 5 10(10)70, grid) xlab(-400(100)400) lwidth(vthin) fcolor(blue) fintensity(80)
-graph export  "$data_out/output/F06_1.png",replace
-
+hist pd, freq width(5) start(-400) color(navy) fintensity(80) ///
+ylab(0(1000)6000, grid) xlab(-400(100)400, grid) 
 
 
 * Figure 6.1 (b)
-hist pd if pd>-5 & pd<5 , width(0.5) percent lcolor(black) lwidth(vthin) fcolor(blue) fintensity(80)
-graph export  "$data_out/output/F06_2.png",replace
+hist pd if pd>-5 & pd<5 , freq width(0.5) start(-5) fcolor(navy) lcol(white) fintensity(80) ///
+ ylab(0(1000)4000, grid) xlab(-5(1)5, grid) 
+
 
 
 ** HYPOTHESIS
