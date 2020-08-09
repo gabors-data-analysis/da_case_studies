@@ -22,7 +22,8 @@
 *********************************************************************
 *cd "" /*set your dir*/
 *cd "C:/Users/GB/Dropbox (MTA KRTK)/bekes_kezdi_textbook"
-cd "D:\Dropbox (MTA KRTK)\bekes_kezdi_textbook"
+*cd "D:\Dropbox (MTA KRTK)\bekes_kezdi_textbook"
+cd "C:/Users/kezdi/Dropbox/bekes_kezdi_textbook"
  * YOU WILL NEED TWO SUBDIRECTORIES
  * textbook_work --- all the codes
  * cases_studies_public --- for the data
@@ -49,12 +50,11 @@ tsset date
 
 * prices
 tsline p_MSFT, lcolor(navy) lwidth(medium) /// 
- ylab(10(10)120, grid) xlab(,grid) ///
+ ylab(0(20)120, grid) xlab(,grid) ///
  tlab(01jan1998 01jan2003 01jan2008 01jan2013 01jan2018) ///
  graphregion(fcolor(white) ifcolor(none))  ///
  plotregion(fcolor(white) ifcolor(white)) ///
- xtitle("") ytitle(" Microsoft stock price (USD)")
-graph export  "$output/ch12-stocks-msft-1.png",replace
+ xtitle("Date (month)") ytitle(" Microsoft stock price (USD)")
 
 
 tsline p_SP500, lcolor(navy) lwidth(medium) /// 
@@ -63,7 +63,6 @@ tsline p_SP500, lcolor(navy) lwidth(medium) ///
  graphregion(fcolor(white) ifcolor(none))  ///
  plotregion(fcolor(white) ifcolor(white)) ///
  xtitle("") ytitle(" S&P 500 stock market index")
-graph export  "$output/ch12-stocks-sp500-1.png",replace
 
 
 

@@ -14,6 +14,7 @@
 # v1.9 2020-04-25 names ok
 # v2.0 2020-04-28 graph label edits
 # v2.1 2020-04-30 graph label edits
+# v2.2 2020-08-09 4,5,6 y axis edits
 
 
 ################################################################################
@@ -209,10 +210,10 @@ p4a <- ggplot(data=data_monthly,aes(x=date)) +
   geom_line(aes(y = PctRetMSFT),color = color[1], size = 0.4)+
   geom_hline(yintercept = 1.13,color=color[3], size=0.8) +
   labs(y = "Microsoft monthly returns (percent)",x = "Date (month)")+
+  scale_y_continuous(expand = c(0.01,0.01), limits=c(-45,45), breaks = seq(-40,40, by=20)) +
   scale_x_date(breaks = as.Date(c("1998-01-01","2002-01-01","2006-01-01","2010-01-01","2014-01-01","2018-01-01")),
                limits = as.Date(c("1998-01-01","2018-12-31")), labels = date_format("%b%Y"),
                minor_breaks = "1 year")  +
-  ylim(-40,40) +
   theme_bg() 
 p4a
 #save_fig("ch12-stocks-msft-3_R","small")
@@ -222,10 +223,10 @@ p4b<-ggplot(data=data_monthly,aes(x=date)) +
   geom_line(aes(y = PctRetSP500),color = color[1], size = 0.4)+
   geom_hline(yintercept = 0,47,color=color[3], size=0.8) +
   labs(y = "S&P500 index monthly returns (percent)",x = "Date (month)")+
+  scale_y_continuous(expand = c(0.01,0.01), limits=c(-45,45), breaks = seq(-40,40, by=20)) +
   scale_x_date(breaks = as.Date(c("1998-01-01","2002-01-01","2006-01-01","2010-01-01","2014-01-01","2018-01-01")),
                limits = as.Date(c("1998-01-01","2018-12-31")), labels = date_format("%b%Y"),
                minor_breaks = "1 year") +
-  ylim(-40,40) +
   theme_bg() 
   
 p4b
@@ -258,8 +259,6 @@ p5<-ggplot(data=data_monthly,aes(x=PctRetSP500,y = PctRetMSFT)) +
   geom_smooth_da(method='lm')+
   labs(x="S&P500 index monthly returns (percent)",y="Microsoft stock monthly returns (percent)")  +
   theme_bg() +
-  xlim(-20,30) +
-  ylim(-20,30) +
   geom_segment(aes(x = -20, y = -20, xend = 20, yend = 20), color=color[3], size=0.5, linetype="dashed")+
   geom_segment(aes(x = 10, y = 0, xend = 17, yend = 17), arrow = arrow(length = unit(0.1, "cm")))+
   annotate("text", x = 10, y = -3, size=2, label = "45 degree line for beta=1")+
@@ -277,7 +276,7 @@ p6a<-ggplot(data=data_monthly %>% select(date, PctRetMSFT, PctRetSP500) %>%
   scale_color_manual(name = "", values=c(color[1], color[2]), 
                      labels = c("Microsoft", "S&P500")) +
   labs(x = 'Date (month)',y = "Monthly returns (percent)")+
-  scale_y_continuous(expand = c(0.01,0.01), limits = c(-40,40), breaks = seq(-40,40,20)) +  
+  scale_y_continuous(expand = c(0.01,0.01), limits = c(-45,45), breaks = seq(-40,40,20)) +  
   scale_x_date(breaks = as.Date(c("1998-01-01","2002-01-01","2006-01-01","2010-01-01","2014-01-01","2018-01-01")),
              limits = as.Date(c("1998-01-01","2018-12-31")), labels = date_format("%b%Y"),
                minor_breaks = "1 year") +
