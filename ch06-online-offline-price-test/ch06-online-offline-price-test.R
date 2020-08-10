@@ -11,7 +11,7 @@
 # v 2.2 2020-03-21  graph axis edits
 # v 2.3 2020-04-08 save_fig
 # v 2.4 2020-04-24 names ok
-# v 2.5 2020-08-09 hist2 adj
+# v 2.5 2020-08-10 hist 1, 2 adj
 
 # WHAT THIS CODES DOES:
 
@@ -64,7 +64,7 @@ descr <- pd %>% summarise(mean = mean(diff,na.rm=T), sd = sd(diff,na.rm=T), min=
 descr
 
 hist1<- ggplot(data=pd, aes(diff))+
-  geom_histogram(binwidth = 5, boundary=0,
+  geom_histogram(binwidth = 5, boundary=0, closed="left",
                  fill = color[1], size = 0.25, alpha = 0.8,  show.legend=F, na.rm=TRUE) +
   labs(x = "Online - offline price difference (US dollars)", y = "Frequency") +
   theme_bg()+
@@ -83,7 +83,7 @@ pd1<-subset(pd,abs(pd$diff)<4.999999)
 Hmisc::describe(pd1$diff)
 
 hist2<- ggplot(data=pd, aes(diff))+
-  geom_histogram(binwidth = 0.5, boundary=-0,
+  geom_histogram(binwidth = 0.5, boundary=-0, closed="left",
                  color = color.outline, fill = color[1], size = 0.25, alpha = 0.8,  show.legend=F, na.rm=TRUE) +
   labs(x = "Online - offline price difference (US dollars)", y = "Frequency") +
   theme_bg()+
