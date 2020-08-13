@@ -388,9 +388,14 @@ save_fig("ch11-figure-7a-pred-hist-byoutcome-lpmbase", output, "small")
 
 # LPM rich model
 g7b<-ggplot(data = share,aes(x=pred_lpm)) + 
-  geom_histogram(data=subset(share[share$stayshealthy == 1, ]), aes(fill=as.factor(stayshealthy), y = (..count..)/sum(..count..)*100), binwidth = 0.05, boundary=0, alpha=0.8, color=color[1]) +
-  geom_histogram(data=subset(share[share$stayshealthy == 0, ]), aes(fill=as.factor(stayshealthy), y = (..count..)/sum(..count..)*100), binwidth = 0.05, boundary=0, alpha=0, color=color[2]) +
-  scale_fill_manual(name="", values=c("white",color[1]),labels=c("Did not stay healthy","Stayed healthy")) +
+  geom_histogram(data=subset(share[share$stayshealthy == 1, ]), 
+    aes(fill=as.factor(stayshealthy), color=as.factor(stayshealthy), y = (..count..)/sum(..count..)*100),
+     binwidth = 0.05, boundary=0, alpha=0.8) +
+  geom_histogram(data=subset(share[share$stayshealthy == 0, ]), 
+    aes(fill=as.factor(stayshealthy), color=as.factor(stayshealthy), y = (..count..)/sum(..count..)*100), 
+    binwidth = 0.05, boundary=0, alpha=0) +
+  scale_fill_manual(name="", values=c("0" = "white", "1" = color[1]),labels=c("Did not stay healthy","Stayed healthy")) +
+  scale_color_manual(name="", values=c("0" = color[2], "1" = color[1]),labels=c("Did not stay healthy","Stayed healthy")) +
   ylab("Percent") +
   xlab("Fitted values") +
   scale_x_continuous(expand=c(0.01,0.01) ,limits = c(0,1), breaks = seq(0,1,0.2)) +
@@ -408,8 +413,6 @@ dt_pred[,list(mean_lpmbase=mean(pred_lpmbase), mean_lpm=mean(pred_lpm), mean_log
 dt_pred[,list(median_lpmbase=median(pred_lpmbase), median_lpm=median(pred_lpm), median_logit=median(pred_logit), median_probit=median(pred_probit)),by=list(stayshealthy)]
 
 rm(logit, logit_marg, logit_marg2, logit2, lpm, lpmbase, probit, probit_marg, dt_pred)
-
-
 
 
 # calibration curves
