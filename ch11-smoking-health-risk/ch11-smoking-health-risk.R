@@ -14,6 +14,7 @@
 # v1.8 2020-06-29 fig 4 color  edit
 # v1.9 2020-07-04 new calibration curves w/ fn
 # v2.0 2020-08-07 histograms edited w boundary, width
+# v2.1 2020-08-14 g7 edited
 
 
 ################################################################################
@@ -372,9 +373,14 @@ share$pred_lpmbase <- predict(lpmbase)
 # DISTRIBUTION OF PREDICTED PROBABILITIES BY OUTCOME
 # LPM simple model
 g7a<-ggplot(data = share,aes(x=pred_lpmbase)) + 
-  geom_histogram(data=subset(share[share$stayshealthy == 1, ]), aes(fill=as.factor(stayshealthy), y = (..count..)/sum(..count..)*100), binwidth = 0.05, boundary=0, alpha=1, color=color[1]) +
-  geom_histogram(data=subset(share[share$stayshealthy == 0, ]), aes(fill=as.factor(stayshealthy), y = (..count..)/sum(..count..)*100), binwidth = 0.05, boundary=0,alpha=0, color=color[2]) +
-  scale_fill_manual(name="", values=c("white",color[1]),labels=c("Did not stay healthy","Stayed healthy")) +
+  geom_histogram(data=subset(share[share$stayshealthy == 1, ]), 
+                 aes(fill=as.factor(stayshealthy), color=as.factor(stayshealthy), y = (..count..)/sum(..count..)*100),
+                 binwidth = 0.05, boundary=0, alpha=0.8) +
+  geom_histogram(data=subset(share[share$stayshealthy == 0, ]), 
+                 aes(fill=as.factor(stayshealthy), color=as.factor(stayshealthy), y = (..count..)/sum(..count..)*100), 
+                 binwidth = 0.05, boundary=0, alpha=0) +
+  scale_fill_manual(name="", values=c("0" = "white", "1" = color[1]),labels=c("Did not stay healthy","Stayed healthy")) +
+  scale_color_manual(name="", values=c("0" = color[2], "1" = color[1]),labels=c("Did not stay healthy","Stayed healthy")) +
   ylab("Percent") +
   xlab("Fitted values") +
   scale_x_continuous(expand=c(0.01,0.01) ,limits = c(0,1), breaks = seq(0,1,0.2)) +
