@@ -20,13 +20,14 @@
 # v2.0. 2020-04-06 major extension, now includes all functions for ch14-ch17 and ch24
 # v2.1. 2020-04-09 minor edits to tree
 # v2.2. 2020-04-30 minor edits ch24
-# v2.3 2020-08-23 library check
+# v2.3 2020-08-24 library check
 
 
 library(tidyverse)
 library(urca)
 library(stargazer)
 library(sandwich)
+library(stringr)
 
 
 calculate_se <- function(lm_model, se = 'robust', max_lag) {
@@ -229,8 +230,7 @@ price_diff_by_variables <- function(df, factor_var, dummy_var){
   # 3)the dummy variable you are interested in (like TV)
 
   # Process your data frame and make a new dataframe which contains the stats
-  require("dplyr")
-  require("ggplot2")
+  
   factor_var <- as.name(factor_var)
   dummy_var <- as.name(dummy_var)
 
@@ -262,9 +262,6 @@ price_diff_by_variables2 <- function(df, factor_var, dummy_var, factor_lab, dumm
   # 3)the dummy variable you are interested in (like TV)
 
   # Process your data frame and make a new dataframe which contains the stats
-  require("dplyr")
-  require("ggplot2")
-  library(stringr)
   factor_var <- as.name(factor_var)
   dummy_var <- as.name(dummy_var)
 

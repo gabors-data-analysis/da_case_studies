@@ -25,6 +25,7 @@
 # v 3.10 2020-04-30 large graph size edit
 # v 3.11 2020-06-26 graph 7 color  edit
 # v 3.13 2020-08-07 graph 6 geom_da gond
+# v 3.13 2020-08-24 library edits
 
 
 ############################################################  
@@ -36,17 +37,29 @@
 # Performs regression analysis 
 # Creates graphs
 
-
+# START NEW SESSION --- it is best to start a new session !
 # CLEAR MEMORY
 rm(list=ls())
 
-source("global.R")
+# packages
+library(tidyverse)
+library(grid)
+library(viridis)
 
-use_case_dir <- "ch07-hotel-simple-reg/"
-loadLibraries(use_case_dir)
+# set working directory
+# option A: open material as project
+# option B: set working directory for da_case_studies
+#           example: setwd("C:/Users/bekes.gabor/Documents/github/da_case_studies/")
 
+# set data dir, load theme and functions
+source("ch00-tech-prep/theme_bg.R")
+source("ch00-tech-prep/da_helper_functions.R")
+
+# data used
+source("set-data-directory.R") #data_dir must be first defined #
 data_in <- paste(data_dir,"hotels-vienna","clean", sep = "/")
 
+use_case_dir <- "ch07-hotel-simple-reg/"
 data_out <- use_case_dir
 output <- paste0(use_case_dir,"output/")
 create_output_if_doesnt_exist(output)
@@ -167,7 +180,6 @@ F07_1b<- ggplot(data = hotels) +
 F07_1b
 #save_fig("F07_1b_R", output, "small")
 save_fig("ch07-figure-1b-scatter-nonpar2", output, "small")
-
 
 
 #Look at a bar chart
