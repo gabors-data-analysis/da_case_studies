@@ -12,23 +12,37 @@
 
 # v1.1 2020-04-20 
 # v1.2 2020-07-14 dplyr edits
+# v1.3 2020-08-24 library + issue
 
-################################################################################
-# SET YOUR DIRECTORY HERE
-################################################################################
-
+# Clear memory -------------------------------------------------------
 rm(list=ls())
 
-source("global.R")
+# Import libraries ---------------------------------------------------
+
+library(tidyverse)
+library(purrr)
+library(haven)
+
+
+# set working directory
+# option A: open material as project
+# option B: set working directory for da_case_studies
+#           example: setwd("C:/Users/bekes.gabor/Documents/github/da_case_studies/")
+
+# set data dir, load theme and functions
+source("ch00-tech-prep/theme_bg.R")
+source("ch00-tech-prep/da_helper_functions.R")
+
+# data used
+source("set-data-directory.R") #data_dir must be first defined #
+data_in <- paste(data_dir,"wms-management-survey","clean/", sep = "/")
 
 use_case_dir <- file.path("ch21-ownership-management-quality/")
-loadLibraries(use_case_dir)
-
-data_in <- paste(data_dir,"wms-management-survey","clean", sep = "/")
-
 data_out <- use_case_dir
-output <- paste0(use_case_dir,"/output/")
+output <- paste0(use_case_dir,"output/")
 create_output_if_doesnt_exist(output)
+
+
 
 
 # ***************************************************************
@@ -40,13 +54,13 @@ create_output_if_doesnt_exist(output)
 
 
 # Load in data -------------------------------------------------------
-data_full <- read_dta(paste(data_in,"wms_da_textbook-xsec.dta",sep=""))
+data_full <- read_csv(paste(data_in,"wms_da_textbook-xsec.csv",sep=""))
 
 # Ownership: define founder/family owned and drop ownership that's missing or not relevant
 # Ownership
 data %>%
   group_by(ownership) %>%
-  summarise (Freq = n()) %>%
+  summarise(Freq = n()) %>%
   mutate(Percent = Freq / sum(Freq)*100, Cum = cumsum(Percent))
 
 # Define foundfam owned
