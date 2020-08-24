@@ -13,7 +13,7 @@
 # v2.0 2020-04-28 adds plots for ch03
 # v2.1 2020-08-04 redo hist 1 2a 2b for boundary=0
 # v2.2 2020-08-07 redo hist 2b for boundary=0
-# v2.2 2020-08-23 library edit
+# v2.2 2020-08-24 library edit
 
 # using WMS data 2004-2015
 #
@@ -22,34 +22,40 @@
 
 ######################################################################
 
-# Clear memory
+# START NEW SESSION --- it is best to start a new session !
+# CLEAR MEMORY
 rm(list=ls())
 
-# Import libraries
+# packages
 library(tidyverse)
 library(haven)
 library(Hmisc)
 library(binsreg)
 library(xtable)
 
-# Sets the core parent directory
-current_path = rstudioapi::getActiveDocumentContext()$path 
-dir<-paste0(dirname(dirname(dirname(current_path ))),"/")
+# set working directory
+# option A: open material as project
+# option B: set working directory for da_case_studies
+#           example: setwd("C:/Users/bekes.gabor/Documents/github/da_case_studies/")
 
-ddata<- "C:/Users/bekes.gabor/Dropbox (MTA KRTK)/bekes_kezdi_textbook/"
-# Location folders
-data_in <- paste0(ddata,"da_data_repo/wms-management-survey/clean/")
-data_out <- paste0(dir,"da_case_studies/ch04-management-firm-size/")
-output <- paste0(dir,"da_case_studies/ch04-management-firm-size/output/")
-func <- paste0(dir, "da_case_studies/ch00-tech-prep/")
+# set data dir, load theme and functions
+source("ch00-tech-prep/theme_bg.R")
+source("ch00-tech-prep/da_helper_functions.R")
 
-#call function
-source(paste0(func, "theme_bg.R"))
-source(paste0(func, "da_helper_functions.R"))
+# data used
+source("set-data-directory.R") #data_dir must be first defined #
+data_in <- paste(data_dir,"wms-management-survey","clean/", sep = "/")
+
+use_case_dir <- "ch04-management-firm-size/"
+data_out <- use_case_dir
+output <- paste0(use_case_dir,"output/")
+create_output_if_doesnt_exist(output)
+
+
 
 ########################################################################
 # Import data
-df <- read_csv(paste0(data_in,"wms_da_textbhook.csv"))
+df <- read_csv(paste0(data_in,"wms_da_textbook.csv"))
 
 # Sample selection
 df <- df %>%
@@ -319,13 +325,14 @@ cor(df$management, df$emp_firm, use = "complete.obs")
 table(df$sic)
 
 # by industry
-df$industry_broad[df$sic<22] <- 'food_drinks_tobacco'
-df$industry_broad[df$sic>=22 & df$sic<24 | df$sic==310  | df$sic==390 ] <- 'textile_apparel_leather_etc'
+df$industry_broad[df$sic<=21] <- 'food_drinks_tobacco'
+df$industry_broad[df$sic>=22 & df$sic<=23 | df$sic==31  ] <- 'textile_apparel_leather_etc'
 df$industry_broad[df$sic>=24& df$sic<=27] <- 'wood_furniture_paper'
 df$industry_broad[df$sic>=28 & df$sic<=30] <- 'chemicals_etc'
 df$industry_broad[df$sic>=32 & df$sic<35] <- 'materials_metals'
 df$industry_broad[df$sic>=35 & df$sic<37] <- 'electronics'
-df$industry_broad[df$sic>=37 & df$sic<38] <- 'auto'
+df$industry_broad[df$sic==37 ] <- 'auto'
+df$industry_broad[df$sic>=38]             <- 'other'
 
 table(df$industry_broad)
 
@@ -355,8 +362,6 @@ df %>%
                    Median = median(emp_firm),
                    n())
 
-# todo create Table 4.1. using this
-# N/A -->other
 
 cor<-df %>%
   group_by(industry_broad) %>%
@@ -373,13 +378,13 @@ table41 <-df %>%
 table41$cor<-cor$COR
 
 
-table41<-table41 %>% replace_na(list(industry_broad = "other"))
+#table41<-table41 %>% replace_na(list(industry_broad = "other"))
 table41$industry_broad<-table41$industry_broad %>% dplyr::recode(auto='Auto',
                                         chemicals_etc='Chemicals',
-                                        electronics='Electronics',
+                                        electronics='Machinery, equipment, electronics',
                                         food_drinks_tobacco='Food, drinks, tobacco',
                                         materials_metals='Materials, metals',
-                                        textile_apparel_leather_etc='Textile, apparel',
+                                        textile_apparel_leather_etc='Textile, apparel, leather',
                                         wood_furniture_paper='Wood, furniture, paper',
                                         other = 'Other'
                                         )
