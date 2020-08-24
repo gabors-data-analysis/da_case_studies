@@ -13,6 +13,7 @@
 # v2.0 2020-04-28 adds plots for ch03
 # v2.1 2020-08-04 redo hist 1 2a 2b for boundary=0
 # v2.2 2020-08-07 redo hist 2b for boundary=0
+# v2.2 2020-08-23 library edit
 
 # using WMS data 2004-2015
 #
@@ -25,23 +26,19 @@
 rm(list=ls())
 
 # Import libraries
-require(tidyverse)
-require(plyr)
-library(gridExtra)
-library(cowplot)
-library(viridis)
+library(tidyverse)
 library(haven)
 library(Hmisc)
 library(binsreg)
 library(xtable)
-library(dplyr)
 
 # Sets the core parent directory
 current_path = rstudioapi::getActiveDocumentContext()$path 
 dir<-paste0(dirname(dirname(dirname(current_path ))),"/")
 
+ddata<- "C:/Users/bekes.gabor/Dropbox (MTA KRTK)/bekes_kezdi_textbook/"
 # Location folders
-data_in <- paste0(dir,"da_data_repo/wms-management-survey/clean/")
+data_in <- paste0(ddata,"da_data_repo/wms-management-survey/clean/")
 data_out <- paste0(dir,"da_case_studies/ch04-management-firm-size/")
 output <- paste0(dir,"da_case_studies/ch04-management-firm-size/output/")
 func <- paste0(dir, "da_case_studies/ch00-tech-prep/")
@@ -51,9 +48,8 @@ source(paste0(func, "theme_bg.R"))
 source(paste0(func, "da_helper_functions.R"))
 
 ########################################################################
-
 # Import data
-df <- read_csv(paste0(data_in,"wms_da_textbook.csv"))
+df <- read_csv(paste0(data_in,"wms_da_textbhook.csv"))
 
 # Sample selection
 df <- df %>%
