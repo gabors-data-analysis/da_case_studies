@@ -8,16 +8,14 @@ library(pacman)
 pacman::p_load(urca, sandwich, stargazer,stringr)
 pacman::p_load(scales, data.table, knitr )
 
-#ch02
+#Part I
 pacman::p_load(lspline, cowplot)
-
-
-#ch04
 pacman::p_load(haven, Hmisc, xtable, binsreg)
 
-#ch07
+# Part II
 pacman::p_load(viridis, grid, gridExtra)
 
 
-#ch13-14
-pacman::p_load(lmtest, caret, glmnet, skimr, directlabels)
+#Part III
+pacman::p_load(lmtest, caret, glmnet, skimr, directlabels, 
+               prophet, timeDate)
