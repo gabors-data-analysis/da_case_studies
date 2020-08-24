@@ -19,16 +19,12 @@
 # v1.11 2020-04-09 color edits again
 # v2.0 2020-06-08 final touches
 # v2.1 2020-08-04 redo hist freq w boundary forced=0
+# v2.2 2020-08-23 library check
 
 
-# Import library
-library(RColorBrewer)
-library(viridis)
-library(gridExtra)
-library(cowplot)
+library(tidyverse)
+library(here)
 library(scales)
-library(extrafont)
-library(knitr)
 
 # -----------------------------
 # in Windows this may be needed

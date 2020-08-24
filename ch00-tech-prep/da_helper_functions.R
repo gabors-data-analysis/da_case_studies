@@ -20,7 +20,13 @@
 # v2.0. 2020-04-06 major extension, now includes all functions for ch14-ch17 and ch24
 # v2.1. 2020-04-09 minor edits to tree
 # v2.2. 2020-04-30 minor edits ch24
+# v2.3 2020-08-23 library check
 
+
+library(tidyverse)
+library(urca)
+library(stargazer)
+library(sandwich)
 
 
 calculate_se <- function(lm_model, se = 'robust', max_lag) {
