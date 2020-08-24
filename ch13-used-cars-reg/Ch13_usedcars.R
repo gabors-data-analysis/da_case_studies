@@ -51,7 +51,7 @@ source("ch00-tech-prep/da_helper_functions.R")
 
 # data used
 source("set-data-directory.R") #data_dir must be first defined #
-data_in <- paste(data_dir,"used-cars","clean", sep = "/")
+data_in <- paste(data_dir,"used-cars","clean/", sep = "/")
 
 use_case_dir <- "ch13-used-cars-reg/"
 data_out <- use_case_dir
@@ -62,7 +62,7 @@ create_output_if_doesnt_exist(output)
 ################################################################################
 
 # DATA IMPORT
-data <- read.csv(paste0(data_in,"/used-cars_2cities_prep.csv"), stringsAsFactors = TRUE)
+data <- read.csv(paste0(data_in,"used-cars_2cities_prep.csv"), stringsAsFactors = TRUE)
 
 # SAMPLE DESIGN
 
