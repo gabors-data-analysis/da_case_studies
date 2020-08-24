@@ -7,7 +7,7 @@
 
 # v1.5 2019-09-06
 # v1.6 2020-01-09 minor graph edits
-
+# v1.7 2020-08-24 library set
 #
 #
 # WHAT THIS CODES DOES:
@@ -23,22 +23,24 @@ library(tidyverse)
 library(stargazer)
 library(Hmisc)
 
-# Set path
+# option A: open material as project
+# option B: set working directory for da_case_studies
+#           example: setwd("C:/Users/bekes.gabor/Documents/github/da_case_studies/")
 
-# there are two airbnb_london_cleaned.csv files; one in */clean and one in */raw.
+# set data dir, load theme and functions
+source("ch00-tech-prep/theme_bg.R")
+source("ch00-tech-prep/da_helper_functions.R")
 
-# CHECK WORKING DIRECTORY - CHANGE IT TO YOUR WORKING DIRECTORY
- dir <-  "C:/Users/GB/Dropbox (MTA KRTK)/bekes_kezdi_textbook/"
-# dir<- "D:/Dropbox (MTA KRTK)/bekes_kezdi_textbook/"
- 
+# data used
+source("set-data-directory.R") #data_dir must be first defined #
+data_in <- paste(data_dir,"airbnb","clean/", sep = "/")
 
-#location folders
- data_in <- paste0(dir,"da_data_repo/airbnb/clean/")
- data_out <- paste0(dir,"da_case_studies/ch14-airbnb-reg/")
- output <- paste0(dir,"da_case_studies/ch14-airbnb-reg/output/")
- func <- paste0(dir, "da_case_studies/ch00-tech-prep/")
- 
-source(paste0(func, "theme_bg.R"))
+use_case_dir <- "ch14-airbnb-reg/"
+data_out <- use_case_dir
+output <- paste0(use_case_dir,"output/")
+create_output_if_doesnt_exist(output)
+
+options(digits = 3)
 
 # Import data
 
