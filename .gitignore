@@ -6,6 +6,7 @@
 */.DS_Store
 *.Rproj
 */output/
+*/temp/
 *.csv
 *.dta
 *.rds
