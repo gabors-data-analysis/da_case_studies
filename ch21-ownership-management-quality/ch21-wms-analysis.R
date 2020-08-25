@@ -20,30 +20,34 @@ library(purrr)
 library(haven)
 library(stargazer)
 library(MatchIt)
-#library(MatchItSE)
 library(Matching)
 library(gmodels)
 
+getwd()
+# set working directory
+# option A: open material as project
+# option B: set working directory for da_case_studies
+#           example: setwd("C:/Users/bekes.gabor/Documents/github/da_case_studies/")
 
-# Sets the core parent directory
-current_path = rstudioapi::getActiveDocumentContext()$path 
-dir<-paste0(dirname(dirname(dirname(current_path ))),"/")
+# set data dir, load theme and functions
+source("ch00-tech-prep/theme_bg.R")
+source("ch00-tech-prep/da_helper_functions.R")
+
+# data used
+source("set-data-directory.R") #data_dir must be first defined #
+
+use_case_dir <- file.path("ch21-ownership-management-quality/")
+
+data_in <- use_case_dir
+data_out <- use_case_dir
+output <- paste0(use_case_dir,"output/")
+create_output_if_doesnt_exist(output)
 
 
-#location folders
-data_in <- paste0(dir,"da_data_repo/wms-management-survey/clean/")
-data_out <- paste0(dir,"da_case_studies/ch21-ownership-management-quality/")
-output <- paste0(dir,"da_case_studies/ch21-ownership-management-quality/output/")
-func <- paste0(dir, "da_case_studies/ch00-tech-prep/")
-
-
-#call function
-source(paste0(func, "theme_bg.R"))
-source(paste0(func, "da_helper_functions.R"))
 
 # Read in data ------------------------------------------------------------
 
-data <- read_rds(paste0(data_out, "work.rds"))
+data <- read_rds(paste0(data_out, "wms_da_textbook-work.rds"))
 
 data %>% 
   group_by(foundfam_owned) %>% 
@@ -99,7 +103,7 @@ cat(.,file= paste0(output, "ch21-foundfam-reg1.tex"))
 # *************************************************************
 # * EXACT MATCHING
 # ***************************************************************** 
-
+Hmisc::describe(data$management)
 data <- data %>%
 	mutate(
 		empbin5 = cut(emp_firm, quantile(emp_firm, seq(0,1,1/5)), include.lowest = TRUE, right = FALSE),
@@ -153,7 +157,7 @@ data_agg %>%
 # SOLUTION With replacement
 # Function only works with non-missing values
 data_pscore <- data %>% 
-  data_pscoreselect(c(y_var, x_var, control_vars, control_vars_to_interact)) %>%
+  dplyr::select(c(y_var, x_var, control_vars, control_vars_to_interact)) %>%
   na.omit()
 
 # with all control vars -------------------------------------------------------
