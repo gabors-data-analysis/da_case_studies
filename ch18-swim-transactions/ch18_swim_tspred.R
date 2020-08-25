@@ -53,6 +53,10 @@ source("set-data-directory.R") #data_dir must be first defined #
 # alternative: give full path here, 
 #            example data_dir="C:/Users/bekes.gabor/Dropbox (MTA KRTK)/bekes_kezdi_textbook/da_data_repo"
 
+# load theme and functions
+source("ch00-tech-prep/theme_bg.R")
+source("ch00-tech-prep/da_helper_functions.R")
+
 data_in <- paste(data_dir,"swim-transactions","clean/", sep = "/")
 
 use_case_dir <- "ch18-swim-transactions/"
@@ -61,9 +65,6 @@ output <- paste0(use_case_dir,"output/")
 create_output_if_doesnt_exist(output)
 
 
-# load theme and functions
-source("ch00-tech-prep/theme_bg.R")
-source("ch00-tech-prep/da_helper_functions.R")
 
 
 #####################################
