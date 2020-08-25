@@ -22,18 +22,31 @@
 ********************************************************************
 * SET YOUR DIRECTORY HERE
 *********************************************************************
-*cd "" /*set your dir*/
 
-*cd "C:/Users/GB/Dropbox (MTA KRTK)/bekes_kezdi_textbook/"
-cd "C:/Users/kezdi/Dropbox/bekes_kezdi_textbook/"
- * YOU WILL NEED TWO SUBDIRECTORIES
- * textbook_work --- all the codes
- * cases_studies_public --- for the data
+
+
+* 1. set your working directory
+* replace this: 
+cd "C:/Users/bekes.gabor/Documents/github/da_case_studies"
+
+
+global data_out  "ch18-swim-transactions"
+global output    "ch18-swim-transactions/output"
+* must add create output if does not exist yet.
+
+
+
+* Step 2: set data directory
+* replace this: 
+ global da_data_repo "C:/Users/bekes.gabor/Dropbox (MTA KRTK)/bekes_kezdi_textbook/da_data_repo"
+
+* alternative: 
+* do "set-data-directory.do" /*data_dir must be first defined */
+
+global data_in	 "$da_data_repo/swim-transactions/raw" 
  
 
-global data_in	 "da_data_repo/swim-transactions/raw" 
-global output    "da_case_studies/ch18-swim-transactions/output"
-global data_out  "da_case_studies/ch18-swim-transactions"
+
 
 
 ***********************************************************
