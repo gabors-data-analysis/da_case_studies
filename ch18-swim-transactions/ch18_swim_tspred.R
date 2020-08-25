@@ -17,6 +17,7 @@
 # v2.2 2020-04-28 date labels edited
 # v2.3 2020-04-30 date labels edited
 # v2.4 2020-08-24 library eidts
+# v2.5 2020-08-25 data soure B 
 
 
 # WHAT THIS CODES DOES:
@@ -53,6 +54,9 @@ source("ch00-tech-prep/da_helper_functions.R")
 
 # data used
 source("set-data-directory.R") #data_dir must be first defined #
+# alternative: give full path here, 
+#            example data_dir="C:/Users/bekes.gabor/Dropbox (MTA KRTK)/bekes_kezdi_textbook/da_data_repo"
+
 data_in <- paste(data_dir,"swim-transactions","clean/", sep = "/")
 
 use_case_dir <- "ch18-swim-transactions/"
