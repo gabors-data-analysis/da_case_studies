@@ -19,3 +19,7 @@ pacman::p_load(viridis, grid, gridExtra)
 #Part III
 pacman::p_load(lmtest, caret, glmnet, skimr, directlabels, 
                prophet, timeDate)
+
+# Part IV
+p_load(MatchIt, Matching, gmodels)
+
