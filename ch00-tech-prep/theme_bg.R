@@ -18,16 +18,12 @@
 # v1.10 2020-04-05 ads tree saver
 # v1.11 2020-04-09 color edits again
 # v2.0 2020-06-08 final touches
+# v2.1 2020-08-04 redo hist freq w boundary forced=0
+# v2.2 2020-08-24 library check
 
 
-# Import library
-library(RColorBrewer)
-library(viridis)
-library(gridExtra)
-library(cowplot)
+library(tidyverse)
 library(scales)
-library(extrafont)
-library(knitr)
 
 # -----------------------------
 # in Windows this may be needed
@@ -39,10 +35,10 @@ library(knitr)
 # Define colors
 ####################################################
 
-# colors based on viridis may be used for online
+# colors based on viridis RGB scheme may be used for online
 # color <- c("#3D4D8AFF",            "#43BF71FF",            "#440154FF",            "#FDE725FF",            "#23888EFF" )
 
-# this is derived from cmyk by cup
+# this is derived from CMYK color scheme by Cambridge University Press for print
 color <- c("#3a5e8cFF", "#10a53dFF", "#541352FF", "#ffcf20FF", "#2f9aa0FF")
 #blue  #3a5e8c   # purple #541352    teal #2f9aa0  yellow #ffcf20   # green #10a53d
 show_col(color)
@@ -58,10 +54,6 @@ color.fill = "#000000"
 color.fill = "#0000FF"
 color.fill2 ="#ADD8E6"
 color.fill3 = "#FF8C00"
-
-# fonts may be added
-# font_import()
-# loadfonts(device = "win")
 
 
 # The function sets the basic design of the graphs (axis, grids, titles etc.)
@@ -161,11 +153,11 @@ geom_histogram_da <- function(type='percent',boundary=0, binwidth=NULL, bins=NUL
                               color = color.outline, fill = theme_colors[1],
                               size = 0.2, alpha = 0.8,  show.legend=F, na.rm=TRUE){
   if(type=='percent'){
-    geom_histogram(aes(y = (..count..)/sum(..count..)),binwidth = binwidth, bins=bins,
+    geom_histogram(aes(y = (..count..)/sum(..count..)),binwidth = binwidth, bins=bins, boundary=0,
                    color = color, fill = fill, alpha = alpha)
   }
   else if(type == 'frequency'){
-    geom_histogram(binwidth = binwidth, bins=bins,
+    geom_histogram(binwidth = binwidth, bins=bins, boundary=0,
                    color = color, fill = fill, alpha = alpha)
   }
   else {
@@ -261,14 +253,6 @@ save_fig <- function(filename, filepath, size,plot=last_plot()){
   print(plot)
   dev.off()
 }
-
-
-
-
-
-
-# for knitr::kable
-# linesep = if (booktabs) c('', '', '', '', '\\addlinespace') else '\\hline'
 
 
 

@@ -16,6 +16,9 @@
 # v1.10 2020-04-22 names ok
 # v1.11 2020-04-27 dplyr edits, nvars2
 # v1.12 2020-04-28 y-ypred
+# v1.13 2020-08-08 hist edits, not ready.
+# v1.14 2020-08-24 library edits
+
 
 ############################################################
 #
@@ -26,34 +29,33 @@ rm(list=ls())
 
 
 # Descriptive statistics and regressions
-library(caret)
 library(tidyverse)
+library(caret)
 library(skimr)
-library(ggplot2)
-library(ggthemes)
-library(gridExtra)
 library(grid)
-library(ggplot2)
-library(lattice)
 library(glmnet)
 library(stargazer)
 library(xtable)
 library(directlabels)
+library(knitr)
 
+# option A: open material as project
+# option B: set working directory for da_case_studies
+#           example: setwd("C:/Users/bekes.gabor/Documents/github/da_case_studies/")
 
-# Sets the core parent directory
-current_path = rstudioapi::getActiveDocumentContext()$path 
-dir<-paste0(dirname(dirname(dirname(current_path ))),"/")
+# set data dir, load theme and functions
+source("ch00-tech-prep/theme_bg.R")
+source("ch00-tech-prep/da_helper_functions.R")
 
+use_case_dir <- "ch14-airbnb-reg/"
 
-#location folders
-data_in <- paste0(dir,"da_data_repo/airbnb/clean/")
-data_out <- paste0(dir,"da_case_studies/ch14-airbnb-reg/")
-func <- paste0(dir, "da_case_studies/ch00-tech-prep/")
-output <- paste0(dir,"da_case_studies/ch14-airbnb-reg/output/")
+# data used
+data_in <- use_case_dir
 
-source(paste0(func, "theme_bg.R"))
-source(paste0(func, "da_helper_functions.R"))
+data_out <- use_case_dir
+output <- paste0(use_case_dir,"output/")
+create_output_if_doesnt_exist(output)
+
 options(digits = 3)
 
 
@@ -181,13 +183,13 @@ datau <- subset(data, price<=400)
 
 # price
 g1 <- ggplot(data=datau, aes(x=price)) +
-  geom_histogram_da(type="percent", binwidth = 10) +
-  #geom_histogram(aes(y = (..count..)/sum(..count..)), binwidth = 10, center=0,
+  geom_histogram_da(type="percent", binwidth = 10, boundary=20) +
+  #geom_histogram(aes(y = (..count..)/sum(..count..)), binwidth = 10, boundary=0,
   #               color = color.outline, fill = color[1], size = 0.25, alpha = 0.8,  show.legend=F,  na.rm=TRUE) +
-  coord_cartesian(xlim = c(0, 400)) +
+#  coord_cartesian(xlim = c(0, 400)) +
   labs(x = "Price (US dollars)",y = "Percent")+
-  scale_y_continuous(expand = c(0.00,0.00),limits=c(0, 0.15), breaks = seq(0, 0.15, by = 0.05), labels = scales::percent_format(1)) +
-  scale_x_continuous(expand = c(0.00,0.00),breaks = seq(0,400, 50)) +
+  scale_y_continuous(expand = c(0.00,0.00),limits=c(0, 0.2), breaks = seq(0, 0.2, by = 0.05), labels = scales::percent_format(1)) +
+    scale_x_continuous(expand = c(0.00,0.00),limits=c(0,400), breaks = seq(0,400, 50)) +
   theme_bg() 
 g1
 #save_fig("F14_airbnb_price_R", output, "small")
@@ -195,12 +197,12 @@ save_fig("ch14-figure-3a-airbnb-price", output, "small")
 
 # lnprice
 g2<- ggplot(data=datau, aes(x=ln_price)) +
-  geom_histogram_da(type="percent", binwidth = 0.18) +
+  geom_histogram_da(type="percent", binwidth = 0.2, boundary=0) +
   #  geom_histogram(aes(y = (..count..)/sum(..count..)), binwidth = 0.18,
   #               color = color.outline, fill = color[1], size = 0.25, alpha = 0.8,  show.legend=F,  na.rm=TRUE) +
-  coord_cartesian(xlim = c(2, 6.5)) +
+  coord_cartesian(xlim = c(2.5, 6.5)) +
   scale_y_continuous(expand = c(0.00,0.00),limits=c(0, 0.15), breaks = seq(0, 0.15, by = 0.05), labels = scales::percent_format(5L)) +
-  scale_x_continuous(expand = c(0.00,0.01),breaks = seq(2,6.5, 0.5)) +
+  scale_x_continuous(expand = c(0.00,0.01),breaks = seq(2.4,6.6, 0.6)) +
   labs(x = "ln(price, US dollars)",y = "Percent")+
   theme_bg() 
 g2
@@ -608,7 +610,7 @@ F14_CI_n_accomodate <- ggplot(predictionlev_holdout_summary, aes(x=factor(n_acco
   geom_bar(aes(y = fit ), stat="identity",  fill = color[1], alpha=0.7 ) +
   geom_errorbar(aes(ymin=pred_lwr, ymax=pred_upr, color = "Pred. interval"),width=.2) +
   #geom_errorbar(aes(ymin=conf_lwr, ymax=conf_upr, color = "Conf. interval"),width=.2) +
-  scale_y_continuous(name = "Price (US dollars)") +
+  scale_y_continuous(name = "Predicted price (US dollars)") +
   scale_x_discrete(name = "Accomodates (Persons)") +
   scale_color_manual(values=c(color[2], color[2])) +
   theme_bg() +

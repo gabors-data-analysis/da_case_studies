@@ -8,6 +8,7 @@
 # Analysis: regression and matching
 
 #v1.1 2020-04-23 edits
+#v1.2 2020-07-14 dplyr edits
 
 ######################################################################
 
@@ -19,7 +20,8 @@ library(purrr)
 library(haven)
 library(stargazer)
 library(MatchIt)
-library(MatchItSE)
+#library(MatchItSE)
+library(Matching)
 library(gmodels)
 
 
@@ -58,7 +60,7 @@ control_vars_to_interact <- c("industry", "countrycode")
 
 
 data %>%
-	select(c(control_vars, control_vars_to_interact)) %>%
+	dplyr::select(c(control_vars, control_vars_to_interact)) %>%
 	summary()
 
 # *************************************************************
@@ -105,7 +107,7 @@ data <- data %>%
 
 data_agg <- data %>%
 	group_by(degree_nm_bins, agecat, competition, empbin5, industry, countrycode) %>%
-	summarise(
+  dplyr::summarise(
 		n = n(), n0 = sum(1-foundfam_owned), n1 = sum(foundfam_owned),
 		y0 = sum(management*(foundfam_owned == 0))/sum(1-foundfam_owned), 
 		y1 = sum(management*(foundfam_owned == 1))/sum(foundfam_owned)
@@ -121,7 +123,7 @@ data_agg %>%
 set.seed(12345)
 data_sample <- data_agg %>%
 	sample_n(size = 340) %>%
-	select(industry, countrycode, degree_nm_bins, competition, agecat, empbin5, n1, n0, n)
+  dplyr::select(industry, countrycode, degree_nm_bins, competition, agecat, empbin5, n1, n0, n)
 
 # examples with founder/family only
 data_sample %>%
@@ -151,7 +153,7 @@ data_agg %>%
 # SOLUTION With replacement
 # Function only works with non-missing values
 data_pscore <- data %>% 
-  select(c(y_var, x_var, control_vars, control_vars_to_interact)) %>%
+  data_pscoreselect(c(y_var, x_var, control_vars, control_vars_to_interact)) %>%
   na.omit()
 
 # with all control vars -------------------------------------------------------
@@ -208,6 +210,9 @@ out2 <- summary(reg_match2)
 
 ATE_PSME2 <- out2$coefficients[2]
 ATE_PSME2_SE <- out2$coefficients[2,2]
+
+out1
+out2
 
 
 # ***************************************************************** 

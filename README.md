@@ -3,7 +3,7 @@
 
 **Data Analysis for Business, Economics, and Policy** by Gábor Békés (CEU) and Gábor Kézdi (U. Michigan) 
 
-Graduate textbook forthcoming (December 2020) by Cambridge University Press
+Graduate textbook forthcoming (January 2021) by Cambridge University Press
 
 ## Code language versions
 1. **R** -- We used v3.6.3, but all code should work in v4.0, but some checks may be needed.
@@ -16,6 +16,11 @@ Graduate textbook forthcoming (December 2020) by Cambridge University Press
 2. Within case study folders, codes in different languages are simply stored together. 
 3. Some intermediary files (csv, dta, rds) may be saved there, too. 
 4. Currently output is not stored here 
+
+## Get data
+[Get data by datasets](https://drive.google.com/drive/folders/1g5j6v_WtB2lQDrSjpfhuw-P4s3Wm7Ucc?usp=sharing)  
+NOTE: Draft version, please do not share. 
+
 
 ## How to run case studies in R
 

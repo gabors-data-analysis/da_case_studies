@@ -13,6 +13,7 @@
 # v1.2. 2020-03-13 edit axes names
 # v1.3. 2020-03-21 edit axes names, eps
 # v1.4. 2020-04-06 minor graphs
+# v1.5. 2020-08-05 graph axis edits
 
 ###############################################
 
@@ -78,7 +79,7 @@ histprice_Vienna5_R<- ggplot(data = filter(hotels_europe_cut, city=="Vienna"), a
   geom_histogram_da(type="percent", binwidth = 20 )+
   labs(x = "Price (US dollars)", y = "Percent") +
   scale_x_continuous(expand = c(0.01,0.01),limits = c(0, 500), breaks = seq(0, 500, by = 100)) +
-  scale_y_continuous(expand = c(0.01,0.01),limits = c(0, 0.3), labels = scales::percent_format()) +
+  scale_y_continuous(expand = c(0.00,0.00),limits = c(0, 0.3), breaks =seq(0,0.3, by=0.1), labels = scales::percent_format()) +
   theme_bg() 
 histprice_Vienna5_R
 #save_fig("histprice_Vienna5_R", output, "small")
@@ -92,7 +93,7 @@ histprice_London_R<-ggplot(data = filter(hotels_europe_cut, city=="London"), aes
   geom_histogram_da(type="percent", binwidth = 20 )+
   labs(x = "Price (US dollars)", y = "Percent") +
   scale_x_continuous(expand = c(0.01,0.01),limits = c(0, 500), breaks = seq(0, 500, by = 100)) +
-  scale_y_continuous(expand = c(0.01,0.01),limits = c(0, 0.3), labels = scales::percent_format()) +
+  scale_y_continuous(expand = c(0.00,0.00),limits = c(0, 0.3), breaks =seq(0,0.3, by=0.1), labels = scales::percent_format()) +
   theme_bg() 
 histprice_London_R
 #save_fig("histprice_London_R", output, "small")
@@ -108,10 +109,10 @@ kdens_ViennaLondon_R<-ggplot(data = hotels_europe_cut, aes(x=price, y = stat(den
   scale_color_manual(name="", 
                      values=c(color[2],color[1]),
                      labels=c("London","Vienna")) +
-  scale_y_continuous(limits = c(0, 0.015), breaks = seq(0, 0.015, by = 0.003)) +
-  scale_x_continuous(expand = c(0.0,0.0),limits = c(0, 500), breaks = seq(0, 500, by = 100)) +
-  geom_text(aes(x = 340, y = 0.003, label = "London"), color = color[2], size=2.5) +
-  geom_text(aes(x = 200, y = 0.007, label = "Vienna"), color = color[1], size=2.5) +
+  scale_y_continuous(expand = c(0.0,0.0), limits = c(0, 0.015), breaks = seq(0, 0.015, by = 0.003)) +
+  scale_x_continuous(expand = c(0.01,0.01),limits = c(0, 500), breaks = seq(0, 500, by = 100)) +
+  geom_text(aes(x = 340, y = 0.0026, label = "London"), color = color[2], size=2.5) +
+  geom_text(aes(x = 170, y = 0.008, label = "Vienna"), color = color[1], size=2.5) +
   theme_bg() 
 kdens_ViennaLondon_R
 #save_fig("kdens_ViennaLondon_R", output, "small")

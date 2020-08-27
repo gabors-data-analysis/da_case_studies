@@ -4,22 +4,18 @@
 * founder/family ownsership
 * wms-management
 *
-* v2.0. 2020-01-24
-* v2.1. 2020-02-17, cleaning code
-* v2.2. 2020-04-20 correcting ownership values, no change on results
-* v2.3. 2020-04-21 starts w xsec
 **********************************************************************
 
 
 * set the path
-cd "C:\Users\GB\Dropbox (MTA KRTK)\bekes_kezdi_textbook"
+*cd "C:\Users\GB\Dropbox (MTA KRTK)\bekes_kezdi_textbook"
+cd "C:\Users\kezdi\Dropbox\bekes_kezdi_textbook"
 
 
 *location folders
 global data_in   "da_data_repo/wms-management-survey/clean"
 global data_out  "da_case_studies/ch21-ownership-management-quality"
 global output   "$data_out/output"
-
 
 
 ***************************************************************
@@ -31,14 +27,22 @@ global output   "$data_out/output"
 
 
 clear
+set matsize 2000
 use "$data_in\wms_da_textbook-xsec.dta"
 
+
+* statistics in text
+* Section A1
+* number of oervations in the entire dataset
+* years and countries covered
 count 
 * 10,282
+tab wave
+codebook country
+tab country
 
 
-
-* Ownership: defone founder/family owned 
+* Ownership: define founder/family owned 
 *  and drop ownership that's missing or not relevant
 codebook ownership
 tab ownership,mis
@@ -106,6 +110,12 @@ encode cty, gen(countrycode)
 drop if ownership=="" ///
  | ownership == "Government" ///
  | ownership == "Other" 
+
+* Statistics in text
+* last paragraph of Section A1
+count
+tab foundfam
+
  
 * keep observations with non-missing variables
 foreach v of varlist management foundfam  ///
@@ -125,20 +135,29 @@ count
 
 
 *************************************************************
-* VARIATION IN X, DISTRUBUTION OF OTHER VARIABLES
+* DESCRIPTIVE STATISTICS
 
+* distribution of y
+sum management
 
+* variation in x
 tab foundfam,mis
 
-tab competition, sum(foundfam)
+* average y by x
+tab foundfam, sum(management)
+
+
+* DISTRUBUTION OF OTHER VARIABLES
+tab competition_string
+tab competition
 tab degree_nm_bins
-tab country, sum(foundfam)
-tab industry, sum(foundfam)
+tab country
+tab industry
 
 * look at data for modelling
-hist emp, percent ylab(, grid)
-hist lnemp, width(0.3) percent ylab(, grid)
-hist degree_nm, width(0.05) percent ylab(, grid)
+hist emp, percent col(navy*0.8) lcol(white) ylab(, grid)
+hist lnemp, percent width(0.3) col(navy*0.8) lcol(white) ylab(, grid)
+hist degree_nm, width(0.05) percent col(navy*0.8) lcol(white) ylab(, grid)
 
 lpoly management degree_nm, nosca ci xlab(, grid) ylab(, grid)
 lpoly management lnemp, nosca ci xlab(, grid) ylab(, grid)
@@ -160,7 +179,7 @@ tab foundfam, sum(management)
 
 
 * save workfile for matching and regression
-save "$data_out/work.dta",replace
+save "$data_out/wms-workfile.dta",replace
 
 
 ***************************************************************
@@ -172,14 +191,14 @@ save "$data_out/work.dta",replace
 * REGRESSIONS
 *************************************************************
 
-use "$data_out/work.dta" ,clear
+use "$data_out/wms-workfile.dta" ,clear
 
 sum industry country degree_nm degree_nm_sq compet_moder compet_strong ///
  age_young age_old age_unknown lnemp 
 
 * y on x
 reg management foundfam_own , robust
- outreg2 using "$output/ch21-foundfam-reg1", 2aster dec(2) symbol(**, *) ///
+ outreg2 using "$output/ch21-foundfam-reg-Stata", 2aster dec(2) symbol(**, *) ///
  ctitle("no confounders") tex(frag) nonotes replace
 
 
@@ -189,7 +208,7 @@ reg management foundfam ///
  degree_nm degree_nm_sq compet_moder compet_strong ///
  age_young age_old age_unknown lnemp ///
  , robust
- outreg2 using "$output/ch21-foundfam-reg1", 2aster dec(2) symbol(**, *) ///
+ outreg2 using "$output/ch21-foundfam-reg-Stata", 2aster dec(2) symbol(**, *) ///
  keep(foundfam) ctitle("with confounders") tex(frag) nonotes append
 
 * y on x and all confounders interacted with industry and country
@@ -200,7 +219,7 @@ reg management foundfam ///
  i.countrycode##c.degree_nm i.countrycode##c.degree_nm_sq i.countrycode##i.compet_moder i.countrycode##i.compet_strong ///
  i.countrycode##i.age_young i.countrycode##i.age_old i.countrycode##i.age_unknown i.countrycode##c.lnemp ///
  , robust
- outreg2 using "$output/ch21-foundfam-reg1", 2aster dec(2) symbol(**, *) ///
+ outreg2 using "$output/ch21-foundfam-reg-Stata", 2aster dec(2) symbol(**, *) ///
  keep(foundfam) ctitle("with confounders interacted") tex(frag) nonotes append
 
 
@@ -209,8 +228,8 @@ reg management foundfam ///
 * EXACT MATCHING
 ***************************************************************** 
 
-use "$data_out/work.dta" ,clear
-count
+use "$data_out/wms-workfile.dta" ,clear
+
 egen empbin5=cut(emp_firm), group(5)
  tabstat emp_firm, by(empbin) s(min max n)
 gen n=1
@@ -219,9 +238,6 @@ gen n0 =1-foundfam
 gen age_mid = age_young==0 & age_old==0 & age_unknown==0
 gen agecat = age_young + 2*age_mid + 3*age_old + 4*age_unknown
 tabstat firmage, by(agecat) s(min max n)
-
-sum management
-tab foundfam
 
 gen y0 = management if foundfam==0
 gen y1 = management if foundfam==1
@@ -235,11 +251,11 @@ dis 4*4*3*5*20*24
 * # combinations in the data
 count
 
-* # firms with no exact match
-tabstat n if n0==0 | n1==0, s(sum)
-
 * # firms with exact match
 tabstat n if n0>=1 & n1>=1, s(sum)
+
+* # firms with no exact match
+tabstat n if n0==0 | n1==0, s(sum)
 
 * examples with founder/family only
 * random order just for the examples
@@ -272,13 +288,13 @@ sum d [w=n1]
 
 * SOLUTION With replacement
 
-use "$data_out/work.dta" ,clear
+use "$data_out/wms-workfile.dta" ,clear
 
 psmatch2  foundfam ///
  i.industry i.countrycode ///
  degree_nm degree_nm_sq compet_moder compet_strong ///
  age_young age_old age_unknown lnemp ///
- , out(management) ate
+ , out(management) ate logit
  
 
 psmatch2  foundfam ///
@@ -287,14 +303,14 @@ psmatch2  foundfam ///
  i.industry##i.age_young i.industry##i.age_old i.industry##i.age_unknown i.industry##c.lnemp ///
  i.countrycode##c.degree_nm i.countrycode##c.degree_nm_sq i.countrycode##i.compet_moder i.countrycode##i.compet_strong ///
  i.countrycode##i.age_young i.countrycode##i.age_old i.countrycode##i.age_unknown i.countrycode##c.lnemp ///
- , out(management) ate
+ , out(management) ate logit
  
  
 
 ***************************************************************** 
 * CHECK common support
 ***************************************************************** 
-use "$data_out/Ch21_wms_workfile_xsec.dta" ,clear
+use "$data_out/wms-workfile.dta" ,clear
 
 
 qui tab industry, gen(i)

@@ -16,6 +16,8 @@
 # v2.1 2020-04-26 grapg edits
 # v2.2 2020-04-28 date labels edited
 # v2.3 2020-04-30 date labels edited
+# v2.4 2020-08-24 library eidts
+# v2.5 2020-08-25 data soure B 
 
 
 # WHAT THIS CODES DOES:
@@ -25,35 +27,43 @@
 #
 ###########################################################
 
-
+# It is advised to start a new session for every case study
 # Clear memory -------------------------------------------------------
 rm(list=ls())
 
 # Import libraries ---------------------------------------------------
-# library(Cairo)
-library(dplyr)
-library(lubridate)
-library(ggplot2)
-library(prophet)
-library(stargazer)
 library(tidyverse)
+library(stargazer)
 library(Hmisc)
 library(timeDate)
+library(lubridate)
 library(caret)
-# CHECK WORKING DIRECTORY - CHANGE IT TO YOUR WORKING DIRECTORY
-# Sets the core parent directory
-current_path = rstudioapi::getActiveDocumentContext()$path 
-dir<-paste0(dirname(dirname(dirname(current_path ))),"/")
+library(prophet)
 
 
-data_in   <- paste0(dir,"da_data_repo/swim-transactions/clean/")
-data_out    <- paste0(dir,"da_case_studies/ch18-swim-transactions/")
-output    <- paste0(dir,"da_case_studies/ch18-swim-transactions/output/")
-func      <- paste0(dir,"da_case_studies/ch00-tech-prep/")
 
-#call function
-source(paste0(func, "theme_bg.R"))
-source(paste0(func, "da_helper_functions.R"))
+# set working directory
+# option A: open material as project
+# option B: set working directory for da_case_studies
+#           example: setwd("C:/Users/bekes.gabor/Documents/github/da_case_studies/")
+
+# set data dir, data used
+source("set-data-directory.R")             # data_dir must be first defined 
+# alternative: give full path here, 
+#            example data_dir="C:/Users/bekes.gabor/Dropbox (MTA KRTK)/bekes_kezdi_textbook/da_data_repo"
+
+# load theme and functions
+source("ch00-tech-prep/theme_bg.R")
+source("ch00-tech-prep/da_helper_functions.R")
+
+data_in <- paste(data_dir,"swim-transactions","clean/", sep = "/")
+
+use_case_dir <- "ch18-swim-transactions/"
+data_out <- use_case_dir
+output <- paste0(use_case_dir,"output/")
+create_output_if_doesnt_exist(output)
+
+
 
 
 #####################################

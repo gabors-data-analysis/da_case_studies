@@ -8,6 +8,7 @@
 # Analysis: regression and matching
 
 #v1.1 2020-04-23 edits
+#v1.2 2020-07-14 dplyr edits
 
 ######################################################################
 
@@ -19,29 +20,34 @@ library(purrr)
 library(haven)
 library(stargazer)
 library(MatchIt)
-library(MatchItSE)
+library(Matching)
 library(gmodels)
 
+getwd()
+# set working directory
+# option A: open material as project
+# option B: set working directory for da_case_studies
+#           example: setwd("C:/Users/bekes.gabor/Documents/github/da_case_studies/")
 
-# Sets the core parent directory
-current_path = rstudioapi::getActiveDocumentContext()$path 
-dir<-paste0(dirname(dirname(dirname(current_path ))),"/")
+# set data dir, load theme and functions
+source("ch00-tech-prep/theme_bg.R")
+source("ch00-tech-prep/da_helper_functions.R")
+
+# data used
+source("set-data-directory.R") #data_dir must be first defined #
+
+use_case_dir <- file.path("ch21-ownership-management-quality/")
+
+data_in <- use_case_dir
+data_out <- use_case_dir
+output <- paste0(use_case_dir,"output/")
+create_output_if_doesnt_exist(output)
 
 
-#location folders
-data_in <- paste0(dir,"da_data_repo/wms-management-survey/clean/")
-data_out <- paste0(dir,"da_case_studies/ch21-ownership-management-quality/")
-output <- paste0(dir,"da_case_studies/ch21-ownership-management-quality/output/")
-func <- paste0(dir, "da_case_studies/ch00-tech-prep/")
-
-
-#call function
-source(paste0(func, "theme_bg.R"))
-source(paste0(func, "da_helper_functions.R"))
 
 # Read in data ------------------------------------------------------------
 
-data <- read_rds(paste0(data_out, "work.rds"))
+data <- read_rds(paste0(data_out, "wms_da_textbook-work.rds"))
 
 data %>% 
   group_by(foundfam_owned) %>% 
@@ -58,7 +64,7 @@ control_vars_to_interact <- c("industry", "countrycode")
 
 
 data %>%
-	select(c(control_vars, control_vars_to_interact)) %>%
+	dplyr::select(c(control_vars, control_vars_to_interact)) %>%
 	summary()
 
 # *************************************************************
@@ -97,7 +103,7 @@ cat(.,file= paste0(output, "ch21-foundfam-reg1.tex"))
 # *************************************************************
 # * EXACT MATCHING
 # ***************************************************************** 
-
+Hmisc::describe(data$management)
 data <- data %>%
 	mutate(
 		empbin5 = cut(emp_firm, quantile(emp_firm, seq(0,1,1/5)), include.lowest = TRUE, right = FALSE),
@@ -105,7 +111,7 @@ data <- data %>%
 
 data_agg <- data %>%
 	group_by(degree_nm_bins, agecat, competition, empbin5, industry, countrycode) %>%
-	summarise(
+  dplyr::summarise(
 		n = n(), n0 = sum(1-foundfam_owned), n1 = sum(foundfam_owned),
 		y0 = sum(management*(foundfam_owned == 0))/sum(1-foundfam_owned), 
 		y1 = sum(management*(foundfam_owned == 1))/sum(foundfam_owned)
@@ -121,7 +127,7 @@ data_agg %>%
 set.seed(12345)
 data_sample <- data_agg %>%
 	sample_n(size = 340) %>%
-	select(industry, countrycode, degree_nm_bins, competition, agecat, empbin5, n1, n0, n)
+  dplyr::select(industry, countrycode, degree_nm_bins, competition, agecat, empbin5, n1, n0, n)
 
 # examples with founder/family only
 data_sample %>%
@@ -151,7 +157,7 @@ data_agg %>%
 # SOLUTION With replacement
 # Function only works with non-missing values
 data_pscore <- data %>% 
-  select(c(y_var, x_var, control_vars, control_vars_to_interact)) %>%
+  dplyr::select(c(y_var, x_var, control_vars, control_vars_to_interact)) %>%
   na.omit()
 
 # with all control vars -------------------------------------------------------
@@ -208,6 +214,9 @@ out2 <- summary(reg_match2)
 
 ATE_PSME2 <- out2$coefficients[2]
 ATE_PSME2_SE <- out2$coefficients[2,2]
+
+out1
+out2
 
 
 # ***************************************************************** 

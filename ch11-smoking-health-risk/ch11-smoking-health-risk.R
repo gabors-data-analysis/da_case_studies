@@ -9,8 +9,12 @@
 # v1.3 2020-04-06 minor graphs
 # v1.4 2020-04-22 names ok
 # v1.5 2020-04-27 label edit
-# v1.5 2020-04-30 label edit
-# v1.6 2020-06-22 calibration curve edit
+# v1.6 2020-04-30 label edit
+# v1.7 2020-06-22 calibration curve edit
+# v1.8 2020-06-29 fig 4 color  edit
+# v1.9 2020-07-04 new calibration curves w/ fn
+# v2.0 2020-08-07 histograms edited w boundary, width
+# v2.1 2020-08-14 g7 edited
 
 
 ################################################################################
@@ -25,44 +29,25 @@
 # SET YOUR DIRECTORY HERE
 ################################################################################
 
-# CLEAR MEMORY
 rm(list=ls())
 
-# Import libraies
-library(haven)
-library(dplyr)
-library(ggplot2)
-library(cowplot)
-library(lspline)
-library(data.table)
-library(mfx) # ?
-library(margins)
-library(stargazer)
-library(psych)
-library(estimatr)
-library(huxtable)
+source("global.R")
 
-# CHECK WORKING DIRECTORY - CHANGE IT TO YOUR WORKING DIRECTORY
-# Sets the core parent directory
-current_path = rstudioapi::getActiveDocumentContext()$path 
-dir<-paste0(dirname(dirname(dirname(current_path ))),"/")
+use_case_dir <- file.path("ch11-smoking-health-risk/")
+loadLibraries(use_case_dir)
 
-#location folders
-data_in <- paste0(dir,"da_data_repo/share-health/clean/")
-data_out <- paste0(dir,"da_case_studies/ch11-smoking-health-risk/")
-func <- paste0(dir, "da_case_studies/ch00-tech-prep/")
-output <- paste0(dir,"da_case_studies/ch11-smoking-health-risk/output/")
+data_in <- paste(data_dir,"share-health","clean", sep = "/")
 
-#call function
-source(paste0(func, "theme_bg.R"))
-source(paste0(func, "da_helper_functions.R"))
+data_out <- use_case_dir
+output <- paste0(use_case_dir,"/output/")
+create_output_if_doesnt_exist(output)
 
 ################################################################################
 # 1. PART - CREATE WORKFILE
 ################################################################################
 
 # load in clean and tidy data and create workfile
-share <- read.csv(paste0(data_in,"share-health.csv"),stringsAsFactors = F)
+share <- read.csv(paste(data_in,"share-health.csv", sep = "/"),stringsAsFactors = F)
 
 share$healthy <- ifelse(share$sphus>0 & share$sphus<=5, 
                         ifelse(share$sphus==1 | share$sphus==2, 1, 0), NA)
@@ -257,7 +242,7 @@ rm(share_pred_lpm)
 
 g3<-ggplot(data=share, aes(x=pred_lpm)) +
   geom_histogram_da(type='percent', binwidth=0.02) +
-  coord_cartesian(xlim = c(0, 1.1)) +
+  coord_cartesian(xlim = c(0, 1.2)) +
   labs(x = "Predicted probability of staying healthy (LPM)",y = "Percent")+
   scale_y_continuous(expand = c(0.00,0.0), limits = c(0,0.07), breaks = seq(0, 0.07, 0.01), labels = scales::percent_format(accuracy = 1)) +
   scale_x_continuous(expand = c(0.001,0.01), limits = c(0,1.1), breaks = seq(0,1.1, 0.2)) +
@@ -353,15 +338,17 @@ print(probit_marg)
 
 # FIXME: looks weird
 g5<-ggplot(data = share) +
-  geom_point(aes(x=pred_lpm, y=pred_probit, color="Probit"), size=0.5,  shape=16) +
-  geom_point(aes(x=pred_lpm, y=pred_logit,  color="Logit"), size=0.5,  shape=16) +
+  geom_point(aes(x=pred_lpm, y=pred_probit, color="Probit"), size=0.4,  shape=16) +
+  geom_point(aes(x=pred_lpm, y=pred_logit,  color="Logit"), size=0.4,  shape=16) +
+  #geom_line(aes(x=pred_lpm, y=pred_probit, color="Probit"), size=0.3) +
+  #geom_line(aes(x=pred_lpm, y=pred_logit,  color="Logit"), size=0.3) +
   geom_line(aes(x=pred_lpm, y=pred_lpm,    color="45 degree line"), size=0.4) +
   labs(x = "Predicted probability of staying healthy (LPM)", y="Predicted probability")+
   scale_y_continuous(expand = c(0.00,0.0), limits = c(0,1), breaks = seq(0,1,0.1)) +
   scale_x_continuous(expand = c(0.00,0.0), limits = c(0,1), breaks = seq(0,1,0.1)) +
-  scale_color_manual(name = "", values=c(color[3],color[2], color[1])) +
+  scale_color_manual(name = "", values=c(color[3], color[1],color[2])) +
   theme_bg()+
-  theme(legend.position=c(0.55,0.06),
+  theme(legend.position=c(0.55,0.08),
         legend.direction = "horizontal",
         legend.text = element_text(size = 4))
 g5
@@ -386,9 +373,14 @@ share$pred_lpmbase <- predict(lpmbase)
 # DISTRIBUTION OF PREDICTED PROBABILITIES BY OUTCOME
 # LPM simple model
 g7a<-ggplot(data = share,aes(x=pred_lpmbase)) + 
-  geom_histogram(data=subset(share[share$stayshealthy == 1, ]), aes(fill=as.factor(stayshealthy), y = (..count..)/sum(..count..)*100), binwidth = 0.05, alpha=1, color=color[1]) +
-  geom_histogram(data=subset(share[share$stayshealthy == 0, ]), aes(fill=as.factor(stayshealthy), y = (..count..)/sum(..count..)*100), binwidth = 0.05, alpha=0, color=color[2]) +
-  scale_fill_manual(name="", values=c("white",color[1]),labels=c("Did not stay healthy","Stayed healthy")) +
+  geom_histogram(data=subset(share[share$stayshealthy == 1, ]), 
+                 aes(fill=as.factor(stayshealthy), color=as.factor(stayshealthy), y = (..count..)/sum(..count..)*100),
+                 binwidth = 0.05, boundary=0, alpha=0.8) +
+  geom_histogram(data=subset(share[share$stayshealthy == 0, ]), 
+                 aes(fill=as.factor(stayshealthy), color=as.factor(stayshealthy), y = (..count..)/sum(..count..)*100), 
+                 binwidth = 0.05, boundary=0, alpha=0) +
+  scale_fill_manual(name="", values=c("0" = "white", "1" = color[1]),labels=c("Did not stay healthy","Stayed healthy")) +
+  scale_color_manual(name="", values=c("0" = color[2], "1" = color[1]),labels=c("Did not stay healthy","Stayed healthy")) +
   ylab("Percent") +
   xlab("Fitted values") +
   scale_x_continuous(expand=c(0.01,0.01) ,limits = c(0,1), breaks = seq(0,1,0.2)) +
@@ -402,9 +394,14 @@ save_fig("ch11-figure-7a-pred-hist-byoutcome-lpmbase", output, "small")
 
 # LPM rich model
 g7b<-ggplot(data = share,aes(x=pred_lpm)) + 
-  geom_histogram(data=subset(share[share$stayshealthy == 1, ]), aes(fill=as.factor(stayshealthy), y = (..count..)/sum(..count..)*100), binwidth = 0.05, alpha=0.8, color=color[1]) +
-  geom_histogram(data=subset(share[share$stayshealthy == 0, ]), aes(fill=as.factor(stayshealthy), y = (..count..)/sum(..count..)*100), binwidth = 0.05, alpha=0, color=color[2]) +
-  scale_fill_manual(name="", values=c("white",color[1]),labels=c("Did not stay healthy","Stayed healthy")) +
+  geom_histogram(data=subset(share[share$stayshealthy == 1, ]), 
+    aes(fill=as.factor(stayshealthy), color=as.factor(stayshealthy), y = (..count..)/sum(..count..)*100),
+     binwidth = 0.05, boundary=0, alpha=0.8) +
+  geom_histogram(data=subset(share[share$stayshealthy == 0, ]), 
+    aes(fill=as.factor(stayshealthy), color=as.factor(stayshealthy), y = (..count..)/sum(..count..)*100), 
+    binwidth = 0.05, boundary=0, alpha=0) +
+  scale_fill_manual(name="", values=c("0" = "white", "1" = color[1]),labels=c("Did not stay healthy","Stayed healthy")) +
+  scale_color_manual(name="", values=c("0" = color[2], "1" = color[1]),labels=c("Did not stay healthy","Stayed healthy")) +
   ylab("Percent") +
   xlab("Fitted values") +
   scale_x_continuous(expand=c(0.01,0.01) ,limits = c(0,1), breaks = seq(0,1,0.2)) +
@@ -424,59 +421,27 @@ dt_pred[,list(median_lpmbase=median(pred_lpmbase), median_lpm=median(pred_lpm), 
 rm(logit, logit_marg, logit_marg2, logit2, lpm, lpmbase, probit, probit_marg, dt_pred)
 
 
-
-
 # calibration curves
 
-actual_vs_predicted <- share %>%
-  ungroup() %>% 
-  dplyr::select(actual = stayshealthy, 
-                predicted = pred_logit) 
-
-num_groups <- 10
-
-calibration_d <- actual_vs_predicted %>%
-  mutate(predicted_score_group = dplyr::ntile(predicted, num_groups))%>%
-  group_by(predicted_score_group) %>%
-  dplyr::summarise(mean_actual = mean(actual), mean_predicted = mean(predicted), num_obs = n())
-
-g_calib <- ggplot(calibration_d,aes(y = mean_actual, x = mean_predicted)) +
-  geom_point(color=color[1], size=1.5, alpha=0.8) +
-  geom_line(color=color[1], size=1, alpha=0.8) +
-  geom_abline(intercept = 0, slope = 1, color=color[2]) +
-  labs(y = "Actual event probability", x = "Predicted event probability") +
-  #  ylim(0, 1) + xlim(0, 1) +
-  scale_x_continuous(expand = c(0.01,0.01), limits = c(0,1), breaks = seq(0,1,0.1)) +
-  scale_y_continuous(expand = c(0.01,0.01), limits = c(0,1), breaks = seq(0,1,0.1)) +
-  theme_bg()
-g_calib
-#save_fig("calib_logit", output, "small")FIXME
-save_fig("ch11-figure-8b-calib-logit", output, "small")
+share %>% 
+  ungroup() %>%
+  create_calibration_plot( 
+    file_name = "ch11-figure-8b-calib-logit", 
+    prob_var = "pred_logit", 
+    actual_var = "stayshealthy", 
+    breaks = c(0, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 1.05)
+  )  
 
 
-actual_vs_predicted <- share %>%
-  ungroup() %>% 
-  dplyr::select(actual = stayshealthy, 
-                predicted = pred_lpm) 
-
-calibration_d <- actual_vs_predicted %>%
-  mutate(predicted_score_group = dplyr::ntile(predicted, num_groups))%>%
-  group_by(predicted_score_group) %>%
-  dplyr::summarise(mean_actual = mean(actual), mean_predicted = mean(predicted), num_obs = n())
-
-g_calib <- ggplot(calibration_d,aes(y = mean_actual, x = mean_predicted)) +
-  geom_point(color=color[1], size=1.5, alpha=0.8) +
-  geom_line(color=color[1], size=1, alpha=0.8) +
-  geom_abline(intercept = 0, slope = 1, color=color[2]) +
-  labs(y = "Actual event probability", x = "Predicted event probability") +
-  #  ylim(0, 1) + xlim(0, 1) +
-  scale_x_continuous(expand = c(0.01,0.01), limits = c(0,1), breaks = seq(0,1,0.1)) +
-  scale_y_continuous(expand = c(0.01,0.01), limits = c(0,1), breaks = seq(0,1,0.1)) +
-  theme_bg()
-g_calib
-#save_fig("calib_lpm", output, "small")
-save_fig("ch11-figure-8a-calib-lpm", output, "small")
-
+share %>% 
+  ungroup() %>%
+  create_calibration_plot( 
+    file_name = "ch11-figure-8a-calib-lpm", 
+    prob_var = "pred_lpm", 
+    actual_var = "stayshealthy", 
+    # n_bins = 10
+    breaks = c(0, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 1.05)
+    )
 
 
 ################################################################################
@@ -532,7 +497,7 @@ g4<-ggplot(data = share) +
   ylab("Probability") +
   xlab("z values") +
   scale_y_continuous(expand = c(0.00,0.0), limits = c(0,1), breaks = seq(0,1,0.2)) +
-  scale_color_manual(name="", values=c(color[2],color[1])) +
+  scale_color_manual(name="", values=c(color[1],color[2])) +
 theme_bg() +
   theme(axis.line.y=element_line(color="grey70",size=.1))
 

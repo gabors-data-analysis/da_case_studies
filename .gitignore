@@ -6,6 +6,7 @@
 */.DS_Store
 *.Rproj
 */output/
+*/temp/
 *.csv
 *.dta
 *.rds
@@ -13,3 +14,5 @@ __pycache__/
 .ipynb_checkpoints/
 .ipynb_checkpoints
 .csv
+set-data-directory.R
+set-data-directory.do

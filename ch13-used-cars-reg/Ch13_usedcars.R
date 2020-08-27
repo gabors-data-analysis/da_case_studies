@@ -11,7 +11,8 @@
 # v1.2 2020-01-03 minor edits to models, small changes in results
 # v1.3 2020-03-25 graph edits
 # v1.4 2020-04-03 very minor graph edits 
-# v1.1 2020-04-22 names ok
+# v1.5 2020-04-22 names ok
+# v1.6 2020-08-24 libraries
 
 ########################################################################
 
@@ -30,35 +31,33 @@ rm(list=ls())
 
 
 # import libraies
-library(lmtest)
-library(ggplot2)
-library(sandwich)
-library(dplyr)
 library(tidyverse)
-library(tidyr)
-library(cowplot)
+library(lmtest)
+library(sandwich)
 library(haven)
 library(stargazer)
 library(caret)
+library(grid)
 
 
-# Sets the core parent directory
-current_path = rstudioapi::getActiveDocumentContext()$path 
-dir<-paste0(dirname(dirname(dirname(current_path ))),"/")
+# set working directory
+# option A: open material as project
+# option B: set working directory for da_case_studies
+#           example: setwd("C:/Users/bekes.gabor/Documents/github/da_case_studies/")
 
+# set data dir, load theme and functions
+source("ch00-tech-prep/theme_bg.R")
+source("ch00-tech-prep/da_helper_functions.R")
 
-# location folders
-data_in <- paste0(dir,"da_data_repo/used-cars/clean/")
-data_out <- paste0(dir,"da_case_studies/ch13-used-cars-reg/")
-output   <- paste0(dir,"da_case_studies/ch13-used-cars-reg/output/")
-func <- paste0(dir, "da_case_studies/ch00-tech-prep/")
- 
- 
- 
-# load ggplot theme function
-source(paste0(func, "theme_bg.R"))
+# data used
+source("set-data-directory.R") #data_dir must be first defined #
+data_in <- paste(data_dir,"used-cars","clean/", sep = "/")
 
-source(paste0(func, "da_helper_functions.R"))
+use_case_dir <- "ch13-used-cars-reg/"
+data_out <- use_case_dir
+output <- paste0(use_case_dir,"output/")
+create_output_if_doesnt_exist(output)
+
 
 ################################################################################
 
@@ -202,12 +201,11 @@ F13_h_price_R <- ggplot(data=data, aes(x=price)) +
                  color = color.outline, fill = color[1], size = 0.25, alpha = 0.8,  show.legend=F, na.rm=TRUE) +
   coord_cartesian(xlim = c(0, 20000)) +
   labs(x = "Price (US dollars)",y = "Percent")+
-  theme_bg() 
+  theme_bg() +
   expand_limits(x = 0.01, y = 0.01) +
   scale_y_continuous(expand = c(0.01,0.01),labels = scales::percent_format(accuracy = 1)) +
   scale_x_continuous(expand = c(0.01,0.01),breaks = seq(0,20000, 2500))
 F13_h_price_R
-#save_fig("F13_h_price_R", output, "small")
 
 
 # lnprice 
@@ -219,8 +217,7 @@ F13_h_lnprice_R<- ggplot(data=data, aes(x=lnprice)) +
   expand_limits(x = 0.01, y = 0.01) +
   scale_y_continuous(expand = c(0.01,0.01),labels = scales::percent_format(accuracy = 0.1)) +
   scale_x_continuous(expand = c(0.01,0.01),breaks = seq(6,10, 1)) +
-  theme_bg() +
-  background_grid(major = "xy", minor = "y", size.major = 0.2) 
+  theme_bg() 
 F13_h_lnprice_R
 
 
@@ -402,6 +399,7 @@ summary(resid_p2)
 # predict value for newly added obs
 pred2_new <- predict(reg3, newdata = new,se.fit = TRUE, interval = "prediction")
 p2<- pred2_new$fit
+pred2_new 
 
 #get model rmse
 data$p2a <- predict(reg3, data)

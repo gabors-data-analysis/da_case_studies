@@ -9,28 +9,40 @@
 
 ######################################################################
 
-# Clear memory
+
+# v1.1 2020-04-20 
+# v1.2 2020-07-14 dplyr edits
+# v1.3 2020-08-24 library + data name edit
+
+# Clear memory -------------------------------------------------------
 rm(list=ls())
+
+# Import libraries ---------------------------------------------------
 
 library(tidyverse)
 library(purrr)
 library(haven)
 
 
-# CHECK WORKING DIRECTORY - CHANGE IT TO YOUR WORKING DIRECTORY
-# dir <-  "C:/Users/GB/Dropbox (MTA KRTK)/bekes_kezdi_textbook/"
-dir <- "/Users/zholler/Documents/Private/"
+# set working directory
+# option A: open material as project
+# option B: set working directory for da_case_studies
+#           example: setwd("C:/Users/bekes.gabor/Documents/github/da_case_studies/")
 
-#location folders
-data_in <- paste0(dir,"da_data_repo/wms-management-survey/clean/")
-data_out <- paste0(dir,"da_case_studies/ch21-ownership-management-quality/")
-output <- paste0(dir,"da_case_studies/ch21-ownership-management-quality/output/")
-func <- paste0(dir, "da_case_studies/ch00-tech-prep/")
+# set data dir, load theme and functions
+source("ch00-tech-prep/theme_bg.R")
+source("ch00-tech-prep/da_helper_functions.R")
+
+# data used
+source("set-data-directory.R") #data_dir must be first defined #
+data_in <- paste(data_dir,"wms-management-survey","clean/", sep = "/")
+
+use_case_dir <- file.path("ch21-ownership-management-quality/")
+data_out <- use_case_dir
+output <- paste0(use_case_dir,"output/")
+create_output_if_doesnt_exist(output)
 
 
-#call function
-source(paste0(func, "theme_bg.R"))
-source(paste0(func, "da_helper_functions.R"))
 
 
 # ***************************************************************
@@ -42,29 +54,22 @@ source(paste0(func, "da_helper_functions.R"))
 
 
 # Load in data -------------------------------------------------------
-data_full <- read_dta(paste(data_in,"wms_da_textbook.dta",sep=""))
-
-# create xsec
-data <- data_full %>%
-	group_by(firmid) %>%
-	filter(wave == max(wave)) %>%
-	ungroup()
-
+data <- read_csv(paste(data_in,"wms_da_textbook-xsec.csv",sep=""))
 
 # Ownership: define founder/family owned and drop ownership that's missing or not relevant
 # Ownership
 data %>%
   group_by(ownership) %>%
-  summarise (Freq = n()) %>%
+  summarise(Freq = n()) %>%
   mutate(Percent = Freq / sum(Freq)*100, Cum = cumsum(Percent))
 
 # Define foundfam owned
 data$foundfam_owned <- ifelse(
        data$ownership== "Family owned, external CEO" |
        data$ownership== "Family owned, family CEO" |
-       data$ownership== "Founder owned, CEO unknown" |
+       data$ownership== "Family owned, CEO unknown" |
        data$ownership== "Founder owned, external CEO" |
-       data$ownership== "Founder owned, family CEO" |
+       data$ownership== "Founder owned, CEO unknown" |
        data$ownership== "Founder owned, founder CEO" , 1, 0)
 
 # Foundfam owned
@@ -104,10 +109,14 @@ data %>%
 data$lnemp <- log(data$emp_firm)
 
 # 4. Competition
+table(data$compet_strong)
+
+
+#itt van valam gond 1 obs
 data <- data %>%
 	mutate(
-		compet_weak = factor(competition == "   0 competitors" | competition == "  1-4 competitors"),
-		compet_moder = factor(competition == " 5-9 competitors"),
+		compet_weak = factor(competition == "0 competitors" | competition == "1-4 competitors"),
+		compet_moder = factor(competition == "5-9 competitors"),
 		compet_strong = factor( competition == "10+ competitors")
 	)
 
@@ -117,9 +126,9 @@ data %>%
             moder = max(compet_moder == TRUE),
             strong = max(compet_strong == TRUE))
 
-data$competition <- 
-  ifelse(data$compet_weak == TRUE, "0-4 competitors",
-        ifelse(data$compet_moder == TRUE, "5-9 competitors", "10+ competitors"))
+#data$competition <- 
+#  ifelse(data$compet_weak == TRUE, "0-4 competitors",
+#        ifelse(data$compet_moder == TRUE, "5-9 competitors", "10+ competitors"))
 
 # 5. Industry in 2 digits
 
@@ -149,8 +158,13 @@ data <- data %>%
 #     Non-employee/Research/Gov/Other type of ownership
 #     non-missing variables 
 data <- data %>%
-  filter(!ownership %in% c("", "Employees/COOP" , "Foundation/Research Institute", "Government", "Other" ),
-         !is.na(management),
+  filter(!ownership %in% c("Government", "Other" ),
+         !is.na(ownership),
+  )
+
+
+data <- data %>%
+  filter( !is.na(management),
          !is.na(foundfam_owned),
          !is.na(degree_nm),
          !is.na(compet_weak),
@@ -162,9 +176,15 @@ data <- data %>%
          )
 
 
+
+data <- data %>%
+  filter( !is.na(compet_weak)
+  )
+
+
 # Summary of num. of employment
 data %>%
-  select(emp_firm) %>%
+  dplyr::select(emp_firm) %>%
   summarise(min = min(emp_firm , na.rm=T), 
             max = max(emp_firm , na.rm=T),
             p1 = quantile(emp_firm , probs = 0.01, na.rm=T),
@@ -187,5 +207,5 @@ data <- data %>%
 
 
 # Save workfile ------------------------------------------------------
-write_rds(data, paste0(data_out, "work.rds"))
-
+write_rds(data, paste0(data_out, "wms_da_textbook-work.rds"))
+# N=8439
