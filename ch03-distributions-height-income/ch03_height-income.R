@@ -20,18 +20,37 @@
 # density + histogram graphs shall have histogram relative freq in percent on y axis
 
 
+# It is advised to start a new session for every case study
+# CLEAR MEMORY
 rm(list=ls())
 
-source("global.R")
+# Import libraries
+library(tidyverse)
+library(scales)
 
-use_case_dir <- file.path("ch03-distributions-height-income/")
-loadLibraries(use_case_dir)
 
-data_in <- paste(data_dir,"height-income-distributions","clean", sep = "/")
+# set working directory
+# option A: open material as project
+# option B: set working directory for da_case_studies
+#           example: setwd("C:/Users/bekes.gabor/Documents/github/da_case_studies/")
 
+# set data dir, data used
+source("set-data-directory.R")             # data_dir must be first defined 
+# alternative: give full path here, 
+#            example data_dir="C:/Users/bekes.gabor/Dropbox (MTA KRTK)/bekes_kezdi_textbook/da_data_repo"
+
+# load theme and functions
+source("ch00-tech-prep/theme_bg.R")
+source("ch00-tech-prep/da_helper_functions.R")
+
+data_in <- paste(data_dir,"height-income-distributions","clean/", sep = "/")
+
+use_case_dir <- "ch03-distributions-height-income/"
 data_out <- use_case_dir
 output <- paste0(use_case_dir,"output/")
 create_output_if_doesnt_exist(output)
+
+
 
 # load in clean and tidy data and create workfile
 hrs <-  read.csv(paste(data_in,"hrs_height_income.csv", sep = "/"))
@@ -112,4 +131,18 @@ save_fig("ch03-figure-11b-hist-income-log", output, "small")
 
 
 
-
+ch03_lognormal_lnincome <- ggplot(filtered_women_income, aes(x = lnincome)) +
+  geom_histogram(aes(y = ..density..), binwidth = 0.25, boundary = 0, 
+                 fill = color[1], color = color.outline, alpha = 0.8) +
+  stat_function(fun = dnorm, colour= color[2],  
+                args = with(filtered_women_income, c(mean = mean(lnincome), sd = sd(lnincome)))) + 
+  scale_x_continuous(expand = c(0.01,0.01), limits = c(0, 8), breaks = seq(0, 8, by = 1)) +
+  scale_y_continuous("Density", position = "right", expand=c(0,0), limits = c(0, 0.4),
+                     sec.axis =  sec_axis(~ . *0.25, name = "Percent",breaks =seq(0,0.1, by=0.025),
+                                          labels = percent_format(accuracy = 0.1))) + 
+  theme_bg() +
+  ylab("Percent") +   xlab("ln(household income, thousand USD)") 
+  ch03_lognormal_lnincome
+  #save_fig("lognormal_hist_lnhhincome_R", output, "small")
+  save_fig("ch03-figure-11b-hist-income-log", output, "small")
+  
