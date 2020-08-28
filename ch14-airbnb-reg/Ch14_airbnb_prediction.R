@@ -1,28 +1,21 @@
-############################################################
+################################################################################################
+# Prepared for the textbook:
+# Data Analysis for Business, Economics, and Policy
+# by Gabor BEKES and  Gabor KEZDI 
+# Cambridge University Press 2021
+# 
+# License: Free to share, modify and use for educational purposes. Not to be used for business purposes.
 #
-# DATA ANALYSIS TEXTBOOK
-# MODEL SELECTION
-# CASE  STUDY
-# Ch 14
-# Airbnb London 2017 march 05 data
+###############################################################################################x
 
-# v1.4 2019-09-05
-# v1.5 2020-01-05 Minor changes re missing values, graphics, LASSO
-# v1.6 2020-01-09 Substantial changes to treating missing values
-# v1.7 2020-03-23
-# v1.8 2020-03-27 edits
-# v1.9 2020-04-03 graph edits, cuts
-# v1.9 2020-04-07 minor edits
-# v1.10 2020-04-22 names ok
-# v1.11 2020-04-27 dplyr edits, nvars2
-# v1.12 2020-04-28 y-ypred
-# v1.13 2020-08-08 hist edits, not ready.
-# v1.14 2020-08-24 library edits
+# CHAPTER 14
+# CH14B Predicting AirBnB apartment prices: selecting a regression model
 
+# football dataset
+# version 0.9 2020-08-28
 
-############################################################
-#
-# WHAT THIS CODES DOES:
+###########
+
 #
 # Clear memory
 rm(list=ls())
@@ -182,7 +175,7 @@ datau <- subset(data, price<=400)
 # Histograms
 
 # price
-g1 <- ggplot(data=datau, aes(x=price)) +
+g3a <- ggplot(data=datau, aes(x=price)) +
   geom_histogram_da(type="percent", binwidth = 10, boundary=20) +
   #geom_histogram(aes(y = (..count..)/sum(..count..)), binwidth = 10, boundary=0,
   #               color = color.outline, fill = color[1], size = 0.25, alpha = 0.8,  show.legend=F,  na.rm=TRUE) +
@@ -191,12 +184,11 @@ g1 <- ggplot(data=datau, aes(x=price)) +
   scale_y_continuous(expand = c(0.00,0.00),limits=c(0, 0.2), breaks = seq(0, 0.2, by = 0.05), labels = scales::percent_format(1)) +
     scale_x_continuous(expand = c(0.00,0.00),limits=c(0,400), breaks = seq(0,400, 50)) +
   theme_bg() 
-g1
-#save_fig("F14_airbnb_price_R", output, "small")
+g3a
 save_fig("ch14-figure-3a-airbnb-price", output, "small")
 
 # lnprice
-g2<- ggplot(data=datau, aes(x=ln_price)) +
+g3b<- ggplot(data=datau, aes(x=ln_price)) +
   geom_histogram_da(type="percent", binwidth = 0.2, boundary=0) +
   #  geom_histogram(aes(y = (..count..)/sum(..count..)), binwidth = 0.18,
   #               color = color.outline, fill = color[1], size = 0.25, alpha = 0.8,  show.legend=F,  na.rm=TRUE) +
@@ -205,8 +197,7 @@ g2<- ggplot(data=datau, aes(x=ln_price)) +
   scale_x_continuous(expand = c(0.00,0.01),breaks = seq(2.4,6.6, 0.6)) +
   labs(x = "ln(price, US dollars)",y = "Percent")+
   theme_bg() 
-g2
-#save_fig("F14_airbnb_lnprice_R", output, "small")
+g3b
 save_fig("ch14-figure-3b-airbnb-lnprice", output, "small")
 
 
@@ -222,7 +213,6 @@ g4 <- ggplot(data = datau, aes(x = f_room_type, y = price)) +
   labs(x = "Room type",y = "Price (US dollars)")+
   theme_bg()
 g4
-#save_fig("plot2_R", output, "small")
 save_fig("ch14-figure-4a-airbnb-room", output, "small")
 
 # Boxplot
@@ -239,7 +229,6 @@ g5 <- ggplot(datau, aes(x = factor(n_accommodates), y = price,
   theme_bg() +
   theme(legend.position = c(0.3,0.8)        )
 g5
-#save_fig("plot3_R", output, "small")
 save_fig("ch14-figure4b-airbnb-accom", output, "small")
 
 
@@ -458,7 +447,6 @@ model_result_plot_levels <- ggplot(data = t1_levels,
   #scale_colour_discrete(guide = 'none') +
   theme_bg()
 model_result_plot_levels
-#save_fig("ch14_airbnb_model_result_levels", output, "small")
 save_fig("ch14-figure-7-airbnb-model-result-levels", output, "small")
 
 
@@ -575,7 +563,6 @@ level_vs_pred <- ggplot(data = d) +
   labs(y = "Price (US dollars)", x = "Predicted price  (US dollars)") +
   theme_bg() 
 level_vs_pred
-#save_fig("level_vs_pred", output, "small")
 save_fig("ch14-figure-8a-level-vs-pred", output, "small")
 
 # calculate  PI for modellev7 for n_accomodate
