@@ -1,82 +1,111 @@
 *********************************************************************
 *
-* DATA ANALYSIS TEXTBOOK
-* CH03
-* Describe hotels-vienna
+* GABORS' DATA ANALYSIS TEXTBOOK (Bekes & Kezdi)
+*
+* Case study 03B
+* Comparing Hotel Prices in Europe: Vienna vs. London
+*
+* using the hotels-europe dataset
 * 
 ********************************************************************
-
-* WHAT THIS CODES DOES:
-* Focus on histograms
-
 
 ********************************************************************
 * SET YOUR DIRECTORY HERE
 *********************************************************************
-*cd "" /*set your dir*/
-*cd "C:/Users/GB/Dropbox (MTA KRTK)/bekes_kezdi_textbook"
-cd "C:\Users\kezdi\Dropbox\bekes_kezdi_textbook"
- 
- * YOU WILL NEED TWO SUBDIRECTORIES
- * textbook_work --- all the codes
- * cases_studies_public --- for the data
 
- *location folders
-global data_in   	"da_data_repo/hotels-europe/clean"
-global data_out  	"da_case_studies/ch03-hotels-europe-compare"
-global output 		"da_case_studies/ch03-hotels-europe-compare/output"
- 
+* Directory for work
+cd "C:\Users\kezdi\GitHub\da_case_studies" 
+global work  "ch03-hotels-europe-compare"
+cap mkdir "$work/output"
+global output "$work/output"
+cap mkdir "$work/temp"
+global temp "$work/temp"
+
+* Directory for data
+* Option 1: run directory-setting do file
+*do "set-data-directory.do" /*data_dir must be first defined */
+*global data_in   	"$da_data_repo/hotels-europe/clean"
+* Option 2: set directory here
+global data_in "C:/Users/kezdi/Dropbox/bekes_kezdi_textbook/da_data_repo/hotels-europe/clean"
+
+
+************************************************** 
 * Vienna vs London
 
 * load in clean and tidy data and create workfile
 use "$data_in/hotels-europe_price", clear
-merge m:m hotel_id using "$data_in/hotels-europe_features.dta"
-drop _m
+merge m:m hotel_id using "$data_in/hotels-europe_features.dta", nogen
 
-* apply filters
-* KEEP NOV 2017 weekend, 3-4 stars less than 8km from center
+* sample design
+* KEEP NOV 2017 weekend, 3-4 star hotels
 keep if year==2017 & month==11 & weekend==0
 keep if city== "Vienna" | city=="London"
 keep if accommodation_type== "Hotel"
 keep if stars>=3 & stars<=4
 
-
-*filter
+* in actual city (takes care of extreme distances, too)
 keep if city_actual== "Vienna" | city_actual=="London"
-keep if price<600
+* drop Vienna hotel with erroneous price 
+keep if price<1000
 
-save "$data_out/hotels-vienna-london.dta", replace
+save "$temp/hotels-vienna-london.dta", replace
+tab city
+
+* distribution of price
+
+* Figure 3.6a Vienna
+colorpalette viridis, n(4) select(2) nograph
+return list
+hist price if city=="Vienna", ///
+	width(20) percent ///
+	xtitle(Price (US dollars))  ///
+	color(`r(p)') lcol(white) lw(vthin) ///
+	xlabel(0(50)500 , grid) ylabel(0(10)30, grid )  ///
+	graphregion(fcolor(white) ifcolor(none)) ///
+	plotregion(fcolor(white) ifcolor(white))
+ graph export "$output/ch03-figure-6a-hist-price-Vienna-Stata.png", replace
+
+* Figure 3.6b London
+colorpalette viridis, n(4) select(2) nograph
+return list
+hist price if city=="London", ///
+	width(20) percent ///
+	xtitle(Price (US dollars))  ///
+	color(`r(p)') lcol(white) lw(vthin) ///
+	xlabel(0(50)500 , grid) ylabel(0(10)30, grid )  ///
+	graphregion(fcolor(white) ifcolor(none)) ///
+	plotregion(fcolor(white) ifcolor(white))
+ graph export "$output/ch03-figure-6b-hist-price-London-Stata.png", replace
+
+* two density plots overlayed
+* Figure 3.7
+kdensity price if city=="Vienna",  gen (xV yV) nograph
+kdensity price if city=="London",  gen (xL yL) nograph
+colorpalette viridis, n(4) select(2) nograph
+return list
+line yV yL xL, lc(`r(p)') lw(thick thick) ///
+	xtitle(Price (US dollars))  ///
+	xlabel(0(100)500 , grid) ylabel(, grid )  ///
+	legend(off) ///
+	text(0.007 180 "Vienna" 0.0025 340 "London")  ///
+	graphregion(fcolor(white) ifcolor(none)) ///
+	plotregion(fcolor(white) ifcolor(white))
+ graph export "$output/ch03-figure-7-densities-price-ViennaLondon-Stata.png", replace
 
 
-  * Figure 3.6 a) and b)
-
-hist price if city=="Vienna", width(20) percent ///
- ylabel(0(10)30, grid) xlabel(0(100)800) lcolor(black) lwidth(vthin) fcolor(blue) fintensity(80)
- graph export "$output/histprice_Vienna5.png", replace
-hist price if city=="London", width(20) percent ///
- ylabel(0(10)30, grid) xlabel(0(100)800) lcolor(black) lwidth(vthin) fcolor(blue) fintensity(80)
- graph export "$output/histprice_London.png", replace
  
- 
-* kernel density plots
-kdensity price if city=="Vienna",  gen (xV yV) lcolor(blue) lwidth(thin) lcolor(blue) fintensity(80)
-more
-kdensity price if city=="London",  gen (xL yL) lcolor(blue) lwidth(thin) lcolor(blue) fintensity(80)
-more
+* Table 3.6
+tabstat price, s(n mean median min max sd ) by(city) format(%4.2f) save
+* calculate mean-median skewness statistic
+* London
+qui sum price if city=="London",d
+dis (r(mean) - r(p50)) / r(sd)
+* Vienna
+qui sum price if city=="Vienna",d
+dis (r(mean) - r(p50)) / r(sd)
 
-* Figure 3.6
-
-line yV xV, lw(thick) lc(black)  || line yL xL, lw(thick) lc(blue) lp(dash) ////
- legend(lab(1 Vienna) lab(2 London)) 
- graph export "$output/kdens_ViennaLondon.png", replace
-
-********************************************************************
-*** SUMMARY STATISTICS
-***********************************************
- 
- * Table 3.1
-tabstat price, s(mean median min max sd n) by(city) format(%3.0f)
-// --> tabout
-estpost tabstat price, s(mean median min max sd n) by(city) 
-esttab using "$output/ch03_summary-vienna-london.tex", replace compress nolabel noobs nogaps wide nomtitles ///
-nonumber collabels(mean median min max sd n ,lhs("City")) cells(" mean(fmt(0)) p50(fmt(0)) min(fmt(0)) max(fmt(0)) sd(fmt(0)) count(fmt(0)) ")
+* into .tex format
+* replace the built-in skewness measure with our measure computed above: (mean-median)/sd
+tabout city using "$output/ch03-table-6-summary-ViennaLondon-Stata.tex" ///
+ , replace style(tex) sum ///
+ c(count price mean price median price min price max price sd price skewness price)

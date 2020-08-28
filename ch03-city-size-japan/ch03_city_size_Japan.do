@@ -1,29 +1,33 @@
 *********************************************************************
 *
-* DATA ANALYSIS TEXTBOOK
-* CH03
-* height-income-distributions
+* GABORS' DATA ANALYSIS TEXTBOOK (Bekes & Kezdi)
 *
+* Also good to know section, power law distribution
+* Distribution of city size in Japan
 *
-* WHAT THIS CODES DOES:
-* creates desrciptive stats
+* using the city-size-japan dataset
 * 
 ********************************************************************
-
-
-
-
 
 ********************************************************************
 * SET YOUR DIRECTORY HERE
 *********************************************************************
-*cd "" /*set your dir*/
-cd "C:\Users\GB\Dropbox (MTA KRTK)\bekes_kezdi_textbook"
 
-*location folders
-global data_in "da_data_repo\city-size-japan\clean"
-global data_out "da_case_studies\ch03-city-size-japan"
-global output "da_case_studies\ch03-city-size-japan\output"
+* Directory for work
+cd "C:\Users\kezdi\GitHub\da_case_studies" 
+global work  "ch03-city-size-japan"
+cap mkdir "$work/output"
+global output "$work/output"
+cap mkdir "$work/temp"
+global temp "$work/temp"
+
+* Directory for data
+* Option 1: run directory-setting do file
+*do "set-data-directory.do" /*data_dir must be first defined */
+*global data_in   	"$da_data_repo/hotels-europe/clean"
+* Option 2: set directory here
+global data_in "C:/Users/kezdi/Dropbox/bekes_kezdi_textbook/da_data_repo/city-size-japan/clean"
+
 
 
 clear
@@ -32,33 +36,23 @@ insheet using "$data_in\city-size-japan.csv"
 sum
 
 gen pop=pop_2015/1000
-gen lnpop=ln(pop_2015)
+gen lnpop=ln(pop)
 gsort -pop	
 gen rank = _n
 
 *******************************
-** ln(rank) vs ln(x)
-
+** Figure: ln(rank) vs ln(x)
 gen lnrank = ln(rank)
-scatter lnrank lnpop, mc(blue) || lfit lnrank lnpop, lc(gs10) ///
- legend(off) ytitle("ln(rank)") xtitle("ln(population)") ///
+
+* Figure 3.12
+colorpalette viridis, n(4) select(2) nograph
+scatter lnrank lnpop|| lfit lnrank lnpop, ///
+ color(`r(p)') ///
+ legend(off) ytitle("ln(rank)") xtitle("ln(population in thousand)") ///
  ylab(, grid) xlab(,grid)
- graph export "$output/citysize_Japan_logrank.png",replace
-more
+ graph export "$output/ch03-figure-12-logrank-Stata.png", replace
 
-
-
-
-/*******************************
-** ln P(X>x) vs ln(x) figure
-** should be the same s with ln(rank) except for constant shift
-
-gen P = rank / _N
-gen lnP = ln(P)
-scatter lnP lnpop || lfit lnP lnpop
-more
-*/
-
+ 
 
 *******************************
 ** SCALE INVARIANCE
