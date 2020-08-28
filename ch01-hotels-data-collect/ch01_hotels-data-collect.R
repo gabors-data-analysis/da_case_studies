@@ -1,21 +1,45 @@
-#############################################
-# Chapter 01
-#
-# First look at the hotels data
+################################################################################################
+# Prepared for the textbook:
+# Data Analysis for Business, Economics, and Policy
+# by Gabor BEKES and  Gabor KEZDI 
+# Cambridge University Press 2021
 # 
-#############################################
+# License: Free to share, modify and use for educational purposes. Not to be used for business purposes.
+#
+###############################################################################################x
+
+# CHAPTER 02
+# CH02B Identifying successful football managers
+
+# football dataset
+# version 0.9 2020-08-28
+
+###########
+
+# CLEAR MEMORY
+rm(list=ls())
+
+library(tidyverse)
+#----------------------------------------------------------------------------------------------------
 
 
-library(plyr)
+# set working directory
+# option A: open material as project
+# option B: set working directory for da_case_studies
+#           example: setwd("C:/Users/bekes.gabor/Documents/github/da_case_studies/")
 
-# set the path
-dir <- "C:/Users/GB/Dropbox (MTA KRTK)/bekes_kezdi_textbook/"
+# set data dir, load theme and functions
+source("ch00-tech-prep/theme_bg.R")
+source("ch00-tech-prep/da_helper_functions.R")
 
-#location folders
-data_in <- paste0(dir,"da_data_repo/hotels-vienna/clean/")
-data_out  <- paste0(dir,"da_case_studies/ch01-hotels-data-collect/")
-output <- paste0(dir,"da_case_studies/ch01-hotels-data-collect/output/")
-func <- paste0(dir, "da_case_studies/ch00-tech-prep/")
+# data used
+source("set-data-directory.R") #data_dir must be first defined #
+data_in <- paste(data_dir,"hotels-vienna","clean/", sep = "/")
+
+use_case_dir <- "ch01-hotels-data-collect/"
+data_out <- use_case_dir
+output <- paste0(use_case_dir,"output/")
+create_output_if_doesnt_exist(output)
 
 
 

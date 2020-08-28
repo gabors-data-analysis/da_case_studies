@@ -1,35 +1,52 @@
-#######################################
-  # Ch03
+################################################################################################
+# Prepared for the textbook:
+# Data Analysis for Business, Economics, and Policy
+# by Gabor BEKES and  Gabor KEZDI 
+# Cambridge University Press 2021
+# 
+# License: Free to share, modify and use for educational purposes. Not to be used for business purposes.
 #
-  # simulation
-# v1.0 2019-07-25
-# v1.1 2020-03-09 axes edited + minor edits
-# v1.2 2020-03-31 power law edited
-# v1.3 2020-04-22 names ok + FIXME 
+###############################################################################################x
 
-# FIXME (hist y ayis) not at zero but visible
-
-
-######################################
-
-#clear environment
-rm(list = ls())
-
-# Sets the core parent directory
-current_path = rstudioapi::getActiveDocumentContext()$path 
-dir<-paste0(dirname(dirname(dirname(current_path ))),"/")
-
-# location folders
-output <- paste0(dir,"da_case_studies/ch03-simulations/output/")
-func <- paste0(dir, "da_case_studies/ch00-tech-prep/")
-
-#call function
-source(paste0(func, "theme_bg.R"))
-source(paste0(func, "da_helper_functions.R"))
+# CHAPTER 03
+# CH03C Measuring Home Team Advantage in Football
+# football dataset
+# version 0.9 2020-08-28
 
 
+# ------------------------------------------------------------------------------------------------------
+#### SET UP
+# It is advised to start a new session for every case study
+# CLEAR MEMORY
+rm(list=ls())
+
+# Import libraries
 library(tidyverse)
 
+
+# set working directory
+# option A: open material as project
+# option B: set working directory for da_case_studies
+#           example: setwd("C:/Users/bekes.gabor/Documents/github/da_case_studies/")
+
+# set data dir, data used
+source("set-data-directory.R")             # data_dir must be first defined 
+# alternative: give full path here, 
+#            example data_dir="C:/Users/bekes.gabor/Dropbox (MTA KRTK)/bekes_kezdi_textbook/da_data_repo"
+
+# load theme and functions
+source("ch00-tech-prep/theme_bg.R")
+source("ch00-tech-prep/da_helper_functions.R")
+
+data_in <- paste(data_dir,"football","clean/", sep = "/")
+
+use_case_dir <- "ch03-simulations/"
+data_out <- use_case_dir
+output <- paste0(use_case_dir,"output/")
+create_output_if_doesnt_exist(output)
+
+
+#------------------------------------
 # set the seed
 set.seed(16460)
 
@@ -50,7 +67,6 @@ g_bernoulli<- ggplot(data = bernoulli, aes (x = bernoulli, y = (..count..)/sum(.
   scale_y_continuous(labels = scales::percent_format(accuracy = 5L)) +
   theme_bg() 
 g_bernoulli
-#save_fig("theoretical_Bernoulli_R", output, size = "small")
 save_fig("ch03-figure-rb7-1a-bernoulli", output, size = "small")
 
 
@@ -68,7 +84,6 @@ g_binom<-ggplot(data = binomial, aes (x = binomial, y = (..count..)/sum(..count.
   scale_x_continuous(expand = c(0.01,0.01), limits=c(0, 16), breaks=seq(0, 16, by=2)) + 
   theme_bg() 
 g_binom
-#save_fig("theoretical_binomial_R", output, size = "small")
 save_fig("ch03-figure-rb7-1b-binomial", output, size = "small")
 
 
@@ -86,7 +101,6 @@ g_uniform<-ggplot(data = uniform, aes (x = uniform, y = (..count..)/sum(..count.
   coord_cartesian(clip = "off") +
     theme_bg() 
 g_uniform
-#save_fig("theoretical_uniform_R", output, size = "small")
 save_fig("ch03-figure-rb7-1c-uniform", output, size = "small")
 
 # normal
@@ -102,7 +116,6 @@ g_normal<-ggplot(data = normal, aes (x = normal, y = (..count..)/sum(..count..))
   coord_cartesian(clip = "off") +
   theme_bg() 
 g_normal
-#save_fig("theoretical_normal_R", output, size = "small")
 save_fig("ch03-figure-rb7-2a-normal", output, size = "small")
 
 # lognoromal
@@ -120,7 +133,6 @@ g_lognormal<-ggplot(data = subset(lognormal, lognormal <10), aes (x = lognormal,
   coord_cartesian(clip = "off") +
   theme_bg() 
 g_lognormal
-#save_fig("theoretical_lognormal_R", output, size = "small")
 save_fig("ch03-figure-rb7-2b-lognormal", output, size = "small")
 
 
@@ -143,7 +155,6 @@ g_power<-ggplot(data = subset(powerlaw, powerlaw < histrange), aes (x = powerlaw
   scale_x_continuous(labels = fancy_scientific) +
   theme_bg() 
 g_power
-#save_fig("theoretical_powerlaw_R", output, size = "small")
 save_fig("ch03-figure-rb7-2c-powerlaw", output, size = "small")
 
 
