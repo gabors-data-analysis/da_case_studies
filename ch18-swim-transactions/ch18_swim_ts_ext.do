@@ -20,23 +20,19 @@
 
 
 ********************************************************************
-* SET YOUR DIRECTORY HERE
+* SET YOUR DIRECTORIES HERE
 *********************************************************************
 
-
-
-* 1. set your working directory
+* set your work directory
 * replace this: 
 cd "C:/Users/bekes.gabor/Documents/github/da_case_studies"
 
-
 global data_out  "ch18-swim-transactions"
 global output    "ch18-swim-transactions/output"
-* must add create output if does not exist yet.
+* must create output directory if does not exist yet 
+*   e.g. like this: md "ch18-swim-transactions/output"
 
-
-
-* Step 2: set data directory
+* Set data directory
 * replace this: 
  global da_data_repo "C:/Users/bekes.gabor/Dropbox (MTA KRTK)/bekes_kezdi_textbook/da_data_repo"
 
