@@ -27,12 +27,11 @@
 #
 ###########################################################
 
-
+# It is advised to start a new session for every case study
 # Clear memory -------------------------------------------------------
 rm(list=ls())
 
 # Import libraries ---------------------------------------------------
-# library(Cairo)
 library(tidyverse)
 library(stargazer)
 library(Hmisc)
@@ -49,7 +48,7 @@ library(prophet)
 #           example: setwd("C:/Users/bekes.gabor/Documents/github/da_case_studies/")
 
 # set data dir, data used
-source("set-data-directory.R") #data_dir must be first defined #
+source("set-data-directory.R")             # data_dir must be first defined 
 # alternative: give full path here, 
 #            example data_dir="C:/Users/bekes.gabor/Dropbox (MTA KRTK)/bekes_kezdi_textbook/da_data_repo"
 

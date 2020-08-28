@@ -1,60 +1,57 @@
-
-#####################################################################
+################################################################################################
+# Prepared for the textbook:
+# Data Analysis for Business, Economics, and Policy
+# by Gabor BEKES and  Gabor KEZDI 
+# Cambridge University Press 2021
+# 
+# License: Free to share, modify and use for educational purposes. Not to be used for business purposes.
 #
-# DATA ANALYSIS TEXTBOOK
-# CH03
-# Home field advantage
+###############################################################################################x
+
+# CHAPTER 03
+# CH03C Measuring Home Team Advantage in Football
 # football dataset
-#
-# WHAT THIS CODES DOES:
-# creates desrciptive stats
-#
+# version 0.9 2020-08-28
 
-# v1.3 2020-04-22 names ok
 
-#####################################################################
-  
-#####################################################################
-# IMPORT LIBRARIES
-#####################################################################
-
-# Clear memory
+# ------------------------------------------------------------------------------------------------------
+#### SET UP
+# It is advised to start a new session for every case study
+# CLEAR MEMORY
 rm(list=ls())
 
-# Libraries
-require(haven)
-library(ggplot2)
-library(dplyr)
-library(gridExtra)
+# Import libraries
+library(tidyverse)
+library(haven)
 library(cowplot)
 library(grid)
 library(scales)
-library(RColorBrewer)
-library(tidyverse)
 library(Hmisc)
 
-############################################################  
-# SET YOUR DIRECTORY HERE
-############################################################  
 
-# Sets the core parent directory
-current_path = rstudioapi::getActiveDocumentContext()$path 
-dir<-paste0(dirname(dirname(dirname(current_path ))),"/")
+# set working directory
+# option A: open material as project
+# option B: set working directory for da_case_studies
+#           example: setwd("C:/Users/bekes.gabor/Documents/github/da_case_studies/")
+
+# set data dir, data used
+source("set-data-directory.R")             # data_dir must be first defined 
+# alternative: give full path here, 
+#            example data_dir="C:/Users/bekes.gabor/Dropbox (MTA KRTK)/bekes_kezdi_textbook/da_data_repo"
+
+# load theme and functions
+source("ch00-tech-prep/theme_bg.R")
+source("ch00-tech-prep/da_helper_functions.R")
+
+data_in <- paste(data_dir,"football","clean/", sep = "/")
+
+use_case_dir <- "ch03-football-home-advantage/"
+data_out <- use_case_dir
+output <- paste0(use_case_dir,"output/")
+create_output_if_doesnt_exist(output)
 
 
-# Location folders
-data_in <- paste0(dir,"da_data_repo/football/clean/")
-data_out <- paste0(dir,"da_case_studies/ch03-football-home-advantage/")
-output <- paste0(dir,"da_case_studies/ch03-football-home-advantage/output/")
-
-func <- paste0(dir, "da_case_studies/ch00-tech-prep/")
-
-# Custom function
-source(paste0(func, "theme_bg.R"))
-# Created a helper function with some useful stuff
-source(paste0(func, "da_helper_functions.R"))
-
-############################################################  
+#-----------------------------------------------------------------------------------------
 
 # Import dataset
 df <- read.csv(paste0(data_in,"epl_games.csv"),
@@ -81,13 +78,12 @@ p1<-ggplot(data = df, aes (x = home_goaladv, y = (..count..)/sum(..count..))) +
   scale_y_continuous(expand = c(0,0), limits = c(0, 0.25), breaks = seq(0,0.25, by = 0.05), labels = scales::percent_format(accuracy = 5L)) +
   theme_bg() 
 p1
-#ggsave(paste0(output, "homeadvantage_hist_R.png"), width=mywidth_large, height=myheight_large, units = "cm", dpi = 1200)
 save_fig("ch03-figure-9-hist-homeadv", output, "small")
 
 
 
 # look at goal advantage by team 
-# table used in book, but interesting
+# table *not* used in book, but interesting
 df %>%
   filter(team_home %in% c("Chelsea", "Arsenal", "Leicester", "Stoke", "West Ham") ) %>%
   group_by(team_home) %>%

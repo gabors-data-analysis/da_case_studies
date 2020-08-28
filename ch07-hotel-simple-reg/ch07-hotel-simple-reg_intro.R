@@ -1,41 +1,21 @@
 ################################################################################################
 # Prepared for the textbook:
 # Data Analysis for Business, Economics, and Policy
-# by Gabor BEKES (Central Europen University) and  Gabor KEZDI (University of Michigan)
-# Cambridge University Press 2020
-
-# License: Free to share, modify and use for educational purposes. 
-# Not to be used for business purposes
+# by Gabor BEKES and  Gabor KEZDI 
+# Cambridge University Press 2021
 # 
+# License: Free to share, modify and use for educational purposes. Not to be used for business purposes.
 #
 ###############################################################################################x
 
-# CHAPTER 7
-# Regression
-# Hotels dataset
-#
-# v 3.2
-# v 3.3 2020-02-06 graphs edited
-# v 3.4 2020-03-06 7.1, 7.2 graphs changed
-# v 3.5 2020-03-10 additional graphs changed, 7.6
-# v 3.6 2020-03-16 additional graphs changed - dollars
-# v 3.7 2020-04-06 graph changes using new geoms. Histogram 
-# v 3.8 2020-04-24 names ok
-# v 3.9 2020-04-27 large graph size edit
-# v 3.10 2020-04-30 large graph size edit
-# v 3.11 2020-06-26 graph 7 color  edit
-# v 3.13 2020-08-07 graph 6 geom_da gond
-# v 3.13 2020-08-24 library edits
+# CHAPTER 07
+# CH07A Finding a good deal among hotels with simple regression
+# hotels-vienna  dataset
+# version 0.9 2020-08-26
 
 
-############################################################  
-# WHAT THIS CODES DOES:
-  
-# Imports price, stars and distance data
-# Manages data to get a clean dataset to work with
-# Describes data
-# Performs regression analysis 
-# Creates graphs
+# ------------------------------------------------------------------------------------------------------
+#### SET UP
 
 # START NEW SESSION --- it is best to start a new session !
 # CLEAR MEMORY
@@ -65,14 +45,11 @@ output <- paste0(use_case_dir,"output/")
 create_output_if_doesnt_exist(output)
 
 
+# ------------------------------------------------------------------------------------------------------
+#### GET DATA AND SAMPLE SELECTION
 
-# load vienna
 hotels <- read_csv(paste(data_in,"hotels-vienna.csv", sep = "/"))
 
-
-
-# ------------------------------------------------------------------------------------------------------
-####SAMPLE SELECTION
 # Apply filters:  3-4 stars, Vienna actual, without  extreme value
 hotels <- hotels %>% filter(accommodation_type=="Hotel") %>%
   filter(city_actual=="Vienna") %>%
@@ -144,7 +121,6 @@ F07_1a<- ggplot(data = hotels) +
   labs(x = "Distance to city center (categories)", y = "Average price (US dollars)") +
   theme_bg()
 F07_1a
-#save_fig("F07_1_R", output, "small")
 save_fig("ch07-figure-1a-scatter-nonpar1", output, "small")
 
 
@@ -162,9 +138,9 @@ hotels %>% group_by(dist4) %>% dplyr::summarize(mean_dist=mean(distance),
                                          max_dist=max(price),
                                          N=n())
 
-############
+#######################
 # Figure 7.1b
-# PLOT MEAN VALUES BY CLOSE VS FAR
+#######################
 
 F07_1b<- ggplot(data = hotels) +
   #geom_point(aes(x = dist4, y = price), size = 1, color = color[1], shape = 16, alpha = 0.5, na.rm=T) +
@@ -178,11 +154,10 @@ F07_1b<- ggplot(data = hotels) +
   labs(x = "Distance to city center (miles)", y = "Price (US dollars)") +
   theme_bg()
 F07_1b
-#save_fig("F07_1b_R", output, "small")
 save_fig("ch07-figure-1b-scatter-nonpar2", output, "small")
 
 
-#Look at a bar chart
+#Look at a bar chart (NOT in BOOK)
 F07_x2<- ggplot(data = hotels, aes(x = dist2, y = price)) +
   stat_boxplot(aes(group = dist2), geom = "errorbar", width = 0.25, color = viridis(2, begin=0.3, end=0.7), size = 0.5, na.rm=T)+
   geom_boxplot(aes(group = dist2),  color = viridis(2, begin=0.3, end=0.7), fill = viridis(2, begin=0.3, end=0.7), size = 0.5, width = 0.5, alpha = 0.3, na.rm=T, outlier.shape = NA) +
@@ -196,8 +171,9 @@ F07_x2
 
 
 
-############
-# FIGURE 7.3a 
+#######################
+# FIGURE 7.2a, 7.2b 
+#######################
 
 p1 <- ggplot(data = hotels, aes(x = distance, y = price)) +
   geom_point_da() +
@@ -226,12 +202,9 @@ hotels$yend <- c(hotels$Eprice_cat4)
 F07_2a <-  p1+
   geom_segment(data=hotels, aes(x = dist4_s, y=yend, xend=xend, yend=yend), color=color[2], size=0.7, na.rm=TRUE) 
 F07_2a
-#save_fig("F07_3_R", output, "small")
 save_fig("ch07-figure-2a-scatter-binscat2", output, "small")
 
 
-############
-# Figure 7.3b 
 
 # New intervals
 hotels <-hotels %>% mutate(dist7_new = 0.5+ 1*as.numeric(hotels$distance>=1) + 1*as.numeric(hotels$distance>=2) +   1*as.numeric(hotels$distance>=3) +1*as.numeric(hotels$distance>=4) +1*as.numeric(hotels$distance>=5) + 1*as.numeric(hotels$distance>=6))  
@@ -259,15 +232,16 @@ F07_2b <- p1 +
  #geom_point(data= dist7_new, aes(x = dist7_new, y = Eprice_cat7_new), size = 2, color = color[4], fill= color[2],  shape = 21, alpha = 0.8) 
  geom_segment(data=hotels, aes(x = dist7_s, y=yend, xend=xend, yend=yend), color=color[2], size=0.7, na.rm=TRUE) 
 F07_2b
-#save_fig("F07_3b_R", output, "small")
 save_fig("ch07-figure-2b-scatter-binscat2", output, "small")
 
 
+#######################
+# Figure 7.3
 # LOWESS NONPARAMETRIC REGRESSION
+
 F07_3 <- p1  +
   geom_smooth_da(method='loess')
 F07_3
-#save_fig("F07_4_R", output, "small")
 save_fig("ch07-figure-3-scatter-lowess", output, "small")
 
 
@@ -278,14 +252,17 @@ regression <- lm(price ~ distance, data=hotels)
 summary(regression)
 
 
+#######################
+# Figure 7.5
 # SCATTERPLOT + REGRESSION LINE
 F07_5 <-  p1  +
 geom_smooth_da(method = "lm")
 F07_5
 save_fig("ch07-figure-5-scatter-linreg", output, "small")
 
-## THE LINEAR REGRESSION GOES THROUGH THE AVERAGES
-## SCATTERPLOT + REGRESSION LINE + LINES FOR AVERAGES
+
+# THE LINEAR REGRESSION GOES THROUGH THE AVERAGES
+# SCATTERPLOT + REGRESSION LINE + LINES FOR AVERAGES (NOT in BOOK)
 F07_x5 <-  p1  +
   geom_smooth_da(method = "lm") +
   geom_vline(xintercept = mean(hotels$distance),color = color[3], lty="dashed", size=0.3)+
@@ -299,11 +276,12 @@ regression <- lm(price ~ distance, data=hotels)
 hotels$predprice <- predict(regression)
 hotels$e <- resid(regression)
 
-############
+###########
+# Figure 7.6, Table 7.1
 xa<- 2.9
 ya<- 208
 ym<- 90.24 
-# TODO
+# FIXME
 # ym  --should be replaced with predicted value directly
 
 F07_6a <-   ggplot(data = hotels, aes(x = distance, y = price)) +
@@ -318,11 +296,10 @@ F07_6a <-   ggplot(data = hotels, aes(x = distance, y = price)) +
   labs(x = "Distance to city center (miles)",y = "Price (US dollars)")+
   theme_bg()
 F07_6a
-#save_fig("F07_7_R", output, "small")
 save_fig("ch07-figure-6a-resid-scatter", output, "small")
 
 
-# historgram of residuals
+# histogram of residuals
 F07_6b<-   ggplot(data = hotels, aes (x = e)) +
   #geom_histogram_da(binwidth = 20, type='percent')+
   geom_histogram(aes(y = (..count..)/sum(..count..)), binwidth = 20, color = color.outline, fill = theme_colors[1],
@@ -333,8 +310,7 @@ F07_6b<-   ggplot(data = hotels, aes (x = e)) +
                      labels = scales::percent_format(accuracy = 1)) +
 theme_bg() 
 F07_6b
-#save_fig("F07_8_R", output, "small")
-save_fig("ch07-figure-6b-resid-hist-v2", output, "small")
+save_fig("ch07-figure-6b-resid-hist", output, "small")
 
 
 # hotels with most negative residuals
@@ -354,11 +330,13 @@ bestdeals <- hotels%>%
   head(5)
 bestdeals
 
-#ch07-table-1-resid
+# FIXME
+# print ch07-table-1-resid
 
 
 
-##############x
+##############
+# Figure 7.7
 # adding annotation
 
 Fig7<-   ggplot(data= hotels, aes(x = distance, y = price)) +
@@ -387,6 +365,5 @@ Fig7<-   ggplot(data= hotels, aes(x = distance, y = price)) +
   theme(axis.title.x=element_text(size=9)) +
   theme(axis.title.y=element_text(size=9)) 
 Fig7
-#save_fig("F07_10_R", output, "small")
 save_fig("ch07-figure-7-underpriced-deals", output, "large")
 
