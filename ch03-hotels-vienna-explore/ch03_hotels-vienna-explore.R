@@ -1,54 +1,51 @@
-###############################################
-# Chapter 03
- 
-# DATA ANALYSIS TEXTBOOK
-# CH03
-# Describe hotels-vienna
+################################################################################################
+# Prepared for the textbook:
+# Data Analysis for Business, Economics, and Policy
+# by Gabor BEKES and  Gabor KEZDI 
+# Cambridge University Press 2021
 # 
-# v1.0.2019-10-07
-# v1.1 2020-03-09 graph axes remastered
-# v1.2 2020-03-13 labels edited
-# v1.3 2020-03-21 labels edited
-# v1.4 2020-04-06 graphs
-# v1.5 2020-04-06 minor graphs
-# v1.6 2020-08-04 redo with frequency now set w boundary=0
-# v1.7 2020-08-04 redo with axis lines harmonized
+# License: Free to share, modify and use for educational purposes. Not to be used for business purposes.
+#
+###############################################################################################x
+
+# CHAPTER 03
+# CH03B Comparing hotel prices in Europe: Vienna vs. London 	
+# hotels-europe dataset
+# version 0.9 2020-08-28
 
 
-
-# WHAT THIS CODES DOES:
-# Focus on histograms
-
-###############################################
-
-
-
+# ------------------------------------------------------------------------------------------------------
+#### SET UP
+# It is advised to start a new session for every case study
 # CLEAR MEMORY
 rm(list=ls())
 
 # Import libraries
-
-library(ggplot2)
 library(tidyverse)
 library(scales)
-
-# Sets the core parent directory
-current_path = rstudioapi::getActiveDocumentContext()$path 
-dir<-paste0(dirname(dirname(dirname(current_path ))),"/")
+library(xtable)
 
 
-#location folders
-data_in <- paste0(dir,"da_data_repo/hotels-vienna/clean/")
-data_out <-  paste0(dir,"da_case_studies/ch03-hotels-vienna-explore/")
-output <- paste0(dir,"da_case_studies/ch03-hotels-vienna-explore/output/")
-func <- paste0(dir, "da_case_studies/ch00-tech-prep/")
+# set working directory
+# option A: open material as project
+# option B: set working directory for da_case_studies
+#           example: setwd("C:/Users/bekes.gabor/Documents/github/da_case_studies/")
 
+# set data dir, data used
+source("set-data-directory.R")             # data_dir must be first defined 
+# alternative: give full path here, 
+#            example data_dir="C:/Users/bekes.gabor/Dropbox (MTA KRTK)/bekes_kezdi_textbook/da_data_repo"
 
-#call function
-source(paste0(func, "theme_bg.R"))
-# Created a helper function with some useful stuff
-source(paste0(func, "da_helper_functions.R"))
+# load theme and functions
+source("ch00-tech-prep/theme_bg.R")
+source("ch00-tech-prep/da_helper_functions.R")
 
+data_in <- paste(data_dir,"hotels-vienna","clean/", sep = "/")
+
+use_case_dir <- "ch03-hotels-vienna-explore/"
+data_out <- use_case_dir
+output <- paste0(use_case_dir,"output/")
+create_output_if_doesnt_exist(output)
 
 
 
