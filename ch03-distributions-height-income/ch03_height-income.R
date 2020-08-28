@@ -1,25 +1,21 @@
-###############################################
-# Chapter 03
+################################################################################################
+# Prepared for the textbook:
+# Data Analysis for Business, Economics, and Policy
+# by Gabor BEKES and  Gabor KEZDI 
+# Cambridge University Press 2021
+# 
+# License: Free to share, modify and use for educational purposes. Not to be used for business purposes.
+#
+###############################################################################################x
 
-# height-income-distributions
-
-# v1.0 2019-09-26
-# v1.1 2020-03-13 edits to all graphs
-# v1.2 2020-04-06 edits to all graphs
-# v1.3 2020-04-22 names ok
-# v1.4 2020-08-06 edited histogram + density
-
-###############################################
-
-# WHAT THIS CODES DOES:
-## creates desrciptive stats
-
-###############################################
-
-# TODO
-# density + histogram graphs shall have histogram relative freq in percent on y axis
+# CHAPTER 03
+# CH03D Distributions of Body Height and Income
+# height-income-distributions  dataset
+# version 0.9 2020-08-28
 
 
+# ------------------------------------------------------------------------------------------------------
+#### SET UP
 # It is advised to start a new session for every case study
 # CLEAR MEMORY
 rm(list=ls())
@@ -51,7 +47,7 @@ output <- paste0(use_case_dir,"output/")
 create_output_if_doesnt_exist(output)
 
 
-
+#-----------------------------------------------------------------------------------------
 # load in clean and tidy data and create workfile
 hrs <-  read.csv(paste(data_in,"hrs_height_income.csv", sep = "/"))
 
@@ -76,7 +72,6 @@ ch03_normal_height <- ggplot(filtered_women, aes(x = rheight)) +
     theme_bg() +
   xlab("Height (meters)")
 ch03_normal_height
-#save_fig("normal_hist_height_R", output, "small")
 save_fig("ch03-figure-10-hist-height", output, "small")
 
 #-------------------------------------------------------------------------------------------
@@ -102,7 +97,6 @@ ch03_lognormal_income <- ggplot(filtered_women_income, aes(x = income)) +
   scale_y_continuous(expand = c(0.01,0.01),breaks = seq(0, 0.3, by = 0.05), labels = scales::percent_format(accuracy = 1)) +
   theme_bg() 
 ch03_lognormal_income
-#save_fig("lognormal_hist_hhincome_R", output, "small")
 save_fig("ch03-figure-11a-hist-income", output, "small")
 
 
@@ -126,7 +120,6 @@ ch03_lognormal_lnincome <- ggplot(filtered_women_income, aes(x = lnincome)) +
   ylab("Percent") +   xlab("ln(household income, thousand USD)") +
   theme_bg()
   ch03_lognormal_lnincome
-#save_fig("lognormal_hist_lnhhincome_R", output, "small")
 save_fig("ch03-figure-11b-hist-income-log", output, "small")
 
 
@@ -143,6 +136,5 @@ ch03_lognormal_lnincome <- ggplot(filtered_women_income, aes(x = lnincome)) +
   theme_bg() +
   ylab("Percent") +   xlab("ln(household income, thousand USD)") 
   ch03_lognormal_lnincome
-  #save_fig("lognormal_hist_lnhhincome_R", output, "small")
   save_fig("ch03-figure-11b-hist-income-log", output, "small")
   

@@ -1,7 +1,18 @@
+################################################################################################
+# Prepared for the textbook:
+# Data Analysis for Business, Economics, and Policy
+# by Gabor BEKES and  Gabor KEZDI 
+# Cambridge University Press 2021
+# 
+# License: Free to share, modify and use for educational purposes. Not to be used for business purposes.
+#
+###############################################################################################x
 
-# Chapter 03 
-# City size distribution in Japan
-###################################################
+# CHAPTER 03
+# CH03 UNDER THE HOOD: MORE ON THEORETICAL DISTRIBUTIONS --- City size distribution in Japan
+# city-size-japan  dataset
+# version 0.9 2020-08-28
+
 
 
 # It is advised to start a new session for every case study
