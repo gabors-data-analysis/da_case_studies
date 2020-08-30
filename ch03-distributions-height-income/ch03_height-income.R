@@ -94,7 +94,7 @@ ch03_lognormal_income <- ggplot(filtered_women_income, aes(x = income)) +
   ylab("Percent") +   xlab("Household income (thousand USD)") +
   expand_limits(x = 0.01, y = 0.01) +
   scale_x_continuous(expand = c(0.01,0.01),limits = c(0, 1000), breaks = seq(0, 1000, by = 100)) +
-  scale_y_continuous(expand = c(0.01,0.01),breaks = seq(0, 0.3, by = 0.05), labels = scales::percent_format(accuracy = 1)) +
+  scale_y_continuous(expand = c(0.00,0.00),limits = c(0, 0.3), breaks = seq(0, 0.3, by = 0.05), labels = scales::percent_format(accuracy = 1)) +
   theme_bg() 
 ch03_lognormal_income
 save_fig("ch03-figure-11a-hist-income", output, "small")
