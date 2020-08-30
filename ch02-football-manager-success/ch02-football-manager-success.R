@@ -1,23 +1,20 @@
-###############################################
-# Chapter 02
-# Data Analysis Textbook
+################################################################################################
+# Prepared for the textbook:
+# Data Analysis for Business, Economics, and Policy
+# by Gabor BEKES and  Gabor KEZDI 
+# Cambridge University Press 2021
+# 
+# License: Free to share, modify and use for educational purposes. Not to be used for business purposes.
+#
+###############################################################################################x
 
-# Teams and Managers in football 
-# (ENGLISH PREMIER LEAGUE SEASONS)
-# v1.0 2019-09-16
-# v1.1 2020-01-28 minor edits, all files csv_read
-# v1.2 2020-03-09 graph x axis renamed + axes remastered
-# v1.3 2020-04-09 FIXME (graph)
-# v1.4 2020-04-22 name ok
-# v1.4 2020-04-26 graph edited
-# v1.6 2020-08-24 winration-->avg points, library
+# CHAPTER 02
+# CH02B Identifying successful football managers
 
-###############################################
+# football dataset
+# version 0.9 2020-08-28
 
-# WHAT THIS CODES DOES:
-  ## opens data tables, and creates a single graph
-
-###############################################
+###########
 
 # CLEAR MEMORY
 rm(list=ls())

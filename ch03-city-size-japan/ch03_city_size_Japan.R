@@ -1,44 +1,49 @@
-###############################################
-# Chapter 03
+################################################################################################
+# Prepared for the textbook:
+# Data Analysis for Business, Economics, and Policy
+# by Gabor BEKES and  Gabor KEZDI 
+# Cambridge University Press 2021
+# 
+# License: Free to share, modify and use for educational purposes. Not to be used for business purposes.
+#
+###############################################################################################x
 
-# city_size_japan : pop & lnpop
-###############################################
-
-# v1.1 2020-04-22 names ok
-
-
-# WHAT THIS CODES DOES:
-## creates desrciptive stats
-
-###############################################
+# CHAPTER 03
+# CH03 UNDER THE HOOD: MORE ON THEORETICAL DISTRIBUTIONS --- City size distribution in Japan
+# city-size-japan  dataset
+# version 0.9 2020-08-28
 
 
+
+# It is advised to start a new session for every case study
 # CLEAR MEMORY
 rm(list=ls())
 
 # Import libraries
-
-library(ggplot2)
 library(tidyverse)
 library(scales)
 
 
-# Sets the core parent directory
-current_path = rstudioapi::getActiveDocumentContext()$path 
-dir<-paste0(dirname(dirname(dirname(current_path ))),"/")
+# set working directory
+# option A: open material as project
+# option B: set working directory for da_case_studies
+#           example: setwd("C:/Users/bekes.gabor/Documents/github/da_case_studies/")
 
+# set data dir, data used
+source("set-data-directory.R")             # data_dir must be first defined 
+# alternative: give full path here, 
+#            example data_dir="C:/Users/bekes.gabor/Dropbox (MTA KRTK)/bekes_kezdi_textbook/da_data_repo"
 
-#location folders
-data_in <- paste0(dir,"da_data_repo/city-size-japan/clean/")
-data_out <-  paste0(dir,"da_case_studies/ch03-city-size-japan/")
-output <- paste0(dir,"da_case_studies/ch03-city-size-japan/output/")
-func <- paste0(dir, "da_case_studies/ch00-tech-prep/")
+# load theme and functions
+source("ch00-tech-prep/theme_bg.R")
+source("ch00-tech-prep/da_helper_functions.R")
 
+data_in <- paste(data_dir,"city-size-japan","clean/", sep = "/")
 
-# load ggplot theme function
-source(paste0(func, "theme_bg.R"))
-# Created a helper function with some useful stuff
-source(paste0(func, "da_helper_functions.R"))
+use_case_dir <- "ch03-city-size-japan/"
+data_out <- use_case_dir
+output <- paste0(use_case_dir,"output/")
+create_output_if_doesnt_exist(output)
 
 #-----------------------------------------------------------------------------------------
 # import data
@@ -51,6 +56,7 @@ city_size <-  city_size %>%
     pop = (pop_2015/1000),
     lnpop = log(pop)) %>%
   arrange(-pop)
+
 
 city_size <- city_size %>%
   mutate (rank = seq( from = 1, to = nrow(.), by = 1))

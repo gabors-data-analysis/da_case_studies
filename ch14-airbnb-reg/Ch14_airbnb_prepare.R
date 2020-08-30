@@ -146,6 +146,10 @@ data <- data %>%
   filter(neighbourhood_cleansed == "Hackney")
 write_csv(data, paste0(data_out, "airbnb_hackney_workfile.csv"))
 
+N=nrow(data)
+N
+# N=4499
+
 #
 #####################
 ### look at price ###
@@ -156,7 +160,7 @@ describe(data$price)
 data <- data %>%
   mutate(ln_price = log(price))
 
-# Remove extreme values from prices
+# Remove extreme values + missing from prices (this case: only 3 missing values)
 data <- data %>%
   filter(price <=1000)
 
