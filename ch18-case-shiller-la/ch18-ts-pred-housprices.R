@@ -1,51 +1,54 @@
-######################################################################
-# Data Analysis Textbook
-# Chapter 18
-# Case study  Forecasting a house price index in LA
-# Data : Case Shiller
+################################################################################################
+# Prepared for the textbook:
+# Data Analysis for Business, Economics, and Policy
+# by Gabor BEKES and  Gabor KEZDI 
+# Cambridge University Press 2021
+# 
+# License: Free to share, modify and use for educational purposes. Not to be used for business purposes.
+#
+###############################################################################################x
 
-# v1.0 2019.01.01
-# v1.1 2019-01-09
-# v1.2 2019-12-29 folders edited
+# CHAPTER 18
+# CH18B Forecasting a house price index
+# case-shiller-la dataset
+# version 0.9 2020-08-28
 
-# v2.0 - 2020.01.11 overhaul to tstibble + fable
-# v2.1 - 2020.01.21 add many models + extra holdout
-# v2.2 - 2020.01.23 price index nsa
-# v2.3 - 2020.01.24 models finalized
-# v2.4 - 2020.01.26 pred graph runs from 2013
-# v2.5 - 2020.02.02 fan graph  + add RMSE fn
-# v2.6 - 2020.02.04 corrected emo graph
-# v1.1 2020-04-22 names ok
 
-######################################################################
-
-# LXXRSNA - Los Angeles Home Price Index NSA
-# CAUR - California Unemployment Rate SA
-# CANA - All Employees: Total Nonfarm in California SA
-
-# Clear memory -------------------------------------------------------
+# ------------------------------------------------------------------------------------------------------
+#### SET UP
+# It is advised to start a new session for every case study
+# CLEAR MEMORY
 rm(list=ls())
 
-# Import libraries ---------------------------------------------------
+# Import libraries
 library(tidyverse)
 library(fpp3)
 
-# Check working directory --------------------------------------------
-# Sets the core parent directory
-current_path = rstudioapi::getActiveDocumentContext()$path 
-dir<-paste0(dirname(dirname(dirname(current_path ))),"/")
+# set working directory
+# option A: open material as project
+# option B: set working directory for da_case_studies
+#           example: setwd("C:/Users/bekes.gabor/Documents/github/da_case_studies/")
+
+# set data dir, data used
+source("set-data-directory.R")             # data_dir must be first defined 
+# alternative: give full path here, 
+#            example data_dir="C:/Users/bekes.gabor/Dropbox (MTA KRTK)/bekes_kezdi_textbook/da_data_repo"
 
 
-# Set location folders -----------------------------------------------
-data_in <- paste0(dir,"da_data_repo/case-shiller-la/clean/")
-data_out <- paste0(dir,"da_case_studies/ch18_case-shiller-la/")
-output <- paste0(dir,"da_case_studies/ch18_case-shiller-la/output/")
-func <- paste0(dir, "da_case_studies/ch00-tech-prep/")
+# load theme and functions
+source("ch00-tech-prep/theme_bg.R")
+source("ch00-tech-prep/da_helper_functions.R")
 
-source(paste0(func, "theme_bg.R"))
-# Created a helper function with some useful stuff
-source(paste0(func, "da_helper_functions.R"))
+# set directory for code and data
+data_in <- paste(data_dir,"case-shiller-la","clean/", sep = "/")
+use_case_dir          <- "ch18-case-shiller-la/"
 
+data_out <- use_case_dir
+output <- paste0(use_case_dir,"output/")
+create_output_if_doesnt_exist(output)
+
+
+#-----------------------------------------------------------------------------------------
 #############################
 # RMSE functions
 #############################
@@ -66,6 +69,7 @@ get_MSE_from_forecast <- function(forecast, groupby = c(".id", ".model")){
     ungroup()
 }
 
+#-----------------------------------------------------------------------------------------
 
 #############################
 # DATA PREP
