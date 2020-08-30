@@ -1,42 +1,35 @@
-********************************************************************************
-* Chapter 04
+*********************************************************************
 *
-* wms-management-survey
-* v1.2
-
-* using WMS data 2004-2015
+* GABORS' DATA ANALYSIS TEXTBOOK (Bekes & Kezdi)
+*
+* Case study 04A
+* Management quality and firm size
+*
+* using the wms-management-survey dataset
 * 
-*
-********************************************************************************
-
+********************************************************************
 
 ********************************************************************
 * SET YOUR DIRECTORY HERE
 *********************************************************************
-*cd "" /*set your dir*/
-*cd "C:/Users/GB/Dropbox (MTA KRTK)/bekes_kezdi_textbook"
-cd "C:\Users\kezdi\Dropbox\bekes_kezdi_textbook"
 
-clear all
-set more off
+* Directory for work
+cd "C:\Users\kezdi\GitHub\da_case_studies" 
+global work  "ch04-management-firm-size"
+cap mkdir "$work/output"
+global output "$work/output"
+cap mkdir "$work/temp"
+global temp "$work/temp"
 
- 
- * YOU WILL NEED TWO SUBDIRECTORIES
- * textbook_work --- all the codes
- * cases_studies_public --- for the data
+* Directory for data
+* Option 1: run directory-setting do file
+*do "set-data-directory.do" /*data_dir must be first defined */
+*global data_in   	"$da_data_repo/hotels-europe/clean"
+* Option 2: set directory here
+global data_in "C:/Users/kezdi/Dropbox/bekes_kezdi_textbook/da_data_repo/wms-management-survey/clean"
 
- *global data_in   "cases_studies_public/wms-management-survey/clean"
-global data_in   "da_data_repo/wms-management-survey/clean"
-global data_out  "da_case_studies/ch04-management-firm-size"
-global output 	 "da_case_studies/ch04-management-firm-size/output"
-
-
-
-
-* use \cases_studies_public\wms-management-survey\wms_gbekes_v2.dta, replace
 
 clear
-* cleaned version, stata13
 use "$data_in\wms_da_textbook.dta"
 
 * sample selection
@@ -49,7 +42,7 @@ keep if emp_firm<=5000
 count
 sum emp_firm,d
 
-save "$data_out/ch04-wms-work.dta", replace
+save "$work/ch04-wms-work.dta", replace
 
 
 * describe data
@@ -58,23 +51,34 @@ sum management emp_firm,d
 
 * distribution of y, distribution of x
 tabstat management emp_firm, s(min max mean median sd n) col(s)
-hist management, percent width(0.25) fcolor(emerald) lcolor(gs12) ///
-graphregion(fcolor(white) ifcolor(none))  ///
- plotregion(fcolor(white) ifcolor(white)) ///
- ylabel(, grid) xtitle("Quality of management, average score")
-graph export "$output/wms_Mex_management_hist.eps",replace
 
-hist emp_firm, percent fcolor(emerald) lcolor(gs12) ///
-graphregion(fcolor(white) ifcolor(none))  ///
- plotregion(fcolor(white) ifcolor(white)) ///
- xlabel(0(500)5000, grid) ylabel(0(10)50, grid) width(200) xtitle("Number of employees") 
-graph export "$output/wms_bra_emp_hist.png",replace
+* Figure 4.1
+colorpalette viridis, n(4) select(2) nograph
+hist management, percent width(0.25)  ///
+ color(`r(p)') lcol(white) ///
+ ylabel(, grid) xtitle("Quality of management, average score") ///
+ graphregion(fcolor(white) ifcolor(none))  ///
+ plotregion(fcolor(white) ifcolor(white)) 
+graph export "$output/ch04-figure-1-wms-mex-management-hist-Stata.png",replace
+
+* Figure 4.2a
+colorpalette viridis, n(4) select(2) nograph
+hist emp_firm, percent start(0) width(200) ///
+ xlabel(0(500)5000, grid) ylabel(0(5)30, grid) xtitle("Number of employees") ///
+ color(`r(p)') lcol(white) ///
+ graphregion(fcolor(white) ifcolor(none))  ///
+ plotregion(fcolor(white) ifcolor(white)) 
+graph export "$output/ch04-figure-2a-wms-mex-emp-hist-Stata.png",replace
+
+* Figure 4.2b
 gen lnemp=ln(emp_firm)
-hist lnemp, percent width(0.29) fcolor(emerald) lcolor(gs12) ///
-graphregion(fcolor(white) ifcolor(none))  ///
- plotregion(fcolor(white) ifcolor(white)) ///
- xlabel(4(1)9, grid) ylabel(, grid) xtitle("Ln number of employees") 
-graph export "$output/wms_Mex_lnemp_hist.eps",replace
+colorpalette viridis, n(4) select(2) nograph
+hist lnemp, percent width(0.25) start(4) ///
+ xlabel(4(1)9, grid) ylabel(, grid) xtitle("Ln number of employees") ///
+ color(`r(p)') lcol(white) ///
+ graphregion(fcolor(white) ifcolor(none))  ///
+ plotregion(fcolor(white) ifcolor(white)) 
+graph export "$output/ch04-figure-2b-wms-mex-lnemp-hist-Stata.png",replace
 
 
 * emp : 3 bins

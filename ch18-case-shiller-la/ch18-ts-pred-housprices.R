@@ -32,19 +32,41 @@ library(fpp3)
 
 # Check working directory --------------------------------------------
 # Sets the core parent directory
-current_path = rstudioapi::getActiveDocumentContext()$path 
-dir<-paste0(dirname(dirname(dirname(current_path ))),"/")
-
+#current_path = rstudioapi::getActiveDocumentContext()$path 
+#dir<-paste0(dirname(dirname(dirname(current_path ))),"/")
 
 # Set location folders -----------------------------------------------
-data_in <- paste0(dir,"da_data_repo/case-shiller-la/clean/")
-data_out <- paste0(dir,"da_case_studies/ch18_case-shiller-la/")
-output <- paste0(dir,"da_case_studies/ch18_case-shiller-la/output/")
-func <- paste0(dir, "da_case_studies/ch00-tech-prep/")
+#data_in <- paste0(dir,"da_data_repo/case-shiller-la/clean/")
+#data_out <- paste0(dir,"da_case_studies/ch18_case-shiller-la/")
+#output <- paste0(dir,"da_case_studies/ch18_case-shiller-la/output/")
+#func <- paste0(dir, "da_case_studies/ch00-tech-prep/")
 
-source(paste0(func, "theme_bg.R"))
+#source(paste0(func, "theme_bg.R"))
 # Created a helper function with some useful stuff
-source(paste0(func, "da_helper_functions.R"))
+#source(paste0(func, "da_helper_functions.R"))
+
+
+
+# set working directory
+# option A: open material as project
+# option B: set working directory for da_case_studies
+#           example: setwd("C:/Users/bekes.gabor/Documents/github/da_case_studies/")
+
+# set data dir, data used
+source("set-data-directory.R")             # data_dir must be first defined 
+# alternative: give full path here, 
+#            example data_dir="C:/Users/bekes.gabor/Dropbox (MTA KRTK)/bekes_kezdi_textbook/da_data_repo"
+
+# load theme and functions
+source("ch00-tech-prep/theme_bg.R")
+source("ch00-tech-prep/da_helper_functions.R")
+
+data_in <- paste(data_dir,"case-shiller-la","clean/", sep = "/")
+
+use_case_dir <- "ch18-case-shiller-la/"
+data_out <- use_case_dir
+output <- paste0(use_case_dir,"output/")
+
 
 #############################
 # RMSE functions

@@ -24,7 +24,7 @@ global temp "$work/temp"
 * Directory for data
 * Option 1: run directory-setting do file
 *do "set-data-directory.do" /*data_dir must be first defined */
-*global data_in   	"$da_data_repo/hotels-europe/clean"
+*global data_in   	"$da_data_repo/height-income-distributions/clean"
 * Option 2: set directory here
 global data_in "C:/Users/kezdi/Dropbox/bekes_kezdi_textbook/da_data_repo/height-income-distributions/clean"
 
@@ -70,8 +70,8 @@ gen lnincome=ln(income)
  lab var lnincome "ln(income, thousand US dollars)"
 colorpalette viridis, n(4) select(2) nograph
 hist lnincome if age>=55 & age<60 & female==1 & lnincome<8 & lnincome>0, ///
- percent width(0.25) ///
- color(`r(p)') lcol(white) lw(vvthin) ///
- ylabel(, grid) xlabel(0(1)8, grid) ///
+ percent width(0.25) start(0) ///
+ color(`r(p)') lcol(white) ///
+ ylabel(0(2.5)10, grid) xlabel(0(1)8, grid) ///
  normal
  graph export "$output/ch03-figure-11b-hist-lninc-Stata.png", replace
