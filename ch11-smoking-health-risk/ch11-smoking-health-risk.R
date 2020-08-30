@@ -1,46 +1,67 @@
-################################################################################
-# DATA ANALYSIS TEXTBOOK
-# CH 11 PROBABILITY MODELS
-# SMOKING AND STAYING HEALTHY
+################################################################################################
+# Prepared for the textbook:
+# Data Analysis for Business, Economics, and Policy
+# by Gabor BEKES and  Gabor KEZDI 
+# Cambridge University Press 2021
+# 
+# License: Free to share, modify and use for educational purposes. Not to be used for business purposes.
 #
-# SHARE
-# v1.1 2019-09-11
-# v1.2 2020-04-01 redoing lpm plot + graphs
-# v1.3 2020-04-06 minor graphs
-# v1.4 2020-04-22 names ok
-# v1.5 2020-04-27 label edit
-# v1.6 2020-04-30 label edit
-# v1.7 2020-06-22 calibration curve edit
-# v1.8 2020-06-29 fig 4 color  edit
-# v1.9 2020-07-04 new calibration curves w/ fn
-# v2.0 2020-08-07 histograms edited w boundary, width
-# v2.1 2020-08-14 g7 edited
+###############################################################################################x
+
+# CHAPTER 11
+# CH11 smoking
+# share-health dataset
+# version 0.9 2020-08-28
 
 
-################################################################################
-  
-# WHAT THIS CODES DOES:
-# runs regressions with binary dependent variable, LPM, logit, probit
-# calculates AME for all models
-# shows predictions, calibration curve
-
-  
-################################################################################
-# SET YOUR DIRECTORY HERE
-################################################################################
-
+# ------------------------------------------------------------------------------------------------------
+#### SET UP
+# It is advised to start a new session for every case study
+# CLEAR MEMORY
 rm(list=ls())
 
-source("global.R")
+# Import libraries
+library(tidyverse)
+library(xtable)
+library(haven)
+library(cowplot,
+        lspline,
+data.table,
+mfx,
+margins,
+stargazer,
+psych,
+estimatr,
+huxtable)
 
-use_case_dir <- file.path("ch11-smoking-health-risk/")
-loadLibraries(use_case_dir)
 
-data_in <- paste(data_dir,"share-health","clean", sep = "/")
+
+# set working directory
+# option A: open material as project
+# option B: set working directory for da_case_studies
+#           example: setwd("C:/Users/bekes.gabor/Documents/github/da_case_studies/")
+
+# set data dir, data used
+source("set-data-directory.R")             # data_dir must be first defined 
+# alternative: give full path here, 
+#            example data_dir="C:/Users/bekes.gabor/Dropbox (MTA KRTK)/bekes_kezdi_textbook/da_data_repo"
+
+# load theme and functions
+source("ch00-tech-prep/theme_bg.R")
+source("ch00-tech-prep/da_helper_functions.R")
+
+data_in <- paste(data_dir,"share-health","clean/", sep = "/")
+
+use_case_dir <- "ch11-smoking-health-risk/"
 
 data_out <- use_case_dir
-output <- paste0(use_case_dir,"/output/")
+output <- paste0(use_case_dir,"output/")
 create_output_if_doesnt_exist(output)
+
+
+#-----------------------------------------------------------------------------------------
+
+
 
 ################################################################################
 # 1. PART - CREATE WORKFILE

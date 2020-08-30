@@ -9,7 +9,7 @@ pacman::p_load(urca, sandwich, stargazer,stringr)
 pacman::p_load(scales, data.table, knitr )
 
 #Part I
-pacman::p_load(lspline, cowplot)
+pacman::p_load(lspline, cowplot, arm, pastecs, DataCombine, janitor)
 pacman::p_load(haven, Hmisc, xtable, binsreg)
 
 # Part II
