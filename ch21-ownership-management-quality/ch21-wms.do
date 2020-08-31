@@ -1,20 +1,34 @@
-********************************************************************************
-* Chapter 21
+*********************************************************************
 *
-* founder/family ownsership
-* wms-management
+* GABORS' DATA ANALYSIS TEXTBOOK (Bekes & Kezdi)
 *
-**********************************************************************
+* Case study 03D
+* Distributions of body height and income
+*
+* using the height-income-distributions dataset
+* 
+********************************************************************
 
+********************************************************************
+* SET YOUR DIRECTORY HERE
+*********************************************************************
 
-* set the path
-cd "C:\Users\bekes.gabor\Dropbox (MTA KRTK)\bekes_kezdi_textbook"
+* Directory for work
+cd "C:\Users\kezdi\GitHub\da_case_studies" 
+global work  "ch21-ownership-management-quality"
+cap mkdir "$work/output"
+global output "$work/output"
+cap mkdir "$work/temp"
+global temp "$work/temp"
 
+* Directory for data
+* Option 1: run directory-setting do file
+*do "set-data-directory.do" /*data_dir must be first defined */
+*global data_in   	"$da_data_repo/hotels-vienna"
+*global data_in   	"$da_data_repo/hotels-vienna"
+* Option 2: set directory here
+global data_in "C:/Users/kezdi/Dropbox/bekes_kezdi_textbook/da_data_repo/wms-management-survey/clean"
 
-*location folders
-global data_in   "da_data_repo/wms-management-survey/clean"
-global data_out  "da_case_studies/ch21-ownership-management-quality"
-global output   "$data_out/output"
 
 
 ***************************************************************
@@ -80,6 +94,8 @@ gen lnemp=ln(emp)
 *lpoly management lnemp, nosca ci ylab(,grid) xlab(,grid)
 
 * competition 
+tab competition,mis
+drop if competition==""
 rename competition competition_string
 encode competition_string, gen(competition)
  recode competition 1=2
@@ -128,7 +144,7 @@ count if emp<50
 drop if emp<50 
 count if emp>5000
 drop if emp>5000
-drop if competition==.
+
 count
 * 8,440
 
@@ -178,7 +194,7 @@ tab foundfam, sum(management)
 
 
 * save workfile for matching and regression
-save "$data_out/wms-workfile.dta",replace
+save "$work/wms-workfile.dta",replace
 
 
 ***************************************************************
@@ -190,7 +206,7 @@ save "$data_out/wms-workfile.dta",replace
 * REGRESSIONS
 *************************************************************
 
-use "$data_out/wms-workfile.dta" ,clear
+use "$work/wms-workfile.dta" ,clear
 
 sum industry country degree_nm degree_nm_sq compet_moder compet_strong ///
  age_young age_old age_unknown lnemp 
@@ -227,7 +243,7 @@ reg management foundfam ///
 * EXACT MATCHING
 ***************************************************************** 
 
-use "$data_out/wms-workfile.dta" ,clear
+use "$work/wms-workfile.dta" ,clear
 
 egen empbin5=cut(emp_firm), group(5)
  tabstat emp_firm, by(empbin) s(min max n)
@@ -287,7 +303,7 @@ sum d [w=n1]
 
 * SOLUTION With replacement
 
-use "$data_out/wms-workfile.dta" ,clear
+use "$work/wms-workfile.dta" ,clear
 
 psmatch2  foundfam ///
  i.industry i.countrycode ///
@@ -309,7 +325,7 @@ psmatch2  foundfam ///
 ***************************************************************** 
 * CHECK common support
 ***************************************************************** 
-use "$data_out/wms-workfile.dta" ,clear
+use "$work/wms-workfile.dta" ,clear
 
 
 qui tab industry, gen(i)
