@@ -1,33 +1,26 @@
-################################################################################
-# DATA ANALYSIS TEXTBOOK
-# CH 12 TIME SERIES
-# STOCK RETURN AND MARKET RISK
+################################################################################################
+# Prepared for the textbook:
+# Data Analysis for Business, Economics, and Policy
+# by Gabor BEKES and  Gabor KEZDI 
+# Cambridge University Press 2021
+# 
+# License: Free to share, modify and use for educational purposes. Not to be used for business purposes.
 #
-# STOCKS-SP500
-# v1.0 2018-10-01 first run
-# v1.3 2019-08-15 new take with many options
-# v1.4 2019-12-04 new version for textbokk
-# v1.5 2019-12-08 small edits, now has u.r. test
-# v1.6 2020-02-06 graph edits re axis
-# v1.7 2020-03-24 more graph edits re axis
-# v1.8 2020-04-22 names ok
-# v1.9 2020-04-25 names ok
-# v2.0 2020-04-28 graph label edits
-# v2.1 2020-04-30 graph label edits
-# v2.2 2020-08-09 4,5,6 y axis edits
+###############################################################################################x
+
+# CHAPTER 10
+# CH12 Returns on a company stock and market returns
+# version 0.9 2020-08-31
 
 
-################################################################################
+# ------------------------------------------------------------------------------------------------------
+#### SET UP
+# It is advised to start a new session for every case study
+# CLEAR MEMORY
+rm(list=ls())
 
-# WHAT THIS CODES DOES:
-# combines data, aggregates to monthly level
-# describes patterns
-# many ts graphs
-# runs regressions 
-
-
+library(tidyverse)
 library(lubridate)
-library(ggplot2)
 library(cowplot)
 library(scales)
 library(DataCombine)
@@ -39,34 +32,34 @@ library(estimatr)
 library(huxtable)
 library(plotly)
 library(htmlwidgets)
-library(tidyverse)
-library(dplyr)
 library(xtable)
 library(aTSA)
 
 
-# CLEAR MEMORY
-rm(list=ls())
+
+# set working directory
+# option A: open material as project
+# option B: set working directory for da_case_studies
+#           example: setwd("C:/Users/bekes.gabor/Documents/github/da_case_studies/")
+
+# set data dir, data used
+source("set-data-directory.R")             # data_dir must be first defined 
+# alternative: give full path here, 
+#            example data_dir="C:/Users/bekes.gabor/Dropbox (MTA KRTK)/bekes_kezdi_textbook/da_data_repo"
+
+# load theme and functions
+source("ch00-tech-prep/theme_bg.R")
+source("ch00-tech-prep/da_helper_functions.R")
+options(digits = 3) 
 
 
-################################################################################
-# SET YOUR DIRECTORY HERE
-################################################################################
-# Sets the core parent directory
-current_path = rstudioapi::getActiveDocumentContext()$path 
-dir<-paste0(dirname(dirname(dirname(current_path ))),"/")
+use_case_dir <- "ch12-stock-returns-risk/"
+data_in <- paste(data_dir,"stocks-sp500","raw/", sep = "/")
+data_out <-  paste(data_dir,"stocks-sp500","clean/", sep = "/")
 
-data_in <- paste0(dir,"da_data_repo/stocks-sp500/raw/")
-data_out <- paste0(dir,"da_data_repo/stocks-sp500/clean/")
+output <- paste0(use_case_dir,"output/")
+create_output_if_doesnt_exist(output)
 
-output   <- paste0(dir,"da_case_studies/ch12-stock-returns-risk/output/")
-func <- paste0(dir, "da_case_studies/ch00-tech-prep/")
-
-
-#call function
-source(paste0(func, "theme_bg.R"))
-# Created a helper function with some useful stuff
-source(paste0(func, "da_helper_functions.R"))
 
 
 
@@ -126,7 +119,6 @@ p1<-ggplot(data=data_daily,aes(x=date)) +
   labs(y = "Microsoft stock price (US dollars)",x= "Date (day)")+
   theme_bg() 
 p1
-#save_fig("ch12-msft-1_R", "small", plot=p1)
 save_fig("ch12-figure-2a-msft-day", output, "small", plot=p1)
 
 
@@ -139,7 +131,6 @@ p2<-ggplot(data=data_daily,aes(x=date)) +
   labs(y = "S&P 500 stock market index",x= "Date (day)")+
   theme_bg() 
 p2
-#save_fig("ch12-sp500-1_R", "small", plot=p2)
 save_fig("ch12-figure-2b-sp500-day",output, "small", plot=p2)
 
   
@@ -183,7 +174,6 @@ p3<-ggplot(data=data_monthly,aes(x=date)) +
   labs(y = "Microsoft stock price (US dollars)",x = "Date (month)")+
   theme_bg() 
 p3
-#save_fig("ch12-stocks-msft-2_R","small", plot=p3)
 save_fig("ch12-figure-3a-msft-mo", output, "small", plot=p3)
 
 
@@ -196,12 +186,10 @@ p4<-ggplot(data=data_monthly,aes(x=date)) +
   labs(y = "S&P500 stock market index",x = "Date (month)")+
   theme_bg() 
 p4
-#save_fig("ch12-stocks-sp500-2_R","small", plot=p4)
 save_fig("ch12-figure-3b-sp500-mo", output, "small", plot=p4)
 
 
 #unit root test
-
 pp.test(data_monthly$p_MSFT)
 pp.test(data_monthly$p_SP500)    
   
@@ -216,7 +204,6 @@ p4a <- ggplot(data=data_monthly,aes(x=date)) +
                minor_breaks = "1 year")  +
   theme_bg() 
 p4a
-#save_fig("ch12-stocks-msft-3_R","small")
 save_fig("ch12-figure-4a-msft-moret",output, "small", plot=p4a)
 
 p4b<-ggplot(data=data_monthly,aes(x=date)) +
@@ -228,9 +215,7 @@ p4b<-ggplot(data=data_monthly,aes(x=date)) +
                limits = as.Date(c("1998-01-01","2018-12-31")), labels = date_format("%b%Y"),
                minor_breaks = "1 year") +
   theme_bg() 
-  
 p4b
-#save_fig("ch12-stocks-sp500-3_R","small" )
 save_fig("ch12-figure-4b-sp500-moret",output, "small", plot=p4b)
 
 #unit root test
@@ -265,7 +250,6 @@ p5<-ggplot(data=data_monthly,aes(x=PctRetSP500,y = PctRetMSFT)) +
   geom_segment(aes(x = -10, y = -17, xend = -15, yend = -17), arrow = arrow(length = unit(0.1, "cm")))+
   annotate("text", x = -5, y = -17, size=2, label = "reg line, beta=1.26")
 p5
-#save_fig("ch12-stocks-scatter_R","small", plot=p9)
 save_fig("ch12-figure-5-stocks-scatter",output, "small", plot=p5)
 
 
@@ -288,7 +272,6 @@ p6a<-ggplot(data=data_monthly %>% select(date, PctRetMSFT, PctRetSP500) %>%
         legend.key.height = unit(.2, "cm")) + 
   guides(linetype = guide_legend(override.aes = list(size = 0.6)))
 p6a
-#save_fig("ch12-stocks-together-1_R","small", plot=p7)
 save_fig("ch12-figure-6a-stocks-together-1",output, "small", plot = p6a)
 
 p6b<-ggplot(data=data_monthly %>% select(date, PctRetMSFT, PctRetSP500) %>%  
@@ -309,7 +292,6 @@ p6b<-ggplot(data=data_monthly %>% select(date, PctRetMSFT, PctRetSP500) %>%
         legend.key.height = unit(.2, "cm")) + 
   guides(linetype = guide_legend(override.aes = list(size = 0.6)))
 p6b
-#save_fig("ch12-stocks-together-2_R","small", plot=p8)
 save_fig("ch12-figure-6b-stocks-together-2",output, "small", plot=p6b)
 
 
