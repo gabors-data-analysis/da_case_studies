@@ -31,6 +31,7 @@ library(stargazer)
 library(xtable)
 library(directlabels)
 library(knitr)
+library(cowplot)
 
 # option A: open material as project
 # option B: set working directory for da_case_studies
@@ -176,12 +177,12 @@ datau <- subset(data, price<=400)
 
 # price
 g3a <- ggplot(data=datau, aes(x=price)) +
-  geom_histogram_da(type="percent", binwidth = 10, boundary=20) +
+  geom_histogram_da(type="percent", binwidth = 10) +
   #geom_histogram(aes(y = (..count..)/sum(..count..)), binwidth = 10, boundary=0,
   #               color = color.outline, fill = color[1], size = 0.25, alpha = 0.8,  show.legend=F,  na.rm=TRUE) +
 #  coord_cartesian(xlim = c(0, 400)) +
   labs(x = "Price (US dollars)",y = "Percent")+
-  scale_y_continuous(expand = c(0.00,0.00),limits=c(0, 0.2), breaks = seq(0, 0.2, by = 0.05), labels = scales::percent_format(1)) +
+  scale_y_continuous(expand = c(0.00,0.00),limits=c(0, 0.15), breaks = seq(0, 0.15, by = 0.03), labels = scales::percent_format(1)) +
     scale_x_continuous(expand = c(0.00,0.00),limits=c(0,400), breaks = seq(0,400, 50)) +
   theme_bg() 
 g3a
@@ -189,7 +190,7 @@ save_fig("ch14-figure-3a-airbnb-price", output, "small")
 
 # lnprice
 g3b<- ggplot(data=datau, aes(x=ln_price)) +
-  geom_histogram_da(type="percent", binwidth = 0.2, boundary=0) +
+  geom_histogram_da(type="percent", binwidth = 0.2) +
   #  geom_histogram(aes(y = (..count..)/sum(..count..)), binwidth = 0.18,
   #               color = color.outline, fill = color[1], size = 0.25, alpha = 0.8,  show.legend=F,  na.rm=TRUE) +
   coord_cartesian(xlim = c(2.5, 6.5)) +
@@ -243,14 +244,12 @@ save_fig("ch14-figure4b-airbnb-accom", output, "small")
 
 # Basic Variables
 basic_lev  <- c("n_accommodates", "n_beds", "f_property_type", "f_room_type", "n_days_since", "flag_days_since")
-basic_log <- c("ln_accommodates", "ln_beds", "f_property_type", "f_room_type","ln_days_since", "flag_days_since")
 
 # Factorized variables
 basic_add <- c("f_bathroom","f_cancellation_policy","f_bed_type")
 reviews <- c("f_number_of_reviews","n_review_scores_rating", "flag_review_scores_rating")
 # Higher orders
 poly_lev <- c("n_accommodates2", "n_days_since2", "n_days_since3")
-poly_log <- c("ln_accommodates2","ln_days_since2","ln_days_since3")
 
 #not use p_host_response_rate due to missing obs
 
@@ -503,7 +502,6 @@ print(lasso_cv_rmse[1, 1])
 ###################################################
 model3_level <- model_results_cv[["modellev3"]][["model_work_data"]]
 model7_level <- model_results_cv[["modellev7"]][["model_work_data"]]
-model7_log <- model_results_cv[["modellog7"]][["model_work_data"]]
 
 
 # look at holdout RMSE
@@ -541,15 +539,7 @@ d <- data.frame(ylev=Ylev, predlev=predictionlev_holdout[,"fit"] )
 # Check the differences
 d$elev <- d$ylev - d$predlev
 
-# FIXME: a problem
-# Logged target variable
-# model log 7 on log price
-Ylog <- data_holdout[["ln_price"]]
-#predictionlog_test <- predict(model7_log, newdata = data_holdout)
-#predictionlog_test2 <- exp(predictionlog_test) * exp((rmselog)^2/2)
-#d <- data.frame(ylev=Ylev, ylog=Ylog, predlev=predictionlev_holdout[,"fit"] , predlog=predictionlog_test2)
-
-
+# NB: you may repeat with logs, watch our for log conversion
 
 # Plot predicted vs price
 level_vs_pred <- ggplot(data = d) +
@@ -565,9 +555,6 @@ level_vs_pred <- ggplot(data = d) +
 level_vs_pred
 save_fig("ch14-figure-8a-level-vs-pred", output, "small")
 
-# calculate  PI for modellev7 for n_accomodate
-# show a graph with x: n_accomodate, y: price
-# graph: F14_CI_n_accomodate
 
 # Redo predicted values at 80% PI
 predictionlev_holdout_pred <- as.data.frame(predict(model7_level, newdata = data_holdout, interval="predict", level=0.8)) %>%
@@ -603,12 +590,12 @@ F14_CI_n_accomodate <- ggplot(predictionlev_holdout_summary, aes(x=factor(n_acco
   theme_bg() +
   theme(legend.title= element_blank(),legend.position="none")
 F14_CI_n_accomodate
-#save_fig("F14_CI_n_accomodate", output, "small")
 save_fig("ch14-figure-8b-ci-n-accomodate", output, "small")
 
-#NOT USED
 
-# Density chart
+
+#NOT USED
+# Density chart (not in book)
 g3 <- ggplot(data = datau, aes(x=price)) +
   geom_density(aes(color=f_room_type, fill=f_room_type),  na.rm =TRUE, alpha= 0.3) +
   labs(x="Price (US dollars)", y="Density", color = "") +
@@ -626,7 +613,7 @@ g3 <- ggplot(data = datau, aes(x=price)) +
 g3
 
 
-# Barchart
+# Barchart  (not in book)
 plot4 <- ggplot(data = datau, aes(x = factor(n_accommodates), color = f_room_type, fill = f_room_type)) +
   geom_bar(alpha=0.8, na.rm=T, width = 0.8) +
   scale_color_manual(name="",
@@ -640,17 +627,6 @@ plot4
 
 
 
-# repeat for log (not used)
-model_result_plot_logs <- ggplot(data = t1_logs, aes(x = factor(nvars), y = value, color=var, group = var)) +
-  geom_line(color=c(color[1],color[2],color[3])) +
-  scale_y_continuous(
-    name = "RMSE",
-    sec.axis = sec_axis(~ . * 100 , name = "BIC"),
-    limits = c(10, 45)) +
-  scale_x_discrete( name = "Number of vars", expand=c(0, 1)) +
-  geom_dl(aes(label = var), method = list("top.points", cex=0.7)) +
-  scale_colour_discrete(guide = 'none') +
-  theme_bg()
 
 #ch14-table-1-levlog-pred
 #ch14-table-3-fit-level
