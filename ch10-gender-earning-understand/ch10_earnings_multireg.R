@@ -1,35 +1,27 @@
-########################################################################
+################################################################################################
+# Prepared for the textbook:
+# Data Analysis for Business, Economics, and Policy
+# by Gabor BEKES and  Gabor KEZDI 
+# Cambridge University Press 2021
+# 
+# License: Free to share, modify and use for educational purposes. Not to be used for business purposes.
 #
-# DATA ANALYSIS TEXTBOOK
-# MULTIVARIATE REGRESSION MODELS
-# ILLUSTRATION STUDY FOR CHAPTER 10
-# PART 1
+###############################################################################################x
 
-# version 2.1. 2019-11-11
-# version 2.2 2019-11-26 just minor edits re tidyverse 
-# version 2.3 2020-03-24 minor axis edits
-# v1.1 2020-04-22 names ok
+# CHAPTER 10
+# CH10A Understanding the gender difference in earnings
+# version 0.9 2020-08-31
 
-# DATA US CENSUS 2014
-########################################################################
 
-# WHAT THIS CODES DOES:
-
-# Loads the data csv
-# Filter the dataset and save a sample used in the analysis
-# Transforms variables
-# Check distribution
-# Run regression with multiple explanatory variables
-# Generate interaction terms
-
+# ------------------------------------------------------------------------------------------------------
+#### SET UP
+# It is advised to start a new session for every case study
 # CLEAR MEMORY
 rm(list=ls())
 
-
+# Import libraries 
+library(tidyverse)
 library(arm)
-library(readr)
-library(dplyr)
-library(ggplot2)
 library(lmtest)
 library(estimatr)
 library(sandwich)
@@ -37,27 +29,33 @@ library(segmented)
 library(stargazer)
 library(cowplot)
 library(huxtable)
-library(tidyverse)
-library(dplyr)
-
-# CHECK WORKING DIRECTORY - CHANGE IT TO YOUR WORKING DIRECTORY
-# Sets the core parent directory
-current_path = rstudioapi::getActiveDocumentContext()$path 
-dir<-paste0(dirname(dirname(dirname(current_path ))),"/")
-
-#location folders
-data_in  <- paste0(dir,"da_data_repo/cps-earnings/clean/")
-data_out <- paste0(dir,"da_case_studies/ch10-gender-earning-understand/")
-output <-  paste0(dir,"da_case_studies/ch10-gender-earning-understand/output/")
-func <-    paste0(dir, "da_case_studies/ch00-tech-prep/")
 
 
-#call function
-source(paste0(func, "theme_bg.R"))
 
-# Created a helper function with some useful stuff
-source(paste0(func, "da_helper_functions.R")) 
+# set working directory
+# option A: open material as project
+# option B: set working directory for da_case_studies
+#           example: setwd("C:/Users/bekes.gabor/Documents/github/da_case_studies/")
+
+# set data dir, data used
+source("set-data-directory.R")             # data_dir must be first defined 
+# alternative: give full path here, 
+#            example data_dir="C:/Users/bekes.gabor/Dropbox (MTA KRTK)/bekes_kezdi_textbook/da_data_repo"
+
+# load theme and functions
+source("ch00-tech-prep/theme_bg.R")
+source("ch00-tech-prep/da_helper_functions.R")
 options(digits = 3) 
+
+data_in <- paste(data_dir,"cps-earnings","clean/", sep = "/")
+use_case_dir <- "ch10-gender-earning-understand/"
+
+data_out <- use_case_dir
+output <- paste0(use_case_dir,"output/")
+create_output_if_doesnt_exist(output)
+
+
+#####################################################################
 
 
 # load in clean and tidy data and create workfile
@@ -94,15 +92,15 @@ reg3 <- lm_robust(age ~ female, data=cps, se_type = "HC1")
 ht<-huxreg(reg,reg2, reg3,
            statistics = c(N = "nobs", R2 = "r.squared")) 
 ht
-#Figure 10.1
 
-
+# not in book
 F10_earnings_hist<- ggplot(data = cps, aes (x = age, y = 2*(..count..)/sum(..count..))) +
-  geom_histogram(binwidth = 4, color = color.outline, fill = color[1], size = 0.25, alpha = 0.8,  show.legend=F, na.rm =TRUE) +
+  geom_histogram(binwidth = 4, color = color.outline, fill = color[1], size = 0.25, alpha = 0.8,  
+                 boundary=0, closed='left',  show.legend=F, na.rm =TRUE) +
   labs(x = "Age (years)", y = "Percent") +
   facet_wrap(~ifelse(female, "Female", "Male"))+
   labs(x = "Age (years)",y = "Percent")+
-  scale_x_continuous(limits = c(24,64) , breaks = seq(25, 65, by = 5),) +
+  scale_x_continuous(limits = c(24,64) , breaks = seq(25, 65, by = 12),) +
   scale_y_continuous(limits=c(0, 0.16), breaks = seq(0, 0.16, by = 0.02), labels = scales::percent_format(accuracy = 5L)) +
   theme_bg()
 F10_earnings_hist
@@ -121,7 +119,6 @@ F10_earnings_density<- ggplot(data = cps, aes(x=age, y = stat(density), color = 
   geom_text(aes(x = 55, y = 0.020, label = "Female"), color = color[1], size=2) +
   theme_bg() 
 F10_earnings_density
-#save_fig("F10_earnings_density_R", output, "small")
 save_fig("ch10-figure-1-earnings-density", output, "small")
 
 
@@ -213,7 +210,6 @@ F10_earnings_interact<- ggplot(data=data_m,aes(x=age,y=value))+
   scale_y_continuous(expand = c(0.01,0.01), limits = c(2.8, 3.8), breaks = seq(2.8, 3.8, by = 0.1)) +
   theme_bg() 
 F10_earnings_interact
-save_fig("ch10-figure-2a-earnings-interact1", output, "small")
 #save_fig("F10_earnings_interact_R", output, "small")
 
 
@@ -245,7 +241,6 @@ F10_earnings_interact2<- ggplot(data=data_m,aes(x=age,y=value))+
   scale_y_continuous(expand = c(0.01,0.01), limits = c(2.8, 3.8), breaks = seq(2.8, 3.8, by = 0.1)) +
   theme_bg() 
 F10_earnings_interact2
-save_fig("ch10-figure-2b-earnings-interact2", output, "small")
 #save_fig("F10_earnings_interact_R", output, "small")
 
 

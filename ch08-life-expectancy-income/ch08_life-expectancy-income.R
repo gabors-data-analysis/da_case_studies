@@ -8,9 +8,8 @@
 #
 ###############################################################################################x
 
-# CHAPTER 03
-# CH03B Comparing hotel prices in Europe: Vienna vs. London 	
-# hotels-europe dataset
+# CHAPTER 08
+# CH08B How is life expectancy related to the average income of a country?
 # version 0.9 2020-08-28
 
 
@@ -45,8 +44,8 @@ source("ch00-tech-prep/theme_bg.R")
 source("ch00-tech-prep/da_helper_functions.R")
 
 data_in <- paste(data_dir,"worldbank-lifeexpectancy","clean/", sep = "/")
-
 use_case_dir <- "ch08-life-expectancy-income/"
+
 data_out <- use_case_dir
 output <- paste0(use_case_dir,"output/")
 create_output_if_doesnt_exist(output)

@@ -1,79 +1,67 @@
-#####################################################################
-# DATA ANALYSIS TEXTBOOK
-# MULTIVARIATE REGRESSION MODEL
-# ILLUSTRATION STUDY FOR CHAPTER 10
+################################################################################################
+# Prepared for the textbook:
+# Data Analysis for Business, Economics, and Policy
+# by Gabor BEKES and  Gabor KEZDI 
+# Cambridge University Press 2021
+# 
+# License: Free to share, modify and use for educational purposes. Not to be used for business purposes.
 #
-# DATA HOTELS 
-#####################################################################
-  
-# WHAT THIS CODES DOES:
-# Run regression with multiple explanatory variables
-# shows yhat y graph
+###############################################################################################x
+
+# CHAPTER 10
+# CH10B Finding a good deal among hotels with multiple regression
+# version 0.9 2020-08-31
 
 
-# v 2.0 2019-11-14 edits
-# v 2.1 2020-03-24 graph edits
-# v 2.2 2020-03-27 graph edits
-# v 2.3 2020-03-31 y-yhat graph edits
-# v 2.4 2020-04-28 y-yhat graph edits, names ok
-
-
-
-# Clear memory
+# ------------------------------------------------------------------------------------------------------
+#### SET UP
+# It is advised to start a new session for every case study
+# CLEAR MEMORY
 rm(list=ls())
 
 # Import libraries 
 library(tidyverse)
-library(lmtest)
-library(sandwich) #
-library(segmented)
 library(stargazer)
 library(haven)
-library(lspline) #
-library(gridExtra)
-library(cowplot)
 library(scales)
 
 
-#TODO
-# clear library list
 
+# set working directory
+# option A: open material as project
+# option B: set working directory for da_case_studies
+#           example: setwd("C:/Users/bekes.gabor/Documents/github/da_case_studies/")
 
-       # CHANGE IT TO YOUR WORKING DIRECTORY
-       ############################################################  
-       # SET YOUR OWN PATH HERE
-       ############################################################  
-        # Sets the core parent directory
-        current_path = rstudioapi::getActiveDocumentContext()$path 
-        dir<-paste0(dirname(dirname(dirname(current_path ))),"/")
+# set data dir, data used
+source("set-data-directory.R")             # data_dir must be first defined 
+# alternative: give full path here, 
+#            example data_dir="C:/Users/bekes.gabor/Dropbox (MTA KRTK)/bekes_kezdi_textbook/da_data_repo"
 
-       
-       #location folders
-       data_in <- paste0(dir,"da_data_repo/hotels-vienna/clean/")
-       data_out <-  paste0(dir,"da_case_studies/ch10-hotels-multiple-reg/")
-       output <- paste0(dir,"da_case_studies/ch10-hotels-multiple-reg/output/")
-       func <- paste0(dir, "da_case_studies/ch00-tech-prep/")
-       
-       
-       #call function
-       source(paste0(func, "theme_bg.R"))
-       
-       # Created a helper function with some useful stuff
-       source(paste0(func, "da_helper_functions.R")) 
-       options(digits = 3) 
+# load theme and functions
+source("ch00-tech-prep/theme_bg.R")
+source("ch00-tech-prep/da_helper_functions.R")
+options(digits = 3) 
+
+data_in <- paste(data_dir,"hotels-vienna","clean/", sep = "/")
+use_case_dir <- "ch10-hotels-multiple-reg/"
+
+data_out <- use_case_dir
+output <- paste0(use_case_dir,"output/")
+create_output_if_doesnt_exist(output)
+
        
 #####################################################################
        
        
-       # load vienna
-       hotels <- read_csv(paste0(data_in,"hotels-vienna.csv"))
-       # ------------------------------------------------------------------------------------------------------
-       ####SAMPLE SELECTION
-       # Apply filters:  3-4 stars, Vienna actual, without  extreme value
-       hotels <- hotels %>% filter(accommodation_type=="Hotel") %>%
-         filter(city_actual=="Vienna") %>%
-         filter(stars>=3 & stars<=4) %>% filter(!is.na(stars)) %>%
-         filter(price<=600)
+# load vienna
+hotels <- read_csv(paste0(data_in,"hotels-vienna.csv"))
+# ------------------------------------------------------------------------------------------------------
+####SAMPLE SELECTION
+# Apply filters:  3-4 stars, Vienna actual, without  extreme value
+hotels <- hotels %>% filter(accommodation_type=="Hotel") %>%
+        filter(city_actual=="Vienna") %>%
+        filter(stars>=3 & stars<=4) %>% filter(!is.na(stars)) %>%
+        filter(price<=600)
        
        
        
@@ -151,11 +139,10 @@ y_yhat_hotels<- ggplot(data = hotels, aes(x = lnprice_hat, y = lnprice)) +
   theme(axis.title.x=element_text(size=9)) +
   theme(axis.title.y=element_text(size=9)) 
 y_yhat_hotels
-#save_fig("y_yhat_hotels_R", output, "large")
 save_fig("ch10-figure-3-hotels-yhat-y", output, "large")
 
 
-# residual - yhat graph
+# residual - yhat graph (not in book)
 ggplot(data = hotels, aes(x = lnprice_hat, y = lnprice_resid)) +
   geom_point(color = color[1], size = 1,  shape = 16, alpha = 0.6, show.legend=F, na.rm = TRUE) + 
   geom_smooth(method="lm", colour=color[4], se=F, size=1) +
