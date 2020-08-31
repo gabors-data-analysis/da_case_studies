@@ -1,61 +1,56 @@
-############################################################
-#
-# DATA ANALYSIS TEXTBOOK
-# INFERENCE
-# Ch05
+################################################################################################
+# Prepared for the textbook:
+# Data Analysis for Business, Economics, and Policy
+# by Gabor BEKES and  Gabor KEZDI 
+# Cambridge University Press 2021
 # 
-# S&P500 index 
-# data covers 11 years starting with August 25 2006 and ending with August 26 2016. It includes 2,519 days.
+# License: Free to share, modify and use for educational purposes. Not to be used for business purposes.
+#
+###############################################################################################x
 
-# v1.1. 2019-10-04
-# v1.2. 2020-01-28 error in DATE parse + added table
-# v1.3. 2020-03-13 various minor edits to axes, labels, annotations
-# v1.4. 2020-04-08 adding save. FIXME: does not read in file...
-# v1.5  2020-04-22 names ok
-# v1.6  2020-04-22 hist ok + FIXME
-# v1.7  2020-04-28 density->hist
-
-############################################################  
-# WHAT THIS CODES DOES:
-
-# Loads the csv file 
-# Clean the dataset
-# Generate new variables
-# Generate samples by resampling to derive confidence intervals
-# Generate samples by bootstraping to derive confidence intervals
-
-# TODO
-# check error msg in data prep
+# CHAPTER 03
+# CH03B Comparing hotel prices in Europe: Vienna vs. London 	
+# hotels-europe dataset
+# version 0.9 2020-08-28
 
 
+# ------------------------------------------------------------------------------------------------------
+#### SET UP
+# It is advised to start a new session for every case study
 # CLEAR MEMORY
 rm(list=ls())
 
+# Import libraries
+library(tidyverse)
 library(arm)
-library(readr)
-library(dplyr)
-library(ggplot2)
 library(pastecs)
 library(DataCombine)
-library(broom)
-library(tidyverse)
-library(lubridate)
 library(janitor)
 
-# Sets the core parent directory
-current_path = rstudioapi::getActiveDocumentContext()$path 
-dir<-paste0(dirname(dirname(dirname(current_path ))),"/")
 
-# Location folders
-data_in <- paste0(dir,"da_data_repo/sp500/clean/")
-data_out <- paste0(dir,"da_case_studies/ch05-stock-market-loss-generalize/")
-output <- paste0(dir,"da_case_studies/ch05-stock-market-loss-generalize/output/")
-func <- paste0(dir, "da_case_studies/ch00-tech-prep/")
+# set working directory
+# option A: open material as project
+# option B: set working directory for da_case_studies
+#           example: setwd("C:/Users/bekes.gabor/Documents/github/da_case_studies/")
+
+# set data dir, data used
+source("set-data-directory.R")             # data_dir must be first defined 
+# alternative: give full path here, 
+#            example data_dir="C:/Users/bekes.gabor/Dropbox (MTA KRTK)/bekes_kezdi_textbook/da_data_repo"
+
+# load theme and functions
+source("ch00-tech-prep/theme_bg.R")
+source("ch00-tech-prep/da_helper_functions.R")
+
+data_in <- paste(data_dir,"sp500","clean/", sep = "/")
+
+use_case_dir <- "ch05-stock-market-loss-generalize/"
+data_out <- use_case_dir
+output <- paste0(use_case_dir,"output/")
+create_output_if_doesnt_exist(output)
 
 
-#call function
-source(paste0(func, "theme_bg.R"))
-
+#-----------------------------------------------------------------------------------------
 # LOAD  DATA
 sp500 <- read_csv(paste0(data_in,"SP500_2006_16_data.csv"),na = c("", "#N/A"))
 sp500 <- subset(sp500, VALUE != "NA")
@@ -134,7 +129,7 @@ right <- mean(nobs_df$nobs_1000)+error
 options(digits = 2)
 
 resample1000<-ggplot(nobs_df,aes(nobs_1000)) +
-      geom_histogram(binwidth = 0.1, color = color.outline, fill = color[1], alpha = 0.8, center=0) +
+      geom_histogram(binwidth = 0.1, color = color.outline, fill = color[1], alpha = 0.8, boundary=0, closed='left') +
       labs(x = "Percent of days with losses of 5% or more", y = "Frequency") +
       geom_vline(aes(xintercept = mean(nobs_500)), color =color[2], size = 0.7) +
       coord_cartesian(xlim = c(0, 1.5), ylim = c(0, 2500)) +
@@ -144,7 +139,6 @@ resample1000<-ggplot(nobs_df,aes(nobs_1000)) +
       annotate("text", x = 0.85, y = 2200, label = "Mean", size=2.5)+
       theme_bg()
 resample1000
-#save_fig("resample1000_R", output, "small") 
 save_fig("ch05-figure-2-resample1000", output, "small")
 
 
@@ -168,8 +162,8 @@ ggplot(nobs_df,aes(nobs_1000))+
 
 
 gh<-ggplot(data=nobs_df)+
-  geom_histogram( aes(x=nobs_500, y = (..count..)/sum(..count..)*100, color = "n500", fill = "n500"), binwidth = 0.2, boundary=0, alpha=0.7) +
-  geom_histogram( aes(x=nobs_1000, y = (..count..)/sum(..count..)*100, color = "n1000", fill = "n1000"), binwidth = 0.2, boundary=0, alpha=0.1, size=0.7) +
+  geom_histogram( aes(x=nobs_500, y = (..count..)/sum(..count..)*100, color = "n500", fill = "n500"), binwidth = 0.2, boundary=0, closed='left', alpha=0.7) +
+  geom_histogram( aes(x=nobs_1000, y = (..count..)/sum(..count..)*100, color = "n1000", fill = "n1000"), binwidth = 0.2, boundary=0, closed='left', alpha=0.1, size=0.7) +
     ylab("Percent") +
   xlab("Percent of days with losses over 5%") +
   scale_x_continuous(expand=c(0.01, 0.01), limits = c(0,1.6), breaks = seq(0, 1.6, by = 0.2)) +
@@ -215,12 +209,11 @@ names(Results) <- c("loss1","loss2","loss3","loss4","loss5","loss6",
 
 # Figure 5.5
 bootstrap<- ggplot(Results,aes(loss5))+
-    geom_histogram_da(type="frequency", binwidth = 0.04)+
+    geom_histogram_da(type="frequency", binwidth = 0.04, boundary=0, closed='left')+
     scale_y_continuous(expand=c(0,0),limits = c(0,1200), breaks = seq(0,1200,200)) +
     scale_x_continuous(expand=c(0.01,0.01),limits=c(0,1.2), breaks = seq(0,1.2,0.1)) +
   labs(x = "Percent of days with losses of 5% or more", y = "Frequency")+
   theme_bg()
 bootstrap
-#save_fig("bootstrap_R", output, "small")
 save_fig("ch05-figure-5-bootstrap", output, "small")
 

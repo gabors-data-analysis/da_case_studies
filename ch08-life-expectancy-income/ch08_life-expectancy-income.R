@@ -1,59 +1,57 @@
-########################################################################
+################################################################################################
+# Prepared for the textbook:
+# Data Analysis for Business, Economics, and Policy
+# by Gabor BEKES and  Gabor KEZDI 
+# Cambridge University Press 2021
+# 
+# License: Free to share, modify and use for educational purposes. Not to be used for business purposes.
 #
-# DATA ANALYSIS TEXTBOOK
-# FUNDAMENTALS OF REGRESSION ANALYSIS
-# ILLUSTRATION STUDY FOR CHAPTER 8
-# Life expectancy and GDP (per capita), xcountry regression
-#
-# data downloaded from the World Bank
-  ########################################################################
+###############################################################################################x
+
+# CHAPTER 08
+# CH08B How is life expectancy related to the average income of a country?
+# version 0.9 2020-08-28
 
 
-# v 3.2. 2019-11-09 
-# v 3.3. 2020-03-17 tidyverse edits, graph edits
-# v 3.4. 2020-03-21 substantial changes, reorder + add histograms
-# v 3.5. 2020-04-08 save fig ERROR 
-# v 3.6 2020-04-22 names ok
-# v 3.7 2020-04-25 numbering edited
-# v 3.8 2020-06-26 7b 9a edited
-
-# WHAT THIS CODES DOES:
-  
-# Imports data
-# Manages data to get a clean dataset to work with
-# Transforms GDP variable into per capita and then log
-# Performs regression analysis of E[lifeexp|ln(GDP/capita)]
-
+# ------------------------------------------------------------------------------------------------------
+#### SET UP
+# It is advised to start a new session for every case study
 # CLEAR MEMORY
 rm(list=ls())
 
+# Import libraries
+library(tidyverse)
 library(arm)
-library(readr)
-library(ggplot2)
 library(segmented)
 library(lmtest)
 library(lspline)
 library(gridExtra)
 library(cowplot)
-library(readr)
-library(dplyr)
 
 
-# CHANGE IT TO YOUR WORKING DIRECTORY
-# Sets the core parent directory
-current_path = rstudioapi::getActiveDocumentContext()$path 
-dir<-paste0(dirname(dirname(dirname(current_path ))),"/")
+# set working directory
+# option A: open material as project
+# option B: set working directory for da_case_studies
+#           example: setwd("C:/Users/bekes.gabor/Documents/github/da_case_studies/")
 
-#location folders
-data_in <- paste0(dir,"da_data_repo/worldbank-lifeexpectancy/clean/")
-data_out <- paste0(dir,"da_case_studies/ch08-life-expectancy-income/")
-output <- paste0(dir,"da_case_studies/ch08-life-expectancy-income/output/")
-func <- paste0(dir, "da_case_studies/ch00-tech-prep/")
+# set data dir, data used
+source("set-data-directory.R")             # data_dir must be first defined 
+# alternative: give full path here, 
+#            example data_dir="C:/Users/bekes.gabor/Dropbox (MTA KRTK)/bekes_kezdi_textbook/da_data_repo"
 
-#call function
-source(paste0(func, "theme_bg.R"))
-source(paste0(func, "da_helper_functions.R"))
+# load theme and functions
+source("ch00-tech-prep/theme_bg.R")
+source("ch00-tech-prep/da_helper_functions.R")
 
+data_in <- paste(data_dir,"worldbank-lifeexpectancy","clean/", sep = "/")
+use_case_dir <- "ch08-life-expectancy-income/"
+
+data_out <- use_case_dir
+output <- paste0(use_case_dir,"output/")
+create_output_if_doesnt_exist(output)
+
+
+#-----------------------------------------------------------------------------------------
 
 xc <- read_delim(paste0(data_in, "worldbank-lifeexpectancy.csv"), 
                                        "\t", escape_double = FALSE, trim_ws = TRUE)
@@ -114,28 +112,26 @@ xc %>%dplyr:: select(lifeexp,gdppc,gdptot,lngdppc,lngdptot) %>% summary()
 
 ch08_lifeexp_hist1<- ggplot(data = xc, 
                        aes (x = gdppc, y = (..count..)/sum(..count..))) +
-  geom_histogram(binwidth = 3, boundary=0,
+  geom_histogram(binwidth = 3, boundary=0, closed='left', 
                  color = color.outline, fill = color[1], size = 0.25, alpha = 0.8,  show.legend=F, na.rm=TRUE) +
   labs(x = "GDP per capita (thousand US dollars)", y = "Percent") +
   expand_limits(x = 0.01, y = 0.01) +
-  scale_x_continuous(expand = c(0.01,0.01),limits = c(0, 120), breaks = seq(0, 120, by = 20)) +
+  scale_x_continuous(expand = c(0.01,0.01),limits = c(0, 120), breaks = seq(0, 120, by = 15)) +
   scale_y_continuous(expand = c(0.0,0.0),limits = c(0,0.2), breaks = seq(0, 0.20, by = 0.04), labels = scales::percent_format(accuracy = 1)) +
   theme_bg() 
 ch08_lifeexp_hist1
-#save_fig("ch08_lifeexp_hist1", output, "small")
 save_fig("ch08-figure-3a-gdppercap-hist", output, "small")
 
 
 ch08_lifeexp_hist2<- ggplot(data = xc, 
                         aes (x = lngdppc, y = (..count..)/sum(..count..))) +
-  geom_histogram(binwidth = 0.15, boundary=0,
+  geom_histogram(binwidth = 0.2, boundary=0, closed='left', 
                  color = color.outline, fill = color[1], size = 0.25, alpha = 0.8,  show.legend=F, na.rm=TRUE) +
   labs(x = "ln(GDP per capita, thousand US dollars)", y = "Percent") +
-  scale_x_continuous(expand = c(0.01,0.01), limits = c(0, 5), breaks = seq(0, 5, by = 0.5)) +
+  scale_x_continuous(expand = c(0.01,0.01), limits = c(0, 5), breaks = seq(0, 5, by = 1)) +
   scale_y_continuous(expand = c(0.0,0.0),limits = c(0,0.1), breaks = seq(0, 0.10, by = 0.02), labels = scales::percent_format(accuracy = 1)) +
   theme_bg() 
 ch08_lifeexp_hist2
-#save_fig("ch08_lifeexp_hist2", output, "small")
 save_fig("ch08-figure-3b-gdppercap-hist-log", output, "small")
 
 
@@ -154,12 +150,10 @@ ch08_lifeexp_linreg1 <- ggplot(data = xc,
   labs(x = "GDP per capita (thousand US dollars)",y = "Life expectancy  (years)")+
   theme_bg()
 ch08_lifeexp_linreg1
-#save_fig("ch08_lifeexp_linreg1", output, "small")
 save_fig("ch08-figure-4-lifeexp", output, "small")
 
 
-
-
+# --------------------------------------------
 # LOG GDP PER CAPITA (shown on two scales)
 
 reg4 <- lm(lifeexp ~ lngdppc, data=xc)
@@ -177,12 +171,7 @@ ch08_lifeexp_linreg2<- ggplot(data = xc,
   labs(x = "ln(GDP per capita, thousand US dollars) ",y = "Life expectancy  (years)")+
   theme_bg() 
 ch08_lifeexp_linreg2
-#save_fig("ch08_lifeexp_linreg2", output, "small")
 save_fig("ch08-figure-5a-lifeexp-log", output, "small")
-
-#ch08_lifeexp_linreg2
-#save_fig("ch08-figure-9a-lifeexp-unweighted", output, "small")
-
 
 ch08_lifeexp_linreg2a<- ggplot(data = xc, 
                       aes(x = gdppc, y = lifeexp)) +
@@ -194,7 +183,6 @@ ch08_lifeexp_linreg2a<- ggplot(data = xc,
   labs(x = "GDP per capita, thousand US dollars (ln scale) ",y = "Life expectancy  (years)")+
   theme_bg() 
 ch08_lifeexp_linreg2a
-#save_fig("ch08_lifeexp_linreg2a", output, "small")
 save_fig("ch08-figure-5b-lifeexp-log-scale", output, "small")
 
 ch08_lifeexp_linreg2a
@@ -221,7 +209,6 @@ ch08_lifeexp_linreg3<- ggplot(data = xc,
   labs(x = "Total GDP  (billion US dollars)",y = "Life expectancy  (years)")+
   theme_bg()
 ch08_lifeexp_linreg3
-#save_fig("ch08_lifeexp_linreg3", output, "small")
 save_fig("ch08-figure-6a-lifeexp-totgdp", output, "small")
 
 
@@ -240,7 +227,6 @@ ch08_lifeexp_linreg4<- ggplot(data = xc,
   labs(x = "Total GDP (in ln scale))",y = "Life expectancy  (years)")+
   theme_bg() 
 ch08_lifeexp_linreg4
-#save_fig("ch08_lifeexp_linreg4", output, "small")
 save_fig("ch08-figure-6b-lifeexp-totgdp-ln", output, "small")
 
 
@@ -274,7 +260,6 @@ ch08_lifeexp_spline<- ggplot(data = xc,
   labs(x = "GDP per capita, thousand US dollars (ln scale) ",y = "Life expectancy  (years)")+
   theme_bg() 
 ch08_lifeexp_spline
-#save_fig("ch08_lifeexp_spline", output, "small")
 save_fig("ch08-figure-7a-lifeexp-spline", output, "small")
 
 
@@ -285,6 +270,8 @@ summary(reg6)
 xc$e6 <- resid(reg6)
 
 #ln units
+
+# not in book
 ch08_lifeexp_quad<- ggplot(data = xc, aes(x = lngdppc, y = lifeexp)) +
   geom_point_da() +
   geom_smooth(method = "lm", formula = y ~ poly(x,2), color=color[2], se = F, size=0.7)+
@@ -294,7 +281,6 @@ ch08_lifeexp_quad<- ggplot(data = xc, aes(x = lngdppc, y = lifeexp)) +
   labs(x = "ln(GDP per capita, thousand US dollars)",y = "Life expectancy  (years)")+
   theme_bg() 
 ch08_lifeexp_quad
-#save_fig("ch08-figure-7b-lifeexp-quad", output, "small")
 
 ch08_lifeexp_quad_level<- ggplot(data = xc, aes(x = gdppc, y = lifeexp)) +
   geom_point_da() +
@@ -333,11 +319,11 @@ ch08_lifeexp_weighted<- ggplot(data = xc, aes(x = gdppc, y = lifeexp)) +
   annotate("text", x = 10, y = 82, label = "China", size=2)+
   annotate("text", x = 7,  y = 63, label = "India", size=2)
 ch08_lifeexp_weighted
-#save_fig("ch08_lifeexp_weighted", output, "small")
 save_fig("ch08-figure-9b-lifeexp-weighted", output, "small")
 
 # ADDITIONAL bits
 
+# not in book
 F08_lifeexp_w_compare<- ggplot(data = xc, aes(x = gdppc, y = lifeexp)) +
   geom_smooth(method = "lm", color=color[2], se = F, size=1)+
   geom_smooth(aes(weight = population), method = "lm", color=color[3], se = F, size=1)+
@@ -350,7 +336,7 @@ F08_lifeexp_w_compare<- ggplot(data = xc, aes(x = gdppc, y = lifeexp)) +
 F08_lifeexp_w_compare
 
 
-# vege
+# not in book
 ch08_lifeexp_weighted<- ggplot(data = xc, aes(x = lngdppc, y = lifeexp)) +
   geom_point(data = xc, aes(size=population),  color = color[1], shape = 16, alpha = 0.4,  show.legend=F) +
   geom_smooth(aes(weight = population), method = "lm", color=color[2], se = F, size=0.7)+

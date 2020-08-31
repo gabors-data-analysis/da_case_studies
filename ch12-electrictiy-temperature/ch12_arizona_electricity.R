@@ -1,33 +1,28 @@
-################################################################################
-# DATA ANALYSIS TEXTBOOK
-# CH 12 TIME SERIES
-# ARIZONA ELECTRICITY CONSUMPTION AND WEATHER
+################################################################################################
+# Prepared for the textbook:
+# Data Analysis for Business, Economics, and Policy
+# by Gabor BEKES and  Gabor KEZDI 
+# Cambridge University Press 2021
+# 
+# License: Free to share, modify and use for educational purposes. Not to be used for business purposes.
 #
-# ARIZONA-ELECTRICITY
-# v1.6 2018-11-15
-# v1.7 2019-07-15
-# v1.8 2019-11-28 reduce stuff to match list of tables in text
-# v1.9 2019-12-06 alter date management
-# v2.0. 2020-02-06 graph font size edits
-# v2.1 2020-04-22 names ok
-# v2.2 2020-04-28 date labels edited
-################################################################################
+###############################################################################################x
 
-# WHAT THIS CODES DOES:
-# combines data, aggregates to monthly level
-# describes patterns
-# runs regressions with lags
+# CHAPTER 12
+# CH12B Electricity consumption and temperature
+# case-shiller-la dataset
+# version 0.9 2020-08-31
 
-################################################################################
-# SET YOUR DIRECTORY HERE
-################################################################################
 
+# ------------------------------------------------------------------------------------------------------
+#### SET UP
+# It is advised to start a new session for every case study
 # CLEAR MEMORY
 rm(list=ls())
 
 # Import libraies
+library(tidyverse)
 library(lubridate)
-library(ggplot2)
 library(cowplot)
 library(scales)
 library(DataCombine)
@@ -35,26 +30,34 @@ library(stargazer)
 library(sandwich)
 library(dyn) 
 library(lmtest)
-library(tidyverse)
-library(dplyr)
 library(estimatr)
 library(huxtable)
 
-# CHECK WORKING DIRECTORY - CHANGE IT TO YOUR WORKING DIRECTORY
-# Sets the core parent directory
-current_path = rstudioapi::getActiveDocumentContext()$path 
-dir<-paste0(dirname(dirname(dirname(current_path ))),"/")
+# set working directory
+# option A: open material as project
+# option B: set working directory for da_case_studies
+#           example: setwd("C:/Users/bekes.gabor/Documents/github/da_case_studies/")
+
+# set data dir, data used
+source("set-data-directory.R")             # data_dir must be first defined 
+# alternative: give full path here, 
+#            example data_dir="C:/Users/bekes.gabor/Dropbox (MTA KRTK)/bekes_kezdi_textbook/da_data_repo"
 
 
-#location folders
-data_in <- paste0(dir,"da_data_repo/arizona-electricity/raw/")
-data_out <- paste0(dir,"da_case_studies/ch12-electrictiy-temperature/")
-output <- paste0(dir,"da_case_studies/ch12-electrictiy-temperature/output/")
-func <- paste0(dir, "da_case_studies/ch00-tech-prep/")
+# load theme and functions
+source("ch00-tech-prep/theme_bg.R")
+source("ch00-tech-prep/da_helper_functions.R")
 
-#call function
-source(paste0(func, "theme_bg.R"))
-source(paste0(func, "da_helper_functions.R"))
+# set directory for code and data
+data_in <- paste(data_dir,"arizona-electricity","raw/", sep = "/")
+use_case_dir          <- "ch12-electrictiy-temperature/"
+
+
+data_out <- use_case_dir
+output <- paste0(use_case_dir,"output/")
+create_output_if_doesnt_exist(output)
+
+
 
 ################################################################################
 

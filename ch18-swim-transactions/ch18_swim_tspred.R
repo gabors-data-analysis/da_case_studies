@@ -1,28 +1,16 @@
-
-############################################################
+################################################################################################
+# Prepared for the textbook:
+# Data Analysis for Business, Economics, and Policy
+# by Gabor BEKES and  Gabor KEZDI 
+# Cambridge University Press 2021
+# 
+# License: Free to share, modify and use for educational purposes. Not to be used for business purposes.
 #
-# DATA ANALYSIS TEXTBOOK
-# Chapter 18 time series - swim ticket sales
+###############################################################################################x
 
-# version 1.2 2009-09-04
-# version 1.3 2019-12-28 edits
-# version 1.4 2020-01-23 substantial change
-# version 1.5 2020-01-25 CV added
-# version 1.6 2020-01-26 graphics changes
-# version 1.7 2020-02-02 new graph with names, minor changes in graphs
-# version 1.8 2020-02-12 starts from daily aggregates
-# version 1.9 2020-04-21 save fig, graph edits, adds TODO
-# v2.0 2020-04-22 names ok
-# v2.1 2020-04-26 grapg edits
-# v2.2 2020-04-28 date labels edited
-# v2.3 2020-04-30 date labels edited
-# v2.4 2020-08-24 library eidts
-# v2.5 2020-08-25 data soure B 
-
-
-# WHAT THIS CODES DOES:
-#
-# Sets up models
+# CHAPTER 18
+# CH18 Forecasting daily ticket sales for a swimming pool 
+# version 0.9 2020-08-31
 
 #
 ###########################################################
@@ -145,7 +133,6 @@ g1 <-ggplot(data=daily_agg[daily_agg$year==2015,], aes(x=date, y=QUANTITY)) +
   labs( x = "Date (day)", y="Daily ticket sales" ) +
   scale_color_discrete(name = "")
 g1
-#save_fig("Ch18_swimmingpool_2015", output, "small")
 save_fig("ch18-figure-3a-swimmingpool-2015", output, "small")
 
 g2<-ggplot(data=daily_agg[(daily_agg$year>=2010) & (daily_agg$year<=2014),], aes(x=date, y=QUANTITY)) +
@@ -165,7 +152,6 @@ g3<-ggplot(data=daily_agg, aes(x=month_abb, y=QUANTITY)) +
   labs( x = "Date (month)", y="Daily ticket sales" ) +
   geom_boxplot(color=color[1],outlier.color = color[4], outlier.alpha = 0.6, outlier.size = 0.4)
 g3
-#save_fig("Ch18_swimmingpool_monthly", output, "small")
 save_fig("ch18-figure-4a-swimmingpool-monthly", output, "small")
 
 g4<-ggplot(data=daily_agg, aes(x=dow_abb, y=QUANTITY)) +
@@ -173,9 +159,7 @@ g4<-ggplot(data=daily_agg, aes(x=dow_abb, y=QUANTITY)) +
   labs( x = "Day of the week", y="Daily ticket sales" ) +
   geom_boxplot(color=color[1],outlier.color = color[4], outlier.alpha = 0.6, outlier.size = 0.4)
   #geom_boxplot(color=color[1], outlier.shape = NA)
-
 g4
-#save_fig("Ch18_swimmingpool_dow", output, "small")
 save_fig("ch18-figure-4b-swimmingpool-dow", output, "small")
 
 # to check for interactions, look at the heatmap
@@ -190,10 +174,9 @@ swim_heatmap <-
     legend.title =element_text(size=6)
     )
 swim_heatmap
-
-#save_fig("ch18_swim_heatmap", output, "large")
 save_fig("ch18-figure-5-swim-heatmap", output, "large")
 
+# not in book
 swim_heatmap_log <-
   ggplot(daily_agg, aes(x = dow_abb, y = month_abb, fill = tickets_ln)) +
   geom_tile(colour = "white") +
@@ -201,7 +184,6 @@ swim_heatmap_log <-
   scale_fill_viridis(alpha = 0.7, begin = 1, end = 0.2, direction = 1, option = "D") +
   theme_bg()  
 swim_heatmap_log
-#not saved
 
 #####################################
 # PREDICTION  ----------
