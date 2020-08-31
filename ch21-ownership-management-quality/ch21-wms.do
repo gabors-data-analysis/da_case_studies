@@ -8,8 +8,7 @@
 
 
 * set the path
-*cd "C:\Users\GB\Dropbox (MTA KRTK)\bekes_kezdi_textbook"
-cd "C:\Users\kezdi\Dropbox\bekes_kezdi_textbook"
+cd "C:\Users\bekes.gabor\Dropbox (MTA KRTK)\bekes_kezdi_textbook"
 
 
 *location folders
@@ -129,7 +128,7 @@ count if emp<50
 drop if emp<50 
 count if emp>5000
 drop if emp>5000
-
+drop if competition==.
 count
 * 8,440
 

@@ -109,8 +109,7 @@ data %>%
 data$lnemp <- log(data$emp_firm)
 
 # 4. Competition
-table(data$compet_strong)
-
+table(data$competition)
 
 #itt van valam gond 1 obs
 data <- data %>%
@@ -165,21 +164,15 @@ data <- data %>%
 
 data <- data %>%
   filter( !is.na(management),
-         !is.na(foundfam_owned),
-         !is.na(degree_nm),
-         !is.na(compet_weak),
-         !is.na(compet_moder),
-         !is.na(compet_strong),
-         !is.na(industry), 
-         !is.na(countrycode),
-         !is.na(lnemp)
-         )
-
-
-
-data <- data %>%
-  filter( !is.na(compet_weak)
+          !is.na(foundfam_owned),
+          !is.na(degree_nm),
+          !is.na(competition),
+          !is.na(industry), 
+          !is.na(countrycode),
+          !is.na(lnemp)
   )
+
+
 
 
 # Summary of num. of employment
