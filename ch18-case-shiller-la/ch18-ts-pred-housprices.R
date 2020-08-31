@@ -23,6 +23,8 @@ rm(list=ls())
 # Import libraries
 library(tidyverse)
 library(fpp3)
+library(cowplot)
+library(lubridate)
 
 # set working directory
 # option A: open material as project
@@ -76,7 +78,9 @@ get_MSE_from_forecast <- function(forecast, groupby = c(".id", ".model")){
 #############################
 #load data
 
-data <- read_rds(paste0(data_in,"houseprices-data-1990-2018.rds"))
+data <- read_rds(paste0(data_in,"houseprices-data-1990-2018.rds")) %>% 
+  mutate(date = as.Date(date))
+
 data <- data %>%
   filter(date>="2000-01-01" & date<"2018-01-01")
  # 18 years data
@@ -121,7 +125,6 @@ price_index_plot <- ggplot(data = data, aes(x = date, y = p))+
   scale_x_date(expand = c(0.01, 0.01),   breaks = as.Date(c("2000-01-01", "2003-01-01", "2006-01-01",  "2009-01-01", "2012-01-01", "2015-01-01", "2018-01-01")),  labels = date_format("%b%Y")) +
   theme_bg()
 price_index_plot
-#save_fig("cs_tseries_p_R", output, "small")
 save_fig("ch18-figure-8-cs-tseries-p", output, "small")
 
 
@@ -166,7 +169,6 @@ emp_plot<-ggplot(data = data, aes(x = date, y = emp))+
   scale_x_date(expand = c(0.01, 0.01),   breaks = as.Date(c("2000-01-01", "2003-01-01", "2006-01-01",  "2009-01-01", "2012-01-01", "2015-01-01", "2018-01-01")),  labels = date_format("%b%Y")) +
   theme_bg()
 emp_plot
-#save_fig("cs_tseries_emp_R", output, "small")
 save_fig("ch18-figure-10c-cs-tseries-emp", output, "small")
 
 
@@ -191,7 +193,6 @@ u_plot<-ggplot(data = data, aes(x = date, y = u))+
   scale_x_date(expand = c(0.01, 0.01),   breaks = as.Date(c("2000-01-01", "2003-01-01", "2006-01-01",  "2009-01-01", "2012-01-01", "2015-01-01", "2018-01-01")),  labels = date_format("%b%Y")) +
   theme_bg()
 u_plot
-#save_fig("cs_tseries_u_R", output, "small")
 save_fig("ch18-figure-10a-cs-tseries-u", output, "small")
 
 
