@@ -1,62 +1,55 @@
-################################################################################
+################################################################################################
+# Prepared for the textbook:
+# Data Analysis for Business, Economics, and Policy
+# by Gabor BEKES and  Gabor KEZDI 
+# Cambridge University Press 2021
+# 
+# License: Free to share, modify and use for educational purposes. Not to be used for business purposes.
 #
-# DATA ANALYSIS TEXTBOOK
-# Ch 14 log vs level
-# Used car data for  Chicago
-# v1.2 2009-01-09 major changes re actual data
-# v1.3 2019-09-09 minor changes
-# v1.4 2020-01-04 minor graph changes, small model changes
-# v1.5 2020-03-27 minor graph changes
-# v1.6 2020-04-03 minor graph changes
-# v1.1 2020-04-22 names ok
+###############################################################################################x
 
-################################################################################
-#
-################################################################################
-
-# WHAT THIS CODES DOES:
-# Level vs log
+# CHAPTER 14
+# CH014A Predicting used car value: log prices
+# version 0.9 2020-08-31
 
 
-################################################################################
-
-# DIRECTORY SETTING
-
-# Clear memory
+# ------------------------------------------------------------------------------------------------------
+#### SET UP
+# It is advised to start a new session for every case study
+# CLEAR MEMORY
 rm(list=ls())
 
-# import libraies
-library(lmtest)
-library(ggplot2)
-library(sandwich)
-library(dplyr)
+# Import libraries
 library(tidyverse)
-library(tidyr)
+library(lmtest)
+library(sandwich)
 library(cowplot)
 library(haven)
 library(stargazer)
 library(caret)
 
+# set working directory
+# option A: open material as project
+# option B: set working directory for da_case_studies
+#           example: setwd("C:/Users/bekes.gabor/Documents/github/da_case_studies/")
 
-# change working directory to your own path
-# Sets the core parent directory
-current_path = rstudioapi::getActiveDocumentContext()$path 
-dir<-paste0(dirname(dirname(dirname(current_path ))),"/")
+# set data dir, data used
+source("set-data-directory.R")             # data_dir must be first defined 
+# alternative: give full path here, 
+#            example data_dir="C:/Users/bekes.gabor/Dropbox (MTA KRTK)/bekes_kezdi_textbook/da_data_repo"
+
+# load theme and functions
+source("ch00-tech-prep/theme_bg.R")
+source("ch00-tech-prep/da_helper_functions.R")
+
+data_in <- paste(data_dir,"used-cars","clean/", sep = "/")
+
+use_case_dir <- "ch14-used-cars-log/"
+data_out <- use_case_dir
+output <- paste0(use_case_dir,"output/")
+create_output_if_doesnt_exist(output)
 
 
-# location folders
- data_in <- paste0(dir,"da_data_repo/used-cars/clean/")
- data_out <- paste0(dir,"da_case_studies/ch14-used-cars-log/")
- output   <- paste0(dir,"da_case_studies/ch14-used-cars-log/output/")
- func <- paste0(dir, "da_case_studies/ch00-tech-prep/")
- 
- 
- # load ggplot theme function
- source(paste0(func, "theme_bg.R"))
- 
- source(paste0(func, "da_helper_functions.R"))
-
- 
  
 
 ################################################################################
@@ -265,7 +258,7 @@ new <- list(age=10, agesq=10^2,odometer=12,odometersq=12^2,SE=0,XLE=0, LE=1,
 # Predict lnprice with Model 3 from ch13
 # Predict price with all predictors (Model3)
 reg3 <- lm(lnprice ~ age  + odometer +  LE + cond_excellent + cond_good + dealer, data=data)
-reg3
+summary(reg3)
 # prediction
 data$lnp2 <- predict(reg3, data)
 rmse3 <- RMSE(data$lnp2,data$lnprice)
