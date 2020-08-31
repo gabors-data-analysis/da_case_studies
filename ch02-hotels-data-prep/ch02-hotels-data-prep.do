@@ -1,35 +1,44 @@
-**********************************************
-* Chapter 02
+*********************************************************************
 *
-* hotels-vienna
+* GABORS' DATA ANALYSIS TEXTBOOK (Bekes & Kezdi)
 *
+* Case study 03D
+* Distributions of body height and income
 *
-* PART A: basic look, some descriptives 
-* uses clean data
+* using the height-income-distributions dataset
+* 
+********************************************************************
 
-* PART B: repeat of the cleaning code
-* uses raw data
+********************************************************************
+* SET YOUR DIRECTORY HERE
+*********************************************************************
 
-* v1.3
-**********************************************
+* Directory for work
+cd "C:\Users\kezdi\GitHub\da_case_studies" 
+global work  "ch02-hotels-data-prep"
+cap mkdir "$work/output"
+global output "$work/output"
+cap mkdir "$work/temp"
+global temp "$work/temp"
 
-* ssc install listtab
+* Directory for data
+* Option 1: run directory-setting do file
+*do "set-data-directory.do" /*data_dir must be first defined */
+*global data_in   	"$da_data_repo/hotels-vienna"
+*global data_in   	"$da_data_repo/hotels-vienna"
+* Option 2: set directory here
+global data_in "C:/Users/kezdi/Dropbox/bekes_kezdi_textbook/da_data_repo/hotels-vienna"
 
-* set the path
-cd "C:\Users\GB\Dropbox (MTA KRTK)\bekes_kezdi_textbook"
+* we'll use both clean and raw files in this case study
+* separate data_in directpories for these two
+* same for options 1 and 2 (once you have set $data_in)
+global data_in_clean "$data_in/clean"
+global data_in_raw "$data_in/raw"
 
 
-*********************************************************
-* PART A: basic look, some descriptives 
-*********************************************************
-*location folders
-global data_in   "da_data_repo/hotels-vienna/clean"
-global data_out  "da_case_studies/ch02-hotels-data-prep"
-global output    "da_case_studies/ch02-hotels-data-prep/output"
-
- 
+*********************************************************************
 * load in clean and tidy data and create workfile
-use "$data_in/hotels-vienna.dta", clear
+use "$data_in_clean/hotels-vienna.dta", clear
 keep hotel_id price accommodation_type distance stars rating rating_count
 
 * look at accomodation types
@@ -38,7 +47,7 @@ tab accom
 
 
 **********************************************
-* Table 2.1
+* Table 2.2
 **********************************************
 
 sort hotel_id
@@ -46,7 +55,7 @@ lis hotel_id price accommodation_type distance stars rating rating_count if _n==
 
 
 listtab hotel_id price accommodation_type distance stars rating rating_count if _n==2 ///
- using "$output/ch02_hotel_list.tex", replace ///
+ using "$output/ch02-table2-hotel-list-Stata.tex", replace ///
  rstyle(tabular) ///
  head("\begin{tabular}{lrrrrrr}" ///
  `"Hotel ID & Price & Accomodation &Distance & stars & rating & rating count \\"') ///
@@ -62,7 +71,7 @@ lis hotel_id price distance if _n<=3
 
 
 listtab hotel_id price distance if _n<=3 ///
- using "$output/ch02_hotel_tidy.tex", replace ///
+ using "$output/ch02-table3-hotel-simpletidy-Stata.tex", replace ///
  rstyle(tabular) ///
  head("\begin{tabular}{lrr}" ///
  `"Hotel ID & Price  & Distance  \\"') ///
@@ -75,16 +84,12 @@ listtab hotel_id price distance if _n<=3 ///
 * includes some additional output
 *********************************************************
 
-*location folders
-global data_in   "da_data_repo/hotels-vienna/raw"
-global data_out   "da_data_repo/hotels-vienna/clean"
-
 *** IMPORT AND PREPARE DATA
 
 * variables downoaded as string, often in form that is not helpful
 * need to transform then to numbers that we can use
 
-import delimited using "$data_in/hotelbookingdata-vienna.csv", clear
+import delimited using "$data_in_raw/hotelbookingdata-vienna.csv", clear
 
 
 * generate numerical variable of rating variable from string variable
@@ -153,7 +158,7 @@ lis hotel_id accommodation_type price  distance stars rating rating_count ///
 
  
 listtab hotel_id accommodation_type price  distance stars rating rating_count if hotel_id==22050 | hotel_id==22185 ///
- using "$output/ch02_hotel_duplicates.tex", replace ///
+ using "$output/ch02-table10-hotel-duplicates-Stata.tex", replace ///
  rstyle(tabular) ///
  head("\begin{tabular}{lrrrrrr}" ///
  `"Hotel ID & Price & Accomodation &Distance & stars & rating & rating count \\"') ///

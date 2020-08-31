@@ -58,9 +58,8 @@ histogram stars, ///
  
 * Figure 3.1b
 colorpalette viridis, n(4) select(2) nograph
-return list
 hist stars , ///
-	discrete start(0) frequency ///
+	discrete frequency ///
 	xtitle(Star rating (number of stars))  ///
 	fcolor(`r(p)') gap(5) lcolor(white) lwidth(vthin) ///
 	xlabel(1(0.5)5 , grid) ylabel(0(20)140, grid )  ///
@@ -86,9 +85,8 @@ tab stars
 
 * Figure 3.2a
 colorpalette viridis, n(4) select(2) nograph
-return list
 hist price , ///
-	discrete start(0) frequency ///
+	discrete  frequency ///
 	xtitle(Price (US dollars))  ///
 	color(`r(p)') ///
 	xlabel(0(50)500 , grid) ylabel(0(2)8, grid )  ///
@@ -98,12 +96,11 @@ hist price , ///
 
 * Figure 3.2b
 colorpalette viridis, n(4) select(2) nograph
-return list
 hist price , ///
-	width(10) start(-5) frequency ///
+	width(10) frequency ///
 	xtitle(Price (US dollars))  ///
 	color(`r(p)') lcol(white) lw(vthin) ///
-	xlabel(0(50)500 , grid) ylabel(0(5)45, grid )  ///
+	xlabel(0(50)500 , grid) ylabel(0(5)40, grid )  ///
 	graphregion(fcolor(white) ifcolor(none)) ///
 	plotregion(fcolor(white) ifcolor(white))
  graph export "$output/ch03-figure-2b-hist-price-Stata.png", replace
@@ -111,9 +108,8 @@ hist price , ///
 
 * Figure 3.3a
 colorpalette viridis, n(4) select(2) nograph
-return list
 hist price , ///
-	width(40) start(-20) frequency ///
+	width(40) start(40) frequency ///
 	xtitle(Price (US dollars))  ///
 	color(`r(p)') lcol(white) lw(vthin) ///
 	xlabel(0(80)500 , grid) ylabel(0(20)120, grid )  ///
@@ -123,9 +119,8 @@ hist price , ///
 
 * Figure 3.3b
 colorpalette viridis, n(4) select(2) nograph
-return list
 hist price , ///
-	width(80) start(40) frequency ///
+	width(80) start(0) frequency ///
 	xtitle(Price (US dollars))  ///
 	color(`r(p)') lcol(white) lw(vthin) ///
 	xlabel(0(80)500 , grid) ylabel(0(50)150, grid )  ///
@@ -139,7 +134,6 @@ hist price , ///
 * Figure 3.4
 * also Figure 3.5 (it's the same with some annotation)
 colorpalette viridis, n(4) select(2) nograph
-return list
 hist distance, ///
 	width(0.5)  frequency ///
 	xtitle(Distance to city center (miles))  ///
