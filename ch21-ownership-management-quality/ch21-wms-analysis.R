@@ -20,7 +20,7 @@ library(purrr)
 library(haven)
 library(stargazer)
 library(MatchIt)
-library(Matching)
+library(Matching) # masks dplyr select!!! #
 library(gmodels)
 
 getwd()
@@ -183,9 +183,8 @@ reg_match <- lm(management ~ foundfam_owned,
 
 out1 <- summary(reg_match)
 
-ATE_PSME1 <- out1$coefficients[2]
-ATE_PSME1_SE <- out1$coefficients[2,2]
-
+ATET_PSME1 <- out1$coefficients[2]
+ATET_PSME1_SE <- out1$coefficients[2,2]
 
 # with all controls + interactions -------------------------------------------------------
 
@@ -212,12 +211,16 @@ reg_match2 <- lm(management ~ foundfam_owned,
 
 out2 <- summary(reg_match2)
 
-ATE_PSME2 <- out2$coefficients[2]
-ATE_PSME2_SE <- out2$coefficients[2,2]
+ATET_PSME2 <- out2$coefficients[2]
+ATET_PSME2_SE <- out2$coefficients[2,2]
 
 out1
 out2
 
+
+# fixme
+# add ate
+# https://r.iq.harvard.edu/docs/matchit/2.4-15/Conducting_Analyses_af2.html
 
 # ***************************************************************** 
 # * CHECK common support
