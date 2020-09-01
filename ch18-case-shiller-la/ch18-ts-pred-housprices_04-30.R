@@ -1,50 +1,52 @@
-######################################################################
-# Data Analysis Textbook
-# Chapter 18
-# Case study  Forecasting a house price index in LA
-# Data : Case Shiller
+################################################################################################
+# Prepared for the textbook:
+# Data Analysis for Business, Economics, and Policy
+# by Gabor BEKES and  Gabor KEZDI 
+# Cambridge University Press 2021
+# 
+# License: Free to share, modify and use for educational purposes. Not to be used for business purposes.
+#
+###############################################################################################x
 
-# v1.0 2019.01.01
-# v1.1 2019-01-09
-# v1.2 2019-12-29 folders edited
+# CHAPTER 14
+# CH14B Predicting AirBnB apartment prices: selecting a regression model
 
-# v2.0 - 2020.01.11 overhaul to tstibble + fable
-# v2.1 - 2020.01.21 add many models + extra holdout
-# v2.2 - 2020.01.23 price index nsa
-# v2.3 - 2020.01.24 models finalized
-# v2.4 - 2020.01.26 pred graph runs from 2013
-# v2.5 - 2020.02.02 fan graph  + add RMSE fn
-# v2.6 - 2020.02.04 corrected emo graph
-# v1.1 2020-04-22 names ok
+# football dataset
+# version 0.9 2020-08-28
 
-######################################################################
+###########
 
-# LXXRSNA - Los Angeles Home Price Index NSA
-# CAUR - California Unemployment Rate SA
-# CANA - All Employees: Total Nonfarm in California SA
-
-# Clear memory -------------------------------------------------------
+#
+# Clear memory
 rm(list=ls())
 
-# Import libraries ---------------------------------------------------
+# Descriptive statistics and regressions
 library(tidyverse)
 library(fpp3)
+library(cowplot)
 
-# Check working directory --------------------------------------------
-# Sets the core parent directory
-current_path = rstudioapi::getActiveDocumentContext()$path 
-dir<-paste0(dirname(dirname(dirname(current_path ))),"/")
+# set data dir, data used
+source("set-data-directory.R")             # data_dir must be first defined 
+
+# option A: open material as project
+# option B: set working directory for da_case_studies
+#           example: setwd("C:/Users/bekes.gabor/Documents/github/da_case_studies/")
+
+# load theme and functions
+source("ch00-tech-prep/theme_bg.R")
+source("ch00-tech-prep/da_helper_functions.R")
+
+data_in <- paste(data_dir,"case-shiller-la","clean/", sep = "/")
+use_case_dir <- "ch18-case-shiller-la/"
+
+data_out <- use_case_dir
+output <- paste0(use_case_dir,"output/")
+create_output_if_doesnt_exist(output)
 
 
-# Set location folders -----------------------------------------------
-data_in <- paste0(dir,"da_data_repo/case-shiller-la/clean/")
-data_out <- paste0(dir,"da_case_studies/ch18_case-shiller-la/")
-output <- paste0(dir,"da_case_studies/ch18_case-shiller-la/output/")
-func <- paste0(dir, "da_case_studies/ch00-tech-prep/")
 
-source(paste0(func, "theme_bg.R"))
-# Created a helper function with some useful stuff
-source(paste0(func, "da_helper_functions.R"))
+
+
 
 #############################
 # RMSE functions
@@ -72,7 +74,9 @@ get_MSE_from_forecast <- function(forecast, groupby = c(".id", ".model")){
 #############################
 #load data
 
-data <- read_rds(paste0(data_in,"houseprices-data-1990-2018.rds"))
+data <- read_rds(paste0(data_in,"houseprices-data-1990-2018.rds")) %>%
+  mutate(date = as.Date(date))
+
 data <- data %>%
   filter(date>="2000-01-01" & date<"2018-01-01")
  # 18 years data
