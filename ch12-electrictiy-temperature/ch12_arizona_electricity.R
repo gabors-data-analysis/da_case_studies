@@ -75,7 +75,7 @@ electricity <- electricity %>% mutate(year = year(as.Date(electricity$date,"%Y/%
                                       ym = format(electricity$date,'%Ym%m'))
 
 
-electricity <- electricity %>% select(-c("MY","year","month"))
+electricity <- electricity %>% dplyr::select(-c("MY","year","month"))
 
 # Take logs of q
 electricity <- electricity %>% mutate(lnQ = log(Q))
@@ -97,10 +97,10 @@ climate <-  climate %>% mutate(ndays = ifelse(month %in% c(1, 3, 5, 7, 8, 10, 12
                                        ifelse(month==2,28,30)))
 climate <- climate %>% mutate_at(c("CLDD", "HTDD", "DX70", "DX90"),list(avg=~./ndays))
 
-climate <- climate %>% select(-c("DATE", "tempdate", "STATION", "NAME"))
+climate <- climate %>% dplyr::select(-c("DATE", "tempdate", "STATION", "NAME"))
 
 
-climate %>% select(CLDD_avg,HTDD_avg,DX70_avg,DX90_avg) %>% summary()
+climate %>% dplyr::select(CLDD_avg,HTDD_avg,DX70_avg,DX90_avg) %>% summary()
 
 
 # Save working file # 2
@@ -124,13 +124,13 @@ write_csv(data, paste0(data_out, "electricity_AZ_workfile.csv"))
 
 data <- read_csv(paste0(data_out, "electricity_AZ_workfile.csv"))
 
-data %>% filter(!is.na(Q)) %>% select(year,month) %>% summary()
-data %>% filter(!is.na(CLDD)) %>% select(year,month) %>% summary()
+data %>% filter(!is.na(Q)) %>% dplyr::select(year,month) %>% summary()
+data %>% filter(!is.na(CLDD)) %>% dplyr::select(year,month) %>% summary()
 
 data <- data %>% mutate(date=as.Date(date))
 data <- data %>% mutate(lnQ=log(Q))
 
-data %>% select(Q,lnQ,CLDD_avg,HTDD_avg) %>% summary()
+data %>% dplyr::select(Q,lnQ,CLDD_avg,HTDD_avg) %>% summary()
 
 
 # PLOT THE TIME SERIES
@@ -215,15 +215,18 @@ ggplot(data = data, aes(x=DHTDD_avg, y=DlnQ)) +
 ################################################################################
 # Linear regressions
 
+# !!! FIXME some error in huxreg
+
 
 # same t RHS variables only, Newey-West SE
 reg1 <- lm(DlnQ ~ DCLDD_avg + DHTDD_avg, data=data)
 reg2 <- lm(DlnQ ~ DCLDD_avg + DHTDD_avg + as.factor(month), data=data)
 
-reg1 <- coeftest(reg1, vcov.=NeweyWest(reg1, prewhite=FALSE, lag=18, verbose=TRUE)) 
-reg2 <- coeftest(reg2, vcov.=NeweyWest(reg2, prewhite=FALSE, lag=18, verbose=TRUE)) 
-huxreg(DlnQ=reg1,DlnQ=reg2,statistics = c(N = "nobs"))
-
+reg1a <- coeftest(reg1, vcov.=NeweyWest(reg1, prewhite=FALSE, lag=18, verbose=TRUE)) 
+reg2a <- coeftest(reg2, vcov.=NeweyWest(reg2, prewhite=FALSE, lag=18, verbose=TRUE)) 
+huxreg(DlnQ=reg1a,
+       DlnQ=reg2a,
+       statistics = c(N = "nobs"))
 
 
 # same t RHS variables + seasonality
@@ -231,7 +234,10 @@ reg4 <- lm(DlnQ ~ DCLDD_avg + DHTDD_avg + as.factor(month), data=data)
 reg5 <- lm(DlnQ ~ DCLDD_avg + DHTDD_avg + as.factor(month), data=data)
 reg5 <- coeftest(reg5, vcov.=NeweyWest(reg5, prewhite=FALSE, lag=18, verbose=TRUE)) 
 reg6 <- dyn$lm(DlnQ ~ DCLDD_avg + DHTDD_avg + as.factor(month) + lag(DlnQ), data=data)
-huxreg(DlnQ_simple_SE=reg4,DlnQ_Newey_West=reg5,DlnQ_lagged=reg6,statistics = c(N = "nobs"))
+huxreg(DlnQ_simple_SE=reg4,
+       DlnQ_Newey_West=reg5,
+       DlnQ_lagged=reg6,
+       statistics = c(N = "nobs"))
 
 
 reg7 <- dyn$lm(DlnQ ~ DCLDD_avg + lag(DCLDD_avg) + lag(lag(DCLDD_avg))
