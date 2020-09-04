@@ -105,11 +105,11 @@ color.background
 
     # Title & axis labels
 
-    theme(plot.title=element_text(color=color.title, size=6, vjust=1.25, hjust=0.5, face = "bold")) +
-    theme(axis.text.x=element_text(size=6,color=color.axis.text, face = "bold")) +
-    theme(axis.text.y=element_text(size=6,color=color.axis.text, face = "bold")) +
-    theme(axis.title.x=element_text(size=6,color=color.axis.title, vjust=0, face = "bold")) +
-    theme(axis.title.y=element_text(size=6,color=color.axis.title, vjust=1.25, face = "bold")) +
+    theme(plot.title=element_text(color=color.title, size=6, vjust=1.25, hjust=0.5, face = "plain")) +
+    theme(axis.text.x=element_text(size=6,color=color.axis.text, face = "plain")) +
+    theme(axis.text.y=element_text(size=6,color=color.axis.text, face = "plain")) +
+    theme(axis.title.x=element_text(size=6,color=color.axis.title, vjust=0, face = "plain")) +
+    theme(axis.title.y=element_text(size=6,color=color.axis.title, vjust=1.25, face = "plain")) +
 
     # Margins
 
