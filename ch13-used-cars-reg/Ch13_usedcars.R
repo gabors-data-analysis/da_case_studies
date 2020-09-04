@@ -1,36 +1,29 @@
-########################################################################
+################################################################################################
+# Prepared for the textbook:
+# Data Analysis for Business, Economics, and Policy
+# by Gabor BEKES and  Gabor KEZDI 
+# Cambridge University Press 2021
+# 
+# License: Free to share, modify and use for educational purposes. Not to be used for business purposes.
 #
-# DATA ANALYSIS TEXTBOOK
-# Chapter 13 Prediction
-#
-# Used car data for LA and Chicago
+###############################################################################################x
 
-# graphs not in textbook!
+# CHAPTER 13
+# CH11 Used cars
+# version 0.9.1 2020-09-04
 
-# v1.1 2019-09-09
-# v1.2 2020-01-03 minor edits to models, small changes in results
-# v1.3 2020-03-25 graph edits
-# v1.4 2020-04-03 very minor graph edits 
-# v1.5 2020-04-22 names ok
-# v1.6 2020-08-24 libraries
 
-########################################################################
-
-# WHAT THIS CODES DOES:
-# prep - cleans the data, makes it ready for work
-# Models
-# Measure of fits
-# Cross validation
-
-########################################################################
-# Clear memory
+# ------------------------------------------------------------------------------------------------------
+#### SET UP
+# It is advised to start a new session for every case study
+# CLEAR MEMORY
 rm(list=ls())
 
 
 # DIRECTORY SETTING
 
 
-# import libraies
+# import libraries
 library(tidyverse)
 library(lmtest)
 library(sandwich)
