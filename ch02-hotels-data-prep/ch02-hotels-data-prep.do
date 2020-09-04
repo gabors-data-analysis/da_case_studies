@@ -2,10 +2,10 @@
 *
 * GABORS' DATA ANALYSIS TEXTBOOK (Bekes & Kezdi)
 *
-* Case study 03D
-* Distributions of body height and income
+* Case study 02A
+* Finding a Good Deal among Hotels: Data Preparation
 *
-* using the height-income-distributions dataset
+* using the hotels-vienna dataset
 * 
 ********************************************************************
 
@@ -80,7 +80,8 @@ listtab hotel_id price distance if _n<=3 ///
 
 
 *********************************************************
-* PART B: repeat of the cleaning code
+* PART B: repeat part of the cleaning code
+* using the raw csv data file
 * includes some additional output
 *********************************************************
 
