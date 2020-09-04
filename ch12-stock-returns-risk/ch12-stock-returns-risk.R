@@ -252,6 +252,19 @@ p5<-ggplot(data=data_monthly,aes(x=PctRetSP500,y = PctRetMSFT)) +
 p5
 save_fig("ch12-figure-5-stocks-scatter",output, "small", plot=p5)
 
+p5<-ggplot(data=data_monthly,aes(x=PctRetSP500,y = PctRetMSFT)) +
+  geom_point_da(size=1.5)+
+  geom_smooth_da(method='lm', size=1.5)+
+  labs(x="S&P500 index monthly returns (percent)",y="Microsoft stock monthly returns (percent)")  +
+  theme_bg() +
+  geom_segment(aes(x = -20, y = -20, xend = 20, yend = 20), color=color[3], size=0.8, linetype="dashed")+
+  geom_segment(aes(x = 10, y = 0, xend = 17, yend = 17), arrow = arrow(length = unit(0.15, "cm")))+
+  annotate("text", x = 10, y = -3, size=2.5, label = "45 degree line for beta=1")+
+  geom_segment(aes(x = -10, y = -20, xend = -15, yend = -20), arrow = arrow(length = unit(0.15, "cm")))+
+  annotate("text", x = -5, y = -20, size=2.5, label = "reg line, beta=1.26")
+p5
+save_fig("ch12-figure-5-stocks-scatter-large",output, "large", plot=p5)
+
 
 p6a<-ggplot(data=data_monthly %>% select(date, PctRetMSFT, PctRetSP500) %>%  
              gather(key = "index", value = "pct_return", -date))+
@@ -323,7 +336,7 @@ p_candle <- stock_data %>%
   group_by (date=substr(ref.date,1,7)) %>%
   mutate (Open = first (price.adjusted, order_by = date),
           Close = last (price.adjusted, order_by = date)) %>%
-  summarize (Open = mean(Open), 
+  dplyr::summarize (Open = mean(Open), 
              Close = mean(Close), 
              High = max(price.adjusted),
              Low = min (price.adjusted)) %>%
