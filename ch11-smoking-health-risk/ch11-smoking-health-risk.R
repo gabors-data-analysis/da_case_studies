@@ -20,20 +20,20 @@
 # CLEAR MEMORY
 rm(list=ls())
 
+
 # Import libraries
 library(tidyverse)
 library(xtable)
 library(haven)
-library(cowplot,
-        lspline,
-data.table,
-mfx,
-margins,
-stargazer,
-psych,
-estimatr,
-huxtable)
-
+library(cowplot)
+library(lspline)
+library(data.table)
+library(mfx)
+library(margins)
+library(stargazer)
+library(psych)
+library(estimatr)
+library(huxtable)
 
 
 # set working directory
