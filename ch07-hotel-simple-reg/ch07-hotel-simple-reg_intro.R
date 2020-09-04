@@ -64,7 +64,7 @@ write_csv(hotels, paste0(data_out,"hotels_work.csv"))
 
 # SUMMARY STATISTICS ON PRICE AND DISTANCE
 
-descr_price <- hotels %>% select(price) %>% 
+descr_price <- hotels %>% dplyr::select(price) %>% 
               dplyr::summarize(mean=mean(price),
                                        sd=sd(price),
                                        min=min(price),
@@ -76,13 +76,15 @@ descr_price <- hotels %>% select(price) %>%
 print(descr_price)
 
 
-descr_dist <- hotels %>% select(distance) %>% dplyr::summarize(mean=mean(distance),
-                                                      sd=sd(distance),
-                                                      min=min(distance),
-                                                      max=max(distance),
-                                                      p50=quantile(distance,.50),
-                                                      p95=quantile(distance,.95),
-                                                      n=length(distance)
+descr_dist <- hotels %>%
+  dplyr::select(distance) %>% 
+  dplyr::summarize(mean=mean(distance),
+                  sd=sd(distance),
+                  min=min(distance),
+                  max=max(distance),
+                  p50=quantile(distance,.50),
+                  p95=quantile(distance,.95),
+                  n=length(distance)
 )
 print(descr_dist)
 
@@ -96,7 +98,8 @@ dist2 <-hotels %>% group_by(dist2) %>% dplyr:: summarize(Eprice_cat2=mean(price)
 hotels<-left_join(hotels,dist2)
 hotels <- hotels %>%  mutate(dist2 = recode(dist2,`0` = "Close",`1` = "Far"))
 
-hotels %>% group_by(dist2) %>% dplyr::summarize(mean_dist=mean(distance), 
+hotels %>% group_by(dist2) %>% 
+  dplyr::summarize(mean_dist=mean(distance), 
                                          sd_dist=sd(distance),
                                          min_dist=min(distance),
                                          max_dist=max(distance),

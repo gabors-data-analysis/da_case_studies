@@ -23,7 +23,7 @@ rm(list=ls())
 # Import libraries
 library(tidyverse)
 library(xtable)
-
+library(broom)
 
 # set working directory
 # option A: open material as project
@@ -113,7 +113,8 @@ out
 
 # create table
 table_out <- pd %>% group_by(retailer) %>% group_modify(~ tidy(t.test(.x$diff))) 
-table_out<-table_out %>% select(retailer,estimate,p.value)
+table_out<-table_out %>% 
+  dplyr::select(retailer,estimate,p.value)
 
 xt<-xtable(table_out,align='llcc', digits = c(0,0,2,2))
 names(xt) <- c('Retailer ID','Diff','p-value')
