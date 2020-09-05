@@ -1,61 +1,42 @@
-******************************************************************************************
-* Prepared for the textbook:
-* Data Analysis for Business, Economics, and Policy
-* by Gabor BEKES (Central US dollarsopen University) and  Gabor KEZDI (University of Michigan)
-* Cambridge University Press 2020
-
-* License: Free to share, modify and use for educational purposes. 
-* Not to be used for business purposes
+*********************************************************************
+*
+* GABORS' DATA ANALYSIS TEXTBOOK (Bekes & Kezdi)
+*
+* Case study 07A
+* Finding a good deal among hotels with simple regression
+*
+* using the hotels-vienna dataset
 * 
-*
-******************************************************************************************
-
-*
-* CHAPTER 7
-* Regression 
-* Hotels dataset
-*********************************************************************
-
-* v2.0. 2019-10-31
-* v2.1. 2020-05-08 adjusted for miles and dollars 
-
-* TODO needs a review based on R code
-
-* WHAT THIS CODES DOES:
-* Imports price, stars and distance data to Stata
-* Manages data to get a clean dataset to work with
-* Describes data
-* Performs regression analysis 
-* Creates graphs
+* License: Free to share, modify and use for educational purposes. 
+* Not to be used for commercial purposes
+* 
+********************************************************************
 
 ********************************************************************
 * SET YOUR DIRECTORY HERE
 *********************************************************************
 
+* Directory for work
+cd "C:\Users\kezdi\GitHub\da_case_studies" 
+global work  "ch07-hotel-simple-reg"
+cap mkdir "$work/output"
+global output "$work/output"
+cap mkdir "$work/temp"
+global temp "$work/temp"
+
+* Directory for data
+* Option 1: run directory-setting do file
+*do "set-data-directory.do" /*data_dir must be first defined */
+*global data_in   	"$da_data_repo/hotels-vienna/clean"
+* Option 2: set directory here
+global data_in "C:/Users/kezdi/Dropbox/bekes_kezdi_textbook/da_data_repo/hotels-vienna/clean"
 
 
-********************************************************************
-* SET YOUR DIRECTORY HERE
 *********************************************************************
-*cd "" /*set your dir*/
-
-
- * YOU WILL NEED TWO SUBDIRECTORIES
- * textbook_work --- all the codes
- * cases_studies_public --- for the data
-
-*location folders
-global data_in   	"da_data_repo/hotels-vienna/clean"
-global data_out  	"da_case_studies/ch07-hotel-simple-reg"
-global output 		"da_case_studies/ch07-hotel-simple-reg/output"
-
+* DATA WRANGLING
 
 * load in clean and tidy data and create workfile
 use "$data_in/hotels-vienna.dta", clear
-
-
-
-
 
 
 *** SAMPLE SELECTION
@@ -72,11 +53,12 @@ tab city_actual
 keep if city_actual=="Vienna"
 
 * save work file
-saveold "$data_out/hotels_work.dta", replace
+saveold "$work/hotels_work.dta", replace
 
 
 
 
+*********************************************************************
 * SUMMARY STATISTICS ON PRICE AND DISTANCE
 codebook price
 tabstat price, s(mean sd min p50 p95 max n)
@@ -86,7 +68,7 @@ more
 
 
 *********************************************************************
-*** REGRESSION 1: CLOSE VS FAR
+*** NONPARAMETRIC REGRESSION 1: CLOSE VS FAR
 gen dist_2groups=distance>=2 
  lab def dist_2groups 0 close 1 far
  lab val dist_2groups dist_2groups 
@@ -97,193 +79,184 @@ tabstat distance, by(dist_2groups) s(mean sd min max n)
 tabstat price, by(dist_2groups) s(mean sd min p25 p50 p75 max n)
 
 * FIGURE 7.1.a
-* PLOT MEAN VALUES BY CLOSE VS FAR
-* TO DO
-* ADD values 
-
-
-
 scatter Eprice_cat2 dist_2groups, ///
- ms(diamond) msize(large) mcolor(blue) mlabel(Eprice_cat2) ///
+ ms(O) msize(vlarge) mcolor(navy*0.8) mlabel(Eprice_cat2) ///
  xscale(range(-0.5 1.5)) yscale(range(0 400)) ///
  xlab(0 1, valuelabel grid) ylab(0(50)400, grid) ///
  xtitle("Distance to city center (categories)") ///
  ytitle("Average price (US dollars)") ///
  graphregion(fcolor(white) ifcolor(none))  ///
  plotregion(fcolor(white) ifcolor(white))
-graph export "$output/F07_1a.png", as(png) replace
+graph export "$output/ch07-figure-1a-scatter-nonpar1-Stata.png", as(png) replace
 
 
  
 *********************************************************************
-*** REGRESSION 2: 4 DISTANCE CATEGORIES
-cap drop dist_4groups Eprice_cat4
-egen dist_4groups=cut(distance), at(0 1 2 3 7)
-replace dist_4groups=dist_4groups+0.5
-replace dist_4groups=5 if dist_4groups==3.5 
-tabstat distance, by(dist_4groups) s(min mean max p95 n) 
-egen Eprice_cat4=mean(price), by(dist_4groups)
+*** NONPARAMETRIC REGRESSION 2: 4 DISTANCE CATEGORIES
+cap drop dist4groups Eprice_cat4
+egen dist4groups=cut(distance), at(0 1 2 3 7)
+replace dist4groups=dist4groups+0.5
+replace dist4groups=5 if dist4groups==3.5 
+tabstat distance, by(dist4groups) s(min mean max p95 n) 
+egen Eprice_cat4=mean(price), by(dist4groups)
  format Eprice_cat4 %3.0f
  lab var Eprice_cat4 "Average price in 4 distance categ."
-tabstat distance, by(dist_4groups) s(mean sd min max n)
-tabstat price, by(dist_4groups) s(mean sd min p25 p50 p75 p95 max n)
+tabstat distance, by(dist4groups) s(mean sd min max n)
+tabstat price, by(dist4groups) s(mean sd min p25 p50 p75 p95 max n)
 
 
 * FIGURE 7.1.b 
 * PLOT MEAN VALUES BY CLOSE VS FAR -- 4 values
-
-
-scatter Eprice_cat4 dist_4groups, ///
- ms(diamond) msize(large) mcolor(blue) mlabel(Eprice_cat4) ///
+scatter Eprice_cat4 dist4groups, ///
+ ms(O) msize(vlarge) mcolor(navy*0.8) mlabel(Eprice_cat4) ///
   xscale(range(0 7)) xlab(1(2)7, grid) yscale(range(0 400)) ylab(0(50)400, grid) ///
  xtitle("Distance to city center (miles)") ///
  ytitle("Average price (US dollars))") ///
  graphregion(fcolor(white) ifcolor(none))  ///
  plotregion(fcolor(white) ifcolor(white))
-graph export "$output/F07_1b.png", as(png) replace /* not used*/
+graph export "$output/ch07-figure-1b-scatter-nonpar2-Stata.png", as(png) replace
  
  
-* Figure 7.2
- * BOX PLOT BY CLOSE VS FAR
- 
-local ymax=300
-graph box price, over(dist_2groups) noouts ///
- medtype(marker) medm(ms(O) msize(large) mcolor(dkgreen)) ///
- ylab(0(100)400)  ///
- ytitle("Average price (US dollars)") ///
- graphregion(fcolor(white) ifcolor(none))  ///
- plotregion(fcolor(white) ifcolor(white))
-graph export "$output/F07_2.png", as(png) replace
-
- 
-
 *********************************************************************
-*** SCATTERPLOT + REGRESSION (2nd regression w/ 4 distance categories)
+*** SCATTERPLOT + NONPARAMETRIC REGRESSION AS STEP FUNCTION
 
-* Figure 7.3.a
+*** (4 distance categories)
+egen price4steps = mean(price), by(dist4groups)
+ gen p4s_1 = price4steps if dist4groups==0.5
+ gen p4s_2 = price4steps if dist4groups==1.5
+ gen p4s_3 = price4steps if dist4groups==2.5
+ gen p4s_4 = price4steps if dist4groups==5
 
 
- scatter price distance , ///
- ms(O) msize(tiny) mlw(thick) mcolor(navy) ///
- xlab(0(1)7, grid) yscale(range(0 400)) ylab(50(50)400, grid) ///
+* Figure 7.2.a
+scatter price distance, ///
+ ms(O) mlw(small) mcolor(navy*0.7)  ///
+ xlab(0(1)7, grid) yscale(range(0 400)) ylab(0(50)400, grid) ///
  xtitle("Distance to city center (miles)") ///
  ytitle("Price (US dollars)") ///
-|| scatter Eprice_cat4 dist_4groups , ///
- ms(diamond) msize(large) mcolor(dkgreen)  ///
- graphregion(fcolor(white) ifcolor(none))  ///
- plotregion(fcolor(white) ifcolor(white))
-graph export "$output/F07_3a.png", as(png) replace
+|| line p4s_* distance, ///
+ lp(solid solid solid solid) lcolor(green green green green)  ///
+ lw(thick thick thick thick) legend(off)
+graph export "$output/ch07-figure-2a-stepfn4cat-Stata.png", as(png) replace
 
 
+
+* 7 bins
+
+* create 7 bins of distance
+egen dist7groups = cut(distance), at(0(1)7)
+ tabstat distance, by(dist7g) s(min max n)
+* create variable with average price within distance bins
+egen price7steps = mean(price), by(dist7groups)
+forvalue i=1/7 {
+	gen p7s_`i' = price7steps if dist7groups==`i'-1
+}
+
+* scatterplot with step function
+scatter price distance, ///
+ ms(O) mlw(small) mcolor(navy*0.7)  ///
+ xlab(0(1)7, grid) yscale(range(0 400)) ylab(0(50)400, grid) ///
+ xtitle("Distance to city center (miles)") ///
+ ytitle("Price (US dollars)") ///
+|| line p7s_* distance, ///
+ lp(solid solid solid solid solid solid solid) lcolor(green green green green green green green)  ///
+ lw(thick thick thick thick thick thick thick) legend(off)
+
+* cosmetics: last two bins have one obs only, 
+* step function line doesn't show there.
+* cosmetic solution:
+* create four fake observations, each for the two ends of the last two bins
+
+* first create new distance variable for step function
+*  so scattrplot doesn't show them as real observations
+gen distfake = distance
+* add 4 nes observations
+set obs `=_N+4'
+count
+* set fake distance variable to ends of last bins
+replace distfake = 5.1 if _n==_N-3
+replace distfake = 5.9 if _n==_N-2
+replace distfake = 6.1 if _n==_N-1
+replace distfake = 6.9 if _n==_N
+* assign average prices to new observations
+sum price if dist7groups==5
+replace p7s_6 = r(mean) if distfake>5 & distfake<6
+sum price if dist7groups==6
+replace p7s_7 = r(mean) if distfake>6 & distfake<7
+
+* redo graph so that step fucntion shows in last two bins, too
+* Figure 7.2.b
+scatter price distance, ///
+ ms(O) mlw(small) mcolor(navy*0.7)  ///
+ xlab(0(1)7, grid) yscale(range(0 400)) ylab(0(50)400, grid) ///
+ xtitle("Distance to city center (miles)") ///
+ ytitle("Price (US dollars)") ///
+|| line p7s_* distfake, ///
+ lp(solid solid solid solid solid solid solid) lcolor(green green green green green green green)  ///
+ lw(thick thick thick thick thick thick thick) legend(off)
+graph export "$output/ch07-figure-2b-stepfn7cat-Stata.png", as(png) replace
 
 
 *********************************************************************
-** COMPARE NONPARAMETRIC REGRESSIONS
-*** bins: 7 bins (distance catgories)
-egen dist_7groups=cut(distance), at(0(1)7)
-replace dist_7groups=dist_7groups+0.5
-tabstat distance, by(dist_7groups) s(min mean max n) 
-egen Eprice_cat7=mean(price), by(dist_7groups)
+** lowess
 
-* Figure 7.3.b
-
- scatter price distance , ///
- ms(O) msize(tiny) mlw(thick) mcolor(navy) ///
- xlab(0(1)7, grid) yscale(range(0 400)) ylab(50(50)400, grid) ///
- xtitle("Distance to city center (miles)") ///
- ytitle("Price (US dollars)") ///
-|| scatter Eprice_cat7 dist_7groups , ///
- ms(diamond) msize(large) mcolor(dkgreen)  ///
- graphregion(fcolor(white) ifcolor(none))  ///
- plotregion(fcolor(white) ifcolor(white))
-graph export "$output/F07_3b.png", as(png) replace
- 
-*lowess price distance, bwidth(0.8) ///
- *lineopts(lw(vthick) lc(dkgreen)) ///
-
- * Figure 7.4
+* Figure 7.3
 *** lowess with scatterplot
 
 lowess price distance , bwidth(0.8) ///
- lineopts(lw(thick) lc(dkgreen)) ///
- ms(O) msize(tiny) mlw(thick) mcolor(navy) mcolor(%50) ///
+ lineopts(lw(thick) lc(green)) ///
+ ms(O) msize(small) mlw(thick) mcolor(navy*0.7)  ///
  xlab(0(1)7, grid) yscale(range(0 300)) ylab(50(50)400, grid) ///
  xtitle("Distance to city center (miles)") ///
  ytitle("Price (US dollars)") title("") note("") ///
  graphregion(fcolor(white) ifcolor(none))  ///
  plotregion(fcolor(white) ifcolor(white))
-graph export "$output/F07_5.png", as(png) replace
+graph export "$output/ch07-figure-3-lowess-Stata.png", as(png) replace
  
  
 ********************************************************************
 *** LINEAR REGRESSIONS
 regress price distance 
 
-* Fig 7.6
+* Fig 7.5
 *** SCATTERPLOT + REGRESSION LINE
 
 scatter price distance , ///
- ms(O) msize(tiny) mlw(thick) mcolor(navy) mcolor(%50) ///
+ ms(O) msize(small) mlw(thick) mcolor(navy*0.8) ///
  xlab(0(1)7, grid) ylab(000(50)400, grid) ///
  xtitle("Distance to city center (miles)") ///
  ytitle("Price(US dollars)") ///
- || lfit price distance, lw(thick) lc(dkgreen) legend(off)  ///
+ || lfit price distance, lw(thick) lc(green) legend(off)  ///
  graphregion(fcolor(white) ifcolor(none))  ///
  plotregion(fcolor(white) ifcolor(white))
-graph export "$output/F07_6.png", as(png) replace
- * to add a residual
+graph export "$output/ch07-figure-5-linreg-Stata.png", as(png) replace
+
  
- *Figure 7.7
-* same graph with resudal
+* Figure 7.6a
+* same graph as 7.5 with extra annotation
  
  
- 
-* Figure 7.8
+* Figure 7.6b
+* histogram of residuals
 regress price distance 
- predict pred_price_ols
+predict pred_price
 predict e ,resid 
- format price pred_price_ols e %3.0f
-hist e, bin(20) percent ///
+hist e, bin(20) percent fcol(navy*0.8) lcol(white) ///
+ xlab(-100(100)300, grid) ylab(0(5)30, grid) ///
  graphregion(fcolor(white) ifcolor(none))  ///
  plotregion(fcolor(white) ifcolor(white))
-graph export "$output/F07_8.png", as(png) replace
+graph export "$output/ch07-figure-6b-resid-hist-Stata.png", as(png) replace
+
  
 * list best deal hotels
 sort e
-list hotel_id distance price pred_price_ols e if _n<=5
-* task: create a nice table as tex output
+list hotel_id distance price pred_price e if _n<=5
+
+* Figure 7.7
+* same graph as 7.5 with extra annotation
 
 
 sum price , det
 local p_avg =`r(mean)'
 sum distance , det
 local d_avg =`r(mean)'
- 
-* Fig 7.10.a
-*** THE LINEAR REGRESSION GOES THROUGH THE AVERAGES
-*** SCATTERPLOT + REGRESSION LINE + LINES FOR AVERAGES
-
-scatter price distance , ///
- ms(O) msize(tiny) mlw(thick) mcolor(navy) mcolor(%50) ///
- xlab(0(1)8) ylab(100(100)400) ///
- xtitle("Distance to city center (miles)") ///
- ytitle("Price (US dollars)") ///
- || lfit price distance , lw(thick) lc(dkgreen) legend(off) ///
-	xline(`d_avg') yline(`p_avg') ///
- graphregion(fcolor(white) ifcolor(none))  ///
- plotregion(fcolor(white) ifcolor(white))
-graph export "$output/F07_notused7.png", as(png) replace
-
-* Fig 7.10.b
-* TO DO MISSING
-
-
-
-
-* get R2 of lowess
-lowess price distance, gen (ylowess)
-gen s2=(ylowess-price)^2
-su s2
-
-
- 
