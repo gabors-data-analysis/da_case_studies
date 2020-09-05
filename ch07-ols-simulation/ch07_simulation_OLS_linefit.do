@@ -1,30 +1,28 @@
 *********************************************************************
 *
-* DATA ANALYSIS TEXTBOOK
-* FUNDAMENTALS OF REGRESSION ANALYSIS
-* Ch07
+* GABORS' DATA ANALYSIS TEXTBOOK (Bekes & Kezdi)
 *
-* OLS fits line to scatterplot
-* produce graph with artificial (simulated) data
+* Chapter 07
+* Simple linear regression with simulated data
+*
+* no real data is used 
 * 
-*************************************
-
-
+* License: Free to share, modify and use for educational purposes. 
+* Not to be used for commercial purposes
+* 
+********************************************************************
 
 ********************************************************************
 * SET YOUR DIRECTORY HERE
 *********************************************************************
-cd "D:/Dropbox (MTA KRTK)/bekes_kezdi_textbook"
 
+* Directory for work
+cd "C:\Users\kezdi\GitHub\da_case_studies" 
+global work  "ch07-ols-simulation"
+cap mkdir "$work/output"
+global output "$work/output"
 
- * YOU WILL NEED TWO SUBDIRECTORIES
- * textbook_work --- all the codes
- * cases_studies_public --- for the data
-
-*location folders
-global data_in   	"da_data_repo/hotels-vienna/clean"
-global data_out  	"da_case_studies/ch07-ols-simulation"
-global output 		"da_case_studies/ch07-ols-simulation/output"
+* No real data is used 
 
 
 * clear environment
@@ -47,15 +45,20 @@ local sigmau = 0.7
 
 gen y = `a' + `b'*x + rnormal(0,`sigmau')
 
-summarize y x
+summarize y
+local meany = r(mean)
+summarize x
+local meanx = r(mean)
 
 * scatterplot and OLS regression line
 * average y and average x shown
 
-scatter y x, mc(navy) ms(O) msize(tiny) mlw(thick) mcolor(%50)  || ///
- lfit y x, legend(off) lc(dkgreen) lw(thick) ///
- ylabel(0(0.5)6, grid) xlabel(0(0.5)4, grid) ytitle("y") xtitle("x") ///
- yline(3, lc(dkgrey))  xline(1.93, lc(dkgrey)) ///
+scatter y x, mc(navy*0.6) ms(O) msize(small) mlw(thick) ///
+ || lfit y x, legend(off) lc(green) lw(thick) ///
+ ylabel(0(0.5)6, grid) xlabel(0(0.5)4, grid) ///
+ ytitle("Simulated y variable") xtitle("Simulated x variable") ///
+ yline(`meany', lc(black) lp(dash))  xline(`meanx', lc(black) lp(dash)) ///
+ text(5 1.6 "Average x") text(3.2 0.4 "Average y") ///
  graphregion(fcolor(white) ifcolor(none))  ///
  plotregion(fcolor(white) ifcolor(white))
-  graph export "$output\F07_OLSfit.png", replace
+graph export "$output\ch07-figure-4-olsfit-Stata.png", replace
