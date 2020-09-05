@@ -1,45 +1,44 @@
 *********************************************************************
 *
-* DATA ANALYSIS TEXTBOOK
-* FUNDAMENTALS OF REGRESSION ANALYSIS
-* ILLUSTRATION STUDY FOR CHAPTER 8
-* Life expectancy and GDP (per capita), xcountry regression
+* GABORS' DATA ANALYSIS TEXTBOOK (Bekes & Kezdi)
 *
-* data downloaded from the World Bank
+* Case study 08B
+* How is life expectancy related to the average income of a country?,
 *
-*********************************************************************
-
-* WHAT THIS CODES DOES:
-
-* Imports data to Stata
-* Manages data to get a clean dataset to work with
-* Transforms GDP variable into per capita and then log
-* Performs regression analysis of E[lifeexp|ln(GDP/capita)]
-
+* using the worldbank-lifeexpectancy dataset
+* 
+* License: Free to share, modify and use for educational purposes. 
+* Not to be used for commercial purposes
+* 
+********************************************************************
 
 ********************************************************************
 * SET YOUR DIRECTORY HERE
 *********************************************************************
-*cd "" /*set your dir*/
-*cd "C:/Users/GB/Dropbox (MTA KRTK)/bekes_kezdi_textbook"
-cd "C:/Users/kezdi/Dropbox/bekes_kezdi_textbook"
 
-clear all
-set more off
+* Directory for work
+cd "C:\Users\kezdi\GitHub\da_case_studies" 
+global work  "ch08-life-expectancy-income"
+cap mkdir "$work/output"
+global output "$work/output"
+cap mkdir "$work/temp"
+global temp "$work/temp"
 
- 
- * YOU WILL NEED TWO SUBDIRECTORIES
- * textbook_work --- all the codes
- * cases_studies_public --- for the data
-
-global data_in   "da_data_repo/worldbank-lifeexpectancy/clean"
-global data_out  "da_case_studies/ch08-life-expectancy-income"
-global output 	 "da_case_studies/ch08-life-expectancy-income/output"
+* Directory for data
+* Option 1: run directory-setting do file
+*do "set-data-directory.do" /*data_dir must be first defined */
+*global data_in   	"$da_data_repo/worldbank-lifeexpectancy/clean"
+* Option 2: set directory here
+global data_in "C:/Users/kezdi/Dropbox/bekes_kezdi_textbook/da_data_repo/worldbank-lifeexpectancy/clean"
 
 
 *********************************************************************
 *** IMPORT DATA
 use "$data_in/worldbank-lifeexpectancy.dta", clear
+
+
+keep if year==2017
+count
 
 count if gdppc!=. & lifeexp!=.
 sum population if gdppc!=. & lifeexp!=.
@@ -48,8 +47,6 @@ sum population if gdppc==. | lifeexp==.
 lis countryname population gdppc lifeexp  if (gdppc==. | lifeexp==. ) & population>1
 
 keep if gdppc!=. & lifeexp!=.
-keep if year==2017
-count
 
 
 compress
@@ -73,18 +70,21 @@ lis countryname population lifeexp if lifeexp>83
 
 ******************************************************************************
 *DISTRIBUTION OF PER CAPITA GDP
-hist gdppc, percent width(5) fcol(navy) lcol(white) ///
- xla(0(20)100, grid) yla(0(5)30, grid) ///
- xtitle("GDP per capita (thousand dollars)")
- graph export "$output/ch08_lifeexp_hist1.png",replace
+
+* Figure 3a
+hist gdppc, percent start(0) width(3) fcol(navy*0.8) lcol(white) ///
+ xla(0(15)120, grid) yla(0(5)20, grid) ///
+ xtitle("GDP per capita (thousand US dollars)")
+graph export "$output/ch08-figure-3a-gdppercap-hist-Stata.png",replace
 
 lis countryname population gdpp if gdppc>80
 tabstat gdppc, s(mean median sd n)
- 
-hist lngdppc, percent width(0.4) fcol(navy) lc(white) ///
- xla(, grid) yla(0(5)30, grid) ///
- xtitle("ln(GDP per capita, thousand dollars)")
- graph export "$output/ch08_lifeexp_hist2.png",replace
+
+* Figure 3b
+hist lngdppc, percent width(0.2) fcol(navy*0.8) lc(white) ///
+ xla(, grid) yla(0(2)10, grid) ///
+ xtitle("ln(GDP per capita, thousand US dollars)")
+graph export "$output/ch08-figure-3b-lngdppercap-hist-Stata.png",replace
 
 lis countryname population gdpp lngdppc if gdppc<1
 tabstat lngdppc, s(mean median sd n)
@@ -95,39 +95,42 @@ tabstat lngdppc, s(mean median sd n)
 
 reg lifeexp gdppc
 scatter lifeexp gdppc, ///
- ms(o) msize(small) mcolor(%50)  mlw(thick) mcolor(navy) ///
- || lfit lifeexp gdppc, lw(thick) lc(green) legend(off) ///
- ytitle("Life expectancy (years)") xtitle("GDP per capita, '000 USD PPP 2011") ///
+ ms(O) mcolor(navy*0.6) ///
+ || lfit lifeexp gdppc, lw(thick) lc(green*0.8) legend(off) ///
+ ytitle("Life expectancy (years)") ///
+ xtitle("GDP per capita (thousand US dollars)") ///
 graphregion(fcolor(white) ifcolor(none))  ///
  plotregion(fcolor(white) ifcolor(white)) ///
   ylabel(50(5)100, grid) xlab(0(10)100, grid) 
- graph export "$output/ch08_lifeexp_linreg1.png",replace
+graph export "$output/ch08-figure-4-linreg-levlev-Stata.png",replace
 
 
 reg lifeexp lngdppc
 scatter lifeexp lngdppc, ///
- ms(o) msize(small) mcolor(%50)  mlw(thick) mcolor(navy) ///
+ ms(O) mcolor(navy*0.6) ///
  || lfit lifeexp lngdppc, lw(thick) lc(green) legend(off) ///
- ytitle("Life expectancy (years)") xtitle("ln(GDP per capita, thousand dollars)") ///
+ ytitle("Life expectancy (years)") ///
+ xtitle("ln(GDP per capita, thousand US dollars)") ///
  graphregion(fcolor(white) ifcolor(none))  ///
  plotregion(fcolor(white) ifcolor(white)) ///
  ylabel(50(5)85, grid) xlab(0(1)5, grid) 
- graph export "$output/ch08_lifeexp_linreg2.png",replace
+graph export "$output/ch08-figure-5a-linreg-levlog-Stata.png",replace
 
 
-foreach x in 1 2 5 10 20 40 70 120 {
+foreach x in 1 2 5 10 20 50 100 {
 	dis `x' "   "  ln(`x')
 }
  
 scatter lifeexp lngdppc, ///
- ms(o) msize(small) mcolor(%50)  mlw(thick) mcolor(navy) ///
+ ms(O) mcolor(navy*0.8) ///
  || lfit lifeexp lngdppc, lw(thick) lc(green) legend(off) ///
- ytitle("Life expectancy (years)") xtitle("GDP per capita, thousand dollars, ln scale") ///
+ ytitle("Life expectancy (years)") ///
+ xtitle("GDP per capita, thousand US dollars, ln scale") ///
  graphregion(fcolor(white) ifcolor(none))  ///
  plotregion(fcolor(white) ifcolor(white)) ///
  ylabel(50(5)85, grid) ///
- xlab(0 "1" 0.7 "2" 1.6 "5" 2.3 "10" 3 "20" 3.7 "40" 4.2 "70" 4.8 "120", grid)   
- graph export "$output/ch08_lifeexp_linreg2a.png",replace
+ xlab(0 "1" 0.7 "2" 1.6 "5" 2.3 "10" 3 "20" 3.9 "50" 4.6 "100", grid)   
+graph export "$output/ch08-figure-5b-linreg-levlog-logscale-Stata.png",replace
 
  
 reg lifeexp lngdppc
@@ -148,42 +151,45 @@ lis countryname population lifeexp gdppc resid if gdppc>65
 
 reg lifeexp gdptot
 scatter lifeexp gdptot, ///
- ms(o) msize(small) mcolor(%50)  mlw(thick) mcolor(navy) ///
+ ms(O) mcolor(navy*0.6) ///
  || lfit lifeexp gdptot, lw(thick) lc(green) legend(off) ///
- ytitle("Life expectancy (years)") xtitle("Total GDP (billion dollars)") ///
+ ytitle("Life expectancy (years)") ///
+ xtitle("Total GDP (billion US dollars)") ///
  graphregion(fcolor(white) ifcolor(none))  ///
  plotregion(fcolor(white) ifcolor(white)) ///
  ylabel(50(5)85, grid) xlab(0(4000)24000, grid) 
- graph export "$output/ch08_lifeexp_linreg3.png",replace
+graph export "$output/ch08-figure-6a-linreg-totalGDP-Stata.png",replace
  
 reg lifeexp lngdptot
  scatter lifeexp lngdptot, ///
- ms(o) msize(small) mcolor(%50)  mlw(thick) mcolor(navy) ///
+ ms(O) mcolor(navy*0.6) ///
  || lfit lifeexp lngdptot, lw(thick) lc(green) legend(off) ///
- ytitle("Life expectancy (years)") xtitle("ln(total GDP, billion dollars)") ///
+ ytitle("Life expectancy (years)") xtitle("ln(total GDP, billion US dollars)") ///
  graphregion(fcolor(white) ifcolor(none))  ///
  plotregion(fcolor(white) ifcolor(white)) ///
  ylabel(50(5)85, grid) xlab(-2(2)10, grid) 
- graph export "$output/ch08_lifeexp_linreg4.png",replace
+graph export "$output/ch08-figure-6b-linreg-lntotalGDP-Stata.png",replace
 
 lis countryname population gdppc gdptotal if gdptotal>5000
  
 ******************************************************************************
 *PIECEWISE LINEAR REGRESSION
 
-mkspline lngdppc_low 4 lngdppc_high = lngdppc
+mkspline lngdppc_low 3.9 lngdppc_high = lngdppc /* knot at 50th USD; ln(50)=3.9 */
 regress lifeexp lngdppc_*
 cap drop pred_spline
 predict pred_spline
 
 scatter lifeexp lngdppc, ///
- ms(o) msize(small) mcolor(%50)  mlw(thick) mcolor(navy) xline(4) ///
+ ms(O) mcolor(navy*0.6) ///
  || line pred_spline lngdppc, sort lw(thick) lc(green) legend(off) ///
- xtitle("ln(GDP per capita, thousand dollars)") ///
- ytitle("Life expectancy (years)") ylabel(50(5)85, grid) xlab(0(1)5) ///
+ xtitle("ln(GDP per capita, thousand US dollars)") ///
+ ytitle("Life expectancy (years)") ylabel(50(5)85, grid) ///
+  xlab(0 "1" 0.7 "2" 1.6 "5" 2.3 "10" 3 "20" 3.9 "50" 4.6 "100", grid) ///
+ xline(3.9, lc(black) lp(dash)) ///
  graphregion(fcolor(white) ifcolor(none))  ///
  plotregion(fcolor(white) ifcolor(white))
- graph export "$output/ch08_lifeexp_spline.png",replace
+graph export "$output/ch08-figure-7a-spline-Stata.png",replace
 
 regress lifeexp lngdppc_low lngdppc_high
 predict resid_spline, resid
@@ -203,13 +209,14 @@ cap drop pred_quad
 predict pred_quad
 
 scatter lifeexp lngdppc, ///
- ms(o) msize(small) mcolor(%50)  mlw(thick) mcolor(navy) ///
+ ms(O) mcolor(navy*0.6) ///
  || line pred_quad lngdppc, sort lw(thick) lc(green) legend(off) ///
  xtitle("ln(GDP per capita, thousand dollars)") ///
- ytitle("Life expectancy (years)") ylabel(50(5)85, grid) xlab(0(1)5) ///
+ ytitle("Life expectancy (years)") ylabel(50(5)85, grid) ///
+  xlab(0 "1" 0.7 "2" 1.6 "5" 2.3 "10" 3 "20" 3.9 "50" 4.6 "100", grid) ///
   graphregion(fcolor(white) ifcolor(none))  ///
  plotregion(fcolor(white) ifcolor(white))
- graph export "$output/ch08_lifeexp_quad.png",replace
+graph export "$output/ch08-figure-7b-quad-Stata.png",replace
 
 regress lifeexp lngdppc_sq
 predict resid_quad, resid
@@ -218,25 +225,29 @@ lis countryname population lifeexp resid_quad if resid_quad>7.5
  
 ******************************************************************************
 *WEIGHTED AND UNWEIGHTED
-reg lifeexp lngdppc
 scatter lifeexp lngdppc, ///
- ms(Oh) msize(medium) mcolor(%50)  mlw(thick) mcolor(navy) ///
+ ms(O) mcolor(navy*0.8) ///
  || lfit lifeexp lngdppc, lw(thick) lc(green) legend(off) ///
+ ytitle("Life expectancy (years)") ///
+ xtitle("GDP per capita, thousand US dollars, ln scale") ///
  graphregion(fcolor(white) ifcolor(none))  ///
  plotregion(fcolor(white) ifcolor(white)) ///
-  ytitle("Life expectancy (years)") ylabel(50(5)85, grid) xlab(0(1)5) ///
-  xtitle("ln(GDP per capita, thousand dollars)")
- graph export "$output/ch08_lifeexp_unweighted.png",replace
+ ylabel(50(5)85, grid) ///
+ xlab(0 "1" 0.7 "2" 1.6 "5" 2.3 "10" 3 "20" 3.9 "50" 4.6 "100", grid)   
+graph export "$output/ch08-figure-9a-linreg-unwgt-logscale-Stata.png",replace
  
  
 reg lifeexp lngdppc [w=pop]
 scatter lifeexp lngdppc [w=pop], ///
- ms(Oh) msize(medium) mcolor(%50)  mlw(thick) mcolor(navy) ///
+ ms(O) mcolor(navy*0.6) ///
  || lfit lifeexp lngdppc [w=pop], lw(thick) lc(green) legend(off) ///
+ ytitle("Life expectancy (years)") ///
+ xtitle("GDP per capita, thousand US dollars, ln scale") ///
+ ylabel(50(5)85, grid) ///
+ xlab(0 "1" 0.7 "2" 1.6 "5" 2.3 "10" 3 "20" 3.9 "50" 4.6 "100", grid) ///
+ text(67 2.0 "India") text(77 2.6 "China") text(79 4.1 "USA") ///
  graphregion(fcolor(white) ifcolor(none))  ///
- plotregion(fcolor(white) ifcolor(white)) ///
- ytitle("Life expectancy (years)") ylabel(50(5)85, grid) xlab(0(1)5) ///
- xtitle("ln(GDP per capita, thousand dollars)")
- graph export "$output/ch08_lifeexp_weighted.png",replace
+ plotregion(fcolor(white) ifcolor(white))
+graph export "$output/ch08-figure-9b-linreg-wgt-logscale-Stata.png",replace
 
  
