@@ -57,7 +57,7 @@ hist height if age>=55 & age<60 & female==1 & height>1.3 & height<2.1, ///
 * Histogram of income and ln income with normal density overlayed
 * Figure 3.11a
 colorpalette viridis, n(4) select(2) nograph
-hist hhincome if age>=55 & age<60 & female==1 & hhincome<1000, ///
+hist hhincome if age>=55 & age<60 & female==1 & hhincome>1 & hhincome<1000, ///
  percent width(20) ///
  color(`r(p)') lcol(white) lw(vvthin) ///
  ylabel(0(5)25, grid) xlabel(0(200)1000, grid) ///
@@ -68,7 +68,7 @@ hist hhincome if age>=55 & age<60 & female==1 & hhincome<1000, ///
 gen lnincome=ln(hhincome)
  lab var lnincome "ln(houehold income, thousand US dollars)"
 colorpalette viridis, n(4) select(2) nograph
-hist lnincome if age>=55 & age<60 & female==1 & lnincome<8 & lnincome>0, ///
+hist lnincome if age>=55 & age<60 & female==1 & lnincome>0 & hhincome<1000, ///
  percent width(0.25) start(0) ///
  color(`r(p)') lcol(white) ///
  ylabel(0(2.5)10, grid) xlabel(0(1)8, grid) ///
