@@ -24,7 +24,7 @@ global temp "$work/temp"
 * Directory for data
 * Option 1: run directory-setting do file
 *do "set-data-directory.do" /*data_dir must be first defined */
-*global data_in   	"$da_data_repo/hotels-europe/clean"
+*global data_in   	"$da_data_repo/wms-management-survey/clean"
 * Option 2: set directory here
 global data_in "C:/Users/kezdi/Dropbox/bekes_kezdi_textbook/da_data_repo/wms-management-survey/clean"
 
