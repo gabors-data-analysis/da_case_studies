@@ -1,28 +1,36 @@
 *********************************************************************
 *
-* DATA ANALYSIS TEXTBOOK
-* CH08 Case Study B: Hotels
+* GABORS' DATA ANALYSIS TEXTBOOK (Bekes & Kezdi)
 *
+* Case study 08A
+* Finding a good deal among hotels with nonlinear function
 *
-*********************************************************************
-
-* WHAT THIS CODES DOES:
-* log-level combinations
-
+* using the hotels-vienna dataset
+* 
+* License: Free to share, modify and use for educational purposes. 
+* Not to be used for commercial purposes
+* 
+********************************************************************
 
 ********************************************************************
 * SET YOUR DIRECTORY HERE
 *********************************************************************
-*cd "" /*set your dir*/
-*cd "D:/Dropbox (MTA KRTK)/bekes_kezdi_textbook"
-cd "C:\Users\kezdi\Dropbox\bekes_kezdi_textbook"
 
+* Directory for work
+cd "C:\Users\kezdi\GitHub\da_case_studies" 
+global work  "ch08-hotels-non-linear"
+cap mkdir "$work/output"
+global output "$work/output"
+cap mkdir "$work/temp"
+global temp "$work/temp"
 
+* Directory for data
+* Option 1: run directory-setting do file
+*do "set-data-directory.do" /*data_dir must be first defined */
+*global data_in   	"$da_data_repo/hotels-vienna/clean"
+* Option 2: set directory here
+global data_in "C:/Users/kezdi/Dropbox/bekes_kezdi_textbook/da_data_repo/hotels-vienna/clean"
 
-*location folders
-global data_in   	"da_data_repo/hotels-vienna/clean"
-global data_out  	"da_case_studies/ch08-hotels-non-linear"
-global output 		"da_case_studies/ch08-hotels-non-linear/output"
 
 
 * load in clean and tidy data and create workfile
@@ -44,7 +52,7 @@ tab city_actual
 keep if city_actual=="Vienna"
 
 * save work file
-saveold "$data_out/hotels_work.dta", replace
+save "$work/hotels_work.dta", replace
 
 
 
@@ -71,46 +79,46 @@ reg price lndistance, r
 	outreg2 using "$output/T08_reg1.tex", label bdec(2) tex(frag)  nose noaster  append
 reg lnprice lndistance
 	outreg2 using "$output/T08_reg1.tex", label bdec(2) tex(frag) nose noaster   append
-x	
+	
 * create graphs	
 scatter price distance , ///
- ms(O) msize(tiny) mlw(thick) mcolor(navy) mcolor(%50) ///
+ ms(O) msize(small) mlw(thick) mcolor(navy*0.6) ///
  xlab(0(1)7, grid) ylab(000(50)400, grid) ///
  xtitle("Distance to city center (miles)") ///
- ytitle("Hotel price(EUR)") ///
- || lfit price distance, lw(thick) lc(dkgreen) legend(off)  ///
+ ytitle("Hotel price(US dollars)") ///
+ || lfit price distance, lw(thick) lc(green) legend(off)  ///
  graphregion(fcolor(white) ifcolor(none))  ///
  plotregion(fcolor(white) ifcolor(white))
-graph export "$output/F08_1a.png", as(png) replace
+graph export "$output/ch08-figure-1a-hotel-levlev-Stata", as(png) replace
 
 
 scatter lnprice distance , ///
- ms(O) msize(tiny) mlw(thick) mcolor(navy) mcolor(%50) ///
+ ms(O) msize(small) mlw(thick) mcolor(navy*0.6) ///
  xlab(0(1)7, grid) ylab(3.5(0.50)6, grid) ///
  xtitle("Distance to city center (miles)") ///
- ytitle("Hotel price (EUR) in log") ///
+ ytitle("ln(hotel price in US dollars)") ///
  || lfit lnprice distance, lw(thick) lc(dkgreen) legend(off)  ///
  graphregion(fcolor(white) ifcolor(none))  ///
  plotregion(fcolor(white) ifcolor(white))
-graph export "$output/F08_1b.png", as(png) replace
+graph export "$output/ch08-figure-1b-hotel-loglev-Stata", as(png) replace
 
 scatter price lndistance , ///
- ms(O) msize(tiny) mlw(thick) mcolor(navy) mcolor(%50) ///
+ ms(O) msize(small) mlw(thick) mcolor(navy*0.6) ///
  xlab(-2.5(0.5)2, grid) ylab(000(50)400, grid) ///
- xtitle("Distance to city center (miles) in log") ///
- ytitle("Hotel price (EUR) ") ///
+ xtitle("ln(distance to city center, miles)") ///
+ ytitle("Hotel price (US dollars) ") ///
  || lfit price lndistance, lw(thick) lc(dkgreen) legend(off)  ///
  graphregion(fcolor(white) ifcolor(none))  ///
  plotregion(fcolor(white) ifcolor(white))
-graph export "$output/F08_1c.png", as(png) replace
+graph export "$output/ch08-figure-1c-hotel-levlog-Stata", as(png) replace
 
 
 scatter lnprice lndistance , ///
- ms(O) msize(tiny) mlw(thick) mcolor(navy) mcolor(%50) ///
- xlab(-2.5(0.5)2, grid) ylab(3.5(0.50)6, grid) ///
- xtitle("Distance to city center (miles) in log") ///
- ytitle("Hotel price (EUR) in log") ///
+ ms(O) msize(small) mlw(thick) mcolor(navy*0.6) ///
+ xlab(-3(0.5)2, grid) ylab(3.5(0.50)6, grid) ///
+ xtitle("ln(distance to city center, miles)") ///
+ ytitle("ln(hotel price in US dollars)") ///
  || lfit lnprice lndistance, lw(thick) lc(dkgreen) legend(off)  ///
  graphregion(fcolor(white) ifcolor(none))  ///
  plotregion(fcolor(white) ifcolor(white))
-graph export "$output/F08_1d.png", as(png) replace
+graph export "$output/ch08-figure-1d-hotel-loglog-Stata", as(png) replace
