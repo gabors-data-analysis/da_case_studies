@@ -1,40 +1,33 @@
-***************************************************************
-* Stock market price and index
-* sp-500
+*********************************************************************
 *
-* Loading and cleaning data
-***************************************************************
-
-
-
-* WHAT THIS CODES DOES:
-
-* Loads the csv file 
-* Clean the dataset
-* Generate new variables
-* Generate samples by resampling to derive confidence intervals
-* Generate samples by bootstraping to derive confidence intervals
-
-***
+* GABORS' DATA ANALYSIS TEXTBOOK (Bekes & Kezdi)
+*
+* Case study 05A
+* What likelihood of loss to expect on a stock portfolio?
+*
+* using the sp500 dataset
+* 
+********************************************************************
 
 ********************************************************************
 * SET YOUR DIRECTORY HERE
 *********************************************************************
-*cd "" /*set your dir*/
-cd "C:/Users/GB/Dropbox (MTA KRTK)/bekes_kezdi_textbook"
- 
- * YOU WILL NEED TWO SUBDIRECTORIES
- * textbook_work --- all the codes
- * cases_studies_public --- for the data
 
-*location folders
-global data_in   	"da_data_repo/sp500/clean"
-global data_out  	"da_case_studies/ch05-stock-market-loss-generalize"
-global output 		"da_case_studies/ch05-stock-market-loss-generalize/output"
+* Directory for work
+cd "C:\Users\kezdi\GitHub\da_case_studies" 
+global work  "ch05-stock-market-loss-generalize"
+cap mkdir "$work/output"
+global output "$work/output"
+cap mkdir "$work/temp"
+global temp "$work/temp"
 
+* Directory for data
+* Option 1: run directory-setting do file
+*do "set-data-directory.do" /*data_dir must be first defined */
+*global data_in   	"$da_data_repo/sp500/clean"
+* Option 2: set directory here
+global data_in "C:/Users/kezdi/Dropbox/bekes_kezdi_textbook/da_data_repo/sp500/clean"
 
-
-global temp      "$data_out"
 
 * set level of loss to inquire
 global loss 5
@@ -60,42 +53,36 @@ gen month=month(date)
 * order variables
 order date datestr year month gap
 
-save "$data_out/work.dta", replace
+save "$work/work.dta", replace
 
 
 ************************************************
-* first look
+* Exaploratory Data Analysis
 ************************************************
 
 
-use "$data_out/work.dta", clear
+use "$work/work.dta", clear
 
+* time series graphs not in textbook
 tsset date
-tsline value
-graph export "$output/sp500_daily.png", as(png) replace
+tsline value, lw(thick) lc(navy*0.8) xla(, grid) yla(,grid)
 
 sort date
 gen pct_return=(value-value[_n-1])/value[_n-1]*100
-tsline pct_return
-graph export "$output/sp500_return_daily.png", as(png) replace
+tsline pct_return, lc(navy*0.8) xla(, grid) yla(,grid) yline(0)
 
 
 collapse (mean) value, by (year )
 tsset year
-tsline value
-graph export "$output/sp500_year.png", as(png) replace
+tsline value, lw(thick) lc(navy*0.8) xla(, grid) yla(,grid)
+
 sort year
 gen pct_return=(value-value[_n-1])/value[_n-1]*100
-tsline pct_return
-graph export "$output/sp500_return_year.png", as(png) replace
+tsline pct_return, lw(thick) lc(navy*0.8) xla(, grid) yla(,grid) yline(0)
 
 
-***************************************
-* Analysis
-* 
-***************************************
 
-use "$data_out/work.dta", clear
+use "$work/work.dta", clear
 
 * create percent daily returns
 sort date
@@ -103,29 +90,31 @@ gen pct_return=(value-value[_n-1])/value[_n-1]*100
 lab var pct_return "Percent daily return"
 
 * histogram
+colorpalette viridis, n(4) select(2) nograph
 histogram pct_return, freq start(-10) width(0.25) bstyle(background) ///
-	fcol(blue) xlab(-10 -5 -2 0 2 5 10) ///
-	xline(-$loss, style(extended) lstyle(foreground) lw(thick))
-graph export "$output/returns_histogram.png",replace
+	fcol(`r(p)') xlab(-10 -5 -2 0 2 5 10, grid) ylab(, grid) ///
+	xline(-$loss, lc(green) lstyle(foreground) lw(thick)) ///
+	text(220 -7 "5% loss -->")
+graph export "$output/ch05-figure-1-returns-histogram-Stata.png",replace
 
 keep date pct_return
-save "$data_out/sp500_pctreturns.dta", replace
+save "$temp/sp500_pctreturns.dta", replace
 
 ***************************************
 * REPEATED SAMPLES
-* samples of 150, 300 and 600 observations (1/2, 1 & 2 years approximately)
+* samples of 500 and 1000 observations (2 & 4 years approximately)
 
 clear
 set matsize 10000
 set seed 573164
 global M=10000
 
-foreach n in 450 900 {
+foreach n in 500 1000 {
 
 	mat def Results = J($M,10,0)
 
 qui forvalues i=1/$M {
-	use "$data_out/sp500_pctreturns.dta",replace
+	use "$temp/sp500_pctreturns.dta",replace
 	sample `n', count
 	forvalue j=1/10 {
 		gen loss`j'p=100*(pct_return<-`j')
@@ -136,46 +125,46 @@ qui forvalues i=1/$M {
 clear
 svmat Results, names(loss)
 tabstat loss*, s(mean median min max sd n)
-save "$data_out/repsamples`n'",replace
+save "$temp/repsamples`n'",replace
 }
 
 
-foreach n in 450 900 {
-	use "$data_out/repsamples`n'",replace
-	tabstat loss$loss, s(mean median min max sd n)
-	lab var loss$loss "Percent of days with losses of $loss% or more"
-	histogram loss$loss, freq width(0.1) fcol(mint) xlab(0(0.2)2)
-	more
-	graph export "$data_out/output/resample`n'.png",replace
-}
+use "$temp/repsamples1000",replace
+tabstat loss$loss, s(mean median min max sd n)
+lab var loss$loss "Percent of days with losses of $loss% or more"
 
-** DENSITY PLOTS WITH DIFFERENT SAMPLE SIZES
+* Figure 2
+qui sum loss$loss
+local mean_resamples1000 = r(mean)
+histogram loss$loss, freq width(0.099) bstyle(background) ///
+	fcol(navy*0.8) xlab(0(0.25)1.5, grid) ylab(0(500)2500, grid) ///
+	xline(`mean_resamples1000 ', lc(green*0.8) lstyle(foreground) lw(thick)) ///
+	text(2400 0.65 "<---- mean")
+graph export "$output/ch05-figure-2-resample1000-Stata.png",replace
+
+
 
 clear
 
-use "$data_out/repsamples450",replace
+use "$temp/repsamples500",replace
  keep loss$loss
- rename loss$loss loss_n450
-merge 1:1 _n using "$data_out/repsamples900", nogen
+ rename loss$loss loss_n500
+merge 1:1 _n using "$temp/repsamples1000", nogen
  keep loss$loss* loss_n*
- rename loss$loss loss_n900
+ rename loss$loss loss_n1000
 
 sum loss* 
- 
-foreach n in 450 900 {
-	kdensity loss_n`n' if loss_n`n'>=0, nogra gen(x`n' y`n') bw(0.5)
-	lab var y`n' "n=`n'"
-}
 
-* NEW
-line y450 x450 , lw(thick) lc(green) lp(shortdash) ///
- || line y900 x900, lw(vthick) lc( blue) ///
- ytitle("Frequency") xtitle("percent of days with losses above 5%") ///
-  xline(0.5, lc(dkgrey) ) xline(0, lw(thin) lc(grey) lp(dash) ) ///
-  xlab(0(0.5)2.5, grid)  ylab(0, grid) legend(rows(1)) ///
- graphregion(fcolor(white) ifcolor(none))  ///
- plotregion(fcolor(white) ifcolor(white))
-  graph export "$output/resample_densities.png",replace
+* Figure 3
+twoway histogram loss_n500, percent width(0.2) ///
+	fcolor(navy*0.6) lcol(navy*1.2) lw(thick)  ///
+  || histogram loss_n1000, percent width(0.2) ///
+	fcolor(none) lcol(green*0.8) lw(thick) ///
+  xlab(0(0.2)1.6, grid) ylab(0(10)50, grid) ///
+  xtitle("Percent of days with losses over $loss%") ytitle("Percent") ///
+  legend(rows(1) position(2) ring(0) region(lp(blank)) ///
+  order(2 "n500" 1 "n1000" )) 
+graph export "$output/ch05-figure-3-resample-hist-Stata.png",replace
 
 
 
@@ -207,8 +196,14 @@ qui forvalues i=1/$M {
 
 lab var loss "Percent of days with losses of $loss% or more"
 tabstat loss, s(mean sd median min max n)
-histogram loss, freq width(0.04) fcol(mint) xlab(0(0.1)1.2)
-graph export "$data_out/output/bootstrap.png",replace
+
+
+* Figure 5
+histogram loss, freq width(0.04) ///
+	fcol(navy*0.8) lcol(white) ///
+	xlab(0(0.1)1.2, grid) ylab(0(200)1200, grid) 
+graph export "$output/ch05-figure-5-bootstrap-Stata.png",replace
+
 
 
 ***************************************
