@@ -53,20 +53,24 @@ hrs <-  read.csv(paste(data_in,"hrs_height_income.csv", sep = "/"))
 
 #------------------------------------------------------------------------------------------------------
 
-hrs$rheight <- as.numeric(as.character(hrs$rheight))
+hrs$height <- as.numeric(as.character(hrs$height))
 
 # NORMAL: height of women age 55-59 
+Hmisc::describe(hrs$height)
 filtered_women <-  hrs %>%
-  filter(age >= 55 & age < 60 & female == 1 & rheight > 1.3 & rheight < 2.1)
-Hmisc::describe(hrs$rheight)
+  filter(age >= 55 & age < 60 & female == 1)
+Hmisc::describe(hrs$height)
+filtered_women_height <-  hrs %>%
+  filter(age >= 55 & age < 60 & female == 1 & height > 1.3 & height < 2.1)
+Hmisc::describe(filtered_women_height$height)
 
 
 # graph --height  
-ch03_normal_height <- ggplot(filtered_women, aes(x = rheight)) +
-  geom_histogram(aes(y = ..density..), binwidth = 0.025, boundary = min(filtered_women$rheight), 
+ch03_normal_height <- ggplot(filtered_women_height, aes(x = height)) +
+  geom_histogram(aes(y = ..density..), binwidth = 0.025, boundary = min(filtered_women_height$height), 
                  fill = color[1], color = color.outline, alpha = 0.8, closed='left') +
   stat_function(fun = dnorm, colour= color[2],  
-                args = with(filtered_women, c(mean = mean(rheight), sd = sd(rheight)))) + 
+                args = with(filtered_women_height, c(mean = mean(height), sd = sd(height)))) + 
   scale_y_continuous("Density", position = "right", expand=c(0,0), limits = c(0, 6),
                      sec.axis =  sec_axis(~ . *0.025, name = "Percent",breaks =seq(0,0.15, by=0.025),labels = percent_format(accuracy = 0.1))) + 
     theme_bg() +
@@ -78,17 +82,15 @@ save_fig("ch03-figure-10-hist-height", output, "small")
 # LOGNORMAL: family income of women age 55-59 
 
 # income variable
-hrs <-  hrs %>%
-  mutate(income = hitot / 1000)
 
 # filter dataset
 filtered_women_income <-  hrs %>%
-  filter(age >= 55 & age < 60 & female == 1 & income > 1 & income < 1000)
-Hmisc::describe(filtered_women_income$income)
+  filter(age >= 55 & age < 60 & female == 1 & hhincome > 1 & hhincome < 1000)
+Hmisc::describe(filtered_women_income$hhincome)
 
 
 # graph --income 
-ch03_lognormal_income <- ggplot(filtered_women_income, aes(x = income)) +
+ch03_lognormal_income <- ggplot(filtered_women_income, aes(x = hhincome)) +
   geom_histogram(aes(y = (..count..)/sum(..count..)), binwidth = 20, boundary=0, closed='left', 
                  fill = color[1], color = color.outline, alpha = 0.8) +
   ylab("Percent") +   xlab("Household income (thousand USD)") +
@@ -105,7 +107,7 @@ save_fig("ch03-figure-11a-hist-income", output, "small")
 
 # ln income
 filtered_women_income <- filtered_women_income %>%
-  mutate(lnincome = log(income))
+  mutate(lnincome = log(hhincome))
 
 
 # graph --ln income
