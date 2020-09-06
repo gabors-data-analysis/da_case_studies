@@ -1,35 +1,53 @@
-*********************************************************************
+********************************************************************
+* Prepared for Gabor's Data Analysis
 *
-* GABORS' DATA ANALYSIS TEXTBOOK (Bekes & Kezdi)
+* Data Analysis for Business, Economics, and Policy
+* by Gabor Bekes and  Gabor Kezdi
+* Cambridge University Press 2021
 *
-* Case study 05A
-* What likelihood of loss to expect on a stock portfolio?
+* gabors-data-analysis.com 
 *
+* License: Free to share, modify and use for educational purposes. 
+* 	Not to be used for commercial purposes.
+*
+* Chapter 05
+* CH05A What likelihood of loss to expect on a stock portfolio?
 * using the sp500 dataset
-* 
+* version 0.9 2020-09-06
 ********************************************************************
 
-********************************************************************
-* SET YOUR DIRECTORY HERE
-*********************************************************************
 
-* Directory for work
-cd "C:\Users\kezdi\GitHub\da_case_studies" 
-global work  "ch05-stock-market-loss-generalize"
-cap mkdir "$work/output"
-global output "$work/output"
-cap mkdir "$work/temp"
-global temp "$work/temp"
+* SETTING UP DIRECTORIES
 
-* Directory for data
+* STEP 1: set working directory for da_case_studies.
+* for example:
+* cd "C:/Users/xy/Dropbox/gabors_data_analysis/da_case_studies"
+
+* STEP 2: * Directory for data
 * Option 1: run directory-setting do file
-*do "set-data-directory.do" /*data_dir must be first defined */
-*global data_in   	"$da_data_repo/sp500/clean"
-* Option 2: set directory here
-global data_in "C:/Users/kezdi/Dropbox/bekes_kezdi_textbook/da_data_repo/sp500/clean"
+do set-data-directory.do 
+							/* this is a one-line do file that should sit in 
+							the working directory you have just set up
+							this do file has a global definition of your working directory
+							more details: gabors-data-analysis.com/howto-stata/   */
+
+* Option 2: set directory directly here
+* for example:
+* global data_dir "C:/Users/xy/gabors_data_analysis/da_data_repo"
 
 
-* set level of loss to inquire
+global data_in  "$data_dir/sp500/clean"
+global work  	"ch05-stock-market-loss-generalize"
+
+cap mkdir 		"$work/output"
+global output 	"$work/output"
+
+cap mkdir 		"$work/temp"
+global temp 	"$work/temp"
+
+
+
+* set level of loss to inquire (in percent)
 global loss 5
 
 ***************************************************************
@@ -58,8 +76,6 @@ save "$work/work.dta", replace
 
 ************************************************
 * Exaploratory Data Analysis
-************************************************
-
 
 use "$work/work.dta", clear
 
@@ -171,7 +187,6 @@ graph export "$output/ch05-figure-3-resample-hist-Stata.png",replace
 
 ***************************************
 * BOOTSRTAP SAMPLES
-***************************************
 
 * WARNING!!!!!! 
 * IF using DROPBOX/BOX - need to switch off sync!!!!
