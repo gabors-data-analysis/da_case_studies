@@ -1,32 +1,46 @@
-*********************************************************************
+********************************************************************
+* Prepared for Gabor's Data Analysis
 *
-* GABORS' DATA ANALYSIS TEXTBOOK (Bekes & Kezdi)
+* Data Analysis for Business, Economics, and Policy
+* by Gabor Bekes and  Gabor Kezdi
+* Cambridge University Press 2021
 *
-* Case study 03D
-* Distributions of body height and income
+* gabors-data-analysis.com 
 *
-* using the height-income-distributions dataset
-* 
+* License: Free to share, modify and use for educational purposes. 
+* 	Not to be used for commercial purposes.
+*
+* Chapter 03
+* CH03B Identifying successful football managers
+* using the football dataset
+* version 0.9 2020-09-06
 ********************************************************************
 
-********************************************************************
-* SET YOUR DIRECTORY HERE
-*********************************************************************
 
-* Directory for work
-cd "C:\Users\kezdi\GitHub\da_case_studies" 
-global work  "ch02-football-manager-success"
-cap mkdir "$work/output"
-global output "$work/output"
-cap mkdir "$work/temp"
-global temp "$work/temp"
+* SETTING UP DIRECTORIES
 
-* Directory for data
+* STEP 1: set working directory for da_case_studies.
+* for example:
+* cd "C:/Users/xy/Dropbox/gabors_data_analysis/da_case_studies"
+
+* STEP 2: * Directory for data
 * Option 1: run directory-setting do file
-*do "set-data-directory.do" /*data_dir must be first defined */
-*global data_in   	"$da_data_repo/football/clean"
-* Option 2: set directory here
-global data_in "C:/Users/kezdi/Dropbox/bekes_kezdi_textbook/da_data_repo/football/clean"
+do set-data-directory.do 
+							/* this is a one-line do file that should sit in 
+							the working directory you have just set up
+							this do file has a global definition of your working directory
+							more details: gabors-data-analysis.com/howto-stata/   */
+
+* Option 2: set directory directly here
+* for example:
+* global data_dir "C:/Users/xy/gabors_data_analysis/da_data_repo"
+
+global data_in  "$data_dir/football/clean"
+global work  	"ch02-football-manager-success"
+
+cap mkdir 		"$work/output"
+global output 	"$work/output"
+
 
 *********************************************************************
 * look at entire clean data table on games
@@ -77,5 +91,5 @@ graph hbar (mean) manager_win_ratio0 manager_win_ratio1 if manager_win_ratio>=2,
   yline(1.6(0.2)3) ///
  graphregion(fcolor(white) ifcolor(none)) ///
  plotregion(fcolor(white) ifcolor(white))
-graph export "$output/ch02-figures1-top-managers-Stata.png", replace
+graph export "$output/ch02-figure1-top-managers-Stata.png", replace
 
