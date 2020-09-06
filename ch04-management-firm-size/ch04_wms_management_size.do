@@ -1,32 +1,46 @@
-*********************************************************************
+********************************************************************
+* Prepared for Gabor's Data Analysis
 *
-* GABORS' DATA ANALYSIS TEXTBOOK (Bekes & Kezdi)
+* Data Analysis for Business, Economics, and Policy
+* by Gabor Bekes and  Gabor Kezdi
+* Cambridge University Press 2021
 *
-* Case study 04A
-* Management quality and firm size
+* gabors-data-analysis.com 
 *
+* License: Free to share, modify and use for educational purposes. 
+* 	Not to be used for commercial purposes.
+*
+* Chapter 04
+* CH04A Management quality and firm size: describing patterns of association
 * using the wms-management-survey dataset
-* 
+* version 0.9 2020-09-06
 ********************************************************************
 
-********************************************************************
-* SET YOUR DIRECTORY HERE
-*********************************************************************
 
-* Directory for work
-cd "C:\Users\kezdi\GitHub\da_case_studies" 
-global work  "ch04-management-firm-size"
-cap mkdir "$work/output"
-global output "$work/output"
-cap mkdir "$work/temp"
-global temp "$work/temp"
+* SETTING UP DIRECTORIES
 
-* Directory for data
+* STEP 1: set working directory for da_case_studies.
+* for example:
+* cd "C:/Users/xy/Dropbox/gabors_data_analysis/da_case_studies"
+
+* STEP 2: * Directory for data
 * Option 1: run directory-setting do file
-*do "set-data-directory.do" /*data_dir must be first defined */
-*global data_in   	"$da_data_repo/wms-management-survey/clean"
-* Option 2: set directory here
-global data_in "C:/Users/kezdi/Dropbox/bekes_kezdi_textbook/da_data_repo/wms-management-survey/clean"
+do set-data-directory.do 
+							/* this is a one-line do file that should sit in 
+							the working directory you have just set up
+							this do file has a global definition of your working directory
+							more details: gabors-data-analysis.com/howto-stata/   */
+
+* Option 2: set directory directly here
+* for example:
+* global data_dir "C:/Users/xy/gabors_data_analysis/da_data_repo"
+
+global data_in  "$data_dir/wms-management-survey/clean"
+global work  	"ch04-management-firm-size"
+
+cap mkdir 		"$work/output"
+global output 	"$work/output"
+
 
 
 clear
@@ -99,25 +113,25 @@ qui foreach v of varlist lean* perf* talent* {
 
 tab lean1 emp3bins, col nofre
 graph bar lean1_*, stack over(emp3bins) percent ///
- bar(1, col(navy)) bar(2, col(green)) bar(3, col(blue)) ///
- bar(4, col(lime)) bar(5, col(ltblue)) ///
+ bar(1, col(yellow*1.2)) bar(2, col(green*0.6)) bar(3, col(bluishgray*1.2)) ///
+ bar(4, col(navy*0.6)) bar(5, col(navy)) ///
  legend(label(1 "1") label(2 "2")  label(3 "3") label(4 "4") label(5 "5") row(1)) ///
  title("Lean management. Score by three bins of firm emp")
-graph export "$output/wms_Mex_lean1_emp3bins.eps",replace
+graph export "$output/ch04-figure-3a-wms-mex-lean1-emp3bins-Stata.png",replace
 
 tab perf2 emp3bins, col nofre
 graph bar perf2_*, stack over(emp3bins) percent ///
- bar(1, col(navy)) bar(2, col(green)) bar(3, col(blue)) ///
- bar(4, col(lime)) bar(5, col(ltblue)) ///
+ bar(1, col(yellow*1.2)) bar(2, col(green*0.6)) bar(3, col(bluishgray*1.2)) ///
+ bar(4, col(navy*0.6)) bar(5, col(navy)) ///
  legend(label(1 "1") label(2 "2")  label(3 "3") label(4 "4") label(5 "5") row(1)) ///
  title("Performance tracking. Score by three bins of firm emp")
-graph export "$output/wms_Mex_perf2_emp3bins.eps",replace
+graph export "$output/ch04-figure-3b-wms-mex-perf2-emp3bins-Stata.png",replace
 
 
 * Bin scatters avg score by employment bins
 tabstat emp_firm, s(min max median n) by(emp3bins)
- recode emp3bins 1=150 2=600 3=3000
- tabstat emp_firm, s(min max median n) by(emp3bins)
+ gen emp3bins_num = (emp3bins==1)*150 + (emp3bins==2)*600 + (emp3bins==3)*3000
+ tabstat emp_firm, s(min max median n) by(emp3bins_num)
 egen emp10bins = cut(emp_firm), group(10)
  tabstat emp_firm, s(min max median n) by(emp10bins)
  recode emp10bins 0=120 1=135 2=165 3=255 4=315 5=375 6=585 7=860 8=1600 9=3500
@@ -125,43 +139,41 @@ egen emp10bins = cut(emp_firm), group(10)
 egen management_emp3bins  = mean(management), by(emp3bins)
 egen management_emp10bins = mean(management), by(emp10bins)
 
-scatter management_emp3bins emp3bins, msize(vlarge) ///
+scatter management_emp3bins emp3bins_num, msize(vlarge) mc(navy*0.8) ///
  ylab(2.4(0.2)3.4, grid) xlab(0(500)3500, grid) ///
  ytitle("Average management quality score") xtitle("Firm size (# employees), 3 bins") ///
  graphregion(fcolor(white) ifcolor(none))  ///
  plotregion(fcolor(white) ifcolor(white))
-graph export "$output/wms_Mex_management_emp3bins.eps", replace
-graph export "$output/wms_Mex_management_emp3bins.png", as(png) replace
+graph export "$output/ch04-figure-4a-wms-mex-mgmt-emp3bins-Stata.png",replace
 
-scatter management_emp10bins emp10bins, msize(vlarge) ///
+scatter management_emp10bins emp10bins, msize(vlarge) mc(navy*0.8) ///
  ylab(2.5(0.25)3.5, grid) xlab(0(500)3500, grid) ///
  ytitle("Average management quality score") xtitle("Firm size (# employees), 10 bins") ///
  graphregion(fcolor(white) ifcolor(none))  ///
  plotregion(fcolor(white) ifcolor(white))
-graph export "$output/wms_Mex_management_emp10bins.eps", replace
-graph export "$output/wms_Mex_management_emp10bins.png", as(png) replace
+graph export "$output/ch04-figure-4b-wms-mex-mgmt-emp10bins-Stata.png",replace
 
 
 * Scatterplot avg score by employment
-scatter management emp_firm, ylab(, grid) xlab(, grid) ///
+scatter management emp_firm, ylab(, grid) xlab(, grid) mc(navy*0.7) ///
  xtitle("Number of employees") ytitle("Quality of management: average score")
-graph export "$output/wms_Mex_management_emp_scatter.eps", replace
+graph export "$output/ch04-figure-4a-wms-mex-mgmt-emp-scatter-Stata.png",replace
 
 cap gen lnemp=ln(emp_firm)
-scatter management lnemp, ylab(, grid) xlab(, grid) ///
+scatter management lnemp, ylab(, grid) xlab(, grid) mc(navy*0.7) ///
  xtitle("Log of number of employees") ytitle("Quality of management: average score")
-graph export "$output/wms_Mex_management_lnemp_scatter.eps", replace
+graph export "$output/ch04-figure-4b-wms-mex-mgmt-lnemp-scatter-Stata.png",replace
 
 
 * Box plots by emp bins
-lab def emp3bin 150 small 600 medium 3500 large
-lab val emp3bin emp3bin 
+graph box management, over(emp3bins) ytitle("Management score")
+graph export "$output/ch04-figure-6a-wms-mex-mgmt-emp3bins-box-Stata.png",replace
 
-graph box management, over(emp3bin) ytitle("Management score")
-graph export "$output/wms_Mex_boxplot_management_emp3bins.eps", replace
-
-violin management, by(emp3bin) 
-graph export "$output/wms_Mex_violin_management_emp3bins.eps", replace
+* Violin plots by emp bins
+* need to install vioplot ado file
+*  (type search vioplot, click on link and follow the instructions)
+vioplot management, over(emp3bins) ylab(,grid)
+graph export "$output/ch04-figure-6b-wms-mex-mgmt-emp3bins-violin-Stata.png",replace
 
 
 ******************************************
@@ -171,36 +183,20 @@ corr management emp_firm
 * by industry
 cap drop industry_broad
 gen industry_broad=""
-replace industry_broad ="food_drinks_tobacco" if sic<22
-replace industry_broad ="textile_apparel_leather_etc" if sic>=22 & sic<24 | sic>=31 & sic<32 | sic>=39 & sic<40
-replace industry_broad ="wood_furniture_paper" if sic>=24 & sic<=26
-replace industry_broad ="chemicals_etc" if sic>=28 & sic<31
+replace industry_broad ="food_drinks_tobacco" if sic<=21
+replace industry_broad ="textile_apparel_leather_etc" if sic==22 | sic==23 | sic==31
+replace industry_broad ="wood_furniture_paper" if sic>=24 & sic<=27
+replace industry_broad ="chemicals_etc" if sic>=28 & sic<=30
 replace industry_broad ="materials_metals" if sic>=32 & sic<35 
-replace industry_broad ="electronics" if sic>35 & sic<37
-replace industry_broad ="auto" if sic>=37 & sic<38
+replace industry_broad ="electronics, equipment, machinery" if sic>=35 & sic<37
+replace industry_broad ="auto" if sic==37
+replace industry_broad ="other" if sic>=38
 tab industry_broad,mis
+tab sic industry_broad,mis
+
 
 sort industry_broad
 by industry_broad: corr management emp_firm
 tab industry, mis sum(management)
 
 
-/*
-*****************************************
-
-* NOT USED IN THE END
-
-*****************************************
-
-* Bin scatters avg score by items
-foreach v of varlist lean* perf* talent* {
-	cap egen as_`v' = mean(management), by(`v')
-	lab var as_`v' "Avg. score"
-	scatter as_`v' `v', msize(huge) ylabel(1.5(0.5)4 ,grid) xlabel(, grid) saving(`v', replace)
-}
-
-graph combine lean1.gph lean2.gph perf1.gph perf2.gph perf3.gph perf4.gph ///
-	perf5.gph perf6.gph perf7.gph perf8.gph perf9.gph perf10.gph ///
-	talent1.gph talent2.gph talent3.gph talent4.gph talent5.gph talent6.gph 
-graph export "$output/management_management_byitems.eps", replace
-graph export "$output/management_management_byitems.png, replace
