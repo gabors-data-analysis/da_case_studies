@@ -1,28 +1,45 @@
-**********************************************
+********************************************************************
+* Prepared for Gabor's Data Analysis
+*
+* Data Analysis for Business, Economics, and Policy
+* by Gabor Bekes and  Gabor Kezdi
+* Cambridge University Press 2021
+*
+* gabors-data-analysis.com 
+*
+* License: Free to share, modify and use for educational purposes. 
+* 	Not to be used for commercial purposes.
+*
 * Chapter 02
-*
-* hotels-vienna
-*
-*
-* PART A: basic look, some descriptives 
-* uses clean data
-
-* PART B: repeat of the cleaning code
-* uses raw data
-
-* v1.1
-**********************************************
+* CH02C Displaying immunization rates across countries
+* using the world-bank-immunizationdataset
+* version 0.9 2020-09-06
+********************************************************************
 
 
-* set the path
-cd "C:\Users\GB\Dropbox (MTA KRTK)\bekes_kezdi_textbook"
+* SETTING UP DIRECTORIES
 
-* ssc install listtab
+* STEP 1: set working directory for da_case_studies.
+* for example:
+* cd "C:/Users/xy/Dropbox/gabors_data_analysis/da_case_studies"
 
-*location folders
-global data_in   "da_data_repo/world-bank-immunization/clean"
-global data_out  "da_case_studies/ch02-immunization-crosscountry"
-global output    "da_case_studies/ch02-immunization-crosscountry/output"
+* STEP 2: * Directory for data
+* Option 1: run directory-setting do file
+do set-data-directory.do 
+							/* this is a one-line do file that should sit in 
+							the working directory you have just set up
+							this do file has a global definition of your working directory
+							more details: gabors-data-analysis.com/howto-stata/   */
+
+* Option 2: set directory directly here
+* for example:
+* global data_dir "C:/Users/xy/gabors_data_analysis/da_data_repo"
+
+global data_in  "$data_dir/world-bank-immunization/clean"
+global work  	"ch02-immunization-crosscountry"
+
+cap mkdir 		"$work/output"
+global output 	"$work/output"
 
  
 * load in clean and tidy data and create workfile
