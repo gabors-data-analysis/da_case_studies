@@ -8,11 +8,11 @@
 #
 ###############################################################################################x
 
-# CHAPTER 14
-# CH14B Predicting AirBnB apartment prices: selecting a regression model
+# CHAPTER 18
+# CH18B Forecasting a house price index
 
-# football dataset
-# version 0.9 2020-08-28
+# case-schiller-la dataset
+# version 0.9 2020-09-06
 
 ###########
 
@@ -451,7 +451,7 @@ colnames(summary_folds) <- c("Model", paste0("Fold ", colnames(summary_folds)[-1
 
 summary_final <- bind_rows(list(summary_p, summary_dp, summary_lnp, summary_var2)) %>%
   group_by(.model) %>%
-  dplyr::summarise(CV_RMSE = sum(MSE)**0.5) %>%
+  dplyr::summarise(CV_RMSE = sum(MSE/4)**0.5) %>%
   as.data.frame()
 
 model_formulas <- summary_final %>%
