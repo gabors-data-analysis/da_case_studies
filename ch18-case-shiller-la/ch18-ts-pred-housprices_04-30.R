@@ -75,7 +75,9 @@ get_MSE_from_forecast <- function(forecast, groupby = c(".id", ".model")){
 #load data
 
 data <- read_rds(paste0(data_in,"houseprices-data-1990-2018.rds")) %>%
-  mutate(date = as.Date(date))
+  as.data.frame() %>%
+  mutate(date = yearmonth(date)) %>%
+  as_tsibble(index = date)
 
 data <- data %>%
   filter(date>="2000-01-01" & date<"2018-01-01")
@@ -104,7 +106,12 @@ data <- data %>%
     du     = difference(u, lag=1, order_by = date),
     lnemp = log(emp),
     dlnemp = difference(lnemp, lag=1, order_by = date)
+  ) %>%
+  mutate(
+    trend = 1:nrow(data),
+    month = as.factor(month(date))
   )
+
 
 #############################
 # GRAPHS part 1
@@ -226,6 +233,11 @@ data_tr <- data_train %>%
   slice(1:(n()-12)) %>% # last year of training data not used in any fold as training
   slide_tsibble(.size = train_legth*12, .step = 12)
 
+data_cv_test <- data_train %>%
+  slice(train_legth*12+1:n()) %>% 
+  slide_tsibble(.size = 12, .step = 12) %>%
+  select(trend, month)
+
 #####################################
 # Look at some TS regressions, tests
 #####################################
@@ -240,13 +252,13 @@ data %>%
 # Look at model coefficients on train data to see if seasonality matters
 fit <-data_train %>%
   model(
-    m5 =  ARIMA(p ~ 1 +season() +  PDQ(0,0,0))
+    m5 =  ARIMA(p ~ 1 + month +  PDQ(0,0,0))
   )
 report(fit)
 
 fit2 <-data_train %>%
   model(
-    m5 =  ARIMA(dp ~  1 + season()+ PDQ(0,0,0))
+    m5 =  ARIMA(dp ~  1 + month + PDQ(0,0,0))
   )
 report(fit2)
 
@@ -274,22 +286,21 @@ q2_auto <- m2_pre$auto_arima[[1]]$fit$spec$q
 d2_auto <- m2_pre$auto_arima[[1]]$fit$spec$d
 
 m3_pre <- data_train %>%
-  model(auto_arima = ARIMA(p ~ season()+  PDQ(0,0,0)))
+  model(auto_arima = ARIMA(p ~ month+  PDQ(0,0,0)))
 p3_auto <- m3_pre$auto_arima[[1]]$fit$spec$p
 q3_auto <- m3_pre$auto_arima[[1]]$fit$spec$q
 d3_auto <- m3_pre$auto_arima[[1]]$fit$spec$d
 
 m4_pre <- data_train %>%
-  model(auto_arima = ARIMA(p ~ season() + trend()+ PDQ(0,0,0)))
+  model(auto_arima = ARIMA(p ~ month + trend + PDQ(0,0,0)))
 p4_auto <- m4_pre$auto_arima[[1]]$fit$spec$p
 q4_auto <- m4_pre$auto_arima[[1]]$fit$spec$q
 d4_auto <- m4_pre$auto_arima[[1]]$fit$spec$d
 
-
-m1_p_formula <- "p ~ season() + trend()"
+m1_p_formula <- "p ~ month + trend"
 m2_p_formula <- paste0("p ~  pdq(",paste(p2_auto,d2_auto,q2_auto, sep=","),") + PDQ(0,0,0)")
-m3_p_formula <- paste0("p ~  pdq(",paste(p3_auto,d3_auto,q3_auto, sep=","),") + PDQ(0,0,0) + season()")
-m4_p_formula <- paste0("p ~  pdq(",paste(p4_auto,d4_auto,q4_auto, sep=","),") + PDQ(0,0,0) + season() + trend()")
+m3_p_formula <- paste0("p ~  pdq(",paste(p3_auto,d3_auto,q3_auto, sep=","),") + PDQ(0,0,0) + month")
+m4_p_formula <- paste0("p ~  pdq(",paste(p4_auto,d4_auto,q4_auto, sep=","),") + PDQ(0,0,0) + month + trend")
 
 m1_p <- TSLM(as.formula(m1_p_formula))
 m2_p <-  ARIMA(as.formula(m2_p_formula))
@@ -307,9 +318,10 @@ rmse_train_p <- models_p %>%
   get_RMSE_from_model()
 
 forecast_p <- models_p %>%
-  forecast(h=12) %>%
+  forecast(new_data = data_cv_test) %>%
   as_tsibble() %>%
-  dplyr::rename(p_pred = p) %>%
+  dplyr::rename(p_pred = .mean) %>%
+  select(.id, .model, date, p_pred) %>%
   left_join(data[,c("date","p")]) %>%
   group_by(.id, .model) %>%
   mutate(e = p - p_pred) %>%
@@ -327,14 +339,14 @@ summary_p
 
 
 m12_pre <- data_train %>%
-  model(auto_arima = ARIMA(dp ~ season()+  PDQ(0,0,0)))
+  model(auto_arima = ARIMA(dp ~ month +  PDQ(0,0,0)))
 p12_auto <- m12_pre$auto_arima[[1]]$fit$spec$p
 q12_auto <- m12_pre$auto_arima[[1]]$fit$spec$q
 d12_auto <- m12_pre$auto_arima[[1]]$fit$spec$d
 
 # Cross-validate models predicting first differences
-m11_dp_formula <- "dp ~ season() + trend()"
-m12_dp_formula <- paste0("dp ~ season()+ pdq(",paste(p12_auto,d12_auto,q12_auto, sep=","),") + PDQ(0,0,0)")
+m11_dp_formula <- "dp ~ month + trend"
+m12_dp_formula <- paste0("dp ~ month + pdq(",paste(p12_auto,d12_auto,q12_auto, sep=","),") + PDQ(0,0,0)")
 
 m11_dp <-  TSLM(as.formula(m11_dp_formula))
 m12_dp <-  ARIMA(as.formula(m12_dp_formula))
@@ -347,9 +359,10 @@ rmse_train_dp <- models_dp %>%
   get_RMSE_from_model()
 
 forecast_dp <- models_dp %>%
-  forecast(h=12) %>%
+  forecast(new_data = data_cv_test) %>%
   as_tsibble() %>%
-  dplyr::rename(dp_pred = dp) %>%
+  dplyr::rename(dp_pred = .mean) %>%
+  select(.id, .model, date, dp_pred) %>%
   left_join(data[,c("date","p","p_lag")]) %>%
   group_by(.id, .model) %>%
   mutate(p_pred = cumsum(dp_pred) + p_lag[1]) %>%
@@ -366,12 +379,12 @@ summary_dp
 #################
 
 m21_pre <- data_train %>%
-  model(auto_arima = ARIMA(lnp ~  season()+ PDQ(0,0,0)))
+  model(auto_arima = ARIMA(lnp ~  month + PDQ(0,0,0)))
 p21_auto <- m21_pre$auto_arima[[1]]$fit$spec$p
 q21_auto <- m21_pre$auto_arima[[1]]$fit$spec$q
 d21_auto <- m21_pre$auto_arima[[1]]$fit$spec$d
 
-m21_lnp_formula <- paste0("lnp ~ season()+ pdq(",paste(p21_auto,d21_auto,q21_auto, sep=","),") + PDQ(0,0,0)")
+m21_lnp_formula <- paste0("lnp ~ month + pdq(",paste(p21_auto,d21_auto,q21_auto, sep=","),") + PDQ(0,0,0)")
 m21_lnp <-  ARIMA(as.formula(m21_lnp_formula))
 
 models_lnp <- data_tr %>%
@@ -381,9 +394,10 @@ rmse_train_lnp <- models_lnp %>%
   get_RMSE_from_model()
 
 forecast_lnp <- models_lnp %>%
-  forecast(h=12) %>%
+  forecast(new_data = data_cv_test) %>%
   as_tsibble() %>%
-  dplyr::rename(lnp_pred = lnp) %>%
+  dplyr::rename(lnp_pred = .mean) %>%
+  select(.id, .model, date, lnp_pred) %>%
   left_join(data[,c("date","p")]) %>%
   left_join(rmse_train_lnp) %>%
   group_by(.id, .model) %>%
@@ -412,7 +426,8 @@ rmse_train_var2 <- var21 %>%
 forecast_var2 <- var21 %>%
   forecast(h=12) %>%
   as_tsibble() %>%
-  dplyr::rename(dp_pred = dp)  %>%
+  dplyr::rename(dp_pred = .mean_dp) %>%
+  select(.id, .model, date, dp_pred) %>%
   left_join(data[,c("date","p","p_lag")]) %>%
   group_by(.id, .model) %>%
   mutate(p_pred = cumsum(dp_pred) + p_lag[1]) %>%
@@ -454,6 +469,7 @@ summary_final
 # predict for holdout
 ###########################x
 conf_level <-  80
+conf_level_chr <- paste0(as.character(conf_level),"%")
 
 # best model when p is target
 # (need to adjust code if lnp is best)
@@ -468,10 +484,12 @@ rmse_train_best_p <- models_best_arima_p %>%
   get_RMSE_from_model(groupby = c(".model"))
 
 forecast_holdout_best_arima_p <- models_best_arima_p %>%
-  forecast(h=12) %>%
+  forecast(new_data = select(data_holdout, trend, month)) %>%
   hilo(level = c(conf_level)) %>%
   as_tsibble() %>%
-  rename(p_pred = p)  %>%
+  rename(p_pred = .mean)  %>%
+  select(.model, date, p_pred, conf_level_chr) %>%
+  unpack_hilo(conf_level_chr) %>%
   left_join(data_holdout[,c("date","p")]) %>%
   mutate(e = p - p_pred) %>%
   ungroup()
@@ -485,21 +503,21 @@ summary_holdout_best_arima_p <- forecast_holdout_best_arima_p %>%
 # var21 <- data_train %>%
 #   filter(!is.na(dp)) %>% # need to exclude first row
 #   model(var2 = var2)
-#
+
 # rmse_train_var2 <- var21 %>%
-#   get_RMSE_from_model(resid_col_name = "dp")
-#
-#
+#   get_RMSE_from_model(resid_col_name = "dp", groupby = c(".model"))
+
+
 # forecast_var2 <- var21 %>%
-#   forecast(h=12) %>%
+#   forecast(new_data = select(data_holdout, trend, month)) %>%
 #   as_tsibble() %>%
-#   rename(dp_pred = dp)  %>%
+#   rename(dp_pred = .mean_dp)  %>%
+#   select(.model, date, dp_pred) %>%
 #   left_join(data_holdout[,c("date","p","p_lag")]) %>%
-#   group_by(.id, .model) %>%
 #   mutate(p_pred = cumsum(dp_pred) + p_lag[1]) %>%
 #   mutate(e = p - p_pred) %>%
 #   ungroup()
-#
+
 # summary_holdout_var <- forecast_var2 %>%
 #   get_MSE_from_forecast(groupby = c(".model"))
 # summary_holdout_var
@@ -509,15 +527,14 @@ summary_holdout_best_arima_p <- forecast_holdout_best_arima_p %>%
 # GRAPHS part 3
 #############################
 # graph actual vs prediction from best arima
-conf_level_chr <- paste0(as.character(conf_level),"%")
 data_plot <- data %>%
-  left_join(unnest(forecast_holdout_best_arima_p[,c("date","p_pred",conf_level_chr)])) %>%
+  left_join(forecast_holdout_best_arima_p) %>%
   filter(year(date)>=2015)
 
 
-pred_p_plot <- ggplot(data = data_plot , aes(x = date, y = p))+
+pred_p_plot <- ggplot(data = data_plot , aes(x = as.Date(date), y = p))+
   geom_line(size = 0.8, aes(color = "Actual")) +
-  geom_line(aes(x = date, y = p_pred, color = "Prediction "),  size = 1) +
+  geom_line(aes(x = as.Date(date), y = p_pred, color = "Prediction "),  size = 1) +
   #annotate("text", x = yearmonth("2017-08"), y = 257, label = "Prediction ", size=2.5, vjust = 2, color = color[2])+  
   #annotate("text", x = yearmonth("2017-03"), y = 258, label = "Actual", size=2.5, hjust = 1.5, color = color[1])+  
   ylab("Case-Shiller Price index") +
@@ -537,10 +554,12 @@ save_fig("ch18-figure-9a-pred-p-mp", output, "small")
 
 
 # with uncertainty fan
-pred_p_mp_fan_R <- ggplot(data = data_plot , aes(x = date, y = p))+
+conf_level_lower <- paste0(conf_level_chr, "_lower")
+conf_level_upper <- paste0(conf_level_chr, "_upper")
+pred_p_mp_fan_R <- ggplot(data = data_plot , aes(x = as.Date(date), y = p))+
   geom_line(size = 0.8, aes(color = "Actual")) +
-  geom_line(aes(x = date, y = p_pred, color = "Prediction "),  size = 1) +
-  geom_ribbon(aes(ymin = .lower, ymax = .upper), alpha=0.2,   bg=color[2]) +
+  geom_line(aes(x = as.Date(date), y = p_pred, color = "Prediction "),  size = 1) +
+  geom_ribbon(aes(ymin =  get(conf_level_lower), ymax = get(conf_level_upper)), alpha=0.2,   bg=color[2]) +
   ylab("Case-Shiller Price index") +
   xlab("Date (month)") +
   scale_color_manual(name="",values=c(color[1], color[2])) +
@@ -562,7 +581,11 @@ save_fig("ch18-figure-9b-pred-p-mp-fan", output, "small")
 ###########################
 
 
-data <- read_rds(paste0(data_in,"houseprices-data-1990-2018.rds"))
+data <- read_rds(paste0(data_in,"houseprices-data-1990-2018.rds")) %>%
+  as.data.frame() %>%
+  mutate(date = yearmonth(date)) %>%
+  as_tsibble(index = date)
+
 data <- data %>%
   filter(date>="2000-01-01" & date<"2019-01-01")
 # pick if seasonal or non seasonal version used, will be cut later
@@ -584,6 +607,10 @@ data <- data %>%
     du     = difference(u, lag=1, order_by = date),
     lnemp = log(emp),
     dlnemp = difference(lnemp, lag=1, order_by = date)
+  )%>%
+  mutate(
+    trend = 1:nrow(data),
+    month = as.factor(month(date))
   )
 
 
@@ -603,7 +630,7 @@ data_train <- data %>%
 # best model when p is target
 # (need to adjust code if lnp is best)
 
-best_arima_model_p <- "m4"
+best_arima_model_p <- "m4_p"
 
 # re-estimate best models on full train set
 models_best_arima_p <- data_train %>%
@@ -613,9 +640,10 @@ rmse_train_best_p <- models_best_arima_p %>%
   get_RMSE_from_model(groupby = c(".model"))
 
 forecast_holdout_best_arima_p <- models_best_arima_p %>%
-  forecast(h=12) %>%
+  forecast(new_data = select(data_holdout, trend, month)) %>%
   as_tsibble() %>%
-  rename(p_pred = p)  %>%
+  rename(p_pred = .mean)  %>%
+  select(.model, date, p_pred) %>%
   left_join(data_holdout[,c("date","p")]) %>%
   mutate(e = p - p_pred) %>%
   ungroup()
@@ -631,9 +659,6 @@ summary_holdout_best_arima_p
 # graph from 2015-18, actual vs prediction from best arima
 
 
-##
-conf_level <-  80
-
 # best model when p is target
 # (need to adjust code if lnp is best)
 
@@ -647,10 +672,12 @@ rmse_train_best_p <- models_best_arima_p %>%
   get_RMSE_from_model(groupby = c(".model"))
 
 forecast_holdout_best_arima_p <- models_best_arima_p %>%
-  forecast(h=12) %>%
+  forecast(new_data = select(data_holdout, trend, month)) %>%
   hilo(level = c(conf_level)) %>%
   as_tsibble() %>%
-  rename(p_pred = p)  %>%
+  rename(p_pred = .mean)  %>%
+  select(.model, date, p_pred, conf_level_chr) %>%
+  unpack_hilo(conf_level_chr) %>%
   left_join(data_holdout[,c("date","p")]) %>%
   mutate(e = p - p_pred) %>%
   ungroup()
@@ -659,17 +686,15 @@ summary_holdout_best_arima_p <- forecast_holdout_best_arima_p %>%
   get_MSE_from_forecast(groupby = c(".model"))
 
 # graph actual vs prediction from best arima
-conf_level_chr <- paste0(as.character(conf_level),"%")
 data_plot <- data %>%
-  left_join(unnest(forecast_holdout_best_arima_p[,c("date","p_pred",conf_level_chr)])) %>%
+  left_join(forecast_holdout_best_arima_p) %>%
   filter(year(date)>=2015)
 
-
 # with uncertainty fan
-pred_p_mp_fan2018_R <- ggplot(data = data_plot , aes(x = date, y = p))+
+pred_p_mp_fan2018_R <- ggplot(data = data_plot , aes(x = as.Date(date), y = p))+
   geom_line(size = 0.8, aes(color = "Actual")) +
-  geom_line(aes(x = date, y = p_pred, color = "Prediction "),  size = 1) +
-  geom_ribbon(aes(ymin = .lower, ymax = .upper), alpha=0.2,   bg=color[2]) +
+  geom_line(aes(x = as.Date(date), y = p_pred, color = "Prediction "),  size = 1) +
+  geom_ribbon(aes(ymin =  get(conf_level_lower), ymax = get(conf_level_upper)), alpha=0.2,   bg=color[2]) +
   ylab("Case-Shiller Price index") +
   xlab("Date (month)") +
   scale_color_manual(name="", values=c(color[1], color[2])) +
