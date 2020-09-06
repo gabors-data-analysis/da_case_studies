@@ -10,8 +10,8 @@
 * License: Free to share, modify and use for educational purposes. 
 * 	Not to be used for commercial purposes.
 *
-* Chapter 03
-* CH03B Identifying successful football managers
+* Chapter 02
+* CH02B Identifying successful football managers
 * using the football dataset
 * version 0.9 2020-09-06
 ********************************************************************
