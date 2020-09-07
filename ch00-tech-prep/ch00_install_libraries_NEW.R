@@ -34,7 +34,7 @@ install.packages("devtools")
 
 #Part I
 pacman::p_load(lspline, cowplot, arm, pastecs, DataCombine, janitor)
-pacman::p_load(haven, Hmisc, xtable, binsreg)
+pacman::p_load(haven, Hmisc, xtable, binsreg, modelsummary)
 
 # Part II
 pacman::p_load(viridis, grid, gridExtra, dyn, estimatr, huxtable, segmented, rms)
