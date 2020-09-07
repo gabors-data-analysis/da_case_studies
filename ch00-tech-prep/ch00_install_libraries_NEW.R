@@ -1,3 +1,26 @@
+#########################################################################################
+# Prepared for Gabor's Data Analysis
+#
+# Data Analysis for Business, Economics, and Policy
+# by Gabor Bekes and  Gabor Kezdi
+# Cambridge University Press 2021
+#
+# gabors-data-analysis.com 
+#
+# License: Free to share, modify and use for educational purposes. 
+# 	Not to be used for commercial purposes.
+
+# To install libraries
+# Using R 4.0.2
+# version 0.8 2020-09-07
+
+
+# NOT READY!!!
+
+#########################################################################################
+
+
+
 # basix
 install.packages("tidyverse")
 install.packages("pacman")
