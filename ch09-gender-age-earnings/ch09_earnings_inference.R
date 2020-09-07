@@ -32,6 +32,7 @@ library(boot)
 library(estimatr)
 library(huxtable)
 library(stargazer)
+library(modelsummary)
 
 
 # set working directory
@@ -106,11 +107,19 @@ table(data$occ2012,data$female)
 # First, look at them one by one
 
 # female binary
+
+# plain SE
 reg1<-lm(lnw~female,data) 
 summary(reg1)
-# with robust SE
+# with robust SE (Stata)
 reg2 <- lm_robust(lnw ~ female, data = data, se_type = "HC1")
 summary(reg2)
+
+msummary(list(reg1, reg2),
+         fmt="%.4f",
+         gof_omit = 'DF|Deviance|Log.Lik.|F|R2 Adj.|AIC|BIC',
+         stars=c('*' = .05, '**' = .01)
+         )
 
 # age
 reg3 <- lm_robust(lnw ~ age, data = data, se_type = "HC1")
