@@ -1,63 +1,59 @@
-########################################################################
+#########################################################################################
+# Prepared for Gabor's Data Analysis
 #
-# DATA ANALYSIS TEXTBOOK
-# FUNDAMENTALS OF REGRESSION ANALYSIS
-# ILLUSTRATION STUDY FOR CHAPTER 8
+# Data Analysis for Business, Economics, and Policy
+# by Gabor Bekes and  Gabor Kezdi
+# Cambridge University Press 2021
 #
-# data downloaded from a hotels price comparison site on October 27, 2017
+# gabors-data-analysis.com 
+#
+# License: Free to share, modify and use for educational purposes. 
+# 	Not to be used for commercial purposes.
 
+# Chapter 08
+# CH08A Finding a good deal among hotels with non-linear function 
+# using the hotels-vienna dataset
+# version 0.9 2020-09-07
+#########################################################################################
 
-# v2.2 2019-11-01 used for pix in book
-# v2.3 2019-12-24 problem noted re dist
-# v2.4 2020-01-24 ln distance now distance=0.05 if less than 0.05
-# v2.5 2020-02-06 graphs minor edits
-# v2.6 2020-03-21 graphs minor edits
-# v2.7 2020-04-22 names ok
-# v2.8 2020-04-30 labels edited
-########################################################################
-  
-# WHAT THIS CODES DOES:
-  
-# Loads the data already cleaned and in Stata format - require haven package to import it
-# Transforms price variables into logs, looks at logs regressions
-# shows log regressions
-# shows non-linear models such as splines
-# shows some models and simulations on measurement error
-
+# ------------------------------------------------------------------------------------------------------
+#### SET UP
+# It is advised to start a new session for every case study
 # CLEAR MEMORY
 rm(list=ls())
 
+
+# Import libraries
 library(haven)
 library(lspline)
-library(ggplot2)
 library(gridExtra)
 library(cowplot)
-library(plyr)
 library(scales)
 library(tidyverse)
 
-# CHANGE IT TO YOUR WORKING DIRECTORY
-############################################################  
-# SET YOUR OWN PATH HERE
-############################################################  
+# set working directory
+# option A: open material as project
+# option B: set working directory for da_case_studies
+#           example: setwd("C:/Users/bekes.gabor/Documents/github/da_case_studies/")
 
-# Sets the core parent directory
-current_path = rstudioapi::getActiveDocumentContext()$path 
-dir<-paste0(dirname(dirname(dirname(current_path ))),"/")
+# set data dir, data used
+source("set-data-directory.R")             # data_dir must be first defined 
+# alternative: give full path here, 
+#            example data_dir="C:/Users/bekes.gabor/Dropbox (MTA KRTK)/bekes_kezdi_textbook/da_data_repo"
+
+# load theme and functions
+source("ch00-tech-prep/theme_bg.R")
+source("ch00-tech-prep/da_helper_functions.R")
+
+data_in <- paste(data_dir,"hotels-vienna","clean/", sep = "/")
+use_case_dir <- "ch08-hotels-non-linear/"
+
+data_out <- use_case_dir
+output <- paste0(use_case_dir,"output/")
+create_output_if_doesnt_exist(output)
 
 
-#location folders
-data_in <- paste0(dir,"da_data_repo/hotels-vienna/clean/")
-data_out <-  paste0(dir,"da_case_studies/ch08-hotels-non-linear/")
-output <- paste0(dir,"da_case_studies/ch08-hotels-non-linear/output/")
-func <- paste0(dir, "da_case_studies/ch00-tech-prep/")
-
-
-#call function
-source(paste0(func, "theme_bg.R"))
-# Created a helper function with some useful stuff
-source(paste0(func, "da_helper_functions.R"))
-
+# ------------------------------------------------------------------------------------------------------
 
 # load vienna
 hotels <- read_csv(paste0(data_in,"hotels-vienna.csv"))
@@ -112,7 +108,6 @@ F08_1a <- ggplot(data = hotels, aes(x = distance, y = price)) +
   labs(x = "Distance to city center (miles)",y = "Price (US dollars)")+
  theme_bg() 
   F08_1a
-  #save_fig("F08_1a_R", output, "small")
   save_fig("ch08-figure-1a-hotel-levlev", output, "small")
 
   
@@ -126,7 +121,6 @@ F08_1a <- ggplot(data = hotels, aes(x = distance, y = price)) +
     labs(x = "Distance to city center (miles)",y = "ln(price, US dollars)")+
     theme_bg() 
   F08_1b
-  #save_fig("F08_1b_R", output, "small")
   save_fig("ch08-figure-1b-hotel-loglev", output, "small")
   
   
@@ -140,7 +134,6 @@ F08_1a <- ggplot(data = hotels, aes(x = distance, y = price)) +
     labs(x = "ln(distance to city center, miles)",y = "Price (US dollars)")+
     theme_bg() 
   F08_1c
-  #save_fig("F08_1c_R", output, "small")
   save_fig("ch08-figure-2a-hotel-levlog", output, "small")
   
   # LOG-LOG LINEAR REGRESSION 
@@ -153,5 +146,5 @@ F08_1a <- ggplot(data = hotels, aes(x = distance, y = price)) +
     labs(x = "ln(distance to city center, miles)",y = "ln(price, US dollars)")+
     theme_bg() 
   F08_1d
-  #save_fig("F08_1d_R", output, "small")
   save_fig("ch08-figure-2b-hotel-loglog", output, "small")
+  

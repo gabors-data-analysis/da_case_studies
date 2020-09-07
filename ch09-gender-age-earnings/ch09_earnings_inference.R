@@ -1,63 +1,64 @@
-########################################################################
+#########################################################################################
+# Prepared for Gabor's Data Analysis
 #
-# DATA ANALYSIS TEXTBOOK
-# FUNDAMENTALS OF REGRESSION ANALYSIS
-# ILLUSTRATION STUDY FOR CHAPTER 9
+# Data Analysis for Business, Economics, and Policy
+# by Gabor Bekes and  Gabor Kezdi
+# Cambridge University Press 2021
 #
-# DATA US CENSUS 2014
+# gabors-data-analysis.com 
+#
+# License: Free to share, modify and use for educational purposes. 
+# 	Not to be used for commercial purposes.
 
-# v1.8 2019-11-11  adds r_stargazer, huxtable tables and estimarR for robust SE
-# v1.9 2019-11-26 minor edits
-# v2.0 2020-03-21 minor edits re graphs
-# v2.1 2020-04-01 minor edits re graphs save
-# v2.2 2020-04-16 minor edits re graphs
-# v2.3 2020-04-22 names ok
-# v2.4 2020-04-27 minor graph edits
-# v2.4 2020-04-30 minor graph edits
+# Chapter 09
+# CH09A Estimating gender and age differences in earnings
+# using the cps-earnings dataset
+# version 0.9 2020-09-07
+#########################################################################################
 
 
-########################################################################
-  
-# WHAT THIS CODES DOES:
-  
-# Loads the data csv
-# Filter the dataset and save a sample used in the analysis
-# Transforms variables
-# shows level and log regressions
-# shows non-linear models such as splines
-# shows CI and PI
-# bootstrap
 
+# ------------------------------------------------------------------------------------------------------
+#### SET UP
+# It is advised to start a new session for every case study
 # CLEAR MEMORY
 rm(list=ls())
 
 # Import libraries
+library(tidyverse)
 library(lspline)
-library(ggplot2)
 library(cowplot)
 library(boot)
 library(estimatr)
 library(huxtable)
 library(stargazer)
-library(magrittr)
-library(dplyr)
-library(tidyverse)
 
-# CHECK WORKING DIRECTORY - CHANGE IT TO YOUR WORKING DIRECTORY
-# Sets the core parent directory
-current_path = rstudioapi::getActiveDocumentContext()$path 
-dir<-paste0(dirname(dirname(dirname(current_path ))),"/")
 
-#location folders
-data_in  <- paste0(dir,"da_data_repo/cps-earnings/clean/")
-data_out <- paste0(dir,"da_case_studies/ch09-gender-age-earnings/")
-output   <- paste0(dir,"da_case_studies/ch09-gender-age-earnings/output/")
-func     <- paste0(dir,"da_case_studies/ch00-tech-prep/")
+# set working directory
+# option A: open material as project
+# option B: set working directory for da_case_studies
+#           example: setwd("C:/Users/bekes.gabor/Documents/github/da_case_studies/")
 
-#call functions
-source(paste0(func, "theme_bg.R"))
-source(paste0(func, "da_helper_functions.R")) 
+# set data dir, data used
+source("set-data-directory.R")             # data_dir must be first defined 
+# alternative: give full path here, 
+#            example data_dir="C:/Users/bekes.gabor/Dropbox (MTA KRTK)/bekes_kezdi_textbook/da_data_repo"
+
+# load theme and functions
+source("ch00-tech-prep/theme_bg.R")
+source("ch00-tech-prep/da_helper_functions.R")
 options(digits = 3) 
+
+data_in <- paste(data_dir,"cps-earnings","clean/", sep = "/")
+use_case_dir <- "ch09-gender-age-earnings/"
+
+data_out <- use_case_dir
+output <- paste0(use_case_dir,"output/")
+create_output_if_doesnt_exist(output)
+
+
+#-----------------------------------------------------------------------------------------
+
 
 #import data
 data_all <- read_csv(paste0(data_in,"morg-2014-emp.csv"))
@@ -174,7 +175,6 @@ F09_3a <- ggplot(data = data, aes(x = age, y = lnw)) +
   labs(x = "Age (years)",y = "ln(earnings per hour)")+
   theme_bg() 
   F09_3a
-  #save_fig("F09_1_R",output, "small")
   save_fig("ch09-figure-3a-wage-lowess",output, "small")
 
 
@@ -223,7 +223,6 @@ F09_3b<- ggplot(data=data,aes(x=age)) +
         legend.key.height = unit(.2, "cm")) + 
   guides(linetype = guide_legend(override.aes = list(size = 0.6)))
   F09_3b
-  #save_fig("F09_2_R",output, "small")
   save_fig("ch09-figure-3b-wage-various",output, "small")
   
   
@@ -276,7 +275,6 @@ F09_3b<- ggplot(data=data,aes(x=age)) +
         legend.key.height = unit(.2, "cm")) + 
   guides(linetype = guide_legend(override.aes = list(size = 0.6)))
   F09_2_CI
-  #save_fig("F09_2_CI_R",output, "large")
   save_fig("ch09-figure-4-wage-age-reg-ci",output, "large")
 
 
@@ -301,7 +299,6 @@ F09_2a_CI<- ggplot(data = pred_confidence %>% filter(data$lnw<4.4 & data$lnw>2),
                        labels = c("Lowess", "Confidence interval (95%)", "Confidence interval (95%)")) +
   theme_bg() 
 F09_2a_CI
-#save_fig("F09_4_CI_R",output, "small")
 save_fig("ch09-figure-2a-wage-age-ci",output, "small")
 
 
@@ -319,7 +316,6 @@ F09_2b_PI<- ggplot(data=pred_interval %>% filter(lnw<4.4 & lnw>2),aes(x=age,y=ln
   labs(x = "Age (years)",y = "ln(earnings per hour)") +
   theme_bg() 
 F09_2b_PI
-#save_fig("F09_4_PI_R",output, "small")
 save_fig("ch09-figure-2b-wage-age-pi",output, "small")
 
 
@@ -358,7 +354,6 @@ coord_cartesian(xlim = c(-0.3, 0.15), ylim = c(0, 0.2)) +
                      labels = scales::percent_format(accuracy = 1)) +
 theme_bg() 
 F09_5
-#save_fig("F09_5_R",output, "small")
 save_fig("ch09-figure-1-bootstrap-dist-wdiff",output, "small")
 
 #ch09-table-3-hotels-extval-time1

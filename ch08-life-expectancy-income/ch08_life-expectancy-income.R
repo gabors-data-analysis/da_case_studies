@@ -1,16 +1,21 @@
-################################################################################################
-# Prepared for the textbook:
-# Data Analysis for Business, Economics, and Policy
-# by Gabor BEKES and  Gabor KEZDI 
-# Cambridge University Press 2021
-# 
-# License: Free to share, modify and use for educational purposes. Not to be used for business purposes.
+#########################################################################################
+# Prepared for Gabor's Data Analysis
 #
-###############################################################################################x
+# Data Analysis for Business, Economics, and Policy
+# by Gabor Bekes and  Gabor Kezdi
+# Cambridge University Press 2021
+#
+# gabors-data-analysis.com 
+#
+# License: Free to share, modify and use for educational purposes. 
+# 	Not to be used for commercial purposes.
 
-# CHAPTER 08
+# Chapter 08
 # CH08B How is life expectancy related to the average income of a country?
-# version 0.9 2020-08-28
+# using the worldbank-lifeexpectancy dataset
+# version 0.9 2020-09-07
+#########################################################################################
+
 
 
 # ------------------------------------------------------------------------------------------------------
