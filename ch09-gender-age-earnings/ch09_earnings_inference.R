@@ -129,46 +129,18 @@ summary(reg4)
 reg5 <- lm_robust(lnw ~ lspline(age, c(30,40)), data = data, se_type = "HC1")
 summary(reg5)
 
+cm <- c('R2' = 'R-squared (%)',
+        '(Intercept)' = 'Constant')
+msummary(list(reg1, reg2, reg3, reg4, reg5),
+         fmt="%.4f",
+         gof_omit = 'DF|Deviance|Log.Lik.|F|R2 Adj.|AIC|BIC',
+         stars=c('*' = .05, '**' = .01),
+         #coef_map = cm,
+         output = paste(output,"ch09_reg2-R.tex",sep=""))
+
 #lowess
 reg6 <- loess(lnw ~ age, data, control = loess.control(surface = "direct"))
 summary(reg6)
-
-
-
-######## create tables
-
-# Quick look at models at once with huxtable
-# Great way to markdown, html
-huxreg(reg1, reg2,
-       statistics = c(N = "nobs", R2 = "r.squared")) 
-huxreg(reg3, reg4, reg5, 
-       statistics = c(N = "nobs", R2 = "r.squared")) 
-
-
-# Print to latex 
-# Solution #1 with huxtable
-huxreg(reg3, reg4, reg5, 
-       statistics = c(N = "nobs", R2 = "r.squared")) %>%
-  quick_latex(file="ch09_reg2")
-huxtable::report_latex_dependencies()
-
-
-#Solution #2 with stargazer, using our modfied version of stargazer_r
-# use plain lm() first, and set robust SE later
-reg2 <- lm(lnw ~ female, data = data)
-reg3 <- lm(lnw ~ age, data = data)
-reg4 <- lm(lnw ~ age+agesq, data = data)
-reg5 <- lm(lnw ~ lspline(age, c(30,40)), data = data)
-# 9.1 
-stargazer_r(list(reg2), se = 'robust', digits=3, out=paste(output,"#ch09-table-2-gendergap-reg1.tex",sep=""))
-# 9.2
-stargazer_r(list(reg3, reg4, reg5), se = 'robust', 
-            float=T, digits=3, out=paste(output,"#ch09-table-2-gendergap-reg2.tex",sep=""))
-
-
-
-stargazer(list(reg3, reg4, reg5), 
-            float=T, digits=3, out=paste(output,"proba.tex",sep=""))
 
 
 
