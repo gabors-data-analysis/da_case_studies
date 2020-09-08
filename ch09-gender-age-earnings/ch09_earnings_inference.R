@@ -129,15 +129,19 @@ summary(reg4)
 reg5 <- lm_robust(lnw ~ lspline(age, c(30,40)), data = data, se_type = "HC1")
 summary(reg5)
 
+gm <- cm <- c('R2' = 'R-squared (%)',
+              'se_type' = 'SE type')
+
 cm <- c('R2' = 'R-squared (%)',
+        'lspline(age, c(30, 40))2' = 'spline(age, c(20,30))',
         '(Intercept)' = 'Constant')
 msummary(list(reg1, reg2, reg3, reg4, reg5),
-         fmt="%.4f",
+         fmt="%.3f",
          gof_omit = 'DF|Deviance|Log.Lik.|F|R2 Adj.|AIC|BIC',
          stars=c('*' = .05, '**' = .01),
-         #coef_map = cm,
-         output = paste(output,"ch09_reg2-R.tex",sep=""))
-
+         coef_rename = cm,
+         #output = paste(output,"ch09_reg2-R.tex",sep="")
+         )
 #lowess
 reg6 <- loess(lnw ~ age, data, control = loess.control(surface = "direct"))
 summary(reg6)
