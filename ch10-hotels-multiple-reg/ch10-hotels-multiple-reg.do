@@ -22,8 +22,6 @@
 * STEP 1: set working directory for da_case_studies.
 * for example:
 * cd "C:/Users/xy/Dropbox/gabors_data_analysis/da_case_studies"
-cd "C:/Users/kezdi/GitHub/da_case_studies"
-
 
 * STEP 2: * Directory for data
 * Option 1: run directory-setting do file
@@ -125,29 +123,25 @@ format lnprice_resid %5.3f
 format distance %3.1f
 list hotel_id price lnprice_resid distance stars rating if _n<=5
 * outputing the list in a LaTex format
-listtex hotel_id price lnprice_resid distance stars rating using "$output\T10_hotel_descr.tex" if _n<=5, replace /// 
-headlines( "\begin{tabular}{l c c c c c}" \hline "Hotel name & price & residual in ln(price) & distance & stars & rating \\" \hline) /// /* headlines defines the way the table layed out/
-footlines(\hline \end{tabular}) rstyle(tabular) /* the tabular style makes the table LaTex friendly */
+listtex hotel_id price lnprice_resid distance stars rating ///
+ using "$output\ch10-table-6-hotels-good-deals-Stata.tex" if _n<=5, replace ///  
+ headlines( "\begin{tabular}{l c c c c c})" ///
+ \hline "Hotel name & price & residual in ln(price) & distance & stars & rating \\" \hline) ///
+ footlines(\hline \end{tabular}) rstyle(tabular) 
+ /* the tabular style makes the table LaTex friendly */
+ /* headlines defines the way the table layed out */
 
-
-* y - yhat graph
-scatter lnprice lnprice_hat, ms(o) mc(navy) mc(%50) ///
- || lfit lnprice lnprice_hat, lw(thick) lc(dkgreen) ///
- || line lnprice lnprice, sort ///
+* yhat - y graph
+* two scatterplot commants, one for best 5 deals, one for rest
+* Figure 10.3
+sort lnprice_resid
+scatter lnprice lnprice_hat if _n>5, ms(O) mc(navy*0.6) ///
+ || scatter lnprice lnprice_hat if _n<=5, ms(O) mc(black) ///
+ || line lnprice lnprice, sort lw(thick) lc(green*0.6) lp(dash)  ///
  graphregion(fcolor(white) ifcolor(none))  ///
  plotregion(fcolor(white) ifcolor(white)) ///
  xlab(3.75(0.25)6, grid) ylab(3.75(0.25)6, grid) legend(off) ///
- ytitle("Ln price") xtitle("Ln price predicted value")
- graph export "$output\y_yhat_hotels.png", replace
+ ytitle("ln(price, US dollars)") xtitle("predicted ln(price, US dollars)") ///
+ text(4.1 4.84 "Best deal") 
+graph export "$output\ch10-figure-3-hitels-yhat-y.png", replace
  
- * not in textbook
- * residual - yhat graph
-scatter lnprice_resid lnprice_hat, ms(D) mc(blue) ///
- || lfit lnprice_resid lnprice_hat, lw(thick) lc(black) graphregion(fcolor(white) ifcolor(none)) ///
- xlab(, grid) ylab(, grid) legend(off) ytitle("Ln predicted price") xtitle("Ln price predicted value")
- graph export "$output\res_yhat_hotels_notused.png", replace
-
- 
-
- 
-
