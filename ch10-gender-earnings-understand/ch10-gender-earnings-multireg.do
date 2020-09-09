@@ -22,8 +22,6 @@
 * STEP 1: set working directory for da_case_studies.
 * for example:
 * cd "C:/Users/xy/Dropbox/gabors_data_analysis/da_case_studies"
-cd "C:/Users/kezdi/GitHub/da_case_studies"
-
 
 * STEP 2: * Directory for data
 * Option 1: run directory-setting do file
@@ -85,18 +83,33 @@ tabstat earnwke uhours w if  w>=1, s(mean min p5 p50 p95 max n) col(s)
 
 
 reg lnw female , robust
- outreg2 using "$output/T10_reg1.tex", 2aster tex(frag) nonotes bdec(3) replace 
+ outreg2 using "$output/ch10-table-1-reg-Stata.tex", 2aster tex(frag) nonotes bdec(3) replace 
 reg lnw female age, robust
- outreg2 using "$output/T10_reg1.tex", 2aster tex(frag) nonotes bdec(3) append
+ outreg2 using "$output/ch10-table-1-reg-Stata.tex", 2aster tex(frag) nonotes bdec(3) append
 reg age female , robust
- outreg2 using "$output/T10_reg1.tex", 2aster tex(frag) nonotes bdec(3) append
+ outreg2 using "$output/ch10-table-1-reg-Stata.tex", 2aster tex(frag) nonotes bdec(3) append
 
- 
+
+* age distribution by gender
+* histogram, not in textbook 
 lab def female 0 male 1 female
 lab value female female 
-hist age, by(female) width(5) fcol(navy*0.8) lcol(white) percent ///
-graphregion(fcolor(white) ifcolor(none))  ///
+hist age, by(female) start(20) width(5) fcol(navy*0.8) lcol(white) percent ///
+ xla(20(10)60, grid) yla(, grid) ///
+ graphregion(fcolor(white) ifcolor(none))  ///
  plotregion(fcolor(white) ifcolor(white))
+
+* density plots
+kdensity age if female==0, gen(x0 y0) nogra
+kdensity age if female==1, gen(x1 y1) nogra
+line y1 y0 x0, lc(navy*0.8 green*0.5) lw(thick thick) ///
+ xla(20(10)60, grid) yla(, grid) ///
+ xtitle("Age (years)") ytitle("Density") ///
+ legend(off) ///
+ text(0.02 55 "Women") text(0.029 55 "Men")
+graph export "$output/ch10-figure-1-density-age-gender.png", replace
+ 
+
 
 *******************************************
 ** LN EARNINGS, GENDER, AGE,
@@ -106,13 +119,13 @@ gen agecu = age^3
 gen agequ = age^4
 
 reg lnw female , robust
- outreg2 using "$output/T10_reg2.tex", 2aster tex(frag) nonotes bdec(3) replace 
+ outreg2 using "$output/ch10-table-2-reg-Stata.tex", 2aster tex(frag) nonotes bdec(3) replace 
 reg lnw female age , robust
- outreg2 using "$output/T10_reg2.tex", 2aster tex(frag) nonotes bdec(3) append
+ outreg2 using "$output/ch10-table-2-reg-Stata.tex", 2aster tex(frag) nonotes bdec(3) append
 reg lnw female age agesq , robust
- outreg2 using "$output/T10_reg2.tex", 2aster tex(frag) nonotes bdec(3) append
+ outreg2 using "$output/ch10-table-2-reg-Stata.tex", 2aster tex(frag) nonotes bdec(3) append
 reg lnw female age* , robust
- outreg2 using "$output/T10_reg2.tex", 2aster tex(frag) nonotes bdec(3) append
+ outreg2 using "$output/ch10-table-2-reg-Stata.tex", 2aster tex(frag) nonotes bdec(3) append
 
 *******************************************
 ** LN EARNINGS, EDU CATEG
@@ -123,11 +136,11 @@ gen ed_Profess = grade==45
 gen ed_PhD = grade==46
 
 reg lnw female , robust
- outreg2 using "$output/T10_reg3.tex", 2aster tex(frag) nonotes bdec(3) replace 
+ outreg2 using "$output/ch10-table-3-reg-Stata.tex", 2aster tex(frag) nonotes bdec(3) replace 
 reg lnw female ed_Prof ed_PhD, robust
- outreg2 using "$output/T10_reg3.tex", 2aster tex(frag) nonotes bdec(3) append
+ outreg2 using "$output/ch10-table-3-reg-Stata.tex", 2aster tex(frag) nonotes bdec(3) append
 reg lnw female ed_MA ed_Prof, robust
- outreg2 using "$output/T10_reg3.tex", 2aster tex(frag) nonotes bdec(3) append
+ outreg2 using "$output/ch10-table-3-reg2-Stata.tex", 2aster tex(frag) nonotes bdec(3) append
 
 *******************************************
 ** SIMPLE INTERACTION: LINEAR AGE WITH GENDER
@@ -136,19 +149,16 @@ gen fXage = female*age
 label var fXage "female X age"
 label var lnw "lnw"
 reg lnw age if female==1, robust
- outreg2 using "$output/T10_reg4.tex", label  ctitle("WOMEN", "lnw") 2aster tex(frag) nonotes bdec(3) replace
+ outreg2 using "$output/ch10-table-4-reg-Stata.tex", label  ctitle("WOMEN", "lnw") 2aster tex(frag) nonotes bdec(3) replace
 reg lnw age if female==0, robust
- outreg2 using "$output/T10_reg4.tex", label ctitle("MEN", "lnw") 2aster tex(frag) nonotes bdec(3) append
+ outreg2 using "$output/ch10-table-4-reg-Stata.tex", label ctitle("MEN", "lnw") 2aster tex(frag) nonotes bdec(3) append
 reg lnw age female fXage , robust
- outreg2 using "$output/T10_reg4.tex", label ctitle("ALL", "lnw") sortvar(female age fXage) 2aster tex(frag) nonotes bdec(3) append
+ outreg2 using "$output/ch10-table-4-reg-Stata.tex", label ctitle("ALL", "lnw") sortvar(female age fXage) 2aster tex(frag) nonotes bdec(3) append
 
  
  
  
- 
- 
-*******************************************
-** FOR RPEDICTIONL LINEAR & INTERACTIONS WITH GENDER
+** LINEAR IN AGE INTERACTED WITH GENDER
 
 reg lnw age female fX* , robust
 cap drop lnwhat*
@@ -161,29 +171,21 @@ gen lnwhat_mCIlo = lnwhat_m - 2*lnwhatse_m
 gen lnwhat_fCIup = lnwhat_f + 2*lnwhatse_f 
 gen lnwhat_fCIlo = lnwhat_f - 2*lnwhatse_f 
 
-lab var lnwhat_m "Men"
-lab var lnwhat_f "Women"
-
-line lnwhat_m lnwhat_mCIup lnwhat_mCIlo lnwhat_f lnwhat_fCIup lnwhat_fCIlo age, ///
+* Figure 2a
+line lnwhat_f lnwhat_fCIup lnwhat_fCIlo lnwhat_m lnwhat_mCIup lnwhat_mCIlo age, ///
 	sort lw(thick medium medium thick medium medium) ///
-	lcolor("green" "green" "green" "navy" "navy" "navy") ///
-	lp(dash dash dash solid solid solid) ///
-	ylab(2.8(0.1)3.8, grid) xlab(25(5)65, grid) ytitle("Log hourly earnings") ///
-	legend(order(1 4)) ///
+	lcolor(green*0.5 green*0.5  green*0.5 navy*0.8 navy*0.8 navy*0.8) ///
+	lp(solid dash dash solid dash dash) ///
+	ylab(2.8(0.1)3.8, grid) xlab(25(5)65, grid) ///
+	ytitle("ln(hourly earnings, US dollars)") xtitle(Age (years)) ///
+	legend(off) ///
+	text(3.24 42 "Women") text( 3.55 42 "Men") ///
 	graphregion(fcolor(white) ifcolor(none))  ///
 	plotregion(fcolor(white) ifcolor(white)) 
+graph export "$output/ch10-figure-2a-reg-age-gender-lin-Stata.png", replace
 
-	graph export "$output/F10_earnings_interact0.png", replace
 
-
- 
- 
- 
- 
- 
- 
-*******************************************
-** FOR RPEDICTIONL FUNCTIONAL FORMS & INTERACTIONS WITH GENDER
+** QUARTIC FUNCTIONAL FORM IN AGE INTERACTED WITH GENDER
 
 gen agesq = age^2
 gen agecu = age^3
@@ -197,11 +199,8 @@ gen fXagequ  = female*agequ
 cap drop lnwhat*
 
 reg lnw age agesq agecu agequ if female==1, robust
- outreg2 using "$output/T10_regnotused.tex", 2aster tex(frag) nonotes bdec(3) replace
 reg lnw age agesq agecu agequ if female==0, robust
- outreg2 using "$output/T10_regnotused.tex", 2aster tex(frag) nonotes bdec(3) append
 reg lnw age agesq agecu agequ female fX* , robust
- outreg2 using "$output/T10_regnotused.tex", 2aster tex(frag) nonotes bdec(3) append
 
 predict lnwhat_m if female==0 
  predict lnwhatse_m if female==0, stdp
@@ -212,37 +211,26 @@ gen lnwhat_mCIlo = lnwhat_m - 2*lnwhatse_m
 gen lnwhat_fCIup = lnwhat_f + 2*lnwhatse_f 
 gen lnwhat_fCIlo = lnwhat_f - 2*lnwhatse_f 
 
-lab var lnwhat_m "Men"
-lab var lnwhat_f "Women"
-
-line lnwhat_m lnwhat_mCIup lnwhat_mCIlo lnwhat_f lnwhat_fCIup lnwhat_fCIlo age, ///
+* Figure 2b
+line lnwhat_f lnwhat_fCIup lnwhat_fCIlo lnwhat_m lnwhat_mCIup lnwhat_mCIlo age, ///
 	sort lw(thick medium medium thick medium medium) ///
-	lcolor("green" "green" "green" "navy" "navy" "navy") ///
-	lp(dash dash dash solid solid solid) ///
-	ylab(2.8(0.1)3.8, grid) xlab(25(5)65, grid) ytitle("Log hourly earnings") ///
-	legend(order(1 4)) ///
+	lcolor(green*0.5 green*0.5  green*0.5 navy*0.8 navy*0.8 navy*0.8) ///
+	lp(solid dash dash solid dash dash) ///
+	ylab(2.8(0.1)3.8, grid) xlab(25(5)65, grid) ///
+	ytitle("ln(hourly earnings, US dollars)") xtitle(Age (years)) ///
+	legend(off) ///
+	text(3.3 42 "Women") text(3.65 42 "Men") ///
 	graphregion(fcolor(white) ifcolor(none))  ///
 	plotregion(fcolor(white) ifcolor(white)) 
-	 graph export "$output/F10_earnings_interact.png", replace
+graph export "$output/ch10-figure-2b-reg-age-gender-nonlin-Stata.png", replace
 
 
-
- 
-	 
-	 
-
-**********************************************
-* PART II
-* CAUSAL ANALYIS - IS IT DISCRIMINATION?
-**********************************************
-
+* CAUSAL ANALYSIS
+* focus on niddle-aged
 use "$work/earnings_multireg.dta",replace
-
-*******************************************
-* focus on homogenous age group
 keep if age>=40 & age<=60
 
-**encoding class94 to factors:
+**encoding class94 to numberical values:
 encode class, gen(temp)
 drop class
 rename temp class
@@ -256,7 +244,7 @@ gen asian = race==4
 gen hisp  = ethn>=1 & ethn<=8
 gen othernonw = white==0 & afram==0 & asian==0 & hisp==0
 sum white-othernonw
-**encoding class94 to factors:
+**encoding class94 to numberical values:
 encode prcitshp, gen(a)
 drop prcitshp
 rename a prcitshp
@@ -266,7 +254,7 @@ gen edMA = grade==44
 gen edProf = grade==45
 gen edPhd = grade==46
 
-global DEMOG1 age afram hisp asian othernonw nonUSborn edProf edPhd 
+global DEMOG age afram hisp asian othernonw nonUSborn edProf edPhd 
 
 * age in polynomial
 gen agesq = age^2
@@ -290,7 +278,7 @@ encode stfips, gen(b)
 drop stfips
 rename b stfips
 **
-global DEMOG2 married divorced wirowed child1-child4  i.stfips 
+global FAMILY married divorced wirowed child1-child4  i.stfips 
 
 * Work-related variables
 gen hours = uhours
@@ -319,41 +307,18 @@ gen hourscu = hours^3
 gen hoursqu = hours^4
 
   
- **** SHORT TABLE FOR TEXTBOOK
-
-*simple way, edited afterwards
+* Table 10.5
+* simple way, edited afterwards
 reg lnw female , robust
-  outreg2 using "$output/earnings_causal_short.tex", 2aster tex(frag) nonotes excel bdec(3) replace
+  outreg2 using "$output/ch10-table-5-earnings-causal-Stata.tex", 2aster tex(frag) ///
+   keep(female) nonotes bdec(3) replace
 reg lnw female age edProf edPhd, robust
-  outreg2 using "$output/earnings_causal_short.tex", 2aster tex(frag) nonotes excel bdec(3) append
-reg lnw female $DEMOG1 $DEMOG2 $WORK, robust
-  outreg2 using "$output/earnings_causal_short.tex", 2aster tex(frag) nonotes excel bdec(3) append
-reg lnw female $DEMOG1 $DEMOG2 $WORK agesq-agequ hourssq-hoursqu, robust
-  outreg2 using "$output/earnings_causal_short.tex", 2aster tex(frag) nonotes excel bdec(3) append
+  outreg2 using "$output/ch10-table-5-earnings-causal-Stata.tex", 2aster tex(frag) ///
+   keep(female) nonotes bdec(3) append
+reg lnw female $DEMOG $FAMILY $WORK, robust
+  outreg2 using "$output/ch10-table-5-earnings-causal-Stata.tex", 2aster tex(frag) ///
+   keep(female) nonotes bdec(3) append
+reg lnw female $DEMOG $FAMILY $WORK agesq-agequ hourssq-hoursqu, robust
+  outreg2 using "$output/ch10-table-5-earnings-causal-Stata.tex", 2aster tex(frag) ///
+   keep(female) nonotes bdec(3) append
 
- 
- 
- * nicer way
- label var lnw "lnw"
-reg lnw female , robust
-  outreg2 using "$output/T10_reg5.tex", label nocon 2aster tex(frag) nonotes excel bdec(3) replace
-label var age "Age and educ"
-reg lnw female age edProf edPhd, robust
-  outreg2 using "$output/T10_reg5.tex", label keep(female age) nocon ststr(replace coef="YES" if varname=="age", replace se="" if varname=="age") 2aster tex(frag) nonotes excel bdec(3)  append
-label var afram "Family background"
-label var stfip "State of residence"
-label var hours "Hours worked"
-label var nonprof "Government or private"
-label var union "Union member"
-label var ind2dig "Industry"
-label var occ2dig "Occupation"
-label var agesq "Age in polynomial"
-label var hourssq "Hours in polynomial"
-reg lnw female $DEMOG1 $DEMOG2 $WORK, robust
-  outreg2 using "$output/T10_reg5.tex", label keep(female age afram stfip hours nonprof union ind2dig ind2dig occ2dig) ///
-  nocon ststr(replace coef="YES" if varname!="female", replace se="" if varname!="female") ///
-  sortvar(female age afram noUSborn hours nonprof union ind2dig ind2dig occ2dig) 2aster tex(frag) nonotes excel bdec(3) append
-reg lnw female $DEMOG1 $DEMOG2 $WORK agesq-agequ hourssq-hoursqu, robust
-  outreg2 using "$output/T10_reg5.tex", label keep(female age afram nonUSborn hours nonprof union ind2dig ind2dig occ2dig agesq hourssq) ///
-  nocon ststr(replace coef="YES" if varname!="female", replace se="" if varname!="female") ///
-  sortvar(female age afram noUSborn hours nonprof union ind2dig ind2dig occ2dig) 2aster tex(frag) nonotes excel bdec(3) append
