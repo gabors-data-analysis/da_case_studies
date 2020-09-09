@@ -1,12 +1,19 @@
-######################################################################
-# Chapter 03
+#########################################################################################
+# Prepared for Gabor's Data Analysis
 #
-# wms-management-survey
-# v1.1
+# Data Analysis for Business, Economics, and Policy
+# by Gabor Bekes and  Gabor Kezdi
+# Cambridge University Press 2021
+#
+# gabors-data-analysis.com 
+#
+# License: Free to share, modify and use for educational purposes. 
+# 	Not to be used for commercial purposes.
 
-# using WMS data 2004-2015
-#
-######################################################################
+# CHAPTER 03 two illustrative plots
+# WMS dataset
+# version 0.9 2020-08-28
+#########################################################################################
 
 
 ######################################################################
@@ -15,31 +22,33 @@
 rm(list=ls())
 
 # Import libraries
-require(ggplot2)
-require(plyr)
-library(ggplot2)
+library(tidyverse)
 library(gridExtra)
 library(cowplot)
 library(viridis)
 library(haven)
 #library(Hmisc)
-library(dplyr)
-library(tidyr)
 library(binsreg)
 
-# Sets the core parent directory
-current_path = rstudioapi::getActiveDocumentContext()$path 
-dir<-paste0(dirname(dirname(dirname(current_path ))),"/")
+# set working directory
+# option A: open material as project
+# option B: set working directory for da_case_studies
+#           example: setwd("C:/Users/bekes.gabor/Documents/github/da_case_studies/")
 
-# Location folders
-data_in <- paste0(dir,"da_data_repo/wms-management-survey/clean/")
-data_out <- paste0(dir,"da_case_studies/ch04-management-firm-size/")
-output <- paste0(dir,"da_case_studies/ch04-management-firm-size/output/")
-func <- paste0(dir, "da_case_studies/ch00-tech-prep/")
+# set data dir, load theme and functions
+source("ch00-tech-prep/theme_bg.R")
+source("ch00-tech-prep/da_helper_functions.R")
 
-#call function
-source(paste0(func, "theme_bg.R"))
-source(paste0(func, "da_helper_functions.R"))
+# data used
+source("set-data-directory.R") #data_dir must be first defined #
+data_in <- paste(data_dir,"wms-management-survey","clean/", sep = "/")
+
+use_case_dir <- "ch04-management-firm-size/"
+data_out <- use_case_dir
+output <- paste0(use_case_dir,"output/")
+create_output_if_doesnt_exist(output)
+
+
 
 ########################################################################
 
