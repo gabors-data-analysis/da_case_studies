@@ -30,11 +30,16 @@ library(pacman)
 #ch00
 pacman::p_load(urca, sandwich, stargazer,stringr)
 pacman::p_load(scales, data.table, knitr )
-install.packages("devtools")
+pacman::p_load(devtools, remotes)
 
 #Part I
 pacman::p_load(lspline, cowplot, arm, pastecs, DataCombine, janitor)
-pacman::p_load(haven, Hmisc, xtable, binsreg, modelsummary)
+pacman::p_load(haven, Hmisc, xtable, binsreg, estimatr, modelsummary, pscl)
+# update estimatr to 0.26.0
+
+library(remotes)
+install_github('vincentarelbundock/modelsummary')
+
 
 # Part II
 pacman::p_load(viridis, grid, gridExtra, dyn, estimatr, huxtable, segmented, rms)
@@ -43,6 +48,8 @@ pacman::p_load(mfx, margins, psych)
 #Part III
 pacman::p_load(lmtest, caret, glmnet, skimr, directlabels, 
                prophet, timeDate, fpp3, aTSA, plotly)
+pacman::p_load(ggthemes, rpart, rpart.plot, rattle, pdp, ranger )
+
 pacman::p_load(glue, vctrs) # needed for FredR
 devtools::install_github("sboysel/fredr")
 

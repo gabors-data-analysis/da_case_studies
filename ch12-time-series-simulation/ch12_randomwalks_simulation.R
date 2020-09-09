@@ -1,45 +1,54 @@
-############################################################
+#########################################################################################
+# Prepared for Gabor's Data Analysis
 #
-# DATA ANALYSIS TEXTBOOK
-# CHAPTER 12
-# time series simulations
+# Data Analysis for Business, Economics, and Policy
+# by Gabor Bekes and  Gabor Kezdi
+# Cambridge University Press 2021
+#
+# gabors-data-analysis.com 
+#
+# License: Free to share, modify and use for educational purposes. 
+# 	Not to be used for commercial purposes.
 
-# v1.1 2019-12-23 line edits
-# v1.2 2020-03-25 graph edits
-# v1.3 2020-04-22 names ok
-# v1.4 2020-04-27 minor edits
+# Chapter 12 
+# CH12 Time series simulation
+# version 0.9 2020-09-09
+#########################################################################################
 
-############################################################  
-# WHAT THIS CODES DOES:
-# random walk simulation
-# serial correlation simulations
 
+
+# ------------------------------------------------------------------------------------------------------
+#### SET UP
+# It is advised to start a new session for every case study
 # CLEAR MEMORY
 rm(list=ls())
 
 
-
-# Libraries
+# Import libraries
 library(tidyverse)
-library(ggplot2)
+
+# set working directory
+# option A: open material as project
+# option B: set working directory for da_case_studies
+#           example: setwd("C:/Users/bekes.gabor/Documents/github/da_case_studies/")
+
+# set data dir, data used
+source("set-data-directory.R")             # data_dir must be first defined 
+# alternative: give full path here, 
+#            example data_dir="C:/Users/bekes.gabor/Dropbox (MTA KRTK)/bekes_kezdi_textbook/da_data_repo"
+
+# load theme and functions
+source("ch00-tech-prep/theme_bg.R")
+source("ch00-tech-prep/da_helper_functions.R")
+
+use_case_dir <- "ch12-time-series-simulation/"
+
+data_out <- use_case_dir
+output <- paste0(use_case_dir,"output/")
+create_output_if_doesnt_exist(output)
 
 
-############################################################  
-# SET YOUR OWN PATH HERE
-############################################################  
-# Sets the core parent directory
-current_path = rstudioapi::getActiveDocumentContext()$path 
-dir<-paste0(dirname(dirname(dirname(current_path ))),"/")
-
-#location folders
-output <- paste0(dir,"da_case_studies/ch12-time-series-simulation/output/")
-func <- paste0(dir, "da_case_studies/ch00-tech-prep/")
-
-
-#call function
-source(paste0(func, "theme_bg.R"))
-
-
+#-----------------------------------------------------------------------------------------
 # PART 1
 # Random walk simulation 
 # Generate k random walks across time {0, 1, ... , T}
@@ -76,10 +85,10 @@ rws_plot <- ggplot(rws,aes(time, value, color=var)) +
        y = "Value of the simulated variable") +
   scale_x_continuous(expand = c(0.01,0.01), limits = c(0,100), breaks=seq(0,100,10)) 
 rws_plot
-#save_fig("R_07_randomwalks", "small")
 save_fig("ch12-figure-1-randomwalks", output, "small")
 
 
+#-----------------------------------------------------------------------------------------
 # PART 2
 # Serially correlated vs serially uncorrelated series
 # simulation exercies
@@ -106,7 +115,6 @@ whitenoise <- ggplot(uncorr,aes(t, x)) +
   scale_y_continuous(expand = c(0.01,0.01)) + 
   scale_x_continuous(expand = c(0.01,0.01),breaks=seq(0,100,10)) 
 whitenoise
-#save_fig("R_07_serialcorr_whitenoise", "small")
 save_fig("ch12-figure-9a-serialcorr-whitenoise", output, "small")
 
 
@@ -133,8 +141,6 @@ corr08_graph <- ggplot(corr08,aes(t, x)) +
   scale_y_continuous(expand = c(0.01,0.01)) + 
   scale_x_continuous(expand = c(0.01,0.01),breaks=seq(0,100,10)) 
 corr08_graph
-
-#save_fig("R_07_serialcorr_corr08", "small")
 save_fig("ch12-figure-9b-serialcorr-corr08", output, "small")
 
 

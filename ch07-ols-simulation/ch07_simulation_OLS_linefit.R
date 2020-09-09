@@ -1,42 +1,55 @@
-############################################################
+#########################################################################################
+# Prepared for Gabor's Data Analysis
 #
-# DATA ANALYSIS TEXTBOOK
-# CHAPTER 07
-# ols fit  simulations
+# Data Analysis for Business, Economics, and Policy
+# by Gabor Bekes and  Gabor Kezdi
+# Cambridge University Press 2021
+#
+# gabors-data-analysis.com 
+#
+# License: Free to share, modify and use for educational purposes. 
+# 	Not to be used for commercial purposes.
 
-# v1.1 2019-12-23 line edits
-# v1.2 2020-03-10 minor axes edits
-# v1.3 2020-04-24 names ok
-# v1.4 2020-04-27 labels
+# Chapter 07
+# CH07 OLS fit simulation
+# version 0.9 2020-09-07
+#########################################################################################
 
-############################################################  
-# WHAT THIS CODES DOES:
-# ols and avg y avg x  simulation
 
+
+# ------------------------------------------------------------------------------------------------------
+#### SET UP
+# It is advised to start a new session for every case study
 # CLEAR MEMORY
 rm(list=ls())
 
-# Libraries
+
+# Import libraries
 library(tidyverse)
-library(ggplot2)
 
 
-############################################################  
-# SET YOUR OWN PATH HERE
-############################################################  
-# Sets the core parent directory
-current_path = rstudioapi::getActiveDocumentContext()$path 
-dir<-paste0(dirname(dirname(dirname(current_path ))),"/")
+# set working directory
+# option A: open material as project
+# option B: set working directory for da_case_studies
+#           example: setwd("C:/Users/bekes.gabor/Documents/github/da_case_studies/")
 
-#location folders
-output <- paste0(dir,"da_case_studies/ch07-ols-simulation/output/")
-func <- paste0(dir, "da_case_studies/ch00-tech-prep/")
+# set data dir, data used
+source("set-data-directory.R")             # data_dir must be first defined 
+# alternative: give full path here, 
+#            example data_dir="C:/Users/bekes.gabor/Dropbox (MTA KRTK)/bekes_kezdi_textbook/da_data_repo"
+
+# load theme and functions
+source("ch00-tech-prep/theme_bg.R")
+source("ch00-tech-prep/da_helper_functions.R")
+
+use_case_dir <- "ch07-ols-simulation/"
+
+data_out <- use_case_dir
+output <- paste0(use_case_dir,"output/")
+create_output_if_doesnt_exist(output)
 
 
-#call function
-source(paste0(func, "theme_bg.R"))
-# Created a helper function with some useful stuff
-source(paste0(func, "da_helper_functions.R"))
+#-----------------------------------------------------------------------------------------
 
 # set the seed
 set.seed(1458)

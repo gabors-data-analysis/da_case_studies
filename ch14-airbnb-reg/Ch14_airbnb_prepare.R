@@ -1,21 +1,27 @@
-############################################################
+#########################################################################################
+# Prepared for Gabor's Data Analysis
 #
-# DATA ANALYSIS TEXTBOOK
-# MODEL SELECTION
-# ILLUSTRATION STUDY
-# Airbnb London 2017 march 05 data
-
-# v1.5 2019-09-06
-# v1.6 2020-01-09 minor graph edits
-# v1.7 2020-08-24 library set
+# Data Analysis for Business, Economics, and Policy
+# by Gabor Bekes and  Gabor Kezdi
+# Cambridge University Press 2021
 #
+# gabors-data-analysis.com 
 #
-# WHAT THIS CODES DOES:
+# License: Free to share, modify and use for educational purposes. 
+# 	Not to be used for commercial purposes.
 
-# Transform variables and filter dataset
-# Generate new features
+# Chapter 14
+# CH14B Predicting AirBnB apartment prices: selecting a regression model
+# using the airbnb dataset
+# version 0.9 2020-09-09
+#########################################################################################
 
 
+
+# ------------------------------------------------------------------------------------------------------
+#### SET UP
+# It is advised to start a new session for every case study
+# CLEAR MEMORY
 rm(list=ls())
 
 
@@ -42,11 +48,11 @@ create_output_if_doesnt_exist(output)
 
 options(digits = 3)
 
-# Import data
-
-data <- read_csv(paste(data_in,"airbnb_london_cleaned.csv", sep = ""))
 
 #-------------------------------------------------------
+# Import data
+data <- read_csv(paste(data_in,"airbnb_london_cleaned.csv", sep = ""))
+
 
 # keep if property type is Apartment, House or Townhouse
 table(data$property_type)

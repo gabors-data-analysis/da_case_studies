@@ -1,39 +1,35 @@
-############################################################
+#########################################################################################
+# Prepared for Gabor's Data Analysis
 #
-# DATA ANALYSIS TEXTBOOK
+# Data Analysis for Business, Economics, and Policy
+# by Gabor Bekes and  Gabor Kezdi
+# Cambridge University Press 2021
+#
+# gabors-data-analysis.com 
+#
+# License: Free to share, modify and use for educational purposes. 
+# 	Not to be used for commercial purposes.
+
 # Chapter 15
-# CART
-# Used cars
-
-# v1.3 2019-10-15 operational, caret version
-# v1.4 2019-12-13 minor fixes, scatter graphs in eps
-# v1.5 2020-01-07 minor fixes on sample design
-# v1.6 2020-01-08 minor fixes on graphs
-# v1.7 2020-02-01 varimp edited
-# v1.8 2020-03-30 graph
-# v1.9 2020-04-07 graph, helper
-# v1.1 2020-04-25 names ok
-
-############################################################
-#
-# WHAT THIS CODES DOES:
-# creates regression trees with the CART method
-# builds trees, does pruning
+# CH15A Predicting used car value with regression trees
+# using the used-cars dataset
+# version 0.9 2020-09-09
+#########################################################################################
 
 
 
-# Clear memory
+# ------------------------------------------------------------------------------------------------------
+#### SET UP
+# It is advised to start a new session for every case study
+# CLEAR MEMORY
 rm(list=ls())
 
 # Descriptive statistics and regressions
 library(caret)
 library(tidyverse)
 library(skimr)
-library(ggplot2)
 library(ggthemes)
 library(gridExtra)
-library(grid)
-library(ggplot2)
 library(lattice)
 library(glmnet)
 library(rpart)
@@ -41,22 +37,33 @@ library(rattle)
 library(rpart.plot)
 library(xtable)
 library(Hmisc)
+library(modelsummary)
 
 
-# Sets the core parent directory
-current_path = rstudioapi::getActiveDocumentContext()$path 
-dir<-paste0(dirname(dirname(dirname(current_path ))),"/")
 
-#location folders
-data_in <- paste0(dir,"da_data_repo/used-cars/clean/")
-data_out <- paste0(dir,"da_case_studies/ch15-used-cars-cart/")
-output <- paste0(dir,"da_case_studies/ch15-used-cars-cart/output/")
-func <- paste0(dir, "da_case_studies/ch00-tech-prep/")
+# set working directory
+# option A: open material as project
+# option B: set working directory for da_case_studies
+#           example: setwd("C:/Users/bekes.gabor/Documents/github/da_case_studies/")
 
-#call function
-source(paste0(func, "theme_bg.R"))
-source(paste0(func, "da_helper_functions.R"))
+# set data dir, data used
+source("set-data-directory.R")             # data_dir must be first defined 
+# alternative: give full path here, 
+#            example data_dir="C:/Users/bekes.gabor/Dropbox (MTA KRTK)/bekes_kezdi_textbook/da_data_repo"
 
+# load theme and functions
+source("ch00-tech-prep/theme_bg.R")
+source("ch00-tech-prep/da_helper_functions.R")
+
+data_in <- paste(data_dir,"used-cars","clean/", sep = "/")
+use_case_dir <- "ch15-used-cars-cart/"
+
+data_out <- use_case_dir
+output <- paste0(use_case_dir,"output/")
+create_output_if_doesnt_exist(output)
+
+
+#-----------------------------------------------------------------------------------------
 
 # DATA IMPORT
 data <- read.csv(paste0(data_in,"used-cars_2cities_prep.csv"), stringsAsFactors = TRUE)
@@ -125,9 +132,11 @@ data <- data %>%
 # save workfile
 write.csv(data, paste0(data_out, "usedcars_work.csv"), row.names = F)
 
+datasummary_skim(data, 'numeric')
+datasummary_skim(data, 'categorical')
+
+
 summary(data$price)
-
-
 
 
 
