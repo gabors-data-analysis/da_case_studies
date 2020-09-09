@@ -1,23 +1,27 @@
-################################################################################################
-# Prepared for the textbook:
+#########################################################################################
+# Prepared for Gabor's Data Analysis
+#
 # Data Analysis for Business, Economics, and Policy
-# by Gabor BEKES and  Gabor KEZDI 
+# by Gabor Bekes and  Gabor Kezdi
 # Cambridge University Press 2021
-# 
-# License: Free to share, modify and use for educational purposes. Not to be used for business purposes.
 #
-###############################################################################################x
+# gabors-data-analysis.com 
+#
+# License: Free to share, modify and use for educational purposes. 
+# 	Not to be used for commercial purposes.
 
-# CHAPTER 14
+# Chapter 14
 # CH14B Predicting AirBnB apartment prices: selecting a regression model
+# using the airbnb dataset
+# version 0.9 2020-09-09
+#########################################################################################
 
-# football dataset
-# version 0.9 2020-08-28
 
-###########
 
-#
-# Clear memory
+# ------------------------------------------------------------------------------------------------------
+#### SET UP
+# It is advised to start a new session for every case study
+# CLEAR MEMORY
 rm(list=ls())
 
 
@@ -57,6 +61,8 @@ options(digits = 3)
 ########################################
 # PART I.
 ########################################
+
+# !!! make sure you have run ch14_airbnb_prepare.R before
 
 
 #############

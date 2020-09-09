@@ -1,40 +1,27 @@
-############################################################
+#########################################################################################
+# Prepared for Gabor's Data Analysis
 #
-# DATA ANALYSIS TEXTBOOK
-# RANDOM FOREST
-# ILLUSTRATION STUDY
-# Airbnb London 2017 march 05 data
+# Data Analysis for Business, Economics, and Policy
+# by Gabor Bekes and  Gabor Kezdi
+# Cambridge University Press 2021
+#
+# gabors-data-analysis.com 
+#
+# License: Free to share, modify and use for educational purposes. 
+# 	Not to be used for commercial purposes.
 
-# v2.1 2019-04-24
-# v2.2 2019-07-25 added todo-s
-# v2.3 2019-08-12 some small changes by BG
-# v2.4 2019-19-18 major update by Zsuzsi
-# v2.5 2019-19-19 small fixes by BG, some minor todos
-# v2.6 small fixes by Zs, better graphs
-# v2.7 new model definitions, new train-holdout split
-# v2.8 2019-10-04 many small changes by GB, some minor todos
-# v2.9 2020-01-11 data cleaning taken out to prep code + minor graph changes + minor model changes
-# v3.0 2020-01-12  table edits, revert varimp graphs to pct
-# v3.1 2020-03-27 Minor graph FIXME/TODOs
-# v3.2 2020-04-03 edits+Minor graph FIXME/TODOs
-# v3.3 2020-04-10 cutting what's not used, PDP redone 
-# v3.4 2020-04-22 names ok
-# v3.5 2020-04-27 minor graph label edits
-#
-############################################################
-#
-# WHAT THIS CODES DOES:
-#
-# Define models
-# Run random forest, GBM
-# Shows tuning
-# Evaluate the performance
-# Compares models
-# Does diagnostics
-###########################################################
+# Chapter 16
+# CH16A Predicting apartment prices with random forest
+# using the airbnb dataset
+# version 0.9 2020-09-09
+#########################################################################################
 
+
+
+# ------------------------------------------------------------------------------------------------------
+#### SET UP
+# It is advised to start a new session for every case study
 # CLEAR MEMORY
-# best to start new session
 rm(list=ls())
 
 
@@ -49,26 +36,28 @@ library(xtable)
 
 
 
+# set working directory
+# option A: open material as project
+# option B: set working directory for da_case_studies
+#           example: setwd("C:/Users/bekes.gabor/Documents/github/da_case_studies/")
+
+# set data dir, data used
+source("set-data-directory.R")             # data_dir must be first defined 
+# alternative: give full path here, 
+#            example data_dir="C:/Users/bekes.gabor/Dropbox (MTA KRTK)/bekes_kezdi_textbook/da_data_repo"
+
+# load theme and functions
+source("ch00-tech-prep/theme_bg.R")
+source("ch00-tech-prep/da_helper_functions.R")
+
+use_case_dir <- "ch16-airbnb-random-forest/"
+data_in <- use_case_dir
+data_out <- use_case_dir
+output <- paste0(use_case_dir,"output/")
+create_output_if_doesnt_exist(output)
 
 
-
-# CHECK WORKING DIRECTORY - CHANGE IT TO YOUR WORKING DIRECTORY
-# Sets the core parent directory
-current_path = rstudioapi::getActiveDocumentContext()$path 
-dir<-paste0(dirname(dirname(dirname(current_path ))),"/")
- 
-  #location folders
-# data_in <- paste0(dir,"da_data_repo/airbnb/clean/")
- data_in <- paste0(dir,"da_case_studies/ch16-airbnb-random-forest/")
- data_out <- paste0(dir,"da_case_studies/ch16-airbnb-random-forest/")
- output <- paste0(dir,"da_case_studies/ch16-airbnb-random-forest/output/")
- func <- paste0(dir, "da_case_studies/ch00-tech-prep/")
-
- #call function
- source(paste0(func, "theme_bg.R"))
- source(paste0(func, "da_helper_functions.R"))
-
-
+#-----------------------------------------------------------------------------------------
 
 #########################################################################################
 #

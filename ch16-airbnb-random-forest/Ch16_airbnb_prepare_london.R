@@ -1,39 +1,153 @@
-############################################################
+#########################################################################################
+# Prepared for Gabor's Data Analysis
 #
-# DATA ANALYSIS TEXTBOOK
-# MODEL SELECTION
-# ILLUSTRATION STUDY
-# Airbnb London 2017 march 05 data
+# Data Analysis for Business, Economics, and Policy
+# by Gabor Bekes and  Gabor Kezdi
+# Cambridge University Press 2021
 #
+# gabors-data-analysis.com 
 #
-# WHAT THIS CODES DOES:
+# License: Free to share, modify and use for educational purposes. 
+# 	Not to be used for commercial purposes.
 
-# Transform variables and filter dataset
-# Generate new features
+# Chapter 16
+# CH16A Predicting apartment prices with random forest
+# using the airbnb dataset
+# version 0.9 2020-09-09
+#########################################################################################
 
 
-############################################################  
-# IN   airbnb_london_workfile.csv
-# OUT  airbnb_london_workfile_adj.csv
 
+# ------------------------------------------------------------------------------------------------------
+#### SET UP
+# It is advised to start a new session for every case study
+# CLEAR MEMORY
+rm(list=ls())
+
+# Import libraries
 library(tidyverse)
-library(skimr)
-
-# CHECK WORKING DIRECTORY - CHANGE IT TO YOUR WORKING DIRECTORY
-dir <-  "C:/Users/GB/Dropbox (MTA KRTK)/bekes_kezdi_textbook/"
-# dir<- "D:/Dropbox (MTA KRTK)/bekes_kezdi_textbook/"
+library(modelsummary)
 
 
-#location folders
-data_in <- paste0(dir,"da_data_repo/airbnb/clean/")
-data_out <- paste0(dir,"da_case_studies/ch16-airbnb-random-forest/")
-func <- paste0(dir, "da_case_studies/ch00-tech-prep/")
 
-source(paste0(func, "theme_bg.R"))
+# set working directory
+# option A: open material as project
+# option B: set working directory for da_case_studies
+#           example: setwd("C:/Users/bekes.gabor/Documents/github/da_case_studies/")
+
+# set data dir, data used
+source("set-data-directory.R")             # data_dir must be first defined 
+# alternative: give full path here, 
+#            example data_dir="C:/Users/bekes.gabor/Dropbox (MTA KRTK)/bekes_kezdi_textbook/da_data_repo"
+
+# load theme and functions
+source("ch00-tech-prep/theme_bg.R")
+source("ch00-tech-prep/da_helper_functions.R")
+
+use_case_dir <- "ch16-airbnb-random-forest/"
+data_in <- paste(data_dir,"airbnb","clean/", sep = "/")
+data_out <- use_case_dir
+output <- paste0(use_case_dir,"output/")
+create_output_if_doesnt_exist(output)
 
 
+
+#-------------------------------------------------------
 # Import data
-data <- read_csv(paste(data_in, "airbnb_london_workfile.csv", sep = ""))
+data <- read_csv(paste(data_in,"airbnb_london_cleaned.csv", sep = ""))
+
+
+# keep if property type is Apartment, House or Townhouse
+table(data$property_type)
+data <- data %>%
+  filter(property_type %in% c("Apartment", "House", "Townhouse"))
+# rename Townhouse to House
+data <- data %>%
+  mutate(
+    property_type = ifelse(data$property_type == "Townhouse", "House", data$property_type),
+    f_property_type = factor(property_type))
+
+
+#Room type as factor
+table(data$room_type)
+data <- data %>%
+  mutate(f_room_type = factor(room_type))
+
+# Rename roomt type because it is too long
+data$f_room_type2 <- factor(ifelse(data$f_room_type== "Entire home/apt", "Entire/Apt",
+                                   ifelse(data$f_room_type== "Private room", "Private",
+                                          ifelse(data$f_room_type== "Shared room", "Shared", "."))))
+
+# cancellation policy as factor
+table(data$cancellation_policy)
+# if cancellation policy is super strict 30 or 60, rename it as strict
+data <- data %>%
+  mutate(
+    cancellation_policy = ifelse(cancellation_policy %in% c("super_strict_30", "super_strict_60"),
+                                 "strict", cancellation_policy),
+    f_cancellation_policy = factor(cancellation_policy))
+
+# bed_type and neighbourhood_cleansed as factors
+table(data$bed_type)
+# rename to Couch
+data <- data %>%
+  mutate(
+    bed_type = ifelse(bed_type %in% c("Futon", "Pull-out Sofa", "Airbed"), "Couch", bed_type),
+    f_bed_type = factor(bed_type),
+    f_neighbourhood_cleansed = factor(neighbourhood_cleansed))
+
+#---------------------------------------------------------------------------------------------------------------------------
+
+## Create Numerical variables
+data <- data %>%
+  mutate(
+    usd_price_day = price,
+    p_host_response_rate = as.numeric(host_response_rate))
+# rename cleaning_fee column
+data <- data %>%
+  rename(usd_cleaning_fee = cleaning_fee)
+#-------------------------------------------------------------------
+
+# add new numeric columns from certain columns
+numericals <- c("accommodates","bathrooms","review_scores_rating","number_of_reviews","guests_included",
+                "reviews_per_month","extra_people","minimum_nights","beds")
+data <- data %>%
+  mutate_at(vars(numericals), funs("n"=as.numeric))
+
+
+# rename columns so they start with n_ as opposed to end with _n
+nnames <- data %>%
+  select(ends_with("_n")) %>%
+  names()
+nnames_i <- match(nnames, colnames(data))
+colnames(data)[nnames_i] <- paste0("n_", numericals)
+
+
+#create days since first review
+data <- data %>%
+  mutate(
+    n_days_since = as.numeric(as.Date(calendar_last_scraped,format="%Y-%m-%d") -
+                                as.Date(first_review ,format="%Y-%m-%d")))
+# create dummy vars
+dummies <- names(data)[seq(73,122)]
+data <- data %>%
+  mutate_at(vars(dummies), funs("d"= (.)))
+# rename columns
+dnames <- data %>%
+  select(ends_with("_d")) %>%
+  names()
+dnames_i <- match(dnames, colnames(data))
+colnames(data)[dnames_i] <- paste0("d_", tolower(gsub("[^[:alnum:]_]", "",dummies)))
+# keep columns if contain d_, n_,f_, p_, usd_ and some others
+data <- data %>%
+  select(matches("^d_.*|^n_.*|^f_.*|^p_.*|^usd_.*"), price,
+         neighbourhood_cleansed,cancellation_policy,room_type,property_type)
+
+write_csv(data, paste0(data_out, "airbnb_london_workfile.csv"))
+
+
+#--------------------------------
+data <- read_csv(paste(data_out,"airbnb_london_workfile.csv", sep = ""))
 
 #####################
 ### look at price ###
@@ -132,7 +246,8 @@ data <- data %>%
   )
 
 # Look at data
-skim(data)
+datasummary_skim(data, 'numeric', histogram = TRUE)
+datasummary_skim(data, 'categorical' )
 
 # where do we have missing variables now?
 to_filter <- sapply(data, function(x) sum(is.na(x)))
