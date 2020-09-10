@@ -1,33 +1,74 @@
+#########################################################################################
+# Prepared for Gabor's Data Analysis
 #
-# DATA ANALYSIS TEXTBOOK
-# CLASSIFICATION
-# ILLUSTRATION STUDY
-# Bisnode data
+# Data Analysis for Business, Economics, and Policy
+# by Gabor Bekes and  Gabor Kezdi
+# Cambridge University Press 2021
+#
+# gabors-data-analysis.com 
+#
+# License: Free to share, modify and use for educational purposes. 
+# 	Not to be used for commercial purposes.
+
+# Chapter 17
+# CH17A
+# using the bisnode-firmd dataset
+# version 0.9 2020-09-10
+#########################################################################################
 
 
-# v2.1. 2020-02-20 edit folder links
-#
-############################################################
-#
-# WHAT THIS CODES DOES:
-#
-# creates work file for prediction
-# feature engineering (e.g. winsorize)
-#
-###########################################################
 
+# ------------------------------------------------------------------------------------------------------
+#### SET UP
+# It is advised to start a new session for every case study
+# CLEAR MEMORY
 rm(list=ls())
 
-source("global.R")
+# Import libraries
+library(haven)
+library(glmnet)
+library(purrr)
+library(margins)
+library(skimr)
+library(kableExtra)
+library(Hmisc)
+library(cowplot)
+library(gmodels) 
+library(lspline)
+library(sandwich)
+library(modelsummary)
 
-use_case_dir <- file.path("ch17-predicting-firm-exit/")
-loadLibraries(use_case_dir)
+library(rattle)
+library(caret)
+library(pROC)
+library(ranger)
+library(rpart)
+library(partykit)
+library(rpart.plot)
 
-data_in <- paste(data_dir,"bisnode-firms","clean", sep = "/")
+
+# set working directory
+# option A: open material as project
+# option B: set working directory for da_case_studies
+#           example: setwd("C:/Users/bekes.gabor/Documents/github/da_case_studies/")
+
+# set data dir, data used
+source("set-data-directory.R")             # data_dir must be first defined 
+# alternative: give full path here, 
+#            example data_dir="C:/Users/bekes.gabor/Dropbox (MTA KRTK)/bekes_kezdi_textbook/da_data_repo"
+
+# load theme and functions
+source("ch00-tech-prep/theme_bg.R")
+source("ch00-tech-prep/da_helper_functions.R")
+
+data_in <- paste(data_dir,"bisnode-firms","clean/", sep = "/")
+use_case_dir <- "ch17-predicting-firm-exit/"
 
 data_out <- use_case_dir
 output <- paste0(use_case_dir,"output/")
 create_output_if_doesnt_exist(output)
+
+
 
 ###########################################################
 # Import data
@@ -92,6 +133,7 @@ data <- data %>%
          d1_sales_mil_log = ifelse(new == 1, 0, d1_sales_mil_log),
          new = ifelse(is.na(d1_sales_mil_log), 1, new),
          d1_sales_mil_log = ifelse(is.na(d1_sales_mil_log), 0, d1_sales_mil_log))
+
 
 
 ###########################################################
@@ -307,7 +349,7 @@ ggplot(data = data, aes(x=d1_sales_mil_log_mod, y=as.numeric(default))) +
   scale_x_continuous(limits = c(-1.5,1.5), breaks = seq(-1.5,1.5, 0.5))
 
 # check variables
-skimr::skim(data)
+datasummary_skim(data, type="numeric")
 
 write_csv(data,paste0(data_out,"bisnode_firms_clean.csv"))
 write_rds(data,paste0(data_out,"bisnode_firms_clean.rds"))

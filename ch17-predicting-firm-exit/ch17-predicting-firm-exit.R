@@ -1,56 +1,78 @@
-############################################################
+#########################################################################################
+# Prepared for Gabor's Data Analysis
 #
-# DATA ANALYSIS TEXTBOOK
-# Chapter 17 probability prediction and classification
-# Case study
-# Bisnode data
+# Data Analysis for Business, Economics, and Policy
+# by Gabor Bekes and  Gabor Kezdi
+# Cambridge University Press 2021
+#
+# gabors-data-analysis.com 
+#
+# License: Free to share, modify and use for educational purposes. 
+# 	Not to be used for commercial purposes.
 
-#
-# v 1.6 2019-11-08 # substantially new version with new structure
-# v 1.7 2019-11-17 # added new structure, RF. helper fn
-# v 1.8 2019-11-18 # change some minor bits, tables.
-# v 1.9 2019-11-19 # minor fixes
-# v 1.10 2019-11-20 # minor changes, todos added
-# v 1.11 2019-11-29 # includes earlier code re showing threshold
-# v 1.12 2019-12-15 # minor edits, mostly graphs
-# V 1.13 2019-12-17 # rf thinking added
-# v 1.14 2019-12-22 # zsuzsi redid RF + minor changes in graphix
-# v 1.15 2019-12-27 # cart v2
-# v 1.16 2020-01-03 # threshold search now on test set
-# v 1.17 2020-01-16 # loss fn is 1,10 (+ve)
-# v 1.18 2020-04-07 # graphical features changed + FIXME
-# v 1.19 2020-04-25 # some graph edits
-# v 2.0  2020-04-26 # names ok + calibration back
-
-#
 
 # This code is co-authored with Zsuzsa Holler and Jeno Pal
-############################################################
-#
-# WHAT THIS CODES DOES:
-#
-# Sets up models
-# Probability prediction
-# classification with loss fn - thershold search, expected loss
-# classification without loss fn - ROC, AUC
-# adds random forest
+# Chapter 17
+# CH17A
+# using the bisnode-firmd dataset
+# version 0.9 2020-09-10
+#########################################################################################
 
-#
-###########################################################
 
+
+# ------------------------------------------------------------------------------------------------------
+#### SET UP
+# It is advised to start a new session for every case study
+# CLEAR MEMORY
 rm(list=ls())
 
-source("global.R")
+# Import libraries
+library(haven)
+library(glmnet)
+library(purrr)
+library(margins)
+library(skimr)
+library(kableExtra)
+library(Hmisc)
+library(cowplot)
+library(gmodels) 
+library(lspline)
+library(sandwich)
+library(modelsummary)
 
-use_case_dir <- file.path("ch17-predicting-firm-exit/")
-loadLibraries(use_case_dir)
+library(rattle)
+library(caret)
+library(pROC)
+library(ranger)
+library(rpart)
+library(partykit)
+library(rpart.plot)
 
-data_in <- paste(data_dir,"bisnode-firms","clean", sep = "/")
+
+# set working directory
+# option A: open material as project
+# option B: set working directory for da_case_studies
+#           example: setwd("C:/Users/bekes.gabor/Documents/github/da_case_studies/")
+
+# set data dir, data used
+source("set-data-directory.R")             # data_dir must be first defined 
+# alternative: give full path here, 
+#            example data_dir="C:/Users/bekes.gabor/Dropbox (MTA KRTK)/bekes_kezdi_textbook/da_data_repo"
+
+# load theme and functions
+source("ch00-tech-prep/theme_bg.R")
+source("ch00-tech-prep/da_helper_functions.R")
+options(digits = 3) 
+
+data_in <- paste(data_dir,"bisnode-firms","clean/", sep = "/")
+use_case_dir <- "ch17-predicting-firm-exit/"
 
 data_out <- use_case_dir
-output <- paste0(use_case_dir,"/output/")
+output <- paste0(use_case_dir,"output/")
 create_output_if_doesnt_exist(output)
 
+
+#-----------------------------------------------------------------------------------------
 
 # THIS IS THE SECOND PART OF THE ch17 CODE
 # USES INTERMEDIATE OUTPUT by ch17-firm-exit-data-prep.R
@@ -62,7 +84,10 @@ create_output_if_doesnt_exist(output)
 # data <- read_csv(paste0(data_out,"bisnode_firms_clean.csv"))
 data <- read_rds(paste(data_out,"bisnode_firms_clean.rds", sep = "/"))
 
-summary(data)
+#summary
+datasummary_skim(data, type='numeric', histogram = TRUE)
+# datasummary_skim(data, type="categorical")
+
 
 # Define variable sets ----------------------------------------------
 # (making sure we use ind2_cat, which is a factor)
