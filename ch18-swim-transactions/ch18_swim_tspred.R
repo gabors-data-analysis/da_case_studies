@@ -1,16 +1,21 @@
-################################################################################################
-# Prepared for the textbook:
-# Data Analysis for Business, Economics, and Policy
-# by Gabor BEKES and  Gabor KEZDI 
-# Cambridge University Press 2021
-# 
-# License: Free to share, modify and use for educational purposes. Not to be used for business purposes.
+#########################################################################################
+# Prepared for Gabor's Data Analysis
 #
-###############################################################################################x
+# Data Analysis for Business, Economics, and Policy
+# by Gabor Bekes and  Gabor Kezdi
+# Cambridge University Press 2021
+#
+# gabors-data-analysis.com 
+#
+# License: Free to share, modify and use for educational purposes. 
+# 	Not to be used for commercial purposes.
 
 # CHAPTER 18
 # CH18 Forecasting daily ticket sales for a swimming pool 
+# using swim data
 # version 0.9 2020-08-31
+#########################################################################################
+
 
 #
 ###########################################################
