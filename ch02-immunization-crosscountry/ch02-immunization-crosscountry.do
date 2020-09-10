@@ -22,6 +22,7 @@
 * STEP 1: set working directory for da_case_studies.
 * for example:
 * cd "C:/Users/xy/Dropbox/gabors_data_analysis/da_case_studies"
+cd "C:/Users/kezdi/Github/da_case_studies"
 
 * STEP 2: * Directory for data
 * Option 1: run directory-setting do file
@@ -35,7 +36,7 @@ do set-data-directory.do
 * for example:
 * global data_dir "C:/Users/xy/gabors_data_analysis/da_data_repo"
 
-global data_in  "$data_dir/world-bank-immunization/clean"
+global data_in  "$data_dir/worldbank-immunization/clean"
 global work  	"ch02-immunization-crosscountry"
 
 cap mkdir 		"$work/output"
@@ -43,7 +44,7 @@ global output 	"$work/output"
 
  
 * load in clean and tidy data and create workfile
-use "$data_in/world-bank_immunization-panel.dta", clear
+use "$data_in/worldbank-immunization-panel.dta", clear
 
 keep countryname year imm gdppc 
 keep if imm!=.
