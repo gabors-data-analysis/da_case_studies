@@ -62,7 +62,7 @@ gen endline  = wave==6
 tab baseline 
 tab endline
 
-* stays healthy at endline
+* define staying healthy at endline
 gen temp = healthy==1 if endline==1
 egen stayshealthy = max(temp), by(mergeid)
 tab stayshealthy
@@ -212,6 +212,7 @@ regress stayshealthy smoking ever_smoked female age eduy_08 eduy_818 eduy_18p //
 predict p_lpm
  lab var p_lpm "Predicted probability of staying healthy (LPM)"
 sum p_lpm,d
+
 * Distribution of predicted probabilities
 * Figure 11.3
 histogram p_lpm, width(0.02) start(0) percent lc(white) lw(vthin) fc(navy*0.8) ///
@@ -236,14 +237,14 @@ sum smoking ever_smoked female age eduyears income10 bmi exerc if q100_lpm==1
 * lpm (repeating the previous regression)
 regress stayshealthy smoking ever_smoked female age eduy_08 eduy_818 eduy_18p ///
  income10 bmi_1635 bmi_3545 exerc i.country, robust
-outreg2 using "$output/T11_reg3.tex", label tex(frag)  dec(3) ///
+outreg2 using "$output/ch11-table-3-reg-Stata.tex", label tex(frag)  dec(3) ///
 keep(stayshealthy smoking ever_smoked female age eduy_08 eduy_818 eduy_18p ///
  income10 bmi_1635 bmi_3545 exerc) addtext("Country indicators", "YES") 2aster nor2 nocon replace
 
 * logit coefficients
 logit stayshealthy smoking ever_smoked female age eduy_08 eduy_818 eduy_18p ///
  income10 bmi_1635 bmi_3545 exerc i.country
- outreg2 using "$output/T11_reg3.tex", label ctitle("logit coeffs") tex(frag)  dec(3) ///
+ outreg2 using "$output/ch11-table-3-reg-Stata.tex", label ctitle("logit coeffs") tex(frag)  dec(3) ///
 keep(stayshealthy smoking ever_smoked female age eduy_08 eduy_818 eduy_18p ///
  income10 bmi_1635 bmi_3545 exerc) addtext("Country indicators", "YES") 2aster nor2 nocon append
 
@@ -251,18 +252,12 @@ keep(stayshealthy smoking ever_smoked female age eduy_08 eduy_818 eduy_18p ///
 predict p_logit
  lab var p_logit "Predicted probability of staying healthy (logit)"
 sum p_logit,d
-histogram p_logit, width(0.025) percent ///
-ylabel(, grid) lcolor(white) lwidth(vthin) fcolor(navy%80) fintensity(80) ///
-graphregion(fcolor(white) ifcolor(none))  ///
- plotregion(fcolor(white) ifcolor(white))
- 
- graph export "$output\pred_histogram_logit.png",replace
  
 * logit marginal differences
 logit stayshealthy smoking ever_smoked female age eduy_08 eduy_818 eduy_18p ///
  income10 bmi_1635 bmi_3545 exerc i.country
  margins, dydx(_all) post
- outreg2 using "$output/T11_reg3.tex", label ctitle("logit marginals") tex(frag)  dec(3) ///
+ outreg2 using "$output/ch11-table-3-reg-Stata", label ctitle("logit marginals") tex(frag)  dec(3) ///
 keep(stayshealthy smoking ever_smoked female age eduy_08 eduy_818 eduy_18p ///
  income10 bmi_1635 bmi_3545 exerc) addtext("Country indicators", "YES") 2aster nor2 nocon append
 
@@ -270,7 +265,7 @@ keep(stayshealthy smoking ever_smoked female age eduy_08 eduy_818 eduy_18p ///
 * probit coefficients
 probit stayshealthy smoking ever_smoked female age eduy_08 eduy_818 eduy_18p ///
  income10 bmi_1635 bmi_3545 exerc i.country
- outreg2 using "$output/T11_reg3.tex", label ctitle("probit coeffs") tex(frag)  dec(3) ///
+ outreg2 using "$output/ch11-table-3-reg-Stata", label ctitle("probit coeffs") tex(frag)  dec(3) ///
 keep(stayshealthy smoking ever_smoked female age eduy_08 eduy_818 eduy_18p ///
  income10 bmi_1635 bmi_3545 exerc) addtext("Country indicators", "YES") 2aster nor2 nocon append
 
@@ -278,148 +273,99 @@ keep(stayshealthy smoking ever_smoked female age eduy_08 eduy_818 eduy_18p ///
 predict p_probit
  lab var p_probit "Predicted probability of staying healthy (probit)"
 sum p_probit,d
-histogram p_probit, percent ///
-ylabel(, grid) lcolor(white) lwidth(vthin) fcolor(navy%80) fintensity(80) ///
-graphregion(fcolor(white) ifcolor(none))  ///
- plotregion(fcolor(white) ifcolor(white))
-  graph export "$output\pred_histogram_probit.png",replace
- graph export "$output\pred_histogram_probit.eps",replace
 
 * probit marginal differences
 probit stayshealthy smoking ever_smoked female age eduy_08 eduy_818 eduy_18p ///
  income10 bmi_1635 bmi_3545 exerc i.country
  margins, dydx(_all) post
- outreg2 using "$output/T11_reg3.tex", label ctitle("probit marginals") tex(frag)  dec(3) ///
+ outreg2 using "$output/ch11-table-3-reg-Stata", label ctitle("probit marginals") tex(frag)  dec(3) ///
 keep(stayshealthy smoking ever_smoked female age eduy_08 eduy_818 eduy_18p ///
  income10 bmi_1635 bmi_3545 exerc) addtext("Country indicators", "YES") 2aster nor2 nocon append
 
+ 
+* lpm, logit and probit predicted probabilities
 scatter p_logit p_probit p_lpm , ///
-xlab(, grid) ylab(, grid) ms(o +) mc(navy green) msize(tiny vtiny) ///
- || line p_lpm p_lpm, ytitle("Predicted probability") lwidth(vthin) lcolor(grey) ///
+xlab(, grid) ylab(, grid) ms(o o) mc(navy*0.8 green*0.6) msize(small small) ///
+ || line p_lpm p_lpm, ytitle("Predicted probability") lwidth(medthick) lcolor(black) ///
  legend(rows(1) lab(1 "logit") lab(2 "probit") lab(3 "45 degree line")) ///
-graphregion(fcolor(white) ifcolor(none))  ///
+ graphregion(fcolor(white) ifcolor(none))  ///
  plotregion(fcolor(white) ifcolor(white))
-  graph export "$output\pred_scatter_3models.png",replace
- graph export "$output\pred_scatter_3models.eps",replace
+graph export "$output\ch11-figure-5-predprob-3models-Stata.png",replace
 
  
-*********************************************
-*********************************************
-* GOODNESS OF FIT
-
-
-
-
-***************************************************************
-*** DISTRIBUTION OF PREDICTED PROBABILITIES BY OUTCOME
-***************************************************************
+* DISTRIBUTION OF PREDICTED PROBABILITIES BY OUTCOME
 * re-estimate the simplest lpm for benchmark
 reg stayshealthy smoking
 predict p_lpmbase
 
 cap drop x* y*
 
-
 * LPM simple model
-twoway histogram p_lpmbase if stayshealthy==1, fraction width(0.05) disc fcolor(navy%80) ///
- || histogram p_lpmbase if stayshealthy==0, fraction width(0.05) disc fcolor(none) lcolor(black) ///
+* Figure 11.7a
+twoway histogram p_lpmbase if stayshealthy==1, percent width(0.05) disc ///
+ fcolor(navy*0.8) lcolor(navy) ///
+ || histogram p_lpmbase if stayshealthy==0, percent width(0.05) disc ///
+ fcolor(none) lcolor(green*0.8) ///
  legend(order(2 "Did not stay healthy" 1 "Stayed healthy" )) ///
- xlab(0(0.2)1) ytitle("Relative frequency")  ///
-graphregion(fcolor(white) ifcolor(none))  ///
+ xlab(0(0.2)1, grid) ylab(0(20)80, grid) ytitle("Relative frequency")  ///
+ graphregion(fcolor(white) ifcolor(none))  ///
  plotregion(fcolor(white) ifcolor(white))
-graph export "$output\pred_hist_byoutcome_lpmbase.png", replace
+graph export "$output\ch11-figure-7a-predprob-by-y-lpmsimple-Stata.png",replace
 
-
- 
 * LPM rich model
-twoway histogram p_lpm if stayshealthy==1, fraction width(0.05) fcolor(navy%80) lcolor(gs12) ///
- || histogram p_lpm if stayshealthy==0,  fraction width(0.05) fcolor(none) lcolor(black) ///
+* Figure 11.7b
+twoway histogram p_lpm if stayshealthy==1, percent width(0.05) start(0) ///
+ fcolor(navy*0.8) lcolor(navy) ///
+ || histogram p_lpm if stayshealthy==0, percent width(0.05) start(0) ///
+ fcolor(none) lcolor(green*0.8) ///
  legend(order(2 "Did not stay healthy" 1 "Stayed healthy" )) ///
- xlab(0(0.2)1) ytitle("Relative frequency") ///
-graphregion(fcolor(white) ifcolor(none))  ///
- plotregion(fcolor(white) ifcolor(white))
-graph export "$output\pred_hist_byoutcome_lpm.png", replace
-
-
-* logit rich model
-twoway histogram p_logit if stayshealthy==1, fraction width(0.05) fcolor(navy%80) lcolor(gs12) ///
- || histogram p_logit if stayshealthy==0, fraction width(0.05) fcolor(none) lcolor(black) ///
- legend(order(2 "Did not stay healthy" 1 "Stayed healthy" )) ///
- xlab(0(0.2)1) ytitle("Relative frequency")  ylab(0) ///
+ xlab(0(0.2)1, grid) ylab(0(5)20, grid) ytitle("Relative frequency")  ///
  graphregion(fcolor(white) ifcolor(none))  ///
  plotregion(fcolor(white) ifcolor(white))
- graph export "$output\pred_hist_byoutcome_logit_notused.png", replace
+graph export "$output\ch11-figure-7b-predprob-by-y-lpm-Stata.png",replace
 
-* probit rich model
-twoway histogram p_probit if stayshealthy==1, fraction width(0.05) fcolor(navy%80) lcolor(gs12) ///
- || histogram p_probit if stayshealthy==0, fraction width(0.05) fcolor(none) lcolor(black) ///
- legend(order(2 "Did not stay healthy" 1 "Stayed healthy" )) ///
- xlab(0(0.2)1) ytitle("Relative frequency")  ylab(0) ///
- graphregion(fcolor(white) ifcolor(none))  ///
- plotregion(fcolor(white) ifcolor(white))
- graph export "$output\pred_hist_byoutcome_probit.png", replace
-
- 
- * or: density plots
-kdensity p_logit if stayshealthy==1, nogra gen(xlogit1 ylogit1)
-kdensity p_logit if stayshealthy==0, nogra gen(xlogit0 ylogit0)
-lab var ylogit1 "Stayed healthy"
-lab var ylogit0 "Did not stay healthy"
-line ylogit0 ylogit1 xlogit1, lc(green navy) lp(dash solid) lw(thick thick) ///
- ytitle("Density") ylab(, grid) xlab(, grid) ///
- graphregion(fcolor(white) ifcolor(none))  ///
- plotregion(fcolor(white) ifcolor(white))
- graph export "$output\pred_density_byoutcome_logit.png", replace
-
- *
- 
-
-*********************************************
-*** SUMMARY STATS OF PREDICTED PROBABILITIES BY OUTCOME
+* SUMMARY STATS OF PREDICTED PROBABILITIES BY OUTCOME
 label var p_lpmbase "Simple LPM"
 label var p_lpm "LPM"
 label var p_logit "Logit"
 label var p_probit "Probit"
 estpost tabstat p_lpmbase p_lpm p_logit p_probit, by(stayshealthy) s(mean)
-esttab using "$output/T11_mean_medtest.tex", replace noobs label  tex  ///
- cells(" p_lpmbase(fmt(3)) p_lpm(fmt(3)) p_logit(fmt(3)) p_probit(fmt(2))")  nonumbers
+esttab using "$output/ch11-table-4-pred-mean-Stata.tex", replace noobs label  tex  ///
+ cells(" p_lpmbase(fmt(3)) p_lpm(fmt(3)) p_logit(fmt(3)) p_probit(fmt(3))")  nonumbers
 
-tabstat p_lpmbase p_lpm p_logit p_probit, by(stayshealthy) s(median) 
-esttab using "$output/T11_mean_medtest2.tex", replace noobs label  tex ///
- cells(" p_lpmbase(fmt(3)) p_lpm(fmt(3)) p_logit(fmt(3)) p_probit(fmt(2))")  nonumbers 
+estpost tabstat p_lpmbase p_lpm p_logit p_probit, by(stayshealthy) s(median) 
+esttab using "$output/ch11-table-4-pred-median-Stata.tex", replace noobs label  tex ///
+ cells(" p_lpmbase(fmt(3)) p_lpm(fmt(3)) p_logit(fmt(3)) p_probit(fmt(3))")  nonumbers 
+
+count if p_lpm!=.
 
  
 *********************************************
 *** CALIBRATION CURVES
 
 * LPM rich model
-egen p_lpm_bins = cut(p_lpm), at(0(0.05)1.05)
- replace p_lpm_bins = int(p_lpm_bins*20)/20
- replace p_lpm_bins = 0.15 if p_lpm_bins<0.15
- replace p_lpm_bins = 0.85 if p_lpm_bins>0.85
-tabstat p_lpm, by(p_lpm_bins) s(min max mean n)
+egen p_lpm_bins = cut(p_lpm), at(0 0.2(0.05)0.85 1.05)
+tabstat p_lpm , by(p_lpm_bins) s(min max mean n)
 egen temp=mean(p_lpm), by(p_lpm_bins)
 replace p_lpm_bins = temp /* attach value to bin: avg pred value */
 tabstat p_lpm, by(p_lpm_bins) s(min max mean n)
 
 preserve
  collapse stayshealthy, by(p_lpm_bins)
- line stayshealthy p_lpm_bins p_lpm_bins,  lw(thick medium ) lc(navy green) ///
+ twoway scatter stayshealthy p_lpm_bins, ms(o) mc(navy*0.8) c(l) lw(thick) lc(navy*0.8) ///
+ || line p_lpm_bins p_lpm_bins,  lw(medium ) lc(green*0.8) ///
  xla(0(0.1)1, grid) yla(0(0.1)1, grid) ///
  xtitle("Bins of predicted probaiblities") ///
  ytitle("Proportion staying healthy") ///
- legend(label(1 "proportion staying healthy") label(2 "45 degree line") rows(1)) ///
+ legend(off) ///
  graphregion(fcolor(white) ifcolor(none))  ///
  plotregion(fcolor(white) ifcolor(white))
-  graph export "$output\calib_lpm.png", replace
+ graph export "$output\ch11-figure-8a-calib-lpm-Stata.png",replace
 restore
-x
+
 
 * logit rich model
-egen p_logit_bins = cut(p_logit), at(0(0.05)1.05)
- replace p_logit_bins = int(p_logit_bins*20)/20
- replace p_logit_bins = 0.15 if p_logit_bins<0.15
- replace p_logit_bins = 0.85 if p_logit_bins>0.85
+egen p_logit_bins = cut(p_logit), at(0 0.2(0.05)0.85 1.05)
 tabstat p_logit, by(p_logit_bins) s(min max mean n)
 cap drop temp
 egen temp=mean(p_logit), by(p_logit_bins)
@@ -428,93 +374,70 @@ tabstat p_logit, by(p_logit_bins) s(min max mean n)
 
 preserve
  collapse stayshealthy, by(p_logit_bins)
- line stayshealthy p_logit_bins p_logit_bins,  lw(thick medium ) lc(navy green) ///
+ twoway scatter stayshealthy p_logit_bins, ms(o) mc(navy*0.8) c(l) lw(thick) lc(navy*0.8) ///
+ || line p_logit_bins p_logit_bins,  lw(medium ) lc(green*0.8) ///
  xla(0(0.1)1, grid) yla(0(0.1)1, grid) ///
  xtitle("Bins of predicted probaiblities") ///
  ytitle("Proportion staying healthy") ///
- legend(label(1 "proportion staying healthy") label(2 "45 degree line") rows(1)) ///
+ legend(off) ///
  graphregion(fcolor(white) ifcolor(none))  ///
  plotregion(fcolor(white) ifcolor(white))
- 
- graph export "$output\calib_logit.png", replace
+ graph export "$output\ch11-figure-8b-calib-logit-Stata.png",replace
 restore
 
 
-
-
-********************************************
-*** GOODNESS OF FIT STATISTICS
-********************************************
-
+* GOODNESS OF FIT STATISTICS
 
 * LPM
 qui reg stayshealthy smoking ever_smoked female age eduy_08 eduy_818 eduy_18p ///
  income10 bmi_1635 bmi_3545 exerc i.country
-* R-squared
-dis e(r2)
+* R-squared 
+local R2_lpm = e(r2)
 * Brier
 gen sqd_lpm = (stayshealthy - p_lpm)^2
-tabstat sqd_lpm
 * log-loss
 gen logl_lpm = stayshealthy*ln(p_lpm) + (1-stayshealthy)*ln(1-p_lpm)
-tabstat logl_lpm
 
 * logit
-* R-squared
+* R-squared & Brier
 qui sum stayshealthy
 gen var_stayshealthy=r(sd)^2
 gen sqd_logit = (stayshealthy - p_logit)^2
 qui sum sqd_logit
 gen r2_logit = 1 - (r(mean) / var_stayshealthy)
-sum r2_logit
-
-* Brier
-tabstat sqd_logit
 * Pseudo R-squared
 qui logit stayshealthy smoking ever_smoked female age eduy_08 eduy_818 eduy_18p ///
  income10 bmi_1635 bmi_3545 exerc i.country
-dis e(r2_p)
+local pseudo_R2_logit = e(r2_p)
 * log-loss
 gen logl_logit = stayshealthy*ln(p_logit) + (1-stayshealthy)*ln(1-p_logit)
-tabstat logl_logit
 
 
 * probit
-* R-squared
+* R-squared and Brier
 gen sqd_probit = (stayshealthy - p_probit)^2
 qui sum sqd_probit
 gen r2_probit = 1 - (r(mean) / var_stayshealthy)
 sum r2_probit
 
-* Brier
-tabstat sqd_probit
 * Pseudo R-squared
 qui probit stayshealthy smoking ever_smoked female age eduy_08 eduy_818 eduy_18p ///
  income10 bmi_1635 bmi_3545 exerc i.country
-dis e(r2_p)
+local pseudo_R2_probit = e(r2_p)
 * log-loss
 gen logl_probit = stayshealthy*ln(p_probit) + (1-stayshealthy)*ln(1-p_probit)
-tabstat logl_probit
 
-
+* R-squares
+dis "R2_lpm = `R2_lpm'"
+tabstat r2_*
+* Brier scores
+tabstat sqd_*
+* Pseudo-R-squares
+dis "pseudo_R2_logit = `pseudo_R2_logit'    " "pseudo_R2_probit = `pseudo_R2_probit'"
+* log-loss
+tabstat logl_*
  
-*** CLASSIFICATION, CONFUSION TABLES
-* for any model
-gen y_actual = stayshealthy
-foreach x in lpmbase lpm logit probit {
-	gen y_`x'=p_`x'>0.5 if p_`x'<=1
-	tab y_`x' y_actual, cell nofre
-	tab y_`x' y_actual, col nofre
-	more
-}
 
-
-*Very easy table with logit
-logit stayshealthy smoking ever_smoked female age  , robust
-lstat
-logit stayshealthy smoking ever_smoked female age eduy_08 eduy_818 eduy_18p income10 bmi_1635 bmi_3545 exerc i.country, robust
-lstat
-*
 
 *********************************************
 * ILLUSTRATION LOGIT AND PROBIT CURVES
@@ -542,19 +465,12 @@ predict bx_probit, xb
 gen illustr_probit=normal(bx_probit)
  lab var illustr_probit "probit"
 
- 
-line illustr_logit bx_logit, sort lw(thick) lc(red) ylab(, grid) ///
-  ytitle("Probability") ///
-  || line illustr_probit bx_probit, sort lw(thick) xaxis(2) lc(navy green) lp(dash) ///
-  ylab(, grid) xlab(, grid) ytitle("Probability") xlabel(-1 1, axis(2)) ///
+* Figure 11.4 
+line illustr_logit illustr_probit bx_logit, sort ///
+  lw(thick thick) lc(navy*0.8 green*0.5) ///
+  ylab(, grid) xlab(, grid) ///
+  ytitle("Probability") xtitle("z values") ///
   legend(rows(1) lab(1 "logit") lab(2 "probit") ) ///
-  graphregion(fcolor(white) ifcolor(none))  ///
+  graphregion(fcolor(white) ifcolor(none)) ///
  plotregion(fcolor(white) ifcolor(white))
- graph export "$output\logit_probit_curves.png",replace
- graph export "$output\logit_probit_curves.eps",replace
- 
- 
-* check if simply plotting against bx_logit works, and it does
-
-line illustr_logit illustr_probit bx_logit, sort
-
+graph export "$output\ch11-figure-4-illustrate-logit-probit-Stata.png",replace
