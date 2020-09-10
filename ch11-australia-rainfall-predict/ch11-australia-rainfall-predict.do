@@ -1,34 +1,48 @@
-*********************************************************************
-*
-* DATA ANALYSIS TEXTBOOK
-* CH 11 PROBABILITY MODELS
-* weather australia
-*
-
-* v 1.0 2019-11-24 
-* v 1.1 2020-03-10 change bins
-
-*********************************************************************
-
-* WHAT THIS CODES DOES:
-
-* selects a single station, shows calibration curve
-
-***
-
 ********************************************************************
-* SET YOUR DIRECTORY HERE
-*********************************************************************
-*cd "" /*set your dir*/
-cd "C:/Users/GB/Dropbox (MTA KRTK)/bekes_kezdi_textbook"
- * YOU WILL NEED TWO SUBDIRECTORIES
- * tex(frag) tbook_work --- all the codes
- * cases_studies_public --- for the data
- 
+* Prepared for Gabor's Data Analysis
+*
+* Data Analysis for Business, Economics, and Policy
+* by Gabor Bekes and  Gabor Kezdi
+* Cambridge University Press 2021
+*
+* gabors-data-analysis.com 
+*
+* License: Free to share, modify and use for educational purposes. 
+* 	Not to be used for commercial purposes.
+*
+* Chapter 11
+* CH11B Are Australian weather forecasts well calibrated?
+* using the australia-weather-forecasts dataset
+* version 0.9 2020-09-06
+********************************************************************
 
-global data_in   "da_data_repo/australia-weather-forecasts/clean" 
-global data_out	 "da_case_studies/ch11-australia-rainfall-predict" 
-global output    "da_case_studies/ch11-australia-rainfall-predict/output" 
+
+* SETTING UP DIRECTORIES
+
+* STEP 1: set working directory for da_case_studies.
+* for example:
+* cd "C:/Users/xy/Dropbox/gabors_data_analysis/da_case_studies"
+
+* STEP 2: * Directory for data
+* Option 1: run directory-setting do file
+do set-data-directory.do 
+							/* this is a one-line do file that should sit in 
+							the working directory you have just set up
+							this do file has a global definition of your working directory
+							more details: gabors-data-analysis.com/howto-stata/   */
+
+* Option 2: set directory directly here
+* for example:
+* global data_dir "C:/Users/xy/gabors_data_analysis/da_data_repo"
+
+
+global data_in  "$data_dir/australia-weather-forecasts/clean"
+global work  	"ch11-australia-rainfall-predict"
+
+cap mkdir 		"$work/output"
+global output 	"$work/output"
+
+
 
 
 clear
@@ -52,17 +66,15 @@ replace bin = bin+0.05
 replace bin=0 if rain_prob_fc==0
 tabstat rain_prob_fc, by(bin) s(min max n)
 
-
  format bin %3.1f
 collapse rain rain_prob_fc, by(bin)
 
- line rain_prob_fc bin  bin,  lw(medium thin) lc(navy green) ///
- recast(connected) mcolor(%80) msize(medium) msymbol(circle none) ///
+scatter rain bin  bin, connect(l l) lw(thick medium) lc(navy*0.8 green*0.6) ///
+ mcolor(navy*0.8) msize(medium) msymbol(O none) ///
  xla(0(0.1)1, grid) yla(0(0.1)1, grid) ///
- xtitle("Bins of predicted probaiblities") ///
- ytitle("Proportion rainy days") ///
- legend(label(1 "proportion rainy days") label(2 "45 degree line") rows(1)) ///
+ xtitle("Bins of predicted probaiblities") ytitle("Proportion rainy days") ///
+ legend(off) ///
  graphregion(fcolor(white) ifcolor(none))  ///
  plotregion(fcolor(white) ifcolor(white))
- graph export "$output\ch11-weather-calib.png", replace
+graph export "$output\ch11-figure-6-weather-calib-Stata.png", replace
 

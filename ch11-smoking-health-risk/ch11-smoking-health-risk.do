@@ -1,37 +1,49 @@
-*********************************************************************
-*
-* DATA ANALYSIS tex(frag) TBOOK
-* CH 11 PROBABILITY MODELS
-* SMOKING AND STAYING HEALTHY
-*
-* SHARE
-* v2.1 2018-09-11
-* v2.2 2019-11-14 small edits
-*********************************************************************
-
-* WHAT THIS CODES DOES:
-
-* ...
-***
-
 ********************************************************************
-* SET YOUR DIRECTORY HERE
-*********************************************************************
-*cd "" /*set your dir*/
-cd "C:\Users\kezdi\Dropbox\bekes_kezdi_textbook"
-*cd "C:/Users/GB/Dropbox (MTA KRTK)/bekes_kezdi_textbook"
-*cd "D:\Dropbox (MTA KRTK)\bekes_kezdi_tex(frag) tbook"
- * YOU WILL NEED TWO SUBDIRECTORIES
- * tex(frag) tbook_work --- all the codes
- * cases_studies_public --- for the data
- 
+* Prepared for Gabor's Data Analysis
+*
+* Data Analysis for Business, Economics, and Policy
+* by Gabor Bekes and  Gabor Kezdi
+* Cambridge University Press 2021
+*
+* gabors-data-analysis.com 
+*
+* License: Free to share, modify and use for educational purposes. 
+* 	Not to be used for commercial purposes.
+*
+* Chapter 11
+* CH11A Does smoking pose a health risk?
+* using the share-health dataset
+* version 0.9 2020-09-06
+********************************************************************
 
-global data_in   "da_data_repo/share-health/clean" 
-global data_out	 "da_case_studies/ch11-smoking-health-risk" 
-global output    "da_case_studies/ch11-smoking-health-risk/output" 
+
+* SETTING UP DIRECTORIES
+
+* STEP 1: set working directory for da_case_studies.
+* for example:
+* cd "C:/Users/xy/Dropbox/gabors_data_analysis/da_case_studies"
+cd "C:/Users/kezdi/GitHub/da_case_studies"
+
+* STEP 2: * Directory for data
+* Option 1: run directory-setting do file
+do set-data-directory.do 
+							/* this is a one-line do file that should sit in 
+							the working directory you have just set up
+							this do file has a global definition of your working directory
+							more details: gabors-data-analysis.com/howto-stata/   */
+
+* Option 2: set directory directly here
+* for example:
+* global data_dir "C:/Users/xy/gabors_data_analysis/da_data_repo"
 
 
-set more off
+global data_in  "$data_dir/share-health/clean"
+global work  	"ch11-smoking-health-risk"
+
+cap mkdir 		"$work/output"
+global output 	"$work/output"
+
+
 
 
 ********************************************************************
@@ -90,11 +102,11 @@ replace eduyears=. if eduyears<0
 summ eduyears
 
 compress
-save "$data_out/ch11_share.dta", replace
+save "$work/ch11_share.dta", replace
 
 
 *** Summary stats
-use "$data_out/ch11_share.dta", clear
+use "$work/ch11_share.dta", clear
 sum stayshealthy smoking ever_smoked female age income10 eduyears bmi exerc 
 tab country stayshealthy,mis
 drop if bmi==.
@@ -105,74 +117,73 @@ tab country stayshealthy,mis
 
 more
 
-******************************************************************
 *** Linear probability models of good health at endline and smoking
 
- 
-
-* (1) current smoker on RHS
+* current smoker on RHS
 regress stayshealthy smoking, robust
- outreg2 using "$output/T11_reg1.tex", label tex(frag)  dec(3) 2aster nor2 replace 
-* visualize this regression
- predict ypred
- lab var ypred "Predicted probability of staying healthy"
- scatter ypred stayshealthy smoking, ///
- graphregion(fcolor(white) ifcolor(none)) ///
-  ms(D O) msize(large vlarge) mc(navy green) connect(l .) ///
-  ylab(, grid) xlab(0 1) 
- graph export "$output\health_smoking_lpm.png",replace
- graph export "$output\health_smoking_lpm.eps",replace
- 
- more
+ outreg2 using "$output/ch11-table-1-reg-Stata.tex", label tex(frag)  dec(3) 2aster nor2 replace 
 
+* visualize this regression
+* Figure 11.1
+qui reg stayshealthy smoking
+predict ypred
+ lab var ypred "Predicted probability of staying healthy"
+egen obs_by_cell = count(ypred), by(stayshealthy smoking)
+scatter stayshealthy smoking [w=obs_by_cell], ms(O) mc(green*0.8) ///
+ || scatter ypred smoking, ms(O) mc(navy*0.8) c(l) lw(thick) lc(navy*0.8) ///
+  ylab(0(0.1)1, grid) xlab(0 1) ///
+  ytitle("Staying healthy / predicted probability of staying healthy") ///
+  legend(off)  
+graph export "$output\ch11-figure-1-reg-Stata.png",replace 
  
  
- 
-* (2) current smoker and ever smoked on RHS
+* current smoker and ever smoked on RHS
 regress stayshealthy smoking ever_smoked, robust
- outreg2 using "$output/T11_reg1.tex", label tex(frag)  dec(3) 2aster nor2 append
+ outreg2 using "$output/ch11-table-1-reg-Stata.tex", label tex(frag)  dec(3) 2aster nor2 append
 
  
 *** adding other right-hand-side variables
 * first check some functional forms
-lowess stayshealthy age, ylab(, grid) xlab(, grid) ///
- graphregion(fcolor(white) ifcolor(none)) lineopts(lcolor(navy))
- more
 
- lowess stayshealthy eduyears, ///
- mcolor(dkgreen) msize(small) lineopts(lcolor(navy)) ///
- ylab(, grid) xlab(, grid) ///
+* age, not in textbook
+lowess stayshealthy age, ms(i) ///
+ lineopts(lw(thick) lcolor(navy*0.8)) ///
+ ylab(0(0.1)1, grid) xlab(, grid) ///
+ ytitle("Probability of staying healthy") xtitle("Age (years)") ///
+ title("") note("") ///
  graphregion(fcolor(white) ifcolor(none))  ///
  plotregion(fcolor(white) ifcolor(white))
- graph export "$output\health_edu.png",replace
- graph export "$output\health_edu.eps",replace
- more
 
- * linear
- scatter stayshealthy eduyears,  mcolor(dkgreen) msize(small)  ///
- || lfit stayshealthy eduyears,  lcolor(navy) ///
- ylab(, grid) xlab(, grid) ///
+* education
+* Figure 11.2a
+lowess stayshealthy eduyears, ms(i) ///
+ lineopts(lw(thick) lcolor(navy*0.8)) ///
+ ylab(0(0.1)1, grid) xlab(0(4)24, grid) ///
+ ytitle("Probability of staying healthy") xtitle("Years of education") ///
+ title("") note("") ///
  graphregion(fcolor(white) ifcolor(none))  ///
  plotregion(fcolor(white) ifcolor(white))
- graph export "$output\health_edu_lpm.png",replace
- graph export "$output\health_edu_lpm.eps",replace
- more
- 
- lowess stayshealthy income10, ///
- mcolor(dkgreen) lineopts(lcolor(navy)) ///
- ylab(, grid) xlab(, grid) ///
- graphregion(fcolor(white) ifcolor(none))  ///
- plotregion(fcolor(white) ifcolor(white))
-  graph export "$output\health_income.png",replace
- graph export "$output\health_income.eps",replace
- more
+graph export "$output\ch11-figure-2a-edu-lowess-Stata.png",replace 
 
- lowess stayshealthy bmi, ///
- mcolor(dkgreen) lineopts(lcolor(navy)) ///
- ylab(, grid) xlab(, grid) ///
+* income group
+* Figure 11.2b
+lowess stayshealthy income10, ms(i) ///
+ lineopts(lw(thick) lcolor(navy*0.8)) ///
+ ylab(0(0.1)1, grid) xlab(1(1)10, grid) ///
+ ytitle("Probability of staying healthy") xtitle("Income group") ///
+ title("") note("") ///
  graphregion(fcolor(white) ifcolor(none))  ///
  plotregion(fcolor(white) ifcolor(white))
- more
+graph export "$output\ch11-figure-2b-inc-lowess-Stata.png",replace 
+
+* BMI, not in textbook
+lowess stayshealthy bmi, ms(i) ///
+ lineopts(lw(thick) lcolor(navy*0.8)) ///
+ ylab(0(0.1)1, grid) xlab(, grid) ///
+ ytitle("Probability of staying healthy") xtitle("BMI") ///
+ title("") note("") ///
+ graphregion(fcolor(white) ifcolor(none))  ///
+ plotregion(fcolor(white) ifcolor(white))
 
 
 * creating piecewise linear spline variables from education and bmi
@@ -193,7 +204,7 @@ label var bmi_3545 "BMI (if $>=35$)"
 label var exerc "Exercises regularly"
 regress stayshealthy smoking ever_smoked female age eduy_08 eduy_818 eduy_18p ///
  income10 bmi_1635 bmi_3545 exerc i.country, robust
- outreg2 using "$output/T11_reg2.tex", label tex(frag)  dec(3) ///
+ outreg2 using "$output/ch11-table-2-reg-Stata.tex", label tex(frag)  dec(3) ///
  keep(stayshealthy smoking ever_smoked female age eduy_08 eduy_818 eduy_18p ///
  income10 bmi_1635 bmi_3545 exerc) addtext("Country indicators", "YES") 2aster nor2 nocon replace
 
@@ -201,12 +212,13 @@ regress stayshealthy smoking ever_smoked female age eduy_08 eduy_818 eduy_18p //
 predict p_lpm
  lab var p_lpm "Predicted probability of staying healthy (LPM)"
 sum p_lpm,d
-histogram p_lpm, width(0.025) percent ///
-ylabel(, grid) lcolor(white) lwidth(vthin) fcolor(navy%80) fintensity(80) ///
-graphregion(fcolor(white) ifcolor(none))  ///
+* Distribution of predicted probabilities
+* Figure 11.3
+histogram p_lpm, width(0.02) start(0) percent lc(white) lw(vthin) fc(navy*0.8) ///
+ ylabel(0(1)7, grid) xlab(, grid) ///
+ graphregion(fcolor(white) ifcolor(none))  ///
  plotregion(fcolor(white) ifcolor(white))
-  graph export "$output\pred_histogram_lpm.png",replace
- graph export "$output\pred_histogram_lpm.eps",replace
+graph export "$output\ch11-figure-3-predprob-hist-Stata.png",replace 
 more
 
 * list top 1% and bottom 1%
@@ -506,7 +518,7 @@ lstat
 
 *********************************************
 * ILLUSTRATION LOGIT AND PROBIT CURVES
-use "$data_out\ch11_share.dta", replace
+use "$work\ch11_share.dta", replace
 drop if bmi==.
 drop if eduyears==.
 drop if exerc==.
