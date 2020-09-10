@@ -4,7 +4,7 @@
 # * Case Study immunization against measels and child mortality age 0-5
 # * whole World
 
-# * Data: world-bank_immunizaton-panle
+# * Data: worldbank-immunizaton-panel
 
 # v2.0. 2020-04-19
 # v2.1. 2020-04-20 minor graph edits
@@ -26,7 +26,7 @@ source("global.R")
 use_case_dir <- file.path("ch23-immunization-life/")
 loadLibraries(use_case_dir)
 
-data_in <- paste(data_dir,"world-bank-immunization","clean", sep = "/")
+data_in <- paste(data_dir,"worldbank-immunization","clean", sep = "/")
 
 data_out <- use_case_dir
 output <- paste0(use_case_dir,"output/")
@@ -34,7 +34,7 @@ create_output_if_doesnt_exist(output)
 
 # Read in data ------------------------------------------------------------
 
-data <- read_dta(paste(data_in, "world-bank_immunization-continents.dta", sep = "/"))
+data <- read_dta(paste(data_in, "worldbank-immunization-continents.dta", sep = "/"))
 
 # **************************************************
 # * info graph on measles vaccination continent aggregates
@@ -73,7 +73,7 @@ save_fig("ch23-figure-2b-tssurvival", output, size = "small")
 # **************************************************
 # * regressions on countries
 
-data_panel <- read_dta(paste(data_in, "world-bank_immunization-panel.dta", sep = "/"))
+data_panel <- read_dta(paste(data_in, "worldbank-immunization-panel.dta", sep = "/"))
 
 data_panel <- data_panel %>%
   filter(!(is.na(imm) | is.na(gdppc))) %>%
