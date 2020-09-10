@@ -4,7 +4,7 @@
 * Case Study immunization against measels and child mortality age 0-5
 * whole World
 
-* Data: world-bank_immunizaton-panle
+* Data: worldbank-immunizaton-panel
 
 
 ***************************************************************
@@ -34,7 +34,7 @@ cd "C:/Users/GB/Dropbox (MTA KRTK)/bekes_kezdi_textbook"
 
 
 
-global data_in "da_data_repo\world-bank-immunization\clean"
+global data_in "da_data_repo\worldbank-immunization\clean"
 global data_out "da_case_studies\ch23-immunization-life"
 global output "da_case_studies\ch23-immunization-life\output"
 
@@ -44,7 +44,7 @@ global output "da_case_studies\ch23-immunization-life\output"
 **************************************************
 * info graph on measles vaccination continent aggregates
 
-use "$data_in/world-bank_immunization-continents.dta", clear
+use "$data_in/worldbank-immunization-continents.dta", clear
 
 
 line imm* year, lw(. . . . . thick thick) ///
@@ -68,7 +68,7 @@ graph export "$output\ch23-figure-2b-tssurvival-toedit.png",replace
 * regressions on countries
 
 clear
-use "$data_in/world-bank_immunization-panel.dta"
+use "$data_in/worldbank-immunization-panel.dta"
 
 xtdes
 
