@@ -166,8 +166,10 @@ tabstat passengers if year==2011, by(smallmkt) s(min max median mean sum n) form
 * describe balanced
 tab year balanced
 tab year balanced, sum(passengers) mean
-tabstat passengers if year==2011, by(balanced) s(sum n) format(%12.0fc)
-tabstat passengers if year==2016, by(balanced) s(sum n) format(%12.0fc)
+
+**** SAMPLE DESIGN 
+* keep if balanced
+keep if balanced==1
 
 * describe treatment
 tabstat passengers if   treated==1 , by(year) s(mean sum n) format(%12.0fc)
@@ -175,46 +177,50 @@ tabstat passengers if untreated==1 , by(year) s(mean sum n) format(%12.0fc)
 tabstat passengers if treated==0 & untreated==0 , by(year) s(mean sum n) format(%12.0fc)
 
 * describe outcome
-*hist avgprice if before, percent ylab(,grid)
+hist avgprice if before, percent col(navy*0.8) lcol(white) ylab(,grid)
 tabstat avgprice if before, s(min p25 med p75 max mean sd) format(%4.0f)
-tabstat passengers if avgprice==0, s(mean sum n)
+
+* investigate if price is zero (can't take log)
+tabstat passengers if avgprice==0, s(mean sum n) by(year)
 
 cap gen lnavgp=ln(avgp)
 cap gen d_lnavgp = d.lnavgp
 
-*hist lnavgp if before, percent ylab(,grid)
-*hist d_lnavgp if before, percent ylab(,grid)
-
+**** SAMPLE DESIGN 
+* keep if nonzero price in both years
+sort market year
+ gen p0 = avgp==0
+ egen p0sum = sum(p0), by(market)
+ tab p0sum,mis
+keep if p0sum==0
+tab year
 
 
 **************************************************************************
 * ANALYSIS
+**************************************************************************
+
+**************************************************************************
 * Basic diff-in-diffs regtrssion
 *  weighted by # passengers on market, in before period
 
+* variable label to get nice LaTex output table
 lab var treated "$ AAUS_{before} $"
 
-* keep balanced 
-keep if balanced==1
-
+* Table 22.2
 reg d_lnavgp treated [w=pass_bef], robust
- outreg2 using "$output/airlines-reg1", dec(2) ctitle(All markets) 2aster tex(frag) lab nonotes replace
+ outreg2 using "$output/ch22-tab2-airlines-Stata", dec(2) ctitle(All markets) 2aster tex(frag) lab nonotes replace
 reg d_lnavgp treated if small==1 [w=pass_bef], robust
- outreg2 using "$output/airlines-reg1", dec(2) ctitle(Small markets) 2aster tex(frag) lab nonotes append
+ outreg2 using "$output/ch22-tab2-airlines-Stata", dec(2) ctitle(Small markets) 2aster tex(frag) lab nonotes append
 reg d_lnavgp treated if small==0 [w=pass_bef], robust
- outreg2 using "$output/airlines-reg1", dec(2) ctitle(Large markets) 2aster tex(frag) lab nonotes append
+ outreg2 using "$output/ch22-tab2-airlines-Stata", dec(2) ctitle(Large markets) 2aster tex(frag) lab nonotes append
 
+* Table 22.3
 * Corresponding diff-in-diffs table
 tab after treated [w=pass_bef], sum(lnavgp) mean noobs
 
 
-**************************************************************************
-*
-* ANALYSIS
-*
-**************************************************************************
-
-
+*****************************************************
 * Examining pre-treatment trends in avg ln price
 
 * use workfile to identify treated and untreated markets
@@ -223,7 +229,7 @@ keep if balanced==1
 sort market year
 drop if market==L.market 
 keep origin finaldest return treated small
-save temp,replace
+save "$data_out/ch22-airline-trends",replace
 
 
 
@@ -232,18 +238,18 @@ save temp,replace
 *	(keep matched ones; no unmatched from "using")
 
 use "$data_in\originfinal-panel",replace
-merge m:1 origin finaldest return using temp, keep(3) nogen
+merge m:1 origin finaldest return using "$data_out/ch22-airline-trends", keep(3) nogen
 
 gen yq=yq(year,quarter)
 format yq %tq
 
-save temp,replace
+save "$data_out/ch22-airline-trends",replace
 
 
 * aggreagete data to create average price by treated-untreated and year-quarter
 * and draw time series graphs of log avg price
 * all markets
-use temp,replace
+use "$data_out/ch22-airline-trends",replace
 
 collapse (mean) avgprice [w=passengers], by(treated yq)
 
@@ -253,15 +259,16 @@ tsset yq
 lab var lnavgprice0 "Untreated markets"
 lab var lnavgprice1 "Treated markets"
 
+* Figure 22.2
 tsline lnavgprice1 lnavgprice0 ///
- , lw(vthick thick) lc(black blue) lp(solid dash) ///
-   ylab(,grid) tlab(2010q1 (4) 2016q1) tline(2012q1 2015q3) ///
-   ttitle("") ytitle("Log average price")
- graph export "$output/pretrends-all.png",replace
+ , lw(vthick vthick) lc(green*0.8 navy*0.8) lp(solid solid) ///
+   ylab(5.0(0.1)5.6,grid) tlab(2010q1 (4) 2016q1) tline(2012q1 2015q3) ///
+   ttitle("") ytitle("ln(average price)")
+ graph export "$output/ch22-figure-2-pretrends-all-Stata.png",replace
 
 
- * small markets
-use temp,replace
+* small markets
+use "$data_out/ch22-airline-trends",replace
 keep if smallmkt==1
 
 collapse (mean) avgprice [w=passengers], by(treated yq)
@@ -272,15 +279,16 @@ tsset yq
 lab var lnavgprice0 "Untreated markets"
 lab var lnavgprice1 "Treated markets"
 
+* Figure 22.3a
 tsline lnavgprice1 lnavgprice0 ///
- , lw(vthick thick) lc(black blue) lp(solid dash) ///
-   ylab(,grid) tlab(2010q1 (4) 2016q1) tline(2012q1 2015q3) ///
-   ttitle("") ytitle("Log average price")
-graph export "$output/pretrends-small.png",replace
+ , lw(vthick vthick) lc(green*0.8 navy*0.8) lp(solid solid) ///
+   ylab(5.3(0.1)5.6,grid) tlab(2010q1 (4) 2016q1) tline(2012q1 2015q3) ///
+   ttitle("") ytitle("ln(average price)")
+ graph export "$output/ch22-figure-3a-pretrends-small-Stata.png",replace
 
  
 * large markets
-use temp,replace
+use "$data_out/ch22-airline-trends",replace
 keep if smallmkt==0
 
 collapse (mean) avgprice [w=passengers], by(treated yq)
@@ -291,17 +299,16 @@ tsset yq
 lab var lnavgprice0 "Untreated markets"
 lab var lnavgprice1 "Treated markets"
 
-
+* Figure 22.3p
 tsline lnavgprice1 lnavgprice0 ///
- , lw(vthick thick) lc(black blue) lp(solid dash) ///
-   ylab(,grid) tlab(2010q1 (4) 2016q1) tline(2012q1 2015q3) ///
-   ttitle("") ytitle("Average log price")
- graph export "$output/pretrends-large.png",replace
+ , lw(vthick vthick) lc(green*0.8 navy*0.8) lp(solid solid) ///
+   ylab(3.75(0.25)5.0,grid) tlab(2010q1 (4) 2016q1) tline(2012q1 2015q3) ///
+   ttitle("") ytitle("ln(average price)")
+ graph export "$output/ch22-figure-3b-pretrends-large-Stata.png",replace
 
 
 
 **************************************************************************
-* ANALYSIS
 * Diff-in-diffs regerssion with confounder variables
 *  weighted by # passengers on market, in before period
 
@@ -320,6 +327,7 @@ gen sharelarge_bef = sharelargest if bef
  replace lnpass_bef = L.lnpass_bef if lnpass_bef ==. 
  replace sharelarge_bef = L.sharelarge_bef if sharelarge_bef ==. 
 
+* check functional forms (not in the text)
 *lpoly d_lnavgp lnpass_bef, nosca ci
  * some nonlinearity but it doesn't matter for regression
 *lpoly d_lnavgp lnavgp_bef, nosca ci
@@ -328,6 +336,7 @@ gen sharelarge_bef = sharelargest if bef
 *global RHS lnpass_bef lnavgp_bef 
 global RHS lnpass_bef return stops sharelarge_bef 
 
+* variable labels to get nice LaTex output table
 lab var treated "$ AAUS_{before} $"
 lab var lnpass_bef "$ \ln passengers_{before} $"
 lab var return "$ return $"
@@ -335,21 +344,14 @@ lab var stops "$ stops $"
 lab var sharelarge_bef "$ sharelargest_{before} $"
 
 reg d_lnavgp treated $RHS [w=pass_bef], robust
- outreg2 using "$output/airlines-reg2", dec(2) ctitle(All markets) 2aster tex(frag) label nonotes replace
+ outreg2 using "$output/ch22-tab4-airlines-Stata", dec(2) ctitle(All markets) 2aster tex(frag) label nonotes replace
 reg d_lnavgp treated $RHS if small==1 [w=pass_bef], robust
- outreg2 using "$output/airlines-reg2", dec(2) ctitle(Small markets) 2aster tex(frag) label nonotes append
+ outreg2 using "$output/ch22-tab4-airlines-Stata", dec(2) ctitle(Small markets) 2aster tex(frag) label nonotes append
 reg d_lnavgp treated $RHS if small==0 [w=pass_bef], robust
- outreg2 using "$output/airlines-reg2", dec(2) ctitle(Large markets) 2aster tex(frag) label nonotes append
-/*
-reg d_lnavgp treated $RHS if return==0 [w=pass_bef], robust
- outreg2 using output/airlines-reg2, dec(2) ctitle(One-way routes) 2aster tex(frag) nonotes append
-reg d_lnavgp treated $RHS if return==1 [w=pass_bef], robust
- outreg2 using output/airlines-reg2, dec(2) ctitle(Return routes) 2aster tex(frag) nonotes append
-*/
+ outreg2 using "$output/ch22-tab4-airlines-Stata", dec(2) ctitle(Large markets) 2aster tex(frag) label nonotes append
 
 
 **************************************************************************
-* ANALYSIS
 * Diff-in-diffs regerssion with quantitative treatment
 *  weighted by # passengers on market, in before period
 
@@ -357,6 +359,7 @@ global RHS lnpass_bef return stops sharelarge_bef
 
 sort market year
 
+* new treatment variable: combined share before treatment
 gen share_bef = shareAA+shareUS if before
  replace share_bef = L.share_bef if share_bef==.
  lab var share_bef "Market share of AA & US combined, at baseline"
@@ -365,30 +368,33 @@ tabstat passengers if before & share_bef==0, s(sum mean n) format(%12.0fc)
 tabstat passengers if before & share_bef>0 & share_bef<1, s(sum mean n) format(%12.0fc)
 tabstat passengers if before & share_bef==1, s(sum mean n) format(%12.0fc)
 
+* Figure 22.4
+hist share_bef if before [w=pass_bef], bin(20) percent col(navy*0.8) lcol(white) ///
+ ylab(,grid) xlab(, grid) 
+graph export "$output/ch22-figure-4-sharehist-Stata.png",replace
 
-hist share_bef if before [w=pass_bef], bin(20) percent ylab(,grid) col(blue)
-* graph export sharehist1.png,replace
-outsheet market year share_bef pass_bef using "$data_out/sharehistogram.csv",comma replace
 
+* variable labels to get nice LaTex output table
 lab var share_bef "$ AAUSshare_{before} $"
 lab var lnpass_bef "$ \ln passengers_{before} $"
 lab var return "$ return $"
 lab var stops "$ stops $"
 lab var sharelarge_bef "$ sharelargest_{before} $"
 
+* Table 22.5
 reg d_lnavgp share_bef $RHS [w=pass_bef], robust
- outreg2 using "$output/airlines-reg3", dec(2) ctitle(All markets) 2aster tex(frag) label nonotes replace
+ outreg2 using "$output/ch22-tab5-airlines-Stata", dec(2) ctitle(All markets) 2aster tex(frag) label nonotes replace
 reg d_lnavgp share_bef $RHS if small==1 [w=pass_bef], robust
- outreg2 using "$output/airlines-reg3", dec(2) ctitle(Small markets) 2aster tex(frag) label nonotes append
+ outreg2 using "$output/ch22-tab5-airlines-Stata", dec(2) ctitle(Small markets) 2aster tex(frag) label nonotes append
 reg d_lnavgp share_bef $RHS if small==0 [w=pass_bef], robust
- outreg2 using "$output/airlines-reg3", dec(2) ctitle(Large markets) 2aster tex(frag) label nonotes append
+ outreg2 using "$output/ch22-tab5-airlines-Stata", dec(2) ctitle(Large markets) 2aster tex(frag) label nonotes append
  
 
 **************************************************************************
-* ANALYSIS
 * Diff-in-diffs on pooled cross-sections regeression 
 * use entire unbalanced panel 
-*   - errr... after only is dropped here see later
+*   - well not the entire unbalanced panel, because "after only" is dropped 
+*     because we need pre-treatment covariates and weights (see text)
 *  weighted by # passengers on market, in before period
 
 use "$data_out/ch22-airline-workfile.dta",replace
@@ -423,13 +429,10 @@ tab balanced if treatment!=. /* balanced or observed before only */
 tabstat passengers if treatment==. , s(sum)
 tabstat passengers if treatment!=. , by(balanced) s(sum)
 
-* describe 
-
+* variable labels to get nice LaTex output table
 lab var treatmentXafter "$ AAUS_{before} \times after $"
 lab var treatment "$ AAUS_{before} $"
 lab var after "$ after $ "
-
-* conditioning on observed confounders
 
 lab var lnpass_bef "$ \ln passengers_{before} $"
 lab var return "$ return $"
@@ -441,10 +444,11 @@ lab var returnXafter "$ return \times after $"
 lab var stopsXafter "$ stops \times after $"
 lab var sharelarge_befXafter "$ sharelargest_{before} \times after $"
 
+* Table 22.6
 regress lnavgp treatmentXafter treatment after $RHS $RHSXafter [w=pass_bef], cluster(market)
- outreg2 using "$output/airlines-reg4", dec(2) ctitle(All markets) 2aster tex(frag) label nonotes replace
+ outreg2 using "$output/ch22-tab6-airlines-pooledxsec-Stata", dec(2) ctitle(All markets) 2aster tex(frag) label nonotes replace
 regress lnavgp treatmentXafter treatment after $RHS $RHSXafter [w=pass_bef] if small==1, cluster(market)
- outreg2 using "$output/airlines-reg4", dec(2) ctitle(Small markets) 2aster tex(frag) label nonotes append
+ outreg2 using "$output/ch22-tab6-airlines-pooledxsec-Stata", dec(2) ctitle(Small markets) 2aster tex(frag) label nonotes append
 regress lnavgp treatmentXafter treatment after $RHS $RHSXafter [w=pass_bef] if small==0, cluster(market)
- outreg2 using "$output/airlines-reg4", dec(2) ctitle(Large markets) 2aster tex(frag) label nonotes append
+ outreg2 using "$output/ch22-tab6-airlines-pooledxsec-Stata", dec(2) ctitle(Large markets) 2aster tex(frag) label nonotes append
 

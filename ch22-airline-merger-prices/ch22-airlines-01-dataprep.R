@@ -1,23 +1,64 @@
-# ***************************************************************
-# * Airline merger
-# * Ch 22
-# Data Preparation Steps and Descriptive Statistics
-# ***************************************************************
+#########################################################################################
+# Prepared for Gabor's Data Analysis
+#
+# Data Analysis for Business, Economics, and Policy
+# by Gabor Bekes and  Gabor Kezdi
+# Cambridge University Press 2021
+#
+# gabors-data-analysis.com 
+#
+# License: Free to share, modify and use for educational purposes. 
+# 	Not to be used for commercial purposes.
+
+# CHAPTER 22
+# CH22A How does a merger between airlines affect prices?
+# using the airline-tickets-usa dataset
+# version 0.9 2020-09-11
+#########################################################################################
 
 
+###########
+
+#
 # Clear memory
 rm(list=ls())
 
-source("global.R")
+# Descriptive statistics and regressions
+library(tidyverse)
+library(haven)
+library(zoo)
+library(stargazer)
+library(estimatr)
+library(modelsummary)
+library(cowplot)
 
-use_case_dir <- file.path("ch22-airline-merger-prices/")
-loadLibraries(use_case_dir)
+# set data dir, data used
+source("set-data-directory.R")             # data_dir must be first defined 
 
-data_in <- paste(data_dir,"airline-tickets-usa","clean", sep = "/")
+# option A: open material as project
+# option B: set working directory for da_case_studies
+#           example: setwd("C:/Users/bekes.gabor/Documents/github/da_case_studies/")
+
+# load theme and functions
+source("ch00-tech-prep/theme_bg.R")
+source("ch00-tech-prep/da_helper_functions.R")
+options(digits = 3)
+
+data_in <- paste(data_dir,"airline-tickets-usa","clean/", sep = "/")
+use_case_dir <- "ch22-airline-merger-prices/"
+
 
 data_out <- use_case_dir
 output <- paste0(use_case_dir,"output/")
 create_output_if_doesnt_exist(output)
+
+
+
+# Data Preparation Steps and Descriptive Statistics
+
+# Load in data -------------------------------------------------------
+
+
 
 # CREATE Workfile : only before and after period
 
