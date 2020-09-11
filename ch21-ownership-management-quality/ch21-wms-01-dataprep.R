@@ -1,18 +1,20 @@
-# ********************************************************************************
-# * Chapter 21
-# *
-# * founder/family ownsership
-# * wms-management
-# *
-# What this code does:
-# Data preparation
+#########################################################################################
+# Prepared for Gabor's Data Analysis
+#
+# Data Analysis for Business, Economics, and Policy
+# by Gabor Bekes and  Gabor Kezdi
+# Cambridge University Press 2021
+#
+# gabors-data-analysis.com 
+#
+# License: Free to share, modify and use for educational purposes. 
+# 	Not to be used for commercial purposes.
 
-######################################################################
-
-
-# v1.1 2020-04-20 
-# v1.2 2020-07-14 dplyr edits
-# v1.3 2020-08-24 library + data name edit
+# CHAPTER 21
+# CH20A Founder/family ownership and quality of management
+# using the wms-management dataset
+# version 0.9 2020-09-11
+#########################################################################################
 
 # Clear memory -------------------------------------------------------
 rm(list=ls())

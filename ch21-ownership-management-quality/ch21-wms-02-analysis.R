@@ -1,16 +1,20 @@
-# ********************************************************************************
-# * Chapter 21
-# *
-# * founder/family ownsership
-# * wms-management
-# *
-# What this code does:
-# Analysis: regression and matching
+#########################################################################################
+# Prepared for Gabor's Data Analysis
+#
+# Data Analysis for Business, Economics, and Policy
+# by Gabor Bekes and  Gabor Kezdi
+# Cambridge University Press 2021
+#
+# gabors-data-analysis.com 
+#
+# License: Free to share, modify and use for educational purposes. 
+# 	Not to be used for commercial purposes.
 
-#v1.1 2020-04-23 edits
-#v1.2 2020-07-14 dplyr edits
-
-######################################################################
+# CHAPTER 21
+# CH20A Founder/family ownership and quality of management
+# using the wms-management dataset
+# version 0.9 2020-09-11
+#########################################################################################
 
 # Clear memory
 rm(list=ls())
@@ -42,6 +46,9 @@ data_in <- use_case_dir
 data_out <- use_case_dir
 output <- paste0(use_case_dir,"output/")
 create_output_if_doesnt_exist(output)
+
+# This is the second part
+# you must run ch21-wms-01-dataprep.R first.
 
 
 
