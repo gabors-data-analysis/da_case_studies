@@ -48,7 +48,7 @@ source("ch00-tech-prep/da_helper_functions.R")
 options(digits = 3) 
 
 data_in <- paste(data_dir,"cps-earnings","clean/", sep = "/")
-use_case_dir <- "ch10-gender-earning-understand/"
+use_case_dir <- "ch10-gender-earnings-understand/"
 
 data_out <- use_case_dir
 output <- paste0(use_case_dir,"output/")
