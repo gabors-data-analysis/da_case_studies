@@ -1,48 +1,64 @@
-# *********************************************************************
+#########################################################################################
+# Prepared for Gabor's Data Analysis
 #
-# DATA ANALYSIS TEXTBOOK
+# Data Analysis for Business, Economics, and Policy
+# by Gabor Bekes and  Gabor Kezdi
+# Cambridge University Press 2021
 #
-# ch24
-# synth for Haiti
-# *********************************************************************
+# gabors-data-analysis.com 
 #
-# WHAT THIS CODES DOES:
-#
-# v1.0 - 2020-03-25
-# v1.1 - 2020-03-26 minor changes + graph edits
-# v1.2 - 2020-04-27 graphs from stata added
-# v1.3 - 2020-04-28 minor edits
-# v1.4 - 2020-04-30 minor edits
+# License: Free to share, modify and use for educational purposes. 
+# 	Not to be used for commercial purposes.
 
-# FIXME: 
-# somehow matching is not good.
+# Chapter 24
+# CH24A Estimating the effect of the 2010 Haiti earthquake on GDP
+# using the haiti-earthquake dataset
+# version 0.9 2020-09-09
+#########################################################################################
 
-#
-#
-# ********************************************************************
-#   * SET YOUR DIRECTORY HERE
-# *********************************************************************
 
-# Clear memory
+
+# ------------------------------------------------------------------------------------------------------
+#### SET UP
+# It is advised to start a new session for every case study
+# CLEAR MEMORY
 rm(list=ls())
 
+# Import libraries
 library(tidyverse)
+library(modelsummary)
+library(cowplot)
+library(gridExtra)
 library(purrr)
 library(kableExtra)
 library(haven)
 library(Synth)
 
-# CHECK WORKING DIRECTORY - CHANGE IT TO YOUR WORKING DIRECTORY
-current_path = rstudioapi::getActiveDocumentContext()$path 
-dir<-paste0(dirname(dirname(dirname(current_path ))),"/")
 
-#location folders
-data_in <- paste0(dir,"da_data_repo/haiti-earthquake/clean/")
-data_out <- paste0(dir,"da_case_studies/ch24-haiti-earthquake-gdp/")
-output <- paste0(dir,"da_case_studies/ch24-haiti-earthquake-gdp/output/")
-func <- paste0(dir, "da_case_studies/ch00-tech-prep/")
 
-source(paste0(func, "theme_bg.R"))
+# set working directory
+# option A: open material as project
+# option B: set working directory for da_case_studies
+#           example: setwd("C:/Users/bekes.gabor/Documents/github/da_case_studies/")
+
+# set data dir, data used
+source("set-data-directory.R")             # data_dir must be first defined 
+# alternative: give full path here, 
+#            example data_dir="C:/Users/bekes.gabor/Dropbox (MTA KRTK)/bekes_kezdi_textbook/da_data_repo"
+
+# load theme and functions
+source("ch00-tech-prep/theme_bg.R")
+source("ch00-tech-prep/da_helper_functions.R")
+
+use_case_dir <- "ch24-haiti-earthquake-gdp/"
+data_in <- paste(data_dir,"haiti-earthquake","clean/", sep = "/")
+data_out <- use_case_dir
+output <- paste0(use_case_dir,"output/")
+create_output_if_doesnt_exist(output)
+
+# FIXME.
+# somehow matching is not good.
+
 
 # Loading and preparing data ----------------------------------------------
 

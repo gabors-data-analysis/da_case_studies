@@ -1,44 +1,59 @@
-# *********************************************************************
+#########################################################################################
+# Prepared for Gabor's Data Analysis
 #
-# BEKES-KEZDI: DATA ANALYSIS (CUP)
-# CH24
-# IMPACT OF THE INTERVENTION OF REPLACING COACH MID-SEASON IN football (ENGLISH PREMIER LEAGUE SEASONS)
-# 
+# Data Analysis for Business, Economics, and Policy
+# by Gabor Bekes and  Gabor Kezdi
+# Cambridge University Press 2021
 #
-# v1.2 2020-03-31 minor edits
-# v1.3 2020-04-24 names ok
-# v1.4 2020-04-27 names ok
-
-# ********************************************************************
+# gabors-data-analysis.com 
 #
-# WHAT THIS CODES DOES:
-# * Creates dataset we need for analysis
-# * desrciptive stats
-# * analysis
+# License: Free to share, modify and use for educational purposes. 
+# 	Not to be used for commercial purposes.
 
-# ********************************************************************
+# Chapter 24
+# CH24B Estimating the impact of replacing football team managers
+# using the football dataset
+# version 0.9 2020-09-09
+#########################################################################################
 
-# Clear memory
+
+
+# ------------------------------------------------------------------------------------------------------
+#### SET UP
+# It is advised to start a new session for every case study
+# CLEAR MEMORY
 rm(list=ls())
 
+# Import libraries
 library(tidyverse)
+library(modelsummary)
 library(purrr)
 library(kableExtra)
 library(plm)
+library(cowplot)
+library(gridExtra)
 
-# CHECK WORKING DIRECTORY - CHANGE IT TO YOUR WORKING DIRECTORY
-# Sets the core parent directory
-current_path = rstudioapi::getActiveDocumentContext()$path 
-dir<-paste0(dirname(dirname(dirname(current_path ))),"/")
 
-#location folders
-data_in <- paste0(dir,"da_data_repo/football/clean/")
-data_out <- paste0(dir,"da_case_studies/ch24-football-manager-replace/")
-output <- paste0(dir,"da_case_studies/ch24-football-manager-replace/output/")
-func <- paste0(dir, "da_case_studies/ch00-tech-prep/")
+# set working directory
+# option A: open material as project
+# option B: set working directory for da_case_studies
+#           example: setwd("C:/Users/bekes.gabor/Documents/github/da_case_studies/")
 
-source(paste0(func, "theme_bg.R"))
-source(paste0(func, "da_helper_functions.R"))
+# set data dir, data used
+source("set-data-directory.R")             # data_dir must be first defined 
+# alternative: give full path here, 
+#            example data_dir="C:/Users/bekes.gabor/Dropbox (MTA KRTK)/bekes_kezdi_textbook/da_data_repo"
+
+# load theme and functions
+source("ch00-tech-prep/theme_bg.R")
+source("ch00-tech-prep/da_helper_functions.R")
+
+use_case_dir <- "ch24-football-manager-replace/"
+data_in <- paste(data_dir,"football","clean/", sep = "/")
+data_out <- use_case_dir
+output <- paste0(use_case_dir,"output/")
+create_output_if_doesnt_exist(output)
+
 
 # Loading and preparing data ----------------------------------------------
 
@@ -97,19 +112,19 @@ data_balanced %>%
   summarise(n_distinct(team, season))
 
 # figure: average number interventions by game number
-ggplot(data = data_balanced, aes(x = gameno, y = intervention)) +
+p3<- ggplot(data = data_balanced, aes(x = gameno, y = intervention)) +
   geom_col(fill = color[1], size = 0.25, alpha = 0.8,  show.legend=F, na.rm =TRUE) +
   labs(y = "Number of manager changes", x = "Game number") +
   scale_y_continuous(expand=c(0.0,0.0), breaks = seq(1, 6, by = 1), limits = c(0, 6)) +
   scale_x_continuous(expand=c(0.01,0.01), breaks = seq(0, 38, 4), limits = c(0, 38)) +
   background_grid(major = "none", minor = "none")+
   theme_bg()
-#save_fig("football-managchanges-1", output, size = "large")
+p3
 save_fig("ch24-figure-3-football-managchanges", output, "large")
 
 # figure: average points by event time
-getPointsGraph(data_balanced, colors = color)
-#save_fig("football-manager-points1", output, size = "large")
+p4<-getPointsGraph(data_balanced, colors = color)
+p4
 save_fig("ch24-figure-4-football-manager-points1", output, "large")
 
 # *********************************************************************-
@@ -181,8 +196,8 @@ data_balanced %>%
   summarise(n_distinct(team, season))
 
 # FIGURE with intervention and pseudo-intervention averages
-getPointsGraphWithPseudo(data_balanced, colors = color)
-#save_fig("football-manager-points2", output, size = "large")
+p5<-getPointsGraphWithPseudo(data_balanced, colors = color)
+p5
 save_fig("ch24-figure-5-football-manager-points2", output, "large")
 
 # ******************************************************************

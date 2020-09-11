@@ -1,40 +1,66 @@
-# ***************************************************************
-# * ch23 
-# *
-# * Case Study immunization against measels and child mortality age 0-5
-# * whole World
+#########################################################################################
+# Prepared for Gabor's Data Analysis
+#
+# Data Analysis for Business, Economics, and Policy
+# by Gabor Bekes and  Gabor Kezdi
+# Cambridge University Press 2021
+#
+# gabors-data-analysis.com 
+#
+# License: Free to share, modify and use for educational purposes. 
+# 	Not to be used for commercial purposes.
 
-# * Data: worldbank-immunizaton-panel
+# Chapter 16
+# CH16A Predicting apartment prices with random forest
+# using the airbnb dataset
+# version 0.9 2020-09-09
+#########################################################################################
 
-# v2.0. 2020-04-19
-# v2.1. 2020-04-20 minor graph edits
-# v2.2 2020-04-22 names ok
-# v2.3 2020-04-22 labels edited
 
-# **************************************************************
 
-# * WHAT THIS CODES DOES:
-# * looks at continents for aggregate trends
-# * country level models
-# **************************************************************
-
-# Clear memory
+# ------------------------------------------------------------------------------------------------------
+#### SET UP
+# It is advised to start a new session for every case study
+# CLEAR MEMORY
 rm(list=ls())
 
-source("global.R")
+# Import libraries
+library(tidyverse)
+library(modelsummary)
+library(haven)
+library(stargazer)
+library(car)
+library(huxtable)
+library(estimatr)
+library(lmtest)
+library(modelsummary)
 
-use_case_dir <- file.path("ch23-immunization-life/")
-loadLibraries(use_case_dir)
 
-data_in <- paste(data_dir,"worldbank-immunization","clean", sep = "/")
+# set working directory
+# option A: open material as project
+# option B: set working directory for da_case_studies
+#           example: setwd("C:/Users/bekes.gabor/Documents/github/da_case_studies/")
 
+# set data dir, data used
+source("set-data-directory.R")             # data_dir must be first defined 
+# alternative: give full path here, 
+#            example data_dir="C:/Users/bekes.gabor/Dropbox (MTA KRTK)/bekes_kezdi_textbook/da_data_repo"
+
+# load theme and functions
+source("ch00-tech-prep/theme_bg.R")
+source("ch00-tech-prep/da_helper_functions.R")
+
+use_case_dir <- "ch23-immunization-life/"
+data_in <- paste(data_dir,"worldbank-immunization","clean/", sep = "/")
 data_out <- use_case_dir
 output <- paste0(use_case_dir,"output/")
 create_output_if_doesnt_exist(output)
 
-# Read in data ------------------------------------------------------------
 
-data <- read_dta(paste(data_in, "worldbank-immunization-continents.dta", sep = "/"))
+#-------------------------------------------------------
+# Import data
+
+data <- read_dta(paste(data_in, "worldbank-immunization-continents.dta", sep = ""))
 
 # **************************************************
 # * info graph on measles vaccination continent aggregates
