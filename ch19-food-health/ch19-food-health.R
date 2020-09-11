@@ -1,44 +1,57 @@
-# CH 19 FOOD-HEALTH 
+#########################################################################################
+# Prepared for Gabor's Data Analysis
+#
+# Data Analysis for Business, Economics, and Policy
+# by Gabor Bekes and  Gabor Kezdi
+# Cambridge University Press 2021
+#
+# gabors-data-analysis.com 
+#
+# License: Free to share, modify and use for educational purposes. 
+# 	Not to be used for commercial purposes.
 
-# v1.1 2020-01-09
-# v1.2. 2020-01-29, adjust graphs
-# v1.3. 2020-01-30, adjust graphs coordinates
-# v1.4. 2020-04-23 edit graphs
-# v1.5 2020-04-22 names ok
-# v1.6 2020-07-01 rerun on corrected data, change var name
+# CHAPTER 19
+# CH19A Food and health
+# using the food-health dataset
+# version 0.9 2020-09-11
+#########################################################################################
 
-# WHAT THIS CODES DOES:
-  # data manage, graphs and simple regressions
 
-# clear environment
+###########
+
+#
+# Clear memory
 rm(list=ls())
 
-# PACKAGES
-library(dplyr)
-library(ggplot2)
-library(tidyr)
-library(readr)
+# Descriptive statistics and regressions
+library(tidyverse)
 library(Hmisc)
 library(estimatr)
+library(modelsummary)
 
 
-# Sets the core parent directory
-current_path = rstudioapi::getActiveDocumentContext()$path 
-dir<-paste0(dirname(dirname(dirname(current_path ))),"/")
+# set data dir, data used
+source("set-data-directory.R")             # data_dir must be first defined 
 
+# option A: open material as project
+# option B: set working directory for da_case_studies
+#           example: setwd("C:/Users/bekes.gabor/Documents/github/da_case_studies/")
 
-data_in <- paste0(dir, "da_data_repo/food-health/clean/")
-data_out <- paste0(dir, "da_case_studies/ch19-food-health/")
-output <- paste0(dir,"da_case_studies/ch19-food-health/output/")
-func <- paste0(dir, "da_case_studies/ch00-tech-prep/")
-
-# load ggplot theme function
-source(paste0(func, "theme_bg.R"))
-# Created a helper function with some useful stuff
-source(paste0(func, "da_helper_functions.R"))
+# load theme and functions
+source("ch00-tech-prep/theme_bg.R")
+source("ch00-tech-prep/da_helper_functions.R")
 options(digits = 3)
 
+data_in <- paste(data_dir,"food-health","clean/", sep = "/")
+use_case_dir <- "ch19-food-health/"
 
+data_out <- use_case_dir
+output <- paste0(use_case_dir,"output/")
+create_output_if_doesnt_exist(output)
+
+
+
+# ------------------------------------------------------------------------------------------------------
 
 # import data
 data <- read_csv(paste0(data_in,"food-health.csv"))
@@ -116,7 +129,6 @@ summary(reg)
    scale_x_continuous(expand = c(0.01,0.01),breaks = seq(0,3000,500)) +
    coord_cartesian(ylim=c(140,280), xlim =c(0,3000), expand=TRUE) 
  fv_bp
- #save_fig("R_19_fv_bp", output, "small")
  save_fig("ch19-figure-8a-fv-bp", output, "small")
 
  # regression line only
@@ -130,7 +142,6 @@ summary(reg)
    scale_x_continuous(expand = c(0.01,0.01),breaks = seq(0,3000,500), minor_breaks = NULL) +
    coord_cartesian(ylim=c(180,200), xlim =c(0,3000), expand=TRUE) 
  fv_bp_regrline
- #save_fig("R_19_fv_regrlineonly", output, "small")
  save_fig("ch19-figure-8b-fv-reglin", output, "small")
 
 
@@ -151,7 +162,6 @@ ggplot(workfile, aes(lninc, fv)) +
   scale_x_continuous(expand = c(0.01,0.01),breaks=c(6,7,8,9,10,11,12)) +
   coord_cartesian(xlim=c(6,12), ylim =c(0,2000), expand=TRUE) 
 fv_inc
-#save_fig("R_19_fv_inc", output, "small")
 save_fig("ch19-figure-9a-fv-inc", output, "small")
 
 # Amount of fruit and vegetables per day, g (fv) vs Days per week vigorous recreational activities (exerc)
@@ -170,7 +180,6 @@ ggplot(workfile, aes(exerc, fv)) +
   scale_y_continuous(expand = c(0.01,0.01),breaks = seq(0,2000,500)) +
   coord_cartesian(xlim=c(0,7), ylim =c(0,2000), expand=TRUE) 
 fv_exerc
-#save_fig("R_19_fv_exerc", output, "small")
 save_fig("ch19-figure-9b-fv-exerc", output, "small")
 
 # potato chips (potato_chips) and amount of fruit and vegetables per day (fv)
@@ -188,22 +197,23 @@ fv_pchips <-
   scale_y_continuous(breaks = seq(0,3000,500)) +
   coord_cartesian(xlim=c(0,400), ylim =c(0,3000), expand=TRUE) 
 fv_pchips
-#save_fig("R_19_fv_pchips", output, "small")
 save_fig("ch19-figure-10-fv-pchips", output, "small")
 
 
 # regressions
-reg1 <- lm_robust(bp~fv, data = workfile)
-summary(reg1)
+reg1 <- lm_robust(bp~fv, data = workfile, se_type = "HC1")
+reg2 <- lm_robust(fv~ lninc  , data = workfile, se_type = "HC1")
+reg3 <- lm_robust(fv~ exerc, data = workfile, se_type = "HC1")
+reg4 <- lm_robust(fv ~ pchips, data = workfile, se_type = "HC1")
 
-reg2 <- lm_robust(fv~ lninc  , data = workfile)
-summary(reg2)
-reg3 <- lm_robust(fv~ exerc, data = workfile)
-summary(reg3)
-reg4 <- lm_robust(fv ~ pchips, data = workfile)
-summary(reg4)
-
-
+cm <- c('(Intercept)' = 'Constant')
+msummary(list(reg1, reg2, reg3, reg4),
+         fmt="%.3f",
+         gof_omit = 'DF|Deviance|Log.Lik.|F|R2 Adj.|AIC|BIC',
+         stars=c('*' = .05, '**' = .01),
+         coef_rename = cm,
+         #output = paste(output,"ch19_reg-R.tex",sep="")
+)
 
 #ch19-table-food-health-destab
 
