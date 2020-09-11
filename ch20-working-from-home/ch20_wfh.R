@@ -1,61 +1,65 @@
-######################################################################
+#########################################################################################
+# Prepared for Gabor's Data Analysis
 #
-# Data Analysis Textbook
-# Case Study for Chapter 20 - Experiments
-# Data : work-from-home
-# Using Bloom et al. (2015): Does Working from Home Work? Evidence from a Chineses Experiment. QJE. 165-218
+# Data Analysis for Business, Economics, and Policy
+# by Gabor Bekes and  Gabor Kezdi
+# Cambridge University Press 2021
 #
-# v2.1 2020-01-01 
-# v2.2 2020-02-24 Minor edits in folders
-# v2.3 2020-04-19 Edits 
-# v2.4 2020-04-20 Minor edits of graph
-# v2.5 2020-04-23 names ok
-# v2.6 2020-04-27 label edit
+# gabors-data-analysis.com 
+#
+# License: Free to share, modify and use for educational purposes. 
+# 	Not to be used for commercial purposes.
 
-######################################################################
-#
-# What this code does:
-#
+# CHAPTER 20
+# CH20A Working from home and employee performance
+# using the wfh dataset
+# version 0.9 2020-09-11
+#########################################################################################
 
-######################################################################
 
-# Clear memory -------------------------------------------------------
+###########
+
+#
+# Clear memory
 rm(list=ls())
 
-# Import libraries ---------------------------------------------------
-library(haven)
-library(dplyr)
+# Descriptive statistics and regressions
 library(tidyverse)
+library(haven)
 library(sandwich)
 library(lmtest)
 library(stargazer)
-library(ggplot2)
 library(reshape)
+library(estimatr)
+library(modelsummary)
+library(cowplot)
 
+# set data dir, data used
+source("set-data-directory.R")             # data_dir must be first defined 
 
-# Sets the core parent directory
-current_path = rstudioapi::getActiveDocumentContext()$path 
-dir<-paste0(dirname(dirname(dirname(current_path ))),"/")
+# option A: open material as project
+# option B: set working directory for da_case_studies
+#           example: setwd("C:/Users/bekes.gabor/Documents/github/da_case_studies/")
 
+# load theme and functions
+source("ch00-tech-prep/theme_bg.R")
+source("ch00-tech-prep/da_helper_functions.R")
+options(digits = 3)
 
-#location folders
-data_in <- paste0(dir,"da_data_repo/working-from-home/clean/")
-data_out <-  paste0(dir,"da_case_studies/ch20-working-from-home/")
-output <-  paste0(dir,"da_case_studies/ch20-working-from-home/output/")
-func <- paste0(dir, "da_case_studies/ch00-tech-prep/")
+data_in <- paste(data_dir,"working-from-home","clean/", sep = "/")
+use_case_dir <- "ch20-working-from-home/"
 
-#call function
-source(paste0(func, "theme_bg.R"))
-
-
-
+data_out <- use_case_dir
+output <- paste0(use_case_dir,"output/")
+create_output_if_doesnt_exist(output)
 
 
 # Load in data -------------------------------------------------------
-data <- read_dta(paste0(data_out, "ch20-wfh-workfile.dta"))
+data <- read_csv(paste0(data_in, "wfh_tidy_person.csv"))
 
 
-data <- data %>% select(personid:perform11, age, male, second_technical, high_school, tertiary_technical, university,
+data <- data %>% 
+  dplyr::select(personid:perform11, age, male, second_technical, high_school, tertiary_technical, university,
                         prior_experience, tenure, married, children, ageyoungestchild, rental,
                         costofcommute, internet, bedroom, basewage, bonus, grosswage)
 
@@ -69,7 +73,7 @@ data$ageyoungestchild <- ifelse(data$children == 0, NA, data$ageyoungestchild)
 # Table of averages in control and treatment
 
 data_temp <- data %>% 
-  select (perform10, age:grosswage, ordertaker)
+  dplyr::select (perform10, age:grosswage, ordertaker)
 
 
 vars <- colnames(data_temp)
@@ -116,11 +120,11 @@ varlabel(data, var.name = c("quitjob", "phonecalls1"))
 
 quitjob <- data %>%
   group_by(treatment) %>%
-  summarise(mean=mean(quitjob),
+  dplyr::summarise(mean=mean(quitjob),
             sd = sd(quitjob),
             N=n())
 total_quitjob <-  data %>%
-  summarise(mean_total=mean(quitjob),
+  dplyr::summarise(mean_total=mean(quitjob),
             sd_total=sd(quitjob),
             N_total=n()) 
 
@@ -130,12 +134,12 @@ total_quitjob
 phonecalls1 <- data %>%
   group_by(treatment) %>%
   filter(ordertaker==1) %>%
-  summarise(mean=mean(phonecalls1),
+  dplyr::summarise(mean=mean(phonecalls1),
             sd = sd(phonecalls1),
             N=n())
 total_phonecalls <-  data%>%
     filter(ordertaker==1) %>%
-    summarise(mean_total=mean(phonecalls1),
+  dplyr::summarise(mean_total=mean(phonecalls1),
             sd_total=sd(phonecalls1),
             N_total=n()) 
 phonecalls1
@@ -166,7 +170,6 @@ quitrates_barchart <-  ggplot(barchart_data,aes(fill = employees, y= pct, x=fact
     plot.margin=unit(x=c(0.1,0.1,0.1,0.1),units="mm")  )+
     background_grid(major="y", minor="none")
 quitrates_barchart
-#save_fig("wfh-quitrates-barchart_R", output, "small")
 save_fig("ch20-figure-1-wfh-quitrates-barchart", output, "small")
 
 # --------------------------------------------------------------------
@@ -191,25 +194,32 @@ data %>%
 
 # Regression 1: ATE estimates, no covariates -------------------------
 
-reg1 <- lm(quitjob ~ treatment, data=data)
-reg1_1 <- coeftest(reg1, vcov = sandwich)
+reg1 <- lm_robust(quitjob ~ treatment, data=data , se_type = "HC1")
+reg2 <- lm_robust(phonecalls1 ~ treatment, data=data[data$ordertaker==1, ], se_type = "HC1")
 
-reg2 <- lm(phonecalls1 ~ treatment, data=data[data$ordertaker==1, ])
-reg2_2 <- coeftest(reg2, vcov = sandwich)
+cm <- c('(Intercept)' = 'Constant')
+msummary(list(reg1, reg2),
+         fmt="%.3f",
+         gof_omit = 'DF|Deviance|Log.Lik.|F|R2 Adj.|AIC|BIC',
+         stars=c('*' = .05, '**' = .01),
+         coef_rename = cm,
+         output = paste(output,"ch20-table-4-wfh-reg1.tex",sep="")
+)
 
-#stargazer(reg1, reg2, out=paste0(output,"Ch20_wfh_reg1_R.tex",sep=""), digits=2, float = F, no.space = T)
-stargazer(reg1, reg2, out=paste0(output,"#ch20-table-4-wfh-reg1.tex",sep=""), digits=2, float = F, no.space = T)
+
 
 # Regression 2: ATE estimates, with covariates of some unbalance -----
-reg3 <- lm(quitjob ~ treatment + married + children + internet, data=data)
-reg3_3 <- coeftest(reg3, vcov = sandwich)
+reg3 <- lm_robust(quitjob ~ treatment + married + children + internet, data=data, se_type = "HC1")
+reg4 <- lm_robust(phonecalls1 ~ treatment + married + children + internet, data=data[data$ordertaker==1, ], se_type = "HC1")
 
-reg4 <- lm(phonecalls1 ~ treatment + married + children + internet, data=data[data$ordertaker==1, ])
-reg4_4 <- coeftest(reg4, vcov = sandwich)
+msummary(list(reg1, reg2),
+         fmt="%.3f",
+         gof_omit = 'DF|Deviance|Log.Lik.|F|R2 Adj.|AIC|BIC',
+         stars=c('*' = .05, '**' = .01),
+         coef_rename = cm,
+         output = paste(output,"ch20-table-4-wfh-reg2.tex",sep="")
+)
 
-
-#stargazer(reg3, reg4, out=paste(output,"Ch20_wfh_reg2_R.tex",sep=""), digits=2, float = F, no.space = T)
-stargazer(reg3, reg4, out=paste(output,"ch20-table-4-wfh-reg2.tex",sep=""), digits=2, float = F, no.space = T)
 
 
 
