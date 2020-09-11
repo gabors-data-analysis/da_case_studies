@@ -123,13 +123,10 @@ msummary(list(reg1, reg2),
 
 # age
 reg3 <- lm_robust(lnw ~ age, data = data, se_type = "HC1")
-summary(reg3)
 reg4 <- lm_robust(lnw ~ age+agesq, data = data, se_type = "HC1")
-summary(reg4)
 reg5 <- lm_robust(lnw ~ lspline(age, c(30,40)), data = data, se_type = "HC1")
-summary(reg5)
 
-gm <- cm <- c('R2' = 'R-squared (%)',
+gm <-  c('R2' = 'R-squared (%)',
               'se_type' = 'SE type')
 
 cm <- c('R2' = 'R-squared (%)',
