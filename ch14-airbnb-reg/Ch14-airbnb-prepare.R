@@ -168,7 +168,7 @@ data <- data %>%
 
 # Remove extreme values + missing from prices (this case: only 3 missing values)
 data <- data %>%
-  filter(price <=1000)
+  filter(price <1000)
 
 # Histograms
 R_F14_h_lnprice <- ggplot(data, aes(ln_price)) +
