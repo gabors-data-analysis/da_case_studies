@@ -1,291 +1,233 @@
-*********************************************************************
+********************************************************************
+* Prepared for Gabor's Data Analysis
 *
-* DATA ANALYSIS TEXTBOOK
-* MODEL SELECTION
-* ILLUSTRATION STUDY
-* BAirbnb London 2017 march 05 data
+* Data Analysis for Business, Economics, and Policy
+* by Gabor Bekes and  Gabor Kezdi
+* Cambridge University Press 2021
 *
-
-* v 2019.01.01
-* edit: 2019-07-23 
-*********************************************************************
-
-* WHAT THIS CODES DOES:
-
-* Models
-* Measure of fits
-* Cross validation
-
-*********************************************************************
-
-* need to load this package
-* ssc install elasticregress, replace
-
-cd "C:\Users\GB\Dropbox (MTA KRTK)\bekes_kezdi_textbook"
-
-global data_in	 "cases_studies_public/airbnb/clean" 
-global output    "textbook_work\ch14\airbnb\output"
-global data_out  "textbook_work\ch14\airbnb"
+* gabors-data-analysis.com 
+*
+* License: Free to share, modify and use for educational purposes. 
+* 	Not to be used for commercial purposes.
+*
+* Chapter 14
+* CH014 Predicting Airbnb apartment prices: selecting a regression model
+* using the airbnb dataset
+* version 0.9 2020-09-12
+********************************************************************
 
 
+* SETTING UP DIRECTORIES
+
+* STEP 1: set working directory for da_case_studies.
+* for example:
+* cd "C:/Users/xy/Dropbox/gabors_data_analysis/da_case_studies"
+cd "C:/Users/kezdi/Github/da_case_studies"
+
+* STEP 2: * Directory for data
+* no need for it here: prepare file created workfile in work directory
+
+global work  	"ch14-airbnb-reg"
+
+cap mkdir 		"$work/output"
+global output 	"$work/output"
 
 clear
-import delimited "$data_in\airbnb_hackney_workfile_adj.csv", varnames(1) encoding(utf8) 
-destring n_*, replace force
-
-cap log close
-log using "$output/hackney_pred1.txt", replace
-
- ******************
- *
- * Setting up models
- *
- *******************
-
-global basic_lev n_accommodates n_beds i.f_property_type i.f_room_type n_days_since 
-global basic_log ln_accommodates ln_beds i.f_property_type i.f_room_type ln_days_since 
-
-global basic_add i.f_bathroom i.f_cancellation_policy i.f_bed_type 
-global reviews i.f_number_of_reviews n_review_scores_rating 
-global poly_lev n_accommodates2 n_days_since2 n_days_since3
-global poly_log ln_accommodates2 ln_days_since2 ln_days_since3
- 
-
-global amenities d_*
-global X1  i.f_room_type##i.f_property_type i.f_number_of_reviews##i.f_property_type 
-global X2  i.d_airconditioning##i.f_property_type i.d_cats##i.f_property_type i.d_dogs##i.f_property_type 
-global X3  c.(d_airconditioning - d_wirelessinternet)# c.(f_property_type - f_bed_type)
- 
-
-* models in levels
-local modellev1 n_accommodates 
-local modellev2 $basic_lev
-local modellev3 $basic_lev $basic_add
-local modellev4 $basic_lev $basic_add $reviews $poly_lev
-local modellev5 $basic_lev $basic_add $reviews $poly_lev $X1
-local modellev6 $basic_lev $basic_add $reviews $poly_lev $X1 $X2
-local modellev7 $basic_lev $basic_add $reviews $poly_lev $X1 $X2 $amenities
-local modellev8 $basic_lev $basic_add $reviews $poly_lev $X1 $X2 $amenities $X3
+set matsize 1000
 
 
-* models in logs
-local modellog1 ln_accommodates 
-local modellog2 $basic_log
-local modellog3 $basic_log $basic_add
-local modellog4 $basic_log $basic_add $reviews $poly_log
-local modellog5 $basic_log $basic_add $reviews $poly_log $X1
-local modellog6 $basic_log $basic_add $reviews $poly_log $X1 $X2
-local modellog7 $basic_log $basic_add $reviews $poly_log $X1 $X2 $amenities
-local modellog8 $basic_log $basic_add $reviews $poly_log $X1 $X2 $amenities $X3
-
-gen Ylev=price
-gen Ylog=ln_price
-
-* our sample
-keep if n_review_scores_rating<.
+use "$work/airbnb_hackney_workfile.dta" , replace
 count
 
-*** FIRST: ENTIRE_SAMPLE REGRESSIONS , BIC
+************************
+* holdout set, work set
+set seed 6309817
+* create random number
+gen temprand = uniform()
+* first 20% to holdout set, remaining 80% to work set
+centile temprand, centile(20)
+gen holdout = temprand<r(c_1)
+gen workset = temprand>=r(c_1)
+tab holdout workset, mis cell
+
+
+
+******************
+* models
+local M1 n_accommodates 
+local M2 `M1' n_beds n_days_since i.f_property_type i.f_room_type i.f_bed_type 
+local M3 `M2' i.f_bathroom i.f_cancellation_policy n_review_score d_missing_review_score i.f_number_of_rev 
+local M4 `M3' n_accommodates2 n_days_since2 n_days_since3
+local M5 `M4' i.f_room_type##i.f_property_type i.f_number_of_rev##i.f_property_type 
+local M6 `M5' d_aircond##i.f_property_type d_petsallowed##i.f_property_type 
+local M7 `M6' d_hourchec d_doorman d_freeparkingonprem d_internet d_paidparking ///
+ d_shampoo d_wheelcha d_doormane d_freeparkingonstr d_iron d_smartlock d_wireless ///
+ d_breakfast d_dryer d_gym d_keypad d_petslive d_smokedet ///
+ d_buzzerwi d_elevator d_hairdryer d_kitchen d_pool d_smokinga ///
+ d_cabletv d_essentials d_hangers d_laptopf d_privatee d_suitable d_carbonmo ///
+ d_familyki d_heating d_lockonbe d_privatel d_tv ///
+ d_cats d_fireexti d_hottub d_lockbox d_safetycard d_washer ///
+ d_dogs d_firstaid d_indoorfi d_otherpets d_selfcheck d_washerdr
+local M8 `M6' i.f_pr##i.d_hourchec i.f_pr##i.d_doorman i.f_pr##i.d_freeparkingonprem i.f_pr##i.d_internet i.f_pr##i.d_paidparking ///
+ i.f_pr##i.d_shampoo i.f_pr##i.d_wheelcha i.f_pr##i.d_doormane i.f_pr##i.d_freeparkingonstr i.f_pr##i.d_iron i.f_pr##i.d_smartlock i.f_pr##i.d_wireless ///
+ i.f_pr##i.d_breakfast i.f_pr##i.d_dryer i.f_pr##i.d_gym i.f_pr##i.d_keypad i.f_pr##i.d_petslive i.f_pr##i.d_smokedet ///
+ i.f_pr##i.d_buzzerwi i.f_pr##i.d_elevator i.f_pr##i.d_hairdryer i.f_pr##i.d_kitchen i.f_pr##i.d_pool i.f_pr##i.d_smokinga ///
+ i.f_pr##i.d_cabletv i.f_pr##i.d_essentials i.f_pr##i.d_hangers i.f_pr##i.d_laptopf i.f_pr##i.d_privatee i.f_pr##i.d_suitable i.f_pr##i.d_carbonmo ///
+ i.f_pr##i.d_familyki i.f_pr##i.d_heating i.f_pr##i.d_lockonbe i.f_pr##i.d_privatel i.f_pr##i.d_tv ///
+ i.f_pr##i.d_cats i.f_pr##i.d_fireexti i.f_pr##i.d_hottub i.f_pr##i.d_lockbox i.f_pr##i.d_safetycard i.f_pr##i.d_washer ///
+ i.f_pr##i.d_dogs i.f_pr##i.d_firstaid i.f_pr##i.d_indoorfi i.f_pr##i.d_otherpets i.f_pr##i.d_selfcheck i.f_pr##i.d_washerdr ///
+ i.f_bed##i.d_hourchec i.f_bed##i.d_doorman i.f_bed##i.d_freeparkingonprem i.f_bed##i.d_internet i.f_bed##i.d_paidparking ///
+ i.f_bed##i.d_shampoo i.f_bed##i.d_wheelcha i.f_bed##i.d_doormane i.f_bed##i.d_freeparkingonstr i.f_bed##i.d_iron i.f_bed##i.d_smartlock i.f_bed##i.d_wireless ///
+ i.f_bed##i.d_breakfast i.f_bed##i.d_dryer i.f_bed##i.d_gym i.f_bed##i.d_keypad i.f_bed##i.d_petslive i.f_bed##i.d_smokedet ///
+ i.f_bed##i.d_buzzerwi i.f_bed##i.d_elevator i.f_bed##i.d_hairdryer i.f_bed##i.d_kitchen i.f_bed##i.d_pool i.f_bed##i.d_smokinga ///
+ i.f_bed##i.d_cabletv i.f_bed##i.d_essentials i.f_bed##i.d_hangers i.f_bed##i.d_laptopf i.f_bed##i.d_privatee i.f_bed##i.d_suitable i.f_bed##i.d_carbonmo ///
+ i.f_bed##i.d_familyki i.f_bed##i.d_heating i.f_bed##i.d_lockonbe i.f_bed##i.d_privatel i.f_bed##i.d_tv ///
+ i.f_bed##i.d_cats i.f_bed##i.d_fireexti i.f_bed##i.d_hottub i.f_bed##i.d_lockbox i.f_bed##i.d_safetycard i.f_bed##i.d_washer ///
+ i.f_bed##i.d_dogs i.f_bed##i.d_firstaid i.f_bed##i.d_indoorfi i.f_bed##i.d_otherpets i.f_bed##i.d_selfcheck i.f_bed##i.d_washerdr
+*/
+ 
+	
 forvalue i=1/8 {
-	dis "`i'"
-	qui regress Ylev `modellev`i''
-	dis "R-squared = " e(r2)
-	dis "RMSE = " e(rmse)
-	estimat stats
+	global M`i' `M`i''
 }
+/* note. we define them as local so Stata can use them in the loops.
+but we also define them as global so we remember it even if we stop the code */
 
 
-
-*** CREATE TRAINING-TEST SAMPLES
-
-  cap drop test* train* 
-  cap drop temp r
-  set seed 13505
-gen temp=runiform()
-sort temp
-gen r=_n/_N
-
-local k=10
-
-gen test=r<(1/`k')
-gen train=1-test
-
-forval j = 1/ `k' {
-
-di "(`j'-1)/`k'" "and " "`j'/`k'"
-gen test`j'= r>=(`j'-1)/`k' & r<`j'/`k'
+*************************************
+* R-SQUARED, BIC on entire work set
+preserve
+keep if workset==1
+count
+forval i=1/8 {
+	quietly reg price `M`i'' 
+	local r2_M`i' = e(r2)
+	local rmse_M`i'= e(rmse) 
+	qui estat ic
+	matrix out=r(S)
+	local BIC_M`i'=out[1,6]
+	dis "r2_M`i'="`r2_M`i'' "  BIC_M`i'="`BIC_M`i''
 }
+restore
+count
 
 
-forvalue i=1/`k' {
-	gen train`i'=1-test`i'
+*************************************
+* k-fold cros-validation
+local k=5
+global k=5
+set seed 76112181
+
+preserve
+keep if workset==1
+
+* create k folds manually
+cap drop temprand
+gen temprand = uniform()
+gen testfold = 0
+sort temprand
+forvalue i=1/$k {
+	replace testfold = `i' if testfold==0 & _n<= (`i'/$k)*_N
 }
-*
-
-  ******************
-  *
-  * Predictions with various models
-  *
-  *******************
-
-********************************************************** 
-*** IN-SAMPLE EVALUATION
-*** & OUT-OF SAMPLE EVALUATION ON ONE SAMPLE
-
-foreach v in lev log {
-	 reg Y`v' `model`v'1' if train==1
-	  do "$data_out/BIC"
-	  do "$data_out/RMSE_`v'"
-	  global df=e(df_m)
-	 outreg2 using "$output/reg_in_onetest_`v'", excel se addstat(nvars, $df, BIC, $BIC, RSMSE_insample, $RMSEin, RSMSE_onetest, $RMSEtest) noaster label replace 
-	forvalue i=2/8 {
-		  reg Y`v' `model`v'`i'' if train==1
-		   do "$data_out/BIC"
-		  do "$data_out/RMSE_`v'"
-		  global df=e(df_m)
-		 outreg2 using "$output/reg_in_onetest_`v'", excel se addstat(nvars, $df, BIC, $BIC, RSMSE_insample, $RMSEin, RSMSE_onetest, $RMSEtest) noaster label append
+tab testfold,mis
+* 8 regressions
+forvalue i=1/8 {
+	local msetest_M`i'=0
+	local msetrain_M`i'=0
+	* k folds
+	qui forvalue j=1/$k {
+		regress price `M`i'' if testfold!=`j'  /* training set: without the test set */
+		predict phat
+		gen e2 = (price-phat)^2 
+		* test set mse 
+		sum e2 if testfold==`j'
+		local msetest`j' = r(mean)
+		local msetest_M`i' = `msetest_M`i'' + `msetest`j''
+		* training set mse (for illustration purposes)
+		sum e2 if testfold!=`j'
+		local msetrain`j' = r(mean)
+		local msetrain_M`i' = `msetrain_M`i'' + `msetrain`j''
+		cap drop e2*
+		cap drop phat*
 	}
-} 
-************************************************************ 
-	foreach v in lev log {
-	noisily dis "RMSE in test sets"
-	noisily dis "`v'" " " "model1"
-	forvalue t=1/`k' {
-		reg Y`v' `model`v'1' if train`t'==1
-		replace test=test`t'
-		do "$data_out/BIC"
-		local BIC`t'=$BIC
-		do "$data_out/RMSE_`v'"
-		gen y`v'_m1_t`t'=ytest
-		gen e`v'_m1_t`t'=ytest-Ylev
-		local MSEin`t'=$MSEin
-		local MSEtest`t'=$MSEtest
-		local RMSEin`t'=sqrt(`MSEin`t'')
-		local RMSEtest`t'=sqrt(`MSEtest`t'')
+	local rmsetest_M`i' = sqrt(`msetest_M`i''/$k)
+	local rmsetrain_M`i' = sqrt(`msetrain_M`i''/$k)
 	
-		noisily dis "RMSE test of fold `t' "  $RMSEtest`t'
-	
-	
+dis "'Model M`i'" "  training avg RMSE = `rmsetrain_M`i'' " "  test avg RMSE = `rmsetest_M`i'' "
+}
+* lasso
+local msetest_lasso=0
+local msetrain_lasso=0
+	* k folds
+forvalue j=1/$k {
+		cvlasso price $M8 if testfold!=`j', alpha(1) lopt nfolds(5)
+		predict phat
+		gen e2 = (price-phat)^2 
+		* test set mse 
+		sum e2 if testfold==`j'
+		local msetest`j' = r(mean)
+		local msetest_lasso = `msetest_lasso' + `msetest`j''
+		* training set mse (for illustration purposes)
+		sum e2 if testfold!=`j'
+		local msetrain`j' = r(mean)
+		local msetrain_lasso = `msetrain_lasso' + `msetrain`j''
+		cap drop e2*
+		cap drop phat*
 	}
-	local BIC`v'=(`BIC1'+`BIC2'+`BIC3'+`BIC4'+`BIC5'+`BIC6'+`BIC7'+`BIC8'+`BIC9'+`BIC10')/10
-	local MSEin`v'=(`MSEin1'+`MSEin2'+`MSEin3'+`MSEin4'+`MSEin5'+`MSEin6'+`MSEin7'+`MSEin8'+`MSEin9'+`MSEin10')/10
-	local MSEtest`v'=(`MSEtest1'+`MSEtest2'+`MSEtest3'+`MSEtest4'+`MSEtest5'+`MSEtest6'+`MSEtest7'+`MSEtest8'+`MSEtest9'+`MSEtest10')/10
-	local RMSEin`v'=sqrt(`MSEin`v'')
-	local RMSEtest`v'=sqrt(`MSEtest`v'')
-	local RMSEtestM`v'=sqrt(max(`MSEtest1',`MSEtest2',`MSEtest3',`MSEtest4',`MSEtest5',`MSEtest6',`MSEtest7',`MSEtest8',`MSEtest9',`MSEtest10'))
-
-
-	matrix `v'1=(`BIC`v'' \ `RMSEin`v'' \ `RMSEtest`v'' \ `RMSEtest1' \ `RMSEtestM`v'' )
-	mat lis `v'1
-	forvalue i=2/8 {
-		noisily dis "`v'" "  " " model`i'"
-		forvalue t=1/`k' {
-			reg Y`v' `model`v'`i'' if train`t'==1
-			 	replace test=test`t'
-			do "$data_out/BIC"
-			local BIC`t'=$BIC
-			do "$data_out/RMSE_`v'"
-			gen y`v'_m`i'_t`t'=ytest
-			gen e`v'_m`i'_t`t'=ytest-Ylev  /* NEW LINE */
-			local MSEin`t'=$MSEin
-			local MSEtest`t'=$MSEtest
-			*ide kell sqrt
-			local RMSEin`t'=sqrt(`MSEin`t'')
-			local RMSEtest`t'=sqrt(`MSEtest`t'')
-			noisily dis "RMSE test of fold `t' "  $RMSEtest`t'
-		}
-
-	local BIC`v'=(`BIC1'+`BIC2'+`BIC3'+`BIC4'+`BIC5'+`BIC6'+`BIC7'+`BIC8'+`BIC9'+`BIC10')/10
-	local MSEin`v'=(`MSEin1'+`MSEin2'+`MSEin3'+`MSEin4'+`MSEin5'+`MSEin6'+`MSEin7'+`MSEin8'+`MSEin9'+`MSEin10')/10
-	local MSEtest`v'=(`MSEtest1'+`MSEtest2'+`MSEtest3'+`MSEtest4'+`MSEtest5'+`MSEtest6'+`MSEtest7'+`MSEtest8'+`MSEtest9'+`MSEtest10')/10
-	local RMSEin`v'=sqrt(`MSEin`v'')
-	local RMSEtest`v'=sqrt(`MSEtest`v'')
-	local RMSEtestM`v'=sqrt(max(`MSEtest1',`MSEtest2',`MSEtest3',`MSEtest4',`MSEtest5',`MSEtest6',`MSEtest7',`MSEtest8',`MSEtest9',`MSEtest10'))
-
-		
-		matrix `v'`i'=(`BIC`v'' \ `RMSEin`v'' \ `RMSEtest`v'' \ `RMSEtest1' \ `RMSEtestM`v'' )
-		mat lis `v'`i'
-	}
-	matrix crossval_`v' = [`v'1 , `v'2 , `v'3 , `v'4 , `v'5 , `v'6 , `v'7 , `v'8 ]
-	matrix rownames crossval_`v' = BIC RMSEin RMSEtestCV RMSEtest1 RMSEtest_max
-	matrix colnames crossval_`v' = model1 model2 model3 model4 model5 model6 model7 model8
+	local rmsetest_lasso = sqrt(`msetest_lasso'/$k)
+	local rmsetrain_lasso = sqrt(`msetrain_lasso'/$k)
+	
+dis "'Model lasso" "  training avg RMSE = `rmsetrain_lasso' " "  test avg RMSE = `rmsetest_lasso' "
 }
 
-mat lis crossval_lev
-mat lis crossval_log
-
-* do lasso 
-
-lassoregress ln_price $basic_log $basic_add $reviews $poly_log $X1 $X2 $amenities $X3
-di "N: " `e(N)' " RMSE:"  (`e(cvmse_actual)')^0.5
-
-lassoregress price $basic_lev $basic_add $reviews $poly_lev $X1 $X2 $amenities $X3
-di "N: " `e(N)' " RMSE:"  (`e(cvmse_actual)')^0.5
+restore
+*/
 
 *******************************
-*** FIGURES FOR FITTED VS ACTUAL OOUTCOME VARIABLES 
-***********************************
-local m 7
-sum Ylev if test5==1,d
-local meanY=r(mean)
-local sdY=r(sd)
-local meanY_m2SE=`meanY'-2*`sdY'
-local meanY_p2SE=`meanY'+2*`sdY'
-local Y5p=r(p5)
-local Y95p=r(p95)
+*** DIAGNOSTICS
 
-sum Ylog if test5==1,d
-local meanY=r(mean)
+qui reg price $M7 if workset==1
+predict phat if holdout==1
+predict spe if holdout==1, stdf
+gen pi80lo = phat - 1.28*spe
+gen pi80hi = phat + 1.28*spe
 
+* average predicted price in the holdout set
+sum phat if holdout==1
+* 80% PI around average predicted price in holdout set
+*  (little trick: there is no observation with the exactly average predicted price
+*   so we look at observations within a narrow interval)
+sum pi80lo pi80hi if holdout==1 & phat>=r(mean)-0.1 & phat<=r(mean)+0.1
 
-scatter ylog_m`m'_t5 ylev_m`m'_t5 Ylev if Ylev<400 , ms(Oh x)  ///
- || lfit ylev_m`m'_t5 Ylev if Ylev<400, lw(vthick) lp(dash) ///
- || lfit ylog_m`m'_t5 Ylev if Ylev<400, ///
- 	 xtitle("Price") ///
-	 ytitle("Predicted price") ///
- 	 graphregion(fcolor(white) ifcolor(none))  ///
-	 plotregion(fcolor(white) ifcolor(white)) 
-	 graph export "$output\log_vs_lin_all.png", as(png) replace
+* Figure 14.8a
+* yhat-y plot
+scatter price phat if holdout==1 & price<=350, ms(o) mc(navy*0.6) ///
+ || line phat phat if holdout==1 , lc(green*0.8) lw(thick) lp(dash) ///
+ xlab(0(50)350, grid) ylab(0(50)350, grid) ///
+ xtitle("Predicted price, (US dollars)") ytitle("Price, (US dollars)") ///
+ legend(off) 
+graph export "$output/ch14-figure-8a-yhat-y-Stata.png", replace
+/* 
+Note: The holdout and work sets are different in different software due to
+differences in random number generation. Therefore the yhat - y plots
+are slightly different in the different sofware, too.
+*/
 
-	 scatter ylog_m`m'_t5 ylev_m`m'_t5 Ylev if Ylev>`Y5p' & Ylev<`Y95p', ms(Oh x)  ///
- || lfit ylev_m`m'_t5 Ylev if Ylev>`Y5p' & Ylev<`Y95p', lw(vthick) lp(dash) ///
- || lfit ylog_m`m'_t5 Ylev if Ylev>`Y5p' & Ylev<`Y95p', ///
- 	 xtitle("Price") ///
-	 ytitle("Predicted price") ///
- 	 graphregion(fcolor(white) ifcolor(none))  ///
-	 plotregion(fcolor(white) ifcolor(white)) 
-	 graph export "$output\log_vs_lin_95.png", as(png) replace
+* point and interval predictions by size
+qui reg price $M7 if workset==1
 
-	 
-scatter ylev_m`m'_t5 Ylev if Ylev>`Y5p' & Ylev<`Y95p', ms(Oh x)  ///
- || lfit ylev_m`m'_t5 Ylev if Ylev>`Y5p' & Ylev<`Y95p', lw(vthick) lp(dash)  ///
- || lfit Ylev Ylev if Ylev>`Y5p' & Ylev<`Y95p',  ///
- 	 xtitle("Price") ///
-	 ytitle("Price, predicted price") ///
- 	  graphregion(fcolor(white) ifcolor(none))  ///
-	 plotregion(fcolor(white) ifcolor(white)) ///
-legend(row(1) lab(1 "Predicted") lab(2 "45 degree line") lab( 3 "Fitted values"))
-graph export "$output\lev_vs_45.png", as(png) replace
+* Figure 14.8b
+preserve
+ keep if holdout==1
+ collapse phat pi80lo pi80hi, by(n_accommodates)
+ 
+ graph twoway (bar phat n_accommodates, col(navy*0.8) lcol(white) lw(vthick) ) ///
+  (rcap pi80lo pi80hi n_accommodates, lc(green) lw(thick) ) , ///
+  legend(off) ///
+  xla(1(1)7, grid) yla(0(50)200, grid) ///
+  xtitle("Number of guests accommodated") ytitle("Predicted price (US dollars)") 
+graph export "$output/ch14-figure-8b-yhat-bars-byaccom-Stata.png", replace
+ 
+restore 
+ 
 
-
-scatter elev_m7_t5 ylev_m7_t5, ylab(,grid) ///
-	 ms(X) msize(small) mlw(thick) mcolor(orange) ///
-	 xtitle("Price") ///
-	 ytitle("Prediction error") ///
-	 || lfit elev_m7_t5 ylev_m7_t5, lw(vthick) lc(navy) legend(off) ///
-	  graphregion(fcolor(white) ifcolor(none))  ///
-	 plotregion(fcolor(white) ifcolor(white))
-	 graph export "$output/F14_preerr1.png", as(png) replace
-
-scatter elev_m7_t5 ylev_m7_t5 if ylev_m7_t5>20 & ylev_m7_t5<200 & elev_m7_t5>-50 & elev_m7_t5<50   , ///
-	 ms(X) msize(small) mlw(thick) mcolor(orange) ///
-	xlab(20(20)200) ylab(-50(50)50, grid) ///
- 	 xtitle("Price") ///
-	 ytitle("Prediction error") ///
-	 || lfit elev_m7_t5 ylev_m7_t5 if ylev_m7_t5>20 & ylev_m7_t5<200 & elev_m7_t5>-50 & elev_m7_t5<50   , lw(vthick) lc(navy) legend(off) ///
-	  graphregion(fcolor(white) ifcolor(none))  ///
-	 plotregion(fcolor(white) ifcolor(white))
-	 graph export "$output/F14_preerr1_zoom.png", as(png) replace
-
-
-log close
