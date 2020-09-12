@@ -11,7 +11,7 @@
 * 	Not to be used for commercial purposes.
 *
 * Chapter 12
-* Simulating random walk time series
+* Simulating time series with various levels of serial correlation
 * no actual data used
 * version 0.9 2020-09-12
 ********************************************************************
@@ -22,7 +22,6 @@
 * set working directory for da_case_studies.
 * for example:
 * cd "C:/Users/xy/Dropbox/gabors_data_analysis/da_case_studies"
-cd "C:/Users/kezdi/GitHub/da_case_studies"
 
 global data_in  "$data_dir/hotels-vienna/clean"
 global work  	"ch12-time-series-simulations"
@@ -43,9 +42,10 @@ tsset t
 gen y1=rnormal(0,$sde)
  lab var y1 "simulated time series, no serial correlation"
 
-tsline y1, lw(thick) lc(green) yline(0) xlabel(, grid) ylabel(, grid) xtitle("") ///
-graphregion(fcolor(white) ifcolor(none))
-graph export "$output\ch12-figure-9b-serialcorr-Stata.png", replace
+tsline y1, lw(thick) lc(navy*0.8) ///
+ yline(0) xlabel(, grid) ylabel(, grid) xtitle("Time period") ///
+ graphregion(fcolor(white) ifcolor(none))
+graph export "$output\ch12-figure-9a-serialcorr-Stata.png", replace
 
 
 ** serially correlated series
@@ -53,7 +53,8 @@ gen y2=0 if t==1
  lab var y2 "simulated time series, serial correlation = 0$rho"
  replace y2=$rho*y2[_n-1] + rnormal(0,$sde) if t>1
 
-tsline y2, lw(thick) lc(red) yline(0) xlabel(, grid) ylabel(, grid) xtitle("") ///
-graphregion(fcolor(white) ifcolor(none))
+tsline y2, lw(thick) lc(navy*0.8) ///
+ yline(0) xlabel(, grid) ylabel(, grid) xtitle("Time period") ///
+ graphregion(fcolor(white) ifcolor(none))
 graph export "$output\ch12-figure-9b-serialcorr-Stata.png", replace
 
