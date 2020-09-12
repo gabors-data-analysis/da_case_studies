@@ -146,13 +146,13 @@ save_fig("ch14-figure-2b-lnp-age-lowess",output,"small")
 # Linear regressions in logs now
 
 # Model 1: Linear regression on age
-model1log <- as.formula(lnprice ~ age )
+model1log <- as.formula(lnprice ~ age +agesq )
 # Models 2-5: no quads
-model2log <- as.formula(lnprice ~ age  + odometer)
-model3log <- as.formula(lnprice ~ age  + odometer +  LE + cond_excellent + cond_good + dealer)
-model4log <- as.formula(lnprice ~ age  + odometer +  LE + XLE + SE + cond_likenew +
+model2log <- as.formula(lnprice ~ age  + agesq + odometer + odometersq)
+model3log <- as.formula(lnprice ~ age  + agesq + odometer + odometersq + LE + cond_excellent + cond_good + dealer)
+model4log <- as.formula(lnprice ~ age  + agesq + odometer + odometersq + LE + XLE + SE + cond_likenew +
                        cond_excellent + cond_good + cylind6 + dealer)
-model5log <- as.formula(lnprice ~ age +  odometer + LE*age + XLE*age + SE*age +
+model5log <- as.formula(lnprice ~ age +  agesq + odometer + odometersq + LE*age + XLE*age + SE*age +
                        cond_likenew*age + cond_excellent*age + cond_good*age + cylind6*age + odometer*age + dealer*age)
 
 
@@ -262,7 +262,7 @@ new <- list(age=10, agesq=10^2,odometer=12,odometersq=12^2,SE=0,XLE=0, LE=1,
 
 # Predict lnprice with Model 3 from ch13
 # Predict price with all predictors (Model3)
-reg3 <- lm(lnprice ~ age  + odometer +  LE + cond_excellent + cond_good + dealer, data=data)
+reg3 <- lm(lnprice ~ age  + agesq + odometer +  odometersq + LE + cond_excellent + cond_good + dealer, data=data)
 summary(reg3)
 # prediction
 data$lnp2 <- predict(reg3, data)
