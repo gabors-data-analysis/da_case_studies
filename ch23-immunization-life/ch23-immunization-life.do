@@ -71,7 +71,7 @@ line surv* year, lw(. . . . . thick thick) ///
  ylab(, grid) xlab(1998(5)2018, grid) legend(off) ///
  ytitle("Child survival rate (percent)") xtitle("Date (year)") ///
  text(93 2002 "South Asia") text(89 2013 "Sub-Saharan Africa") 
-graph export "$output\ch23-figure-2b-tssurvival-Stta.png",replace
+graph export "$output\ch23-figure-2b-tssurvival-Stata.png",replace
 */
 
 **************************************************
