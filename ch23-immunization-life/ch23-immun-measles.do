@@ -1,42 +1,50 @@
-***************************************************************
-* ch23 
-*
-* Case Study immunization against measels and child mortality age 0-5
-* whole World
-
-* Data: worldbank-immunizaton-panel
-
-
-***************************************************************
-
-* v 1.1. 2019-11-19
-* v 1.2. 2019-12-10 corrected folders, deleted cleaning
-* v.1.3. 2020-02-03 some edits
-* v.1.4. 2020-04-16 just look at graphs
-
-
-
-* WHAT THIS CODES DOES:
-* looks at continents for aggregate trends
-* country level models
-
-
-
 ********************************************************************
-* SET YOUR DIRECTORY HERE
-*********************************************************************
-*cd "" /*set your dir*/
+* Prepared for Gabor's Data Analysis
+*
+* Data Analysis for Business, Economics, and Policy
+* by Gabor Bekes and  Gabor Kezdi
+* Cambridge University Press 2021
+*
+* gabors-data-analysis.com 
+*
+* License: Free to share, modify and use for educational purposes. 
+* 	Not to be used for commercial purposes.
+*
+* Chapter 23
+* CH23B Immunization against measles and saving children
+* using the worldbank-immunization dataset
+* version 0.9 2020-09-13
+********************************************************************
 
-cd "C:/Users/GB/Dropbox (MTA KRTK)/bekes_kezdi_textbook"
- * YOU WILL NEED TWO SUBDIRECTORIES
- * textbook_work --- all the codes
- * cases_studies_public --- for the data
+
+* SETTING UP DIRECTORIES
+
+* STEP 1: set working directory for da_case_studies.
+* for example:
+* cd "C:/Users/xy/Dropbox/gabors_data_analysis/da_case_studies"
+cd "C:/Users/kezdi/GitHub/da_case_studies"
 
 
+* STEP 2: * Directory for data
+* Option 1: run directory-setting do file
+do set-data-directory.do 
+							/* this is a one-line do file that should sit in 
+							the working directory you have just set up
+							this do file has a global definition of your working directory
+							more details: gabors-data-analysis.com/howto-stata/   */
 
-global data_in "da_data_repo\worldbank-immunization\clean"
-global data_out "da_case_studies\ch23-immunization-life"
-global output "da_case_studies\ch23-immunization-life\output"
+* Option 2: set directory directly here
+* for example:
+* global data_dir "C:/Users/xy/gabors_data_analysis/da_data_repo"
+
+
+global data_in  "$data_dir/worldbank-immunization/clean"
+global work  	"ch23-immunization-life"
+
+cap mkdir 		"$work/output"
+global output 	"$work/output"
+
+
 
 
 
@@ -46,22 +54,24 @@ global output "da_case_studies\ch23-immunization-life\output"
 
 use "$data_in/worldbank-immunization-continents.dta", clear
 
-
 line imm* year, lw(. . . . . thick thick) ///
- lc(gs10 gs10 gs10 gs10 gs10 blue green) ///
- ylab(, grid) xlab(1998(5)2018, grid) legend(off) ytitle("Immunization rate (percent)")
-* save in Stata graph format to edit: add legend next to lines 
-graph save "$output\ch23-figure-2a-tsimmun-toedit",replace
-* save in png format 
-graph export "$output\ch23-figure-2a-tsimmun-toedit.png",replace
+ lc(gs10 gs10 gs10 gs10 gs10 navy*0.8 green*0.6) ///
+ ylab(, grid) xlab(1998(5)2018, grid) ///
+ legend(off) ytitle("Immunization rate (percent)") xtitle("Date (year)") ///
+ text(72 2005 "South Asia") text(67 2013 "Sub-Saharan Africa") 
+graph export "$output\ch23-figure-2a-tsimmun-Stata.png",replace
+
+* survival rates to percent from 1/1000
+forvalue i=1/7 {
+	replace surv`i' = surv`i'/10
+}
 
 line surv* year, lw(. . . . . thick thick) ///
- lc(gs10 gs10 gs10 gs10 gs10 blue green) ///
- ylab(, grid) xlab(1998(5)2018, grid) legend(off) ytitle("Child survival rate (percent)")
-* save in Stata graph format to edit: add legend next to lines 
-graph save "$output\ch23-figure-2b-tssurvival-toedit",replace
-* save in png format 
-graph export "$output\ch23-figure-2b-tssurvival-toedit.png",replace
+ lc(gs10 gs10 gs10 gs10 gs10 navy*0.8 green*0.8) ///
+ ylab(, grid) xlab(1998(5)2018, grid) legend(off) ///
+ ytitle("Child survival rate (percent)") xtitle("Date (year)") ///
+ text(93 2002 "South Asia") text(89 2013 "Sub-Saharan Africa") 
+graph export "$output\ch23-figure-2b-tssurvival-Stta.png",replace
 */
 
 **************************************************
@@ -94,19 +104,23 @@ lab var lngdppc "ln GDP per capita"
 lab var lnpop "ln population"
 lab var surv "Survival rate"
 
-/*************************
+*************************
 * DESCRIBE
 sum d_surv,d
 sum d_imm, d
 tab countrycode if d_surv<-1 | d_surv>1 & year>1998
 tab countrycode if d_imm<-20 | d_imm>20 & year>1998
 
+* graphs not in the textbook
 graph box d_surv 
-hist d_surv, col(blue) percent ylab(, grid)
-hist d_surv if d_surv>-2 & d_surv<2, col(blue) percent ylab(, grid)
+graph box d_surv if d_surv>-1 & d_surv<1
+hist d_surv, fcol(navy*0.8) lcol(white) percent ylab(, grid)
+hist d_surv if d_surv>-1 & d_surv<1, fcol(navy*0.8) lcol(white) percent ylab(, grid)
 
 graph box d_imm 
-hist d_imm, col(blue) percent ylab(, grid)
+graph box d_imm if d_imm>-10 & d_imm<10
+hist d_imm, fcol(navy*0.8) lcol(white) percent ylab(, grid)
+hist d_imm if d_imm>-10 & d_imm<10, disc fcol(navy*0.8) lcol(white) percent ylab(, grid)
 
 sum surv imm pop lngdppc 
 */
