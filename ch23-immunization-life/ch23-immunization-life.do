@@ -131,11 +131,11 @@ egen avgpop=mean(pop), by(c) /* for weights in xtreg fe */
 
 *areg surv imm i.year [w=pop] , absorb(c) cluster(c)
 xtreg surv imm i.year [w=avgpop] , fe cluster(c)
- outreg2 using "$output\ch23-table-2-immun-fe", se bdec(3) 2aster tex(fragment) nonotes ///
+ outreg2 using "$output\ch23-table-2-immun-fe-Stata", se bdec(3) 2aster tex(fragment) nonotes ///
  label keep(imm ) replace
 *areg surv imm lngdppc lnpop i.year [w=pop], absorb(c) cluster(c)
 xtreg surv imm lngdppc lnpop i.year [w=avgpop], fe cluster(c)
- outreg2 using "$output\ch23-table-2-immun-fe", se bdec(3) 2aster tex(fragment) nonotes ///
+ outreg2 using "$output\ch23-table-2-immun-fe-Stata", se bdec(3) 2aster tex(fragment) nonotes ///
  label keep( imm lngdppc lnpop ) append
 
 
@@ -143,11 +143,11 @@ xtreg surv imm lngdppc lnpop i.year [w=avgpop], fe cluster(c)
 ** CLUSTER SE VS BIASED SE 
 *areg surv imm lngdppc lnpop i.year [w=pop], absorb(c) cluster(c)
 xtreg surv imm lngdppc lnpop i.year [w=avgpop], fe cluster(c)
- outreg2 using "$output\ch23-table-3-immun-fese", se bdec(3) 2aster tex(fragment) nonotes ///
+ outreg2 using "$output\ch23-table-3-immun-fese-Stata", se bdec(3) 2aster tex(fragment) nonotes ///
  label drop(i.year _cons) ctitle("Clustered SE") replace
 *areg surv imm lngdppc lnpop i.year [w=pop], absorb(c) 
 xtreg surv imm lngdppc lnpop i.year [w=avgpop], fe
- outreg2 using "$output\ch23-table-3-immun-fese", se bdec(3) 2aster tex(fragment) nonotes ///
+ outreg2 using "$output\ch23-table-3-immun-fese-Stata", se bdec(3) 2aster tex(fragment) nonotes ///
  label drop( i.year _cons ) ctitle("Simple SE") append
 
 
@@ -163,21 +163,21 @@ label var d_imm "$\Delta imm$"
 
 * basic FD
 reg d_surv d_imm [w=pop], cluster(c)
- outreg2 using "$output\ch23-table-4-immun-fd1", se bdec(3) 2aster label tex(fragment) nonotes replace
+ outreg2 using "$output\ch23-table-4-immun-fd1-Stata", se bdec(3) 2aster label tex(fragment) nonotes replace
 
 * FD, 5 lags
 reg d_surv L(0/`maxlag').d_imm [w=pop], cluster(c)
- outreg2 using "$output\ch23-table-4-immun-fd1", se bdec(3) 2aster label tex(fragment) nonotes append
+ outreg2 using "$output\ch23-table-4-immun-fd1-Stata", se bdec(3) 2aster label tex(fragment) nonotes append
 more
 
 * FD, 5 lags, cumul
 gen d2_imm=d.d_imm
 reg d_surv L`maxlag'.d_imm L(0/`maxlag_1').d2_imm [w=pop], cluster(c)
- outreg2 using "$output\ch23-table-4-immun-fd1", se bdec(3) 2aster label tex(fragment) nonotes drop(L(0/`maxlag_1').d2_imm) append
+ outreg2 using "$output\ch23-table-4-immun-fd1-Stata", se bdec(3) 2aster label tex(fragment) nonotes drop(L(0/`maxlag_1').d2_imm) append
 
 * FD, 5 lags, cumul, lead
 reg d_surv L`maxlag'.d_imm L(0/`maxlag_1').d2_imm F(1/3).d_imm [w=pop], cluster(c)
- outreg2 using "$output\ch23-table-4-immun-fd1", se bdec(3) 2aster tex(fragment) nonotes label drop(L(0/`maxlag_1').d2_imm) append
+ outreg2 using "$output\ch23-table-4-immun-fd1-Stata", se bdec(3) 2aster tex(fragment) nonotes label drop(L(0/`maxlag_1').d2_imm) append
 more
 
  
@@ -185,7 +185,7 @@ more
 * AGGREG TREND, CONFOUNDERS, CTRY TRENDS
 * FD, 5 lags, cumul, aggreg trend
 reg d_surv L`maxlag'.d_imm L(0/`maxlag_1').d2_imm i.year [w=pop], cluster(c)
- outreg2 using "$output\ch23-table-5-immun-fd2", se bdec(3) 2aster ///
+ outreg2 using "$output\ch23-table-5-immun-fd2-Stata", se bdec(3) 2aster ///
  label keep(L`maxlag'.d_imm )  tex(fragment) nonotes replace
 more
 
@@ -193,7 +193,7 @@ more
 reg d_surv L`maxlag'.d_imm L(0/`maxlag_1').d2_imm ///
   L(0/`maxlag').d_lngdppc L(0/`maxlag').d_lnpop ///
  i.year [w=pop], cluster(c)
- outreg2 using "$output\ch23-table-5-immun-fd2", se bdec(3) 2aster tex(fragment) nonotes ///
+ outreg2 using "$output\ch23-table-5-immun-fd2-Stata", se bdec(3) 2aster tex(fragment) nonotes ///
  label keep(L`maxlag'.d_imm ) append
 more
 * check: cumulative coeffs on the confounders
@@ -209,7 +209,7 @@ more
 areg d_surv L`maxlag'.d_imm L(0/`maxlag_1').d2_imm ///
   L(0/`maxlag').d_lngdppc L(0/`maxlag').d_lnpop ///
   i.year [w=pop], cluster(c) absorb(c)
- outreg2 using "$output\ch23-table-5-immun-fd2", se bdec(3) 2aster tex(fragment) nonotes ///
+ outreg2 using "$output\ch23-table-5-immun-fd2-Stata", se bdec(3) 2aster tex(fragment) nonotes ///
  label keep(L`maxlag'.d_imm ) append
 more
 
