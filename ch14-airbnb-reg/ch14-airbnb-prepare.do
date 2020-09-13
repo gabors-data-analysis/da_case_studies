@@ -170,8 +170,10 @@ gen lnprice=log(price)
 
 *****************
 * sample design
+count
 drop if price==.
-drop if price>=1000
+keep if price<1000 /* in R it's <=1000; it doesn't matter there but it matters here, due to differences in data storage */
+count
 drop if n_accommodates>7 | n_accommodates==.
 count
 
@@ -180,14 +182,14 @@ hist price if price<=400, width(10) percent color(navy*0.8) lcolor(white) ///
  xlab(0(50)400, grid) ylab(0(5)15, grid) ///
  graphregion(fcolor(white) ifcolor(none))  ///
  plotregion(fcolor(white) ifcolor(white))
-graph export "$output/ch14-figure-3a-hist-price-Stata", as(png) replace
+graph export "$output/ch14-figure-3a-hist-price-Stata.png", replace
  
 * Fig 14.3b
 hist lnprice, percent width(0.2) color(navy*0.8) lcolor(white) ///
  xlab(2(0.5)6.5, grid) ylab(0(5)15, grid) ///
  graphregion(fcolor(white) ifcolor(none))  ///
  plotregion(fcolor(white) ifcolor(white))
-graph export "$output/ch14-figure-3a-hist-price-Stata", as(png) replace
+graph export "$output/ch14-figure-3b-hist-lnprice-Stata.png", replace
  
 *******************************************************
 * other feature engineering, functional forms
@@ -214,7 +216,7 @@ reg lnprice n_accommodates
 * Graph not in the textbook
 lowess price n_accommodates if price<=800, bwidth(0.8) ///
  lineopts(lw(vthick) lc(dkgreen)) ///
- ms(X) msize(vlarge) mlw(thick) mcolor(navy*0.6) ///
+ ms(O) mlw(thick) mcolor(navy*0.6) ///
  xlab(0(1)7) yscale(range(0 800)) ylab(0(100)800, grid) ///
  xtitle("Number of people accomodated") ///
  ytitle("Daily price (USD)") title("") note("") ///
@@ -269,7 +271,7 @@ gen n_days_since3=n_days_since^3
 * Graph not in the textbook
 lowess price n_review_scores_rating , bwidth(0.8) ///
  lineopts(lw(vthick) lc(dkgreen)) ///
- ms(X) msize(vlarge) mlw(thick) mcolor(navy*0.6) ///
+ ms(O)  mlw(thick) mcolor(navy*0.6) ///
  xlab(, grid) yscale(range(1 7)) ylab(, grid) ///
  xtitle("Review score") ///
  ytitle("Daily price (USD)") title("") ///
@@ -284,7 +286,7 @@ outreg2 using "$output/t6", word tex append
 
 * minimum nights
 * Graph not in the textbook
-lowess lnprice n_minimum_nights if n_minimum_nights <5, mc(navy*0.6)
+lowess lnprice n_minimum_nights if n_minimum_nights <5, ms(O) mc(navy*0.6)
 
 reg lnprice n_minimum_nights
 gen f_minimum_nights=1
@@ -305,13 +307,13 @@ esttab using "$output/t_`fval'.tex", cells("count mean(fmt(1)) ") replace title(
 * price by room type: box plots
 * Fig 14.4a
 graph box price if price<300, over(f_room_type) nooutsides
-graph export "$output/ch14-figure-4a-box-bytype-Stata", as(png) replace
+graph export "$output/ch14-figure-4a-box-bytype-Stata.png",  replace
 	
 * price by size and property type: box plots
 * Fig 14.4b
 graph box price if price<400 , over(n_accommodates) by(f_property_type) ///
  nooutsides ylab(0(50)400)
-graph export "$output/ch14-figure-4a-box-byaccom-Stata", as(png) replace
+graph export "$output/ch14-figure-4a-box-byaccom-Stata.png",  replace
 
  
 * price by various feature variables: box plots
@@ -322,41 +324,41 @@ graph bar price, over(f_room) by(d_family) ///
  bar(1, col(navy*0.8)) ylab(0(25)125) ///
  ytitle("Average price (US dollars)") b1title("Room type") ///
  title("By whether family friendly") 
-graph export "$output/ch15-figure-5-bars-1-Stata", as(png) replace
+graph export "$output/ch15-figure-5-bars-1-Stata.png",  replace
 
 graph bar price, over(f_room) by(f_property) ///
  bar(1, col(navy*0.8)) ylab(0(25)125) ///
  ytitle("Average price (US dollars)") b1title("Room type") ///
  title("By property type") 
-graph export "$output/ch15-figure-5-bars-2-Stata", as(png) replace
+graph export "$output/ch15-figure-5-bars-2-Stata.png",  replace
  
 lab val d_family yesno
 graph bar price, over(f_cancel) by(d_family) ///
  bar(1, col(navy*0.8)) ylab(0(25)125) ///
  ytitle("Average price (US dollars)") b1title("Cancellation policy") ///
  title("By whether family friendly") 
-graph export "$output/ch15-figure-5-bars-3-Stata", as(png) replace
+graph export "$output/ch15-figure-5-bars-3-Stata.png",  replace
 
 lab val d_tv yesno
 graph bar price, over(f_cancel) by(d_tv) ///
  bar(1, col(navy*0.8)) ylab(0(25)125) ///
  ytitle("Average price (US dollars)") b1title("Cancellation policy") ///
  title("By whether has TV") 
-graph export "$output/ch15-figure-5-bars-4-Stata", as(png) replace
+graph export "$output/ch15-figure-5-bars-4-Stata.png",  replace
 
 lab val d_cats yesno
 graph bar price, over(f_property) by(d_cats) ///
  bar(1, col(navy*0.8)) ylab(0(25)125) ///
  ytitle("Average price (US dollars)") b1title("Property type") ///
  title("By whether cats are allowed") 
-graph export "$output/ch15-figure-5-bars-5-Stata", as(png) replace
+graph export "$output/ch15-figure-5-bars-5-Stata.png",  replace
 
 lab val d_dogs yesno
 graph bar price, over(f_property) by(d_dogs) ///
  bar(1, col(navy*0.8)) ylab(0(25)125) ///
  ytitle("Average price (US dollars)") b1title("Property type") ///
  title("By whether dogs are allowed") 
-graph export "$output/ch15-figure-5-bars-6-Stata", as(png) replace
+graph export "$output/ch15-figure-5-bars-6-Stata.png",  replace
 
 
 save "$work/airbnb_hackney_workfile.dta" , replace
