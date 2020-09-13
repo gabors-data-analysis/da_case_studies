@@ -1,35 +1,48 @@
-***************************************************************
-* Airline merger
-* Ch 22
-
-* version 2.0.2019-10-01 Redo from scratch
-* version 2.1 2020-01-24 some changes 
-
-
-* WHAT THIS CODES DOES:
-* describes data
-* creates graphs
-* runs didff-in-diff regressions
-
-
-
 ********************************************************************
-* SET YOUR DIRECTORY HERE
-*********************************************************************
-*cd "" /*set your dir*/
-*cd "C:/Users/GB/Dropbox (MTA KRTK)/bekes_kezdi_textbook"
-cd "C:/Users/kezdi/Dropbox/bekes_kezdi_textbook"
- * YOU WILL NEED TWO SUBDIRECTORIES
- * textbook_work --- all the codes
- * cases_studies_public --- for the data
+* Prepared for Gabor's Data Analysis
+*
+* Data Analysis for Business, Economics, and Policy
+* by Gabor Bekes and  Gabor Kezdi
+* Cambridge University Press 2021
+*
+* gabors-data-analysis.com 
+*
+* License: Free to share, modify and use for educational purposes. 
+* 	Not to be used for commercial purposes.
+*
+* Chapter 22
+* CH22A How does a merger between airlines affect prices?
+* using the airline-tickets-usa dataset
+* version 0.9 2020-09-13
+********************************************************************
 
 
-*/
+* SETTING UP DIRECTORIES
 
-global data_in   	"da_data_repo/airline-tickets-usa/clean"
-global data_out  	"da_case_studies/ch22-airline-merger-prices"
-global output 		"da_case_studies/ch22-airline-merger-prices/output"
-clear
+* STEP 1: set working directory for da_case_studies.
+* for example:
+* cd "C:/Users/xy/Dropbox/gabors_data_analysis/da_case_studies"
+cd "C:/Users/kezdi/GitHub/da_case_studies"
+
+
+* STEP 2: * Directory for data
+* Option 1: run directory-setting do file
+do set-data-directory.do 
+							/* this is a one-line do file that should sit in 
+							the working directory you have just set up
+							this do file has a global definition of your working directory
+							more details: gabors-data-analysis.com/howto-stata/   */
+
+* Option 2: set directory directly here
+* for example:
+* global data_dir "C:/Users/xy/gabors_data_analysis/da_data_repo"
+
+
+global data_in  "$data_dir/airline-tickets-usa/clean"
+global work  	"ch22-airline-merger-prices"
+
+cap mkdir 		"$work/output"
+global output 	"$work/output"
 
 
 
@@ -147,7 +160,7 @@ order market year balanced origin-return return_sym airports stops ///
 
 compress
 lab data "Airline diff-in-diffs workfile, T=2, before=2011 after=2016, market=origin + final destination"
-save "$data_out/ch22-airline-workfile.dta" ,replace
+save "$work/ch22-airline-workfile.dta" ,replace
 
 
 
@@ -155,7 +168,7 @@ save "$data_out/ch22-airline-workfile.dta" ,replace
 * DESCRIBE
 * and create d_ln(y)
 
-use "$data_out/ch22-airline-workfile.dta" ,replace
+use "$work/ch22-airline-workfile.dta" ,replace
 
 * describe yearly data
 tabstat passengers, by(year) s(p50 p75 p90 mean sum n) format(%12.0fc)
@@ -177,7 +190,8 @@ tabstat passengers if untreated==1 , by(year) s(mean sum n) format(%12.0fc)
 tabstat passengers if treated==0 & untreated==0 , by(year) s(mean sum n) format(%12.0fc)
 
 * describe outcome
-hist avgprice if before, percent col(navy*0.8) lcol(white) ylab(,grid)
+* graph not in textbook
+hist avgprice if before, percent col(navy*0.8) lcol(white) ylab(,grid) xlab(,grid)
 tabstat avgprice if before, s(min p25 med p75 max mean sd) format(%4.0f)
 
 * investigate if price is zero (can't take log)
@@ -224,12 +238,12 @@ tab after treated [w=pass_bef], sum(lnavgp) mean noobs
 * Examining pre-treatment trends in avg ln price
 
 * use workfile to identify treated and untreated markets
-use "$data_out/ch22-airline-workfile.dta" ,replace
+use "$work/ch22-airline-workfile.dta" ,replace
 keep if balanced==1
 sort market year
 drop if market==L.market 
 keep origin finaldest return treated small
-save "$data_out/ch22-airline-trends",replace
+save "$work/ch22-airline-trends",replace
 
 
 
@@ -238,20 +252,20 @@ save "$data_out/ch22-airline-trends",replace
 *	(keep matched ones; no unmatched from "using")
 
 use "$data_in\originfinal-panel",replace
-merge m:1 origin finaldest return using "$data_out/ch22-airline-trends", keep(3) nogen
+merge m:1 origin finaldest return using "$work/ch22-airline-trends", keep(3) nogen
 
 gen yq=yq(year,quarter)
 format yq %tq
 
-save "$data_out/ch22-airline-trends",replace
+save "$work/ch22-airline-trends",replace
 
 
 * aggreagete data to create average price by treated-untreated and year-quarter
 * and draw time series graphs of log avg price
 * all markets
-use "$data_out/ch22-airline-trends",replace
+use "$work/ch22-airline-trends",replace
 
-collapse (mean) avgprice [w=passengers], by(treated yq)
+collapse (mean) avgprice year quarter [w=passengers], by(treated yq)
 
 gen lnavgprice = ln(avgprice)
 reshape wide avgprice lnavgprice, i(yq) j(treated)
@@ -262,13 +276,17 @@ lab var lnavgprice1 "Treated markets"
 * Figure 22.2
 tsline lnavgprice1 lnavgprice0 ///
  , lw(vthick vthick) lc(green*0.8 navy*0.8) lp(solid solid) ///
-   ylab(5.0(0.1)5.6,grid) tlab(2010q1 (4) 2016q1) tline(2012q1 2015q3) ///
-   ttitle("") ytitle("ln(average price)")
- graph export "$output/ch22-figure-2-pretrends-all-Stata.png",replace
+   ylab(5.0(0.1)5.6,grid) tlab(2010q1 (4) 2016q1) ///
+   tline(2012q1 2015q3, lp(dash)) ///
+   legend(off) ///
+   ttitle("Date (quarters)") ytitle("ln(average price, US dollars)") ///
+   ttext(5.15 2013q1 "Treated markets") ttext(5.44 2013q1 "Untreated markets") ///
+   ttext(5.57 2011q1 "Merger annuounced") ttext(5.57 2014q3 "Merger completed") 
+graph export "$output/ch22-figure-2-pretrends-all-Stata.png",replace
 
 
 * small markets
-use "$data_out/ch22-airline-trends",replace
+use "$work/ch22-airline-trends",replace
 keep if smallmkt==1
 
 collapse (mean) avgprice [w=passengers], by(treated yq)
@@ -282,13 +300,17 @@ lab var lnavgprice1 "Treated markets"
 * Figure 22.3a
 tsline lnavgprice1 lnavgprice0 ///
  , lw(vthick vthick) lc(green*0.8 navy*0.8) lp(solid solid) ///
-   ylab(5.3(0.1)5.6,grid) tlab(2010q1 (4) 2016q1) tline(2012q1 2015q3) ///
-   ttitle("") ytitle("ln(average price)")
- graph export "$output/ch22-figure-3a-pretrends-small-Stata.png",replace
+   ylab(5.3(0.1)5.6,grid) tlab(2010q1 (4) 2016q1) ///
+   tline(2012q1 2015q3, lp(dash)) ///
+   legend(off) ///
+   ttitle("Date (quarters)") ytitle("ln(average price, US dollars)") ///
+   ttext(5.4 2013q1 "Treated markets") ttext(5.58  2013q1 "Untreated markets") ///
+   ttext(5.3 2011q1 "Merger annuounced") ttext(5.3 2014q3 "Merger completed") 
+graph export "$output/ch22-figure-3a-pretrends-small-Stata.png",replace
 
  
 * large markets
-use "$data_out/ch22-airline-trends",replace
+use "$work/ch22-airline-trends",replace
 keep if smallmkt==0
 
 collapse (mean) avgprice [w=passengers], by(treated yq)
@@ -302,9 +324,13 @@ lab var lnavgprice1 "Treated markets"
 * Figure 22.3p
 tsline lnavgprice1 lnavgprice0 ///
  , lw(vthick vthick) lc(green*0.8 navy*0.8) lp(solid solid) ///
-   ylab(3.75(0.25)5.0,grid) tlab(2010q1 (4) 2016q1) tline(2012q1 2015q3) ///
-   ttitle("") ytitle("ln(average price)")
- graph export "$output/ch22-figure-3b-pretrends-large-Stata.png",replace
+   ylab(3.75(0.25)5.0,grid) tlab(2010q1 (4) 2016q1) ///
+   tline(2012q1 2015q3, lp(dash)) ///
+   legend(off) ///
+   ttitle("Date (quarters)") ytitle("ln(average price, US dollars)") ///
+   ttext(4.92 2013q1 "Treated markets") ttext(4.0  2013q1 "Untreated markets") ///
+   ttext(4.5 2011q1 "Merger annuounced") ttext(4.5 2014q3 "Merger completed") 
+graph export "$output/ch22-figure-3b-pretrends-large-Stata.png",replace
 
 
 
@@ -312,7 +338,7 @@ tsline lnavgprice1 lnavgprice0 ///
 * Diff-in-diffs regerssion with confounder variables
 *  weighted by # passengers on market, in before period
 
-use "$data_out/ch22-airline-workfile.dta",replace
+use "$work/ch22-airline-workfile.dta",replace
 keep if balanced==1
 sort market year
 cap gen lnavgp=ln(avgp)
@@ -397,7 +423,7 @@ reg d_lnavgp share_bef $RHS if small==0 [w=pass_bef], robust
 *     because we need pre-treatment covariates and weights (see text)
 *  weighted by # passengers on market, in before period
 
-use "$data_out/ch22-airline-workfile.dta",replace
+use "$work/ch22-airline-workfile.dta",replace
 
 cap gen lnavgp=ln(avgp)
 
