@@ -38,10 +38,12 @@ set matsize 1000
 
 use "$work/airbnb_hackney_workfile.dta" , replace
 count
+keep if price<1000
+count
 
 ************************
 * holdout set, work set
-set seed 6309817
+set seed 6411554
 * create random number
 gen temprand = uniform()
 * first 20% to holdout set, remaining 80% to work set
@@ -50,6 +52,11 @@ gen holdout = temprand<r(c_1)
 gen workset = temprand>=r(c_1)
 tab holdout workset, mis cell
 
+/* 
+Note: The holdout and work sets are different in different software due to
+differences in random number generation. Therefore all results are slightly 
+different in different sofware, too.
+*/
 
 
 ******************
@@ -207,11 +214,6 @@ scatter price phat if holdout==1 & price<=350, ms(o) mc(navy*0.6) ///
  xtitle("Predicted price, (US dollars)") ytitle("Price, (US dollars)") ///
  legend(off) 
 graph export "$output/ch14-figure-8a-yhat-y-Stata.png", replace
-/* 
-Note: The holdout and work sets are different in different software due to
-differences in random number generation. Therefore the yhat - y plots
-are slightly different in the different sofware, too.
-*/
 
 * point and interval predictions by size
 qui reg price $M7 if workset==1
