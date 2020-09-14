@@ -74,7 +74,7 @@ write.csv(data, paste0(data_out, "ch04-wms-work.csv"), row.names = F)
 # Summary
 df %>%
   dplyr::select(management, emp_firm) %>% 
-  summarise_all(funs(min, max, mean, median, sd, n()))
+  summarise_all(tibble::lst(min, max, mean, median, sd, length))
 
 # Histogram
 g1<-ggplot(data = df, aes (x = management)) +
@@ -176,7 +176,7 @@ save_fig("ch04-figure-3b-wms-mex-perf2-emp3bins",output , "small")
 df %>%
   select(emp_firm, emp3bins) %>% 
   group_by(emp3bins) %>% 
-  dplyr::summarise_all(funs(min, max, mean, median, sd, n()))
+  dplyr::summarise_all(tibble::lst(min, max, mean, median, sd, length))
 
 # Recode employee bins
 df$emp3bins <- ifelse(df$emp3bins == 1 , 150, 
@@ -186,7 +186,7 @@ df$emp3bins <- ifelse(df$emp3bins == 1 , 150,
 df %>%
   select(emp_firm, emp3bins) %>% 
   group_by(emp3bins) %>%
-  summarise_all(funs(min, max, mean, median, sd, n()))
+  summarise_all(tibble::lst(min, max, mean, median, sd, length))
 
 # Generate variables by mean
 df1<-df %>% group_by(emp3bins) %>%
@@ -217,7 +217,7 @@ df$emp10bins <- df$emp_firm %>% cut_number(10)
 df_summary<-df %>%
   select(emp_firm, emp10bins) %>% 
   group_by(emp10bins) %>%
-  summarise_all(funs(min, max, mean, median, sd, n()))
+  summarise_all(ftibble::lst(min, max, mean, median, sd, length))
 df_summary
 
 # Recode
@@ -228,7 +228,7 @@ df$emp10bins<-as.numeric(levels(df$emp10bins))[df$emp10bins]
 df %>%
   select(emp_firm, emp10bins) %>% 
   group_by(emp10bins) %>%
-  dplyr::summarise_all(funs(min, max, mean, median, sd, n()))
+  dplyr::summarise_all(tibble::lst(min, max, mean, median, sd, length))
 
 # Generate variables by mean
 df1 <- df %>% group_by(emp10bins) %>% 
