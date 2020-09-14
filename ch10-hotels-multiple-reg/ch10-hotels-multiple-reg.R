@@ -24,6 +24,7 @@ library(tidyverse)
 library(stargazer)
 library(haven)
 library(scales)
+library(lspline)
 
 
 
@@ -117,10 +118,12 @@ stargazer_r(list(reg1, reg2, reg3, reg4), se = 'robust', digits=3, out=paste(out
 
 
 # List of 5 best deals
-df <- data.frame(hotel_id = hotels$hotel_id, price= hotels$price, lnprice_resid=hotels$lnprice_resid, distanc=hotels$distance, stars=hotels$stars, rating=hotels$rating)
-df[order(df$lnprice_resid)[1:5], ]
-#TODO
-# print out nice table
+hotels %>%
+  select(hotel_id, price, lnprice_resid, distance, stars, rating) %>%
+  arrange(lnprice_resid) %>%
+  .[1:5,] %>%
+  as.data.frame() %>% 
+  stargazer(summary= FALSE, digits = 1, out = paste(output,"T10_hotels_best_deals.tex",sep=""))
 
 # y - yhat graph
 y_yhat_hotels<- ggplot(data = hotels, aes(x = lnprice_hat, y = lnprice)) +
