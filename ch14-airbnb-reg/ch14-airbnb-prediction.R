@@ -123,21 +123,6 @@ data <- data %>%
           )
 table(data$flag_days_since)
 
-# redo features
-# Create variables, measuring the time since: squared, cubic, logs
-data <- data %>%
-  mutate(
-    ln_days_since = log(n_days_since+1),
-    ln_days_since2 = log(n_days_since+1)^2,
-    ln_days_since3 = log(n_days_since+1)^3 ,
-    n_days_since2=n_days_since^2,
-    n_days_since3=n_days_since^3,
-    ln_review_scores_rating = log(n_review_scores_rating),
-    ln_days_since=ifelse(is.na(ln_days_since),0, ln_days_since),
-    ln_days_since2=ifelse(is.na(ln_days_since2),0, ln_days_since2),
-    ln_days_since3=ifelse(is.na(ln_days_since3),0, ln_days_since3),
-    )
-
 # Look at data
 skim(data)
 
@@ -193,19 +178,6 @@ g3a <- ggplot(data=datau, aes(x=price)) +
   theme_bg() 
 g3a
 save_fig("ch14-figure-3a-airbnb-price", output, "small")
-
-# lnprice
-g3b<- ggplot(data=datau, aes(x=ln_price)) +
-  geom_histogram_da(type="percent", binwidth = 0.2) +
-  #  geom_histogram(aes(y = (..count..)/sum(..count..)), binwidth = 0.18,
-  #               color = color.outline, fill = color[1], size = 0.25, alpha = 0.8,  show.legend=F,  na.rm=TRUE) +
-  coord_cartesian(xlim = c(2.5, 6.5)) +
-  scale_y_continuous(expand = c(0.00,0.00),limits=c(0, 0.15), breaks = seq(0, 0.15, by = 0.05), labels = scales::percent_format(5L)) +
-  scale_x_continuous(expand = c(0.00,0.01),breaks = seq(2.4,6.6, 0.6)) +
-  labs(x = "ln(price, US dollars)",y = "Percent")+
-  theme_bg() 
-g3b
-save_fig("ch14-figure-3b-airbnb-lnprice", output, "small")
 
 
 
@@ -266,8 +238,6 @@ amenities <-  grep("^d_.*", names(data), value = TRUE)
 # Look for interactions
 ################################################
 
-#FIXME: smaller title, legend text, legend color box
-
 #Look up room type interactions
 p1 <- price_diff_by_variables2(data, "f_room_type", "d_familykidfriendly", "Room type", "Family kid friendly")
 p2 <- price_diff_by_variables2(data, "f_room_type", "f_property_type", "Room type", "Property type")
@@ -302,16 +272,6 @@ modellev5 <- paste0(" ~ ",paste(c(basic_lev,basic_add,reviews,poly_lev,X1),colla
 modellev6 <- paste0(" ~ ",paste(c(basic_lev,basic_add,reviews,poly_lev,X1,X2),collapse = " + "))
 modellev7 <- paste0(" ~ ",paste(c(basic_lev,basic_add,reviews,poly_lev,X1,X2,amenities),collapse = " + "))
 modellev8 <- paste0(" ~ ",paste(c(basic_lev,basic_add,reviews,poly_lev,X1,X2,amenities,X3),collapse = " + "))
-
-# Create models in logs, models: 1-8
-modellog1 <- " ~ ln_accommodates"
-modellog2 <- paste0(" ~ ",paste(basic_log,collapse = " + "))
-modellog3 <- paste0(" ~ ",paste(c(basic_log, basic_add),collapse = " + "))
-modellog4 <- paste0(" ~ ",paste(c(basic_log,basic_add,reviews,poly_log),collapse = " + "))
-modellog5 <- paste0(" ~ ",paste(c(basic_log,basic_add,reviews,poly_log,X1),collapse = " + "))
-modellog6 <- paste0(" ~ ",paste(c(basic_log,basic_add,reviews,poly_log,X1,X2),collapse = " + "))
-modellog7 <- paste0(" ~ ",paste(c(basic_log,basic_add,reviews,poly_log,X1,X2,amenities),collapse = " + "))
-modellog8 <- paste0(" ~ ",paste(c(basic_log,basic_add,reviews,poly_log,X1,X2,amenities,X3),collapse = " + "))
 
 #################################
 # Separate hold-out set #
@@ -350,53 +310,47 @@ folds_i <- sample(rep(1:n_folds, length.out = nrow(data_work) ))
 # Create results
 model_results_cv <- list()
 
-for (type in c("lev","log")) {
-  for (i in (1:8)){
-    model_name <-  paste0("model",type,i)
-    model_pretty_name <- paste0("(",i,")")
 
-    yvar <- ifelse(type=="lev","price","ln_price")
-    xvars <- eval(parse(text = model_name))
-    formula <- formula(paste0(yvar,xvars))
+for (i in (1:8)){
+  model_name <-  paste0("modellev",i)
+  model_pretty_name <- paste0("(",i,")")
 
-    # Initialize values
-    rmse_train <- c()
-    rmse_test <- c()
+  yvar <- "price"
+  xvars <- eval(parse(text = model_name))
+  formula <- formula(paste0(yvar,xvars))
 
-    model_work_data <- lm(formula,data = data_work)
-    BIC <- BIC(model_work_data)
-    nvars <- model_work_data$rank -1
-    r2 <- summary(model_work_data)$r.squared
+  # Initialize values
+  rmse_train <- c()
+  rmse_test <- c()
 
-    # Do the k-fold estimation
-    for (k in 1:n_folds) {
-      test_i <- which(folds_i == k)
-      # Train sample: all except test_i
-      data_train <- data_work[-test_i, ]
-      # Test sample
-      data_test <- data_work[test_i, ]
-      # Estimation and prediction
-      model <- lm(formula,data = data_train)
-      prediction_train <- predict(model, newdata = data_train)
-      prediction_test <- predict(model, newdata = data_test)
+  model_work_data <- lm(formula,data = data_work)
+  BIC <- BIC(model_work_data)
+  nvars <- model_work_data$rank -1
+  r2 <- summary(model_work_data)$r.squared
 
-      # Criteria evaluation
-      if (type=="lev") {
-        rmse_train[k] <- mse_lev(prediction_train, data_train[,yvar] %>% pull)**(1/2)
-        rmse_test[k] <- mse_lev(prediction_test, data_test[,yvar] %>% pull)**(1/2)
-      } else {
-        rmselog <- mse_lev(prediction_train, data_train[,yvar] %>% pull)**(1/2)
-        rmse_train[k] <- mse_log(prediction_train, data_train[,yvar] %>% pull,rmselog)**(1/2)
-        rmse_test[k] <- mse_log(prediction_test, data_test[,yvar] %>% pull,rmselog)**(1/2)
-      }
+  # Do the k-fold estimation
+  for (k in 1:n_folds) {
+    test_i <- which(folds_i == k)
+    # Train sample: all except test_i
+    data_train <- data_work[-test_i, ]
+    # Test sample
+    data_test <- data_work[test_i, ]
+    # Estimation and prediction
+    model <- lm(formula,data = data_train)
+    prediction_train <- predict(model, newdata = data_train)
+    prediction_test <- predict(model, newdata = data_test)
 
-    }
+    # Criteria evaluation
+    rmse_train[k] <- mse_lev(prediction_train, data_train[,yvar] %>% pull)**(1/2)
+    rmse_test[k] <- mse_lev(prediction_test, data_test[,yvar] %>% pull)**(1/2)
 
-    model_results_cv[[model_name]] <- list(yvar=yvar,xvars=xvars,formula=formula,model_work_data=model_work_data,
-                                           rmse_train = rmse_train,rmse_test = rmse_test,BIC = BIC,
-                                           model_name = model_pretty_name, nvars = nvars, r2 = r2)
   }
+
+  model_results_cv[[model_name]] <- list(yvar=yvar,xvars=xvars,formula=formula,model_work_data=model_work_data,
+                                         rmse_train = rmse_train,rmse_test = rmse_test,BIC = BIC,
+                                         model_name = model_pretty_name, nvars = nvars, r2 = r2)
 }
+
 model <- lm(formula,data = data_train)
 prediction_train <- predict(model, newdata = data_train)
 prediction_test <- predict(model, newdata = data_test)
@@ -419,22 +373,15 @@ column_names <- c("Model", "N predictors", "R-squared", "BIC", "Training RMSE",
 # -In sample rmse: average on training data; avg test : average on test data
 
 t14_2 <- t1 %>%
-  filter(grepl("lev",model_name)) %>%
   select("model_pretty_name", "nvars", "r2" , "BIC", "rmse_train", "rmse_test")
 colnames(t14_2) <- column_names
 print(xtable(t14_2, type = "latex", digits=c(0,0,0,2,0,2,2)), file = paste0(output, "ch14_table_fit_level.tex"),
       include.rownames=FALSE, booktabs=TRUE, floating = FALSE)
 
-t14_2_log <- t1 %>%
-  filter(grepl("log",model_name)) %>%
-  select("model_pretty_name", "nvars", "r2" , "BIC", "rmse_train", "rmse_test")
-colnames(t14_2_log) <- column_names
-print(xtable(t14_2_log, type = "latex", digits=c(0,0,0,2,0,2,2)), file = paste0(output, "ch14_table_fit_log.tex"),include.rownames=FALSE, booktabs=TRUE, floating = FALSE)
 
 
 # RMSE training vs test graph
 t1_levels <- t1 %>%
-  filter(grepl("lev",model_name)) %>%
   dplyr::select("nvars", "rmse_train", "rmse_test") %>%
   gather(var,value, rmse_train:rmse_test) %>%
   mutate(nvars2=nvars+1) %>%
@@ -477,7 +424,8 @@ lasso_model <- caret::train(formula,
                       method = "glmnet",
                       preProcess = c("center", "scale"),
                       trControl = train_control,
-                      tuneGrid = tune_grid)
+                      tuneGrid = tune_grid,
+                    na.action=na.exclude)
 
 print(lasso_model$bestTune$lambda)
 
@@ -544,8 +492,6 @@ predictionlev_holdout <- cbind(data_holdout[,c("price","n_accommodates")],
 d <- data.frame(ylev=Ylev, predlev=predictionlev_holdout[,"fit"] )
 # Check the differences
 d$elev <- d$ylev - d$predlev
-
-# NB: you may repeat with logs, watch our for log conversion
 
 # Plot predicted vs price
 level_vs_pred <- ggplot(data = d) +

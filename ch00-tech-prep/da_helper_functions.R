@@ -290,9 +290,9 @@ price_diff_by_variables2 <- function(df, factor_var, dummy_var, factor_lab, dumm
           legend.position = "top",
           #legend.position = c(0.7, 0.9),
           legend.box = "vertical",
-          legend.text = element_text(size = 6),
-          legend.title = element_text(size = 6, face = "bold"),
-          legend.key.size = unit(x = 0.5, units = "cm")
+          legend.text = element_text(size = 5),
+          legend.title = element_text(size = 5, face = "bold"),
+          legend.key.size = unit(x = 0.4, units = "cm")
         )
 }
 
