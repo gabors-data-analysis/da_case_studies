@@ -1,28 +1,36 @@
 # da_case_studies
-**Code for Case Studies in**
 
-**Data Analysis for Business, Economics, and Policy** by Gábor Békés (CEU) and Gábor Kézdi (U. Michigan) 
+**R, Python and Stata code for**  
+**Data Analysis for Business, Economics, and Policy**   
+by Gábor Békés (CEU) and Gábor Kézdi (U. Michigan)   
+Forthcoming in January 2021 by Cambridge University Press  
+[**gabors-data-analysis.com**](https://gabors-data-analysis.com/)
 
-Graduate textbook forthcoming (January 2021) by Cambridge University Press
 
-## Code language versions
-1. **R** -- We used v4.0.2. Install packages `ch00-tech-prep/ch00_install_libraries`. See more [info incluidng package list](https://gabors-data-analysis.com/howto-r/){:target="_blank"}  
-2. **Stata** -- We used version 15, allmost all code should work in version 13 up.
-3. **Python** (in preparation) -- We used Python 3.8.3.
+## How to use
+[Overview of data and code](https://gabors-data-analysis.com/data-and-code/)
 
+## Get data
+[Get data by datasets](https://drive.google.com/drive/folders/1g5j6v_WtB2lQDrSjpfhuw-P4s3Wm7Ucc?usp=sharing)  
+
+## Status (18 September, 2020)
+1. **R** -- All codes ready. Used for graphs in textbook. 
+2. **Stata** -- All codes ready. In the lack of machine learning capabilities, no code for chapters 15,16,17, some limitations for chapter 18.
+3. **Python**  -- Under preparation. Chapters 01-12 ready, chapters 13-24 are under development. Should be ready by early 2021. 
 
 ## Organization
 1. Each case study has a separate folder.
 2. Within case study folders, codes in different languages are simply stored together. 
-3. Some intermediary files (csv, dta, rds) may be saved there, too. 
-4. Currently output is not stored here 
+3. Data should be downloaded and stored in a separate folder. 
 
-## Get data
-[Get data by datasets](https://drive.google.com/drive/folders/1g5j6v_WtB2lQDrSjpfhuw-P4s3Wm7Ucc?usp=sharing)  
-NOTE: Draft version, please do not share. 
-
+## Code language versions
+1. **R** -- We used R 4.0.2. 
+2. **Stata** -- We used version 15, allmost all code should work in version 13 up.
+3. **Python** -- We used Python 3.6.0.
 
 ## How to run case studies in R
+
+Install packages `ch00-tech-prep/ch00_install_libraries`. See more [info incluidng package list](https://gabors-data-analysis.com/howto-r/){:target="_blank"}  
 
 1. Step 1: Set the working directory for your project.
 
