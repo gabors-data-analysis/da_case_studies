@@ -6,7 +6,7 @@
 Graduate textbook forthcoming (January 2021) by Cambridge University Press
 
 ## Code language versions
-1. **R** -- We used v3.6.3, but all code should work in v4.0, but some checks may be needed.
+1. **R** -- We used v4.0.2. Install packages `ch00-tech-prep/ch00_install_libraries`. See more [info incluidng package list](https://gabors-data-analysis.com/howto-r/){:target="_blank"}  
 2. **Stata** -- We used version 15, but raw data is saved in Stata 13 and allmost all code should work in version 13 up.
 3. **Python** (in preparation) -- We used Python 3.8.3.
 
