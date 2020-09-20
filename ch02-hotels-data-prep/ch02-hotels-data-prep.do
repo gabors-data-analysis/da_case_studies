@@ -83,8 +83,8 @@ listtab hotel_id price accommodation_type distance stars rating rating_count if 
 **********************************************
 
 keep if accommodation_type=="Hotel"
+count
 lis hotel_id price distance if _n<=3
-
 
 listtab hotel_id price distance if _n<=3 ///
  using "$output/ch02-table3-hotel-simpletidy-Stata.tex", replace ///
