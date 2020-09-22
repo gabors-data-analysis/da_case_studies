@@ -22,6 +22,7 @@
 * STEP 1: set working directory for da_case_studies.
 * for example:
 * cd "C:/Users/xy/Dropbox/gabors_data_analysis/da_case_studies"
+ cd "C:/Users/kezdi/GitHub/da_case_studies"
 
 * STEP 2: * Directory for data
 * Option 1: run directory-setting do file
@@ -51,13 +52,13 @@ use "$data_in/hrs_height_income.dta",clear
 sum height if age>=55 & age<60 & female==1 
 tab height if height>1.80 & age>=55 & age<60 & female==1 ,mis
 
-count if age>=55 & age<60 & female==1 & height>1.3 & height<2
-sum height if age>=55 & age<60 & female==1 & height>1.3 & height<2
+count if age>=55 & age<60 & female==1 & height>1.3 
+sum height if age>=55 & age<60 & female==1 & height>1.3 
 
 * Histogram with normal density overlayed
 * Figure 3.10
 colorpalette viridis, n(4) select(2) nograph
-hist height if age>=55 & age<60 & female==1 & height>1.3 & height<2.1, ///
+hist height if age>=55 & age<60 & female==1 & height>1.3 , ///
  percent width(0.025) ///
  color(`r(p)') lcol(white) ///
  normal ///
@@ -70,6 +71,12 @@ hist height if age>=55 & age<60 & female==1 & height>1.3 & height<2.1, ///
 
 * Histogram of income and ln income with normal density overlayed
 * Figure 3.11a
+count if age>=55 & age<60 & female==1
+count if age>=55 & age<60 & female==1 & hhincome<1
+count if age>=55 & age<60 & female==1 & hhincome>1000 & hhincome!=.
+count if age>=55 & age<60 & female==1 & hhincome==.
+count if age>=55 & age<60 & female==1 & hhincome>1 & hhincome<1000
+
 colorpalette viridis, n(4) select(2) nograph
 hist hhincome if age>=55 & age<60 & female==1 & hhincome>1 & hhincome<1000, ///
  percent width(20) ///
