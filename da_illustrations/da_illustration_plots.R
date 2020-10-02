@@ -81,7 +81,7 @@ d2 = dt(x, df, ncp = 2.6)
 data <- data.frame(x = x, d = d, d2 = d2)
 ggplot(data = data, aes(x=x, y=d2)) +
   geom_line(size = 0.5, color = color[1]) +
-  geom_area(data = data[data$x< 2,], fill = color[3], alpha=0.7) +
+  geom_area(data = data[data$x< 2,], fill = color[3], alpha=0.8) +
   geom_line(aes(x=x, y=d), size = 0.5, color = color[3]) +
   geom_area(aes(x=x, y=d2), data = data[data$x> 2 , ], fill = color[5], alpha=0.7) +
   
