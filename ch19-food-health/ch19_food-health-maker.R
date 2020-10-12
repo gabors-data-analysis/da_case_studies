@@ -122,11 +122,11 @@ data <- data %>%
 		married = dmdmartl==1 | dmdmartl==6,
 		edu = dmdeduc2,
 		hh_size = dmdhhsiz,
-		hh_income = ifelse( indhhin2==12, 6, indhhin2),
-		hh_income = ifelse( indhhin2==13, 4, indhhin2),
-		hh_income = ifelse( indhhin2==14, 12, indhhin2),
-		hh_income = ifelse( indhhin2==15, 13, indhhin2),
-		hh_income = ifelse( indhhin2>15, NA, indhhin2),
+		hh_income = ifelse( indhhin2==12, 6, hh_size),
+		hh_income = ifelse( indhhin2==13, 4, hh_size),
+		hh_income = ifelse( indhhin2==14, 12, hh_size),
+		hh_income = ifelse( indhhin2==15, 13, hh_size),
+		hh_income = ifelse( indhhin2>15, NA, hh_size),
 		hh_income_usd = recode(indhhin2, !!!hh_income_usd_recode)
 	) %>%
 	mutate(
