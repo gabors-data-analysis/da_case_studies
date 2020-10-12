@@ -1,42 +1,50 @@
-################################################################################
-# DATA ANALYSIS TEXTBOOK
-# Illustration graphs
-
-# v1.0 2020-04-24
-# v1.1 2020-04-25 GK edits
-# v1.2 2020-04-25 GB minor edits
-# v1.3 2020-04-30 GB minor edits
-
+################################################################################################
+# Prepared for the textbook:
+# Data Analysis for Business, Economics, and Policy
+# by Gabor BEKES and  Gabor KEZDI 
+# Cambridge University Press 2021
+# 
+# License: Free to share, modify and use for educational purposes. Not to be used for business purposes.
 #
-################################################################################
+###############################################################################################x
 
+# VARIOUS CHAPTERS
+# Simulations, graphs
+# version 0.91 2020-10-02
+
+
+# ------------------------------------------------------------------------------------------------------
+#### SET UP
+# It is advised to start a new session for every case study
+# CLEAR MEMORY
+rm(list=ls())
+
+# Import libraries
 library(ggplot2)
 library(tidyr)
 library(cowplot)
 
-# CLEAR MEMORY
-rm(list=ls())
+# set working directory
+# option A: open material as project
+# option B: set working directory for da_case_studies
+#           example: setwd("C:/Users/bekes.gabor/Documents/github/da_case_studies/")
+
+# set data dir, data used
+source("set-data-directory.R")             # data_dir must be first defined 
+# alternative: give full path here, 
+#            example data_dir="C:/Users/bekes.gabor/Dropbox (MTA KRTK)/bekes_kezdi_textbook/da_data_repo"
+
+# load theme and functions
+source("ch00-tech-prep/theme_bg.R")
+source("ch00-tech-prep/da_helper_functions.R")
+
+use_case_dir <- "da_illustrations/"
+data_out <- use_case_dir
+output <- paste0(use_case_dir,"output/")
+create_output_if_doesnt_exist(output)
 
 
-################################################################################
-# SET YOUR DIRECTORY HERE
-################################################################################
-# Sets the core parent directory
-current_path = rstudioapi::getActiveDocumentContext()$path 
-dir<-paste0(dirname(dirname(dirname(current_path ))),"/")
-#  dir <- "/Users/zholler/Documents/Private/"
-
-
-output   <- paste0(dir,"da_case_studies/da_illustrations/output/")
-func <- paste0(dir, "da_case_studies/ch00-tech-prep/")
-
-
-#call function
-source(paste0(func, "theme_bg.R"))
-# Created a helper function with some useful stuff
-source(paste0(func, "da_helper_functions.R"))
-
-
+# CHAPTER 06
 
 # ch6-figure-2  ------------------------------------------------------
 df <- 200
@@ -66,27 +74,36 @@ ggplot(data = data, aes(x=x, y=d)) +
 save_fig("ch06-figure-2-hyptest-nulltrue", output, size = "small")
 
 # ch6-figure-3  ------------------------------------------------------
-
-x = seq(-3, 5.5, 0.01)
+x = seq(-3, 6, 0.01)
 d = dt(x, df)
-d2 = dt(x, df, ncp = 2.2)
+d2 = dt(x, df, ncp = 2.6)
 
 data <- data.frame(x = x, d = d, d2 = d2)
 ggplot(data = data, aes(x=x, y=d2)) +
-  geom_line(size = 1, color = color[1]) +
-  geom_area(data = data[data$x< 2,], fill = color[3]) +
-  geom_area(data = data[data$x> 2,], fill = color[5]) +
-  geom_line(aes(x=x, y=d), size = 0.5, color = color[1]) +
+  geom_line(size = 0.5, color = color[1]) +
+  geom_area(data = data[data$x< 2,], fill = color[3], alpha=0.8) +
+  geom_line(aes(x=x, y=d), size = 0.5, color = color[3]) +
+  geom_area(aes(x=x, y=d2), data = data[data$x> 2 , ], fill = color[5], alpha=0.7) +
+  
   geom_vline(xintercept = -2, linetype = "dashed") +
   geom_vline(xintercept = 2, linetype = "dashed", color = color[3]) +
-  annotate(geom = "text", x = 2, y = 0.42 , label = "Alternative", size = 2.5, hjust = -0.1, color = color[3]) +
+  annotate(geom = "text", x = 2.3, y = 0.42 , label = "Alternative is true",  size = 2.0, hjust = -0.1, color = color[1]) +
+  annotate(geom = "text", x = -1.5,   y = 0.42 , label = "If Null were true", size = 2.0, hjust = -0.1, color = color[3]) +
+  annotate(geom = "text", x = -1.0,   y = 0.48 , label = "Critical values", size = 2.0, hjust = -0.1, color = color[3]) +
+  annotate(geom = "segment", x = -1.3, y = 0.48, xend = -2, yend = 0.48, size=0.5, arrow = arrow(length = unit(1, "mm"))) +
+  annotate(geom = "segment", x = 1.3, y = 0.48, xend = 2, yend = 0.48, size=0.5, arrow = arrow(length = unit(1, "mm"))) +
+  annotate(geom = "text", x = 1.2, y = 0.06 , label = "FN", size = 2.5, hjust = -0.1, color = "black") +
+  annotate(geom = "text", x = 3.5, y = 0.06 , label = "TP", size = 2.5, hjust = -0.1, color = "black") +
   labs(y = "", x = "") +
-  scale_y_continuous(expand=c(0,0),limits = c(0,0.45), breaks = c()) +
-  scale_x_continuous( limits = c(-3,5.7)) +
+  scale_y_continuous(expand=c(0,0),limits = c(0,0.50), breaks = c()) +
+  scale_x_continuous( limits = c(-3,6), breaks = c(-2,0,2,4,6)) +
   theme_bg() +
   theme(panel.border = element_blank(), panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"))
 save_fig("ch06-figure-3-hyptest-nulltrue-alttrue", output, size = "small")
+
+
+# CHAPTER 13
 
 
 # ch13-figure-1  ------------------------------------------------------
@@ -142,6 +159,10 @@ ggplot(data = data, aes(x=x, y=live)) +
   background_grid(major="y", minor="none")
 save_fig("ch13-figure-2-overfitting-complexity", output, size = "small")
 
+
+# CHAPTER 22
+
+
 # ch22-figure-1  ------------------------------------------------------
 x = seq(0, 10, 1)
 y = seq(0, 10, 1)
@@ -181,9 +202,8 @@ dev.off()
 
 
 
+# CHAPTER 18
 
-###############################################
-# ch18
 
 # test sets within 
 # t = 1 to 24

@@ -140,7 +140,6 @@ summary(data$price)
 
 
 
-
 #################################
 # Create test and train samples #
 #################################
@@ -164,6 +163,7 @@ data_test <- data %>% filter(train == 0)
 # Regression tree (rpart)
 
 summary(data_train$price)
+summary(data_train$age)
 
 # AGE IS THE ONLY  PREDICTOR VARIABLE
 model1 <- formula(price ~ age)
