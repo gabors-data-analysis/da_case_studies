@@ -13,6 +13,11 @@ Forthcoming in January 2021 by Cambridge University Press
 ## Get data
 [Get data by datasets](https://drive.google.com/drive/folders/1g5j6v_WtB2lQDrSjpfhuw-P4s3Wm7Ucc?usp=sharing)  
 
+## Found an error or have a suggestion.
+Awesome, we know there may be errors. Or just much better ways to do a procedure.
+
+To make a suggestion, please open a github issue here with a title containing the case study name. Cheers!
+
 ## Status (18 September, 2020)
 1. **R** -- All codes ready. Used for graphs in textbook. 
 2. **Stata** -- All codes ready. In the lack of machine learning capabilities, no code for chapters 15,16,17, some limitations for chapter 18.
