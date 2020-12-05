@@ -13,7 +13,7 @@ Forthcoming in January 2021 by Cambridge University Press
 ## Get data
 [Get data by datasets](https://drive.google.com/drive/folders/1g5j6v_WtB2lQDrSjpfhuw-P4s3Wm7Ucc?usp=sharing)  
 
-## Found an error or have a suggestion.
+## Found an error or have a suggestion?
 Awesome, we know there may be errors. Or just much better ways to do a procedure.
 
 To make a suggestion, please open a github issue here with a title containing the case study name. Cheers!
