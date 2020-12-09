@@ -221,6 +221,8 @@ tabstat points_b_7_12 dip points_b_1 if intervention, s(min p25 p75 max mean n) 
 tabstat points_b_7_12 dip points_b_1 if pseudo, s(min p25 p75 max mean n) col(s)
 
 
+* Note: In the textbook (2021 edition) we say  "When there was more than one candidate game within the same season for the same team, we selected the first one in the season."
+* In fact we mean "..., we selected **one in the season randomly**."
 
 * if more such games in a teamXseason, choose one randomly
 egen tempcountpseudo = sum(pseudo), by(team season)
