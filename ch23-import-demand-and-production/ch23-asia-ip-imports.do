@@ -143,13 +143,17 @@ reg dln_ip l(0/4)dln_usa_imports  l(1/2)dln_ip if countrycode=="THA"
 reg dln_ip l(0/4)dln_usa_imports  l(1/2)dln_ip if countrycode=="THA" 
 
 
+* Serial correlation matters because it may lead to biased standard error estimates.
+* We recommended two ways to address this problem: estimate Newey–West standard errors
+* or include the lag of the dependent variable in the regression. 
+
 * long-term coeff, Thailand
 reg dln_ip l(4/4)dln_usa_imports  l(0/3)d.dln_usa_imports  l(1/1)dln_ip  if countrycode=="THA" 
  outreg2 using "$output/ch23-table-1-asia-ip-imports-reg-Stata", dec(2) ctitle(Thailand) 2aster tex(fragment) nonotes append
 * same with newey-west se
 newey dln_ip l(4/4)dln_usa_imports  l(0/3)d.dln_usa_imports  l(1/1)dln_ip  if countrycode=="THA" , lag(4)
 
-* long-term coeff, lagged dy, countries separately
+* long-term coeff, lagged dy, countries separately (with lagged dep var.)
 reg dln_ip l(4/4)dln_usa_imports  l(0/3)d.dln_usa_imports  l(1	/1)dln_ip  if countrycode=="THA" 
  outreg2 using "$output/ch23-table-1-asia-ip-imports-reg-Stata", dec(3) ctitle(Thailand) 2aster tex(fragment) nonotes keep(l(4/4).dln_usa_imports l(1/1)dln_ip ) replace
 reg dln_ip l(4/4)dln_usa_imports  l(0/3)d.dln_usa_imports  l(1/1)dln_ip  if countrycode=="MYS" 
