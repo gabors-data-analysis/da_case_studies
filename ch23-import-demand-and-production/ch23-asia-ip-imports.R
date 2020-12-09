@@ -218,16 +218,16 @@ dlnusaimp
 
 
 # Thailand
-lags_helper <- paste(paste0("lag(dln_usa_imports,", c(0:4), ")"), collapse = " + ")
-lags_helper2 <- paste(paste0("lag(dln_ip,", c(1:2), ")"), collapse = " + ")
+lags_usa <- paste(paste0("lag(dln_usa_imports,", c(0:4), ")"), collapse = " + ")
+lags_ip <- paste(paste0("lag(dln_ip,", c(1:2), ")"), collapse = " + ")
 
-thai_formula <- as.formula(paste0("dln_ip ~ ", lags_helper, " + ",lags_helper2))
+thai_formula <- as.formula(paste0("dln_ip ~ ", lags_usa, " + ",lags_ip))
 
 thai_reg <- lm(thai_formula, data = filter(work, countrycode=="THA"))
 
 # long-term coeff, lagged dy, countries separately
-lags_helper <- paste(paste0("lag(ddln_usa_imports,", c(0:3), ")"), collapse = " + ")
-lt_formula <- as.formula(paste0("dln_ip ~ lag(dln_usa_imports, 4) + ", lags_helper, " + lag(dln_ip, 1)"))
+lags_usa <- paste(paste0("lag(ddln_usa_imports,", c(0:3), ")"), collapse = " + ")
+lt_formula <- as.formula(paste0("dln_ip ~ lag(dln_usa_imports, 4) + ", lags_usa, " + lag(dln_ip, 1)"))
 
 tha_reg_lt <- lm(lt_formula, data = filter(work, countrycode=="THA"))
 mys_reg_lt <- lm(lt_formula, data = filter(work, countrycode=="MYS"))
@@ -235,7 +235,7 @@ phl_reg_lt <- lm(lt_formula, data = filter(work, countrycode=="PHL"))
 sgp_reg_lt <- lm(lt_formula, data = filter(work, countrycode=="SGP"))
 
 # long-term coeff, lagged dy, countries pooled
-lt_formula_pooled <- as.formula(paste0("dln_ip ~ lag(dln_usa_imports, 4) + ", lags_helper, " + lag(dln_ip, 1) + cc"))
+lt_formula_pooled <- as.formula(paste0("dln_ip ~ lag(dln_usa_imports, 4) + ", lags_usa, " + lag(dln_ip, 1) + cc"))
 pooled_reg_lt <- lm(lt_formula_pooled, data = work)
 
 
