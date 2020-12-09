@@ -1,59 +1,66 @@
-#*********************************************************************
-# DATA ANALYSIS TEXTBOOK
-# CH 23 IMPORT DEMAND AND PRODUCTION
-# 
+#########################################################################################
+# Prepared for Gabor's Data Analysis
+#
+# Data Analysis for Business, Economics, and Policy
+# by Gabor Bekes and  Gabor Kezdi
+# Cambridge University Press 2021
+#
+# gabors-data-analysis.com 
+#
+# License: Free to share, modify and use for educational purposes. 
+# 	Not to be used for commercial purposes.
 
-#  v1.0 2020-02-03 draw only the graphs (data: work.dta)
-#  v1.1 2020-03-01 added feature engineering part & panel setup (data: asia-industry_tidy.dta)
-#  v1.2 2020-04-07 errors corrected
-#  v1.3 2020-04-20 labels edited
-#  v1.4 2020-04-22 names ok
-#  v1.5 2020-04-28 label edits
-#  v1.6 2020-04-30 label edits
-
-#*********************************************************************
-# WHAT THIS CODES DOES:
-##  
+# Chapter 23
+# CH23A Import demand and industrial production
+# using the asia-industry dataset
+# version 0.9 2020-12-09
+#########################################################################################
 
 
 # clear environment
 rm(list=ls())
 
 # Libraries
-library(readstata13)
-library(dplyr)
-library(tidyr)
-library(ggplot2)
+library(tidyverse)
+library(haven)
+library(estimatr)
+library(huxtable)
 library(Hmisc)
-library(zoo)
-library(lubridate)
-library(fpp3)
+library(modelsummary)
+
+# set data dir, data used
+source("set-data-directory.R")             # data_dir must be first defined 
+
+# option A: open material as project
+# option B: set working directory for da_case_studies
+#           example: setwd("C:/Users/bekes.gabor/Documents/github/da_case_studies/")
+
+# load theme and functions
+source("ch00-tech-prep/theme_bg.R")
+source("ch00-tech-prep/da_helper_functions.R")
+options(digits = 3)
+
+data_in <- paste(data_dir,"asia-industry","clean/", sep = "/")
+use_case_dir <- "ch23-import-demand-and-production/"
+
+data_out <- use_case_dir
+output <- paste0(use_case_dir,"output/")
+create_output_if_doesnt_exist(output)
 
 
-# Set directories ---------------------------------------------------------
-# Sets the core parent directory
-current_path = rstudioapi::getActiveDocumentContext()$path 
-dir<-paste0(dirname(dirname(dirname(current_path ))),"/")
 
-data_in <- paste0(dir,"da_data_repo/asia-industry/clean/")
-data_out <-  paste0(dir,"da_case_studies/ch23-import-demand-and-production/")
-output <-  paste0(dir,"da_case_studies/ch23-import-demand-and-production/output/")
-func <-  paste0(dir,"da_case_studies/ch00-tech-prep/")
+# ------------------------------------------------------------------------------------------------------
 
-#call function
-source(paste0(func, "theme_bg.R"))
-source(paste0(func, "da_helper_functions.R"))
 
 
 # import data
-raw <- read.dta13(paste0(data_in,'asia-industry_tidy.dta'))
+# raw <- read.dta13(paste0(data_in,'asia-industry_tidy.dta'))
+raw <- read_dta(paste(data_in, 'asia-industry_tidy.dta', sep = ""))
 
 data <- raw %>%
-  filter(year >= 1998)
-
-data <- data[!(data$year==1998 & data$month==1),]
-data <- data[!(data$year==2018 & data$month > 4),]
-
+  filter(year >= 1998) %>%
+  filter(!(year==1998 & month==1)) %>%
+  filter(!(year==2018 & month > 4))
 
 data %>%
   group_by(countrycode) %>%
@@ -74,7 +81,7 @@ data <- data %>%
   mutate(temp1 = ifelse(countrycode=='USA',ind_prod_const_sa, 0), 
          usa_ip_sa = max(temp1), 
          temp2 = ifelse(countrycode == 'CHN', ind_prod_const_sa, 0), 
-        chn_ip_sa = max(temp2)) %>%
+         chn_ip_sa = max(temp2)) %>%
   dplyr::select(-temp1, -temp2)
 
 data <- data %>%
@@ -94,39 +101,29 @@ data %>%
   count()
 
 # panel setup
-# encode country , gen(cc)
-# sort cc time
-# tsset cc time
 data <- data %>%
-  mutate(cc=as.factor(countrycode))
-
+  mutate(
+    cc= factor(countrycode, levels = c("THA", "MYS", "PHL", "SGP"), labels = c("Thailand" ,"Malaysia", "Philippines", "Singapore")),
+    date = lubridate::make_date(year, month, 1)
+  )
 
 # lagged variables
 work <- data %>%
-  arrange(cc, time) 
-
-work <- work %>%
+  arrange(cc, date)  %>%
   group_by(cc) %>%
   mutate(
-    dln_ip =            difference(ln_ip,          lag=1, order_by = time),
-    dln_usa_ip =        difference(ln_usa_ip,      lag=1, order_by = time),
-    dln_chn_ip =        difference(ln_chn_ip,      lag=1, order_by = time),
-    dln_usa_imports =   difference(ln_usa_imports, lag=1, order_by = time),
-    dln_er_usd =        difference(ln_er_usd,      lag=1, order_by = time)
-    ) %>%
+    dln_ip = ln_ip - lag(ln_ip),
+    dln_usa_ip = ln_usa_ip - lag(ln_usa_ip),
+    dln_chn_ip = ln_chn_ip - lag(ln_chn_ip),
+    dln_usa_imports = ln_usa_imports - lag(ln_usa_imports),
+    ddln_usa_imports = dln_usa_imports - lag(dln_usa_imports),
+    dln_er_usd = ln_er_usd - lag(ln_er_usd)
+  ) %>%
   ungroup()
-
 
 work %>%
   group_by(countrycode) %>%
   dplyr::summarise(mean=mean(dln_ip, na.rm = TRUE))
-
-
-# create time variables
-work$Date <- with(work, sprintf("%d-%02d", year, month))
-work <- work %>%
-  mutate(date=parse_date_time(Date, orders='ym'),
-         ym=format(date, '%b%Y')) 
 
 
 work %>%
@@ -162,7 +159,7 @@ lnip_THA
 save_fig("ch23-figure-1a-thai-lnip", output, "small")
 
 dlnip_THA <- ggplot(data=work, aes(x=as.Date(date), y=dln_ip))+
-    geom_line(data=subset(work[work$country=='Thailand', ]), color=color[1], size=0.4) +
+  geom_line(data=subset(work[work$country=='Thailand', ]), color=color[1], size=0.4) +
   theme_bg() +
   xlab("Date (month)") +
   ylab('Change ln(Thai industrial prod., bn US dollars)') +
@@ -191,7 +188,7 @@ lnusaimp <- ggplot(data=work, aes(x=as.Date(date), y=ln_usa_imports))+
                                   "2006-01-01 UTC", "2010-01-01 UTC",
                                   "2014-01-01 UTC","2018-01-01 UTC"))) +
   geom_vline(xintercept = as.Date('2008-11-01 UTC'), linetype="dashed",  color=color[3], size=0.5)+
-    annotate('text',size=2, color=color[3], label='2008-09 crisis', y=11.5, x=as.Date('2008-07-01 UTC'), angle=90)
+  annotate('text',size=2, color=color[3], label='2008-09 crisis', y=11.5, x=as.Date('2008-07-01 UTC'), angle=90)
 lnusaimp
 #save_fig("ch23_lnusaimp", output, "small")
 save_fig("ch23-figure-1b-usa-lnimp", output, "small")
@@ -207,16 +204,58 @@ dlnusaimp <- ggplot(data=work, aes(x=as.Date(date), y=dln_usa_imports))+
   scale_x_date(date_labels = '%b%Y', 
                breaks = as.Date(c("1998-01-01 UTC","2002-01-01 UTC",
                                   "2006-01-01 UTC", "2010-01-01 UTC",
-                                   "2014-01-01 UTC","2018-01-01 UTC"))) +
+                                  "2014-01-01 UTC","2018-01-01 UTC"))) +
   geom_vline(xintercept = as.Date('2008-11-01 UTC'), linetype="dashed",  color=color[3], size=0.5)+
   annotate('text', size=2, color=color[3], label='2008-09 crisis', y=-0.10, x=as.Date('2008-06-01 UTC'), angle=90)
 dlnusaimp
 #save_fig("ch23_dlnusaimp", output, "small")
 
+# REGRESSIONS
+
+# Serial correlation matters because it may lead to biased standard error estimates.
+# We recommended two ways to address this problem: estimate Newey–West standard errors
+# or include the lag of the dependent variable in the regression. (Used here.)
+
+
+# Thailand
+lags_helper <- paste(paste0("lag(dln_usa_imports,", c(0:4), ")"), collapse = " + ")
+lags_helper2 <- paste(paste0("lag(dln_ip,", c(1:2), ")"), collapse = " + ")
+
+thai_formula <- as.formula(paste0("dln_ip ~ ", lags_helper, " + ",lags_helper2))
+
+thai_reg <- lm(thai_formula, data = filter(work, countrycode=="THA"))
+
+# long-term coeff, lagged dy, countries separately
+lags_helper <- paste(paste0("lag(ddln_usa_imports,", c(0:3), ")"), collapse = " + ")
+lt_formula <- as.formula(paste0("dln_ip ~ lag(dln_usa_imports, 4) + ", lags_helper, " + lag(dln_ip, 1)"))
+
+tha_reg_lt <- lm(lt_formula, data = filter(work, countrycode=="THA"))
+mys_reg_lt <- lm(lt_formula, data = filter(work, countrycode=="MYS"))
+phl_reg_lt <- lm(lt_formula, data = filter(work, countrycode=="PHL"))
+sgp_reg_lt <- lm(lt_formula, data = filter(work, countrycode=="SGP"))
+
+# long-term coeff, lagged dy, countries pooled
+lt_formula_pooled <- as.formula(paste0("dln_ip ~ lag(dln_usa_imports, 4) + ", lags_helper, " + lag(dln_ip, 1) + cc"))
+pooled_reg_lt <- lm(lt_formula_pooled, data = work)
+
+
 #ch23-table-1-asia-reg
-
-  
-
+huxreg(
+  list(
+    "Thailand" = tha_reg_lt, 
+    "Malaysia" = mys_reg_lt, 
+    "Philippines" = phl_reg_lt,
+    "Singapore" = sgp_reg_lt,
+    "Pooled" = pooled_reg_lt
+  ), 
+  statistics = c(Observations = "nobs", R2 = "r.squared"), 
+  coefs = c(
+    "USA imports log change, cumulative coeff." = "lag(dln_usa_imports, 4)", 
+    "Industrial production log change, lag" = "lag(dln_ip, 1)", 
+    "Malaysia" = "ccMalaysia", 
+    "Philippines" = "ccPhilippines", 
+    "Singapore" = "ccSingapore", 
+    "Constant" = "(Intercept)"  ))
 
 
 
