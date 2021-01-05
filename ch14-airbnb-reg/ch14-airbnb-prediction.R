@@ -13,7 +13,7 @@
 # Chapter 14
 # CH14B Predicting AirBnB apartment prices: selecting a regression model
 # using the airbnb dataset
-# version 0.9 2020-09-09
+# version 0.91 2020-01-05
 #########################################################################################
 
 
@@ -86,7 +86,7 @@ to_filter <- sapply(data, function(x) sum(is.na(x)))
 to_filter[to_filter > 0]
 
 # what to do with missing values?
-# 1. drop if no target
+# 1. drop if no target (already did)
 data <- data %>%
   drop_na(price)
 
@@ -124,7 +124,7 @@ data <- data %>%
 table(data$flag_days_since)
 
 # Look at data
-skim(data)
+summary(data$price)
 
 # where do we have missing variables now?
 to_filter <- sapply(data, function(x) sum(is.na(x)))
@@ -136,9 +136,14 @@ to_filter[to_filter > 0]
 ###################################
 
 # Decision
-# Size, we need a normal apartment
+# Size, we need a normal apartment, 1-7persons, below 500 USD
 data <- data %>%
-  filter(n_accommodates < 8)
+  filter(n_accommodates < 8,
+         price<500)
+# N=4393
+
+# that's gonna be our sample
+skimr::skim(data)
 
 # save workfile
 write.csv(data, paste0(data_out, "airbnb_hackney_work.csv"), row.names = F)
@@ -159,13 +164,13 @@ data %>%
 
 Hmisc::describe(data$price)
 
-# NB all graphs, we exclude 4 extreme values of price
+# NB all graphs, we exclude  extreme values of price
+datau <- subset(data, price<400)
 
-## Distribution of price by type below 400
-datau <- subset(data, price<=400)
+
+# Distribution of price by type below 400
 
 # Histograms
-
 # price
 g3a <- ggplot(data=datau, aes(x=price)) +
   geom_histogram_da(type="percent", binwidth = 10) +
@@ -178,6 +183,19 @@ g3a <- ggplot(data=datau, aes(x=price)) +
   theme_bg() 
 g3a
 save_fig("ch14-figure-3a-airbnb-price", output, "small")
+
+# lnprice
+g3b<- ggplot(data=datau, aes(x=ln_price)) +
+  geom_histogram_da(type="percent", binwidth = 0.2) +
+  #  geom_histogram(aes(y = (..count..)/sum(..count..)), binwidth = 0.18,
+  #               color = color.outline, fill = color[1], size = 0.25, alpha = 0.8,  show.legend=F,  na.rm=TRUE) +
+  coord_cartesian(xlim = c(2.5, 6.5)) +
+  scale_y_continuous(expand = c(0.00,0.00),limits=c(0, 0.15), breaks = seq(0, 0.15, by = 0.05), labels = scales::percent_format(5L)) +
+  scale_x_continuous(expand = c(0.00,0.01),breaks = seq(2.4,6.6, 0.6)) +
+  labs(x = "ln(price, US dollars)",y = "Percent")+
+  theme_bg() 
+g3b
+save_fig("ch14-figure-3b-airbnb-lnprice", output, "small")
 
 
 
