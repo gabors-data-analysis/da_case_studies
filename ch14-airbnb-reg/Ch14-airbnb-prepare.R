@@ -13,7 +13,7 @@
 # Chapter 14
 # CH14B Predicting AirBnB apartment prices: selecting a regression model
 # using the airbnb dataset
-# version 0.9 2020-09-09
+# version 0.91 2021-01-04
 #########################################################################################
 
 
@@ -137,12 +137,16 @@ dnames_i <- match(dnames, colnames(data))
 colnames(data)[dnames_i] <- paste0("d_", tolower(gsub("[^[:alnum:]_]", "",dummies)))
 # keep columns if contain d_, n_,f_, p_, usd_ and some others
 data <- data %>%
-  select(matches("^d_.*|^n_.*|^f_.*|^p_.*|^usd_.*"), price,
+  select(matches("^d_.*|^n_.*|^f_.*|^p_.*|^usd_.*"), price, id,
          neighbourhood_cleansed,cancellation_policy,room_type,property_type)
+
+# with price info only
+data <- data %>%
+  drop_na(price)
 
 write_csv(data, paste0(data_out, "airbnb_london_workfile.csv"))
 
-
+library(skimr)
 ##################################
 # DESCRIBE
 
@@ -155,6 +159,7 @@ write_csv(data, paste0(data_out, "airbnb_hackney_workfile.csv"))
 N=nrow(data)
 N
 # N=4499
+
 
 #
 #####################
