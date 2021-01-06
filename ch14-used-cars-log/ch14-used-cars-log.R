@@ -190,7 +190,7 @@ eval <- data.frame(models, k, RSquared, RMSE, BIC)
 eval <- eval %>%
   mutate(models = paste0("(",gsub("reg","",models),")")) %>%
   rename(Model = models, "R-squared" = RSquared, "Training RMSE" = RMSE, "N predictors" = k)
-stargazer(eval, summary = F, out=paste(output,"Ch14_bicrmselog_R.tex",sep=""), digits=2, float = F, no.space = T)
+# stargazer(eval, summary = F, out=paste(output,"Ch14_bicrmselog_R.tex",sep=""), digits=2, float = F, no.space = T)
 
 
 #################################################################
@@ -235,8 +235,8 @@ cv_matlog <- data.frame(rbind(cv1log$resample[4], "Average"),
 colnames(cv_matlog)<-c("Resample","Model1log", "Model2log", "Model3log", "Model4log", "Model5log")
 cv_matlog
 
-stargazer(cv_matlog, summary = F, digits=3, float=F, out=paste(output,"Ch14_cvmatlog_R.tex",sep=""))
-stargazer(cv_matlog, summary = F, digits=3, float=F, type="text",  out=paste(output,"Ch14_cvmatlog_R.txt",sep=""))
+#stargazer(cv_matlog, summary = F, digits=3, float=F, out=paste(output,"Ch14_cvmatlog_R.tex",sep=""))
+#stargazer(cv_matlog, summary = F, digits=3, float=F, type="text",  out=paste(output,"Ch14_cvmatlog_R.txt",sep=""))
 
 
 
@@ -316,5 +316,7 @@ sum
 stargazer(sum, out=paste(output,"Ch14_levlog80_R.tex",sep=""), type = "latex", float=F, digits=2)
 stargazer(sum, out=paste(output,"Ch14_levlog80_R.txt",sep=""), type = "text", digits=2)
 
+
+# These two tables are merged into ch14-table-1-levlog-pred.tex
 
 ################################################################################

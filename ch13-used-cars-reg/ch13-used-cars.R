@@ -10,7 +10,7 @@
 
 # CHAPTER 13
 # CH11 Used cars
-# version 0.9.1 2020-09-04
+# version 0.9.2 2021-01-06
 
 
 # ------------------------------------------------------------------------------------------------------
@@ -278,7 +278,7 @@ for ( i in 1:length(models)){
 # Linear regression evaluation
 
 # Model 1
-stargazer(regr[[1]],  out=paste(output,"Ch13_reg_age_R.tex",sep=""), digits=2, float = F, no.space = T)
+#stargazer(regr[[1]],  out=paste(output,"Ch13_reg_age_R.tex",sep=""), digits=2, float = F, no.space = T)
 
 # Lowess vs. quadratic (reg1) regression
 Ch13_p_age_quad_vs_lowess_R <- ggplot(data = data, aes(x=age)) +
@@ -303,18 +303,18 @@ eval <- data.frame(models, k, RSquared, RMSE, BIC)
 eval <- eval %>%
   mutate(models = paste0("(",gsub("reg","",models),")")) %>%
   rename(Model = models, "R-squared" = RSquared, "Training RMSE" = RMSE, "N predictors" = k)
-stargazer(eval, summary = F, out=paste(output,"Ch13_bicrmse_R.tex",sep=""), digits=2, float = F, no.space = T)
-
+stargazer(eval, summary = F, out=paste(output,"ch13-table-4-bicrmse.tex",sep=""), digits=2, float = F, no.space = T)
+# old name: Ch13_bicrmse_R.tex
 # models 1-4 only, 5 too large
 
 # TODO 
 # use stargazer_r to get robust se
 # could be made nicer, also not producing it here
 stargazer_r(list(reg1, reg2, reg3, reg4 ), float=F, se = 'robust', digits=2, dep.var.caption = "Dep. var: price", keep.stat = c("rsq","n"),
-            out=paste0(output,"Ch13_multireg1_R.tex",sep=""), no.space = T)
+            out=paste0(output,"ch13-table-2-multireg1.tex",sep=""), no.space = T)
 stargazer(reg1, reg2, reg3, reg4 , align = T,   digits=2, dep.var.caption = "Dep. var: price", keep.stat = c("rsq","n"),
-            type="text", title = "Cars - regression", out=paste0(output,"Ch13_multireg1_R.text",sep=""), no.space = T)
-
+            type="text", title = "Cars - regression", out=paste0(output,"ch13-table-2-multireg1.txt",sep=""), no.space = T)
+# old name: Ch13_multireg1_R.tex
 
 #################################################################
 # Cross-validation
@@ -357,9 +357,11 @@ cv_mat <- data.frame(rbind(cv1$resample[4], "Average"),
 colnames(cv_mat)<-c("Resample","Model1", "Model2", "Model3", "Model4", "Model5")
 cv_mat
 
-stargazer(cv_mat, summary = F, digits=0, float=F, out=paste(output,"Ch13_cvmat_R.tex",sep=""))
-stargazer(cv_mat, summary = F, digits=0, float=F, type="text",  out=paste(output,"Ch13_cvmat_R.txt",sep=""))
+stargazer(cv_mat, summary = F, digits=0, float=F, out=paste(output,"ch13-table-5-cvmat.tex",sep=""))
+stargazer(cv_mat, summary = F, digits=0, float=F, type="text",  out=paste(output,"ch13-table-5-cvmat.txt",sep=""))
+# old name: Ch13_cvmat_R
 
+# NB THIS IS SLIGHTLY DIFFERENT TO ONE IN TEXTBOOK (DIFFERENT SEED)
 
 ###############################################################################
 # Prediction
@@ -406,8 +408,9 @@ rownames(sum1) <- c('Predicted', 'PI_low (95%)', 'PI_high (95%)')
 
 sum1
 
-stargazer(sum1, summary = F, digits=0, float=F, out=paste(output,"Ch13_pred_R.tex",sep=""))
-stargazer(sum1, summary = F, digits=0, float=F, type="text",  out=paste(output,"Ch13_pred_R.txt",sep=""))
+stargazer(sum1, summary = F, digits=0, float=F, out=paste(output,"ch13-table-3-pred-new.tex",sep=""))
+stargazer(sum1, summary = F, digits=0, float=F, type="text",  out=paste(output,"ch13-table-3-pred-new.txt",sep=""))
+# old name: Ch13_pred_R.txt
 
 # prediction
 
@@ -425,10 +428,8 @@ colnames(sum2) <- c('Model1', 'Model3')
 rownames(sum2) <- c('Predicted', 'PI_low (80%)', 'PI_high (80%)')
 sum2
 
-stargazer(sum2, summary = F, digits=0, float=F, out=paste(output,"Ch13_pred80_R.tex",sep=""))
-stargazer(sum2, summary = F, digits=0, float=F, type="text",  out=paste(output,"Ch13_pred80_R.txt",sep=""))
+ stargazer(sum2, summary = F, digits=0, float=F, out=paste(output,"ch13-table-3-pred-new80.tex",sep=""))
+ stargazer(sum2, summary = F, digits=0, float=F, type="text",  out=paste(output,"ch13-table-3-pred-new80.txt",sep=""))
 
-#ch13-table-2-multireg1
-#ch13-table-3-pred-new
-#ch13-table-4-bicrmse
-#ch13-table-5-cvmat
+ # in book sum1 and sum2 are combined in Table 3
+ 
