@@ -11,7 +11,7 @@ Forthcoming in January 2021 by Cambridge University Press
 [Overview of data and code](https://gabors-data-analysis.com/data-and-code/)
 
 ## Get data
-[Get data by datasets](https://drive.google.com/drive/folders/1g5j6v_WtB2lQDrSjpfhuw-P4s3Wm7Ucc?usp=sharing)  
+[Get data by datasets](https://osf.io/7epdj/)  
 
 ## Found an error or have a suggestion?
 Awesome, we know there may be errors. Or just much better ways to do a procedure.
