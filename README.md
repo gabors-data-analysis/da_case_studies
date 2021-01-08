@@ -11,7 +11,7 @@ Forthcoming in January 2021 by Cambridge University Press
 [Overview of data and code](https://gabors-data-analysis.com/data-and-code/)
 
 ## Get data
-[Get data by datasets](https://drive.google.com/drive/folders/1g5j6v_WtB2lQDrSjpfhuw-P4s3Wm7Ucc?usp=sharing)  
+[Get data by datasets](https://osf.io/7epdj/)  
 
 ## Found an error or have a suggestion?
 Awesome, we know there may be errors. Or just much better ways to do a procedure.
@@ -35,15 +35,14 @@ To make a suggestion, please open a github issue here with a title containing th
 
 ## How to run case studies in R
 
-Install packages `ch00-tech-prep/ch00_install_libraries`. See more [info incluidng package list](https://gabors-data-analysis.com/howto-r/){:target="_blank"}  
+Install packages `ch00-tech-prep/ch00_install_libraries`. [More info](https://gabors-data-analysis.com/howto-r/)
 
 1. Step 1: Set the working directory for your project.
 
 	- Option 1: [Recommended] In case you use `RStudio` create a new `Rstudio` project for the case studies and load it every time you are working on the project. See the [official documentation](https://support.rstudio.com/hc/en-us/articles/200526207-Using-Projects) on how to create and use `Rstudio` projects.
 	- Option 2: Make sure some other way that your working directory is the root folder of the case study repository.
 
-2. Step 2: Change set-data-directory file to include your actual folder containing the data
-make sure some other way that this `.Renviron` file is processed.
+2. Step 2: Change set-data-directory file to include your actual folder containing the data make sure some other way that this `.Renviron` file is processed.
 
 ## How to run case studies in Stata
 
