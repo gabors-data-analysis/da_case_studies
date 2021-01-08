@@ -13,7 +13,7 @@
 # CHAPTER 18
 # CH18B Forecasting a home price index
 # case-schiller-la dataset
-# version 0.9 2020-09-06
+# version 0.91 2020-01-08
 #########################################################################################
 
 
@@ -77,26 +77,30 @@ get_MSE_from_forecast <- function(forecast, groupby = c(".id", ".model")){
 #############################
 #load data
 
-data <- read_rds(paste0(data_in,"houseprices-data-1990-2018-f.rds")) 
-
-  
-
+data <- read_rds(paste0(data_in,"houseprices-data-1990-2018-f.rds"))
+#%>%
+#as.data.frame() %>%
+#mutate(date = yearmonth(date)) %>%
+#as_tsibble(index = date)
 
 data <- data %>%
   filter(date>="2000-01-01" & date<"2018-01-01")
- # 18 years data
- # 1 year holdout
- # 4 years of test
- # 13 years of train (rolling window)
-
+# 18 years data
+# 1 year holdout
+# 4 years of test
+# 13 years of train (rolling window)
+#data <- data %>% mutate(date = yearmonth(date))
 # pick if seasonal or non seasonal version used, will be cut later
 # here we pick pn, not seasonally adjusted
+
+data <- data %>% mutate(date = yearmonth(date))
+
 data <- data %>%
   mutate(
     p=pn,
     u=us,
     emp=emps
-      )
+  )
 
 data <- data %>%
   mutate(
@@ -123,7 +127,7 @@ data <- data %>%
 
 
 # Plot price index
-price_index_plot <- ggplot(data = data, aes(x = date, y = p))+
+price_index_plot <- ggplot(data = data, aes(x = as.Date(date), y = p))+
   geom_line_da() +
   ylab("Case-shiller Price index") +
   xlab("Date (month)") +
@@ -139,7 +143,7 @@ save_fig("ch18-figure-8-cs-tseries-p", output, "small")
 
 
 # Plot log difference of price index
-dp_plot <- ggplot(data = data, aes(x = date, y = dp))+
+dp_plot <- ggplot(data = data, aes(x = as.Date(date), y = dp))+
   geom_line_da() +
   ylab("First difference of price index") +
   xlab("Date (month)") +
@@ -151,7 +155,7 @@ dp_plot
 
 
 # Plot log difference of price index
-dlnp_plot <- ggplot(data = data, aes(x = date, y = dlnp))+
+dlnp_plot <- ggplot(data = data, aes(x = as.Date(date), y = dlnp))+
   geom_line_da() +
   ylab("Log first difference of price index") +
   xlab("Date (month)") +
@@ -168,11 +172,11 @@ dlnp_plot
 #############################
 
 # Plot employment
-emp_plot<-ggplot(data = data, aes(x = date, y = emp))+
+emp_plot<-ggplot(data = data, aes(x = as.Date(date), y = emp))+
   geom_line_da() +
   ylab("Employment (in thousands)") +
   xlab("Date (month)") +
-#  scale_y_continuous(limits = c(10000,18000), breaks = seq(10000,18000,2000)) +
+  #  scale_y_continuous(limits = c(10000,18000), breaks = seq(10000,18000,2000)) +
   scale_x_date(expand = c(0.01, 0.01),   breaks = as.Date(c("2000-01-01", "2003-01-01", "2006-01-01",  "2009-01-01", "2012-01-01", "2015-01-01", "2018-01-01")),  labels = date_format("%b%Y")) +
   theme_bg()
 emp_plot
@@ -181,7 +185,7 @@ save_fig("ch18-figure-10c-cs-tseries-emp", output, "small")
 
 
 # Plot log diff employment
-ldemp_plot<- ggplot(data = data, aes(x = date, y = dlnemp))+
+ldemp_plot<- ggplot(data = data, aes(x = as.Date(date), y = dlnemp))+
   geom_line_da() +
   ylab("Log change in employment") +
   xlab("Date (month)") +
@@ -193,11 +197,11 @@ save_fig("ch18-figure-10d-cs-tseries-dlnemp", output, "small")
 
 
 # Plot unemplyiment rate
-u_plot<-ggplot(data = data, aes(x = date, y = u))+
+u_plot<-ggplot(data = data, aes(x = as.Date(date), y = u))+
   geom_line_da() +
   ylab("Unemployment rate (percent)") +
   xlab("Date (month)") +
-#  scale_y_continuous(limits = c(10000,18000), breaks = seq(10000,18000,2000)) +
+  #  scale_y_continuous(limits = c(10000,18000), breaks = seq(10000,18000,2000)) +
   scale_x_date(expand = c(0.01, 0.01),   breaks = as.Date(c("2000-01-01", "2003-01-01", "2006-01-01",  "2009-01-01", "2012-01-01", "2015-01-01", "2018-01-01")),  labels = date_format("%b%Y")) +
   theme_bg()
 u_plot
@@ -206,7 +210,7 @@ save_fig("ch18-figure-10a-cs-tseries-u", output, "small")
 
 
 # Plot diff unemployment
-du_plot<- ggplot(data = data, aes(x = date, y = du))+
+du_plot<- ggplot(data = data, aes(x = as.Date(date), y = du))+
   geom_line_da() +
   ylab("Change in unemployment rate") +
   xlab("Date (month)") +
@@ -221,6 +225,8 @@ save_fig("ch18-figure-10b-cs-tseries-du", output, "small")
 #############################
 # Create train/houldout data
 #############################
+
+
 
 # Last year of data
 data_holdout <- data %>%
@@ -244,6 +250,7 @@ data_cv_test <- data_train %>%
 #####################################
 # Look at some TS regressions, tests
 #####################################
+
 
 # test unit root
 data %>%
@@ -315,7 +322,7 @@ models_p <- data_tr %>%
         m2_p = m2_p,
         m3_p = m3_p,
         m4_p = m4_p
-        )
+  )
 
 rmse_train_p <- models_p %>%
   get_RMSE_from_model()
@@ -584,13 +591,18 @@ save_fig("ch18-figure-9b-pred-p-mp-fan", output, "small")
 ###########################
 
 
-data <- read_rds(paste0(data_in,"houseprices-data-1990-2018.rds")) %>%
-  as.data.frame() %>%
-  mutate(date = yearmonth(date)) %>%
-  as_tsibble(index = date)
+data <- read_rds(paste0(data_in,"houseprices-data-1990-2018-f.rds"))
+#%>%
+#as.data.frame() %>%
+#mutate(date = yearmonth(date)) %>%
+#as_tsibble(index = date)
 
 data <- data %>%
   filter(date>="2000-01-01" & date<"2019-01-01")
+
+
+data <- data %>% mutate(date = yearmonth(date))
+
 # pick if seasonal or non seasonal version used, will be cut later
 data <- data %>%
   mutate(
@@ -615,6 +627,8 @@ data <- data %>%
     trend = 1:nrow(data),
     month = as.factor(month(date))
   )
+
+
 
 
 # Last year of data
@@ -716,3 +730,4 @@ save_fig("ch18-figure-11-pred-p-mp-fan2018", output, "small")
 #ch18-table-1-swim-rmse
 #ch18-table-2-cs-models-rmse
 #ch18-table-3-arima-folds
+
