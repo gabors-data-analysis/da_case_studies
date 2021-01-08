@@ -77,10 +77,10 @@ get_MSE_from_forecast <- function(forecast, groupby = c(".id", ".model")){
 #############################
 #load data
 
-data <- read_rds(paste0(data_in,"houseprices-data-1990-2018.rds")) %>%
-  as.data.frame() %>%
-  mutate(date = yearmonth(date)) %>%
-  as_tsibble(index = date)
+data <- read_rds(paste0(data_in,"houseprices-data-1990-2018-f.rds")) 
+
+  
+
 
 data <- data %>%
   filter(date>="2000-01-01" & date<"2018-01-01")
