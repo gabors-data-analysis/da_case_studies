@@ -455,12 +455,19 @@ lasso_coeffs <- coef(lasso_model$finalModel, lasso_model$bestTune$lambda) %>%
 
 print(lasso_coeffs)
 
+lasso_coeffs_nz<-lasso_coeffs %>%
+  filter(coefficient>0)
+print(nrow(lasso_coeffs_nz))
+
 # Evaluate model. CV error:
 lasso_cv_rmse <- lasso_model$results %>%
   filter(lambda == lasso_model$bestTune$lambda) %>%
   dplyr::select(RMSE)
 print(lasso_cv_rmse[1, 1])
 
+# Note: re book
+# The textbook contains a somewhat different table and graph for train and test RMSE. 
+# The ordering is the same but the numbers are not. This is an error in the book, sorry. 
 
 
 ########################################
