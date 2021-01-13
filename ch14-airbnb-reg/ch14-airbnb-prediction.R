@@ -411,7 +411,7 @@ model_result_plot_levels <- ggplot(data = t1_levels,
   geom_line(size=1,show.legend=FALSE, na.rm = TRUE) +
   scale_color_manual(name="",
                      values=c(color[2],color[1])) +
-  scale_y_continuous(name = "RMSE", limits = c(34, 44), breaks = seq(34,44, 2)) +
+  scale_y_continuous(name = "RMSE", limits = c(26, 50), breaks = seq(26,50, 2)) +
   scale_x_discrete( name = "Number of coefficients", expand=c(0.01, 0.01)) +
   geom_dl(aes(label = var),  method = list("last.points", dl.trans(x=x-1), cex=0.4)) +
   #scale_colour_discrete(guide = 'none') +
@@ -455,12 +455,19 @@ lasso_coeffs <- coef(lasso_model$finalModel, lasso_model$bestTune$lambda) %>%
 
 print(lasso_coeffs)
 
+lasso_coeffs_nz<-lasso_coeffs %>%
+  filter(coefficient>0)
+print(nrow(lasso_coeffs_nz))
+
 # Evaluate model. CV error:
 lasso_cv_rmse <- lasso_model$results %>%
   filter(lambda == lasso_model$bestTune$lambda) %>%
   dplyr::select(RMSE)
 print(lasso_cv_rmse[1, 1])
 
+# Note: re book
+# The textbook contains a somewhat different table and graph for train and test RMSE. 
+# The ordering is the same but the numbers are not. This is an error in the book, sorry. 
 
 
 ########################################
