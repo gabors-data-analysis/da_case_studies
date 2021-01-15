@@ -13,7 +13,7 @@
 # Chapter 16
 # CH16A Predicting apartment prices with random forest
 # using the airbnb dataset
-# version 0.9 2020-09-09
+# version 0.92 2020-04-05
 #########################################################################################
 
 
@@ -140,7 +140,7 @@ dnames_i <- match(dnames, colnames(data))
 colnames(data)[dnames_i] <- paste0("d_", tolower(gsub("[^[:alnum:]_]", "",dummies)))
 # keep columns if contain d_, n_,f_, p_, usd_ and some others
 data <- data %>%
-  select(matches("^d_.*|^n_.*|^f_.*|^p_.*|^usd_.*"), price,
+  select(matches("^d_.*|^n_.*|^f_.*|^p_.*|^usd_.*"), price, id,
          neighbourhood_cleansed,cancellation_policy,room_type,property_type)
 
 write_csv(data, paste0(data_out, "airbnb_london_workfile.csv"))
@@ -156,7 +156,8 @@ summary(data$price)
 data <- data %>%
   mutate(ln_price = log(price))
 data <- data %>%
-  filter(price <=1000)
+  filter(price <1000)
+
 
 # Squares and further values to create
 data <- data %>%
@@ -246,11 +247,14 @@ data <- data %>%
   )
 
 # Look at data
-datasummary_skim(data, 'numeric', histogram = TRUE)
+datasummary_skim(data$id)
 datasummary_skim(data, 'categorical' )
+skimr::skim(data)
 
 # where do we have missing variables now?
 to_filter <- sapply(data, function(x) sum(is.na(x)))
 to_filter[to_filter > 0]
+
+# N=51646
 
 write_csv(data, paste0(data_out, "airbnb_london_workfile_adj.csv"))
