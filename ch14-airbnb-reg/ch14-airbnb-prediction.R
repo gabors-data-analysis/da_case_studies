@@ -75,6 +75,7 @@ data <-
   read_csv(paste0(data_in, "airbnb_", area, "_workfile_adj.csv")) %>%
   mutate_if(is.character, factor)
 
+
 ######################
 # Quick look at data #
 ######################
@@ -136,11 +137,11 @@ to_filter[to_filter > 0]
 ###################################
 
 # Decision
-# Size, we need a normal apartment, 1-7persons, below 500 USD
+# Size, we need a normal apartment, 1-7persons
 data <- data %>%
-  filter(n_accommodates < 8,
-         price<500)
-# N=4393
+  filter(n_accommodates < 8
+         )
+# Note: slight difference from book: N=4396 not 4393 as in book
 
 # that's gonna be our sample
 skimr::skim(data)
@@ -456,7 +457,7 @@ lasso_coeffs <- coef(lasso_model$finalModel, lasso_model$bestTune$lambda) %>%
 print(lasso_coeffs)
 
 lasso_coeffs_nz<-lasso_coeffs %>%
-  filter(coefficient>0)
+  filter(coefficient!=0)
 print(nrow(lasso_coeffs_nz))
 
 # Evaluate model. CV error:
@@ -467,7 +468,7 @@ print(lasso_cv_rmse[1, 1])
 
 # Note: re book
 # The textbook contains a somewhat different table and graph for train and test RMSE. 
-# The ordering is the same but the numbers are not. This is an error in the book, sorry. 
+# The ordering is the same but the numbers are not. This is because of some minor change in cleaing file. Sory. 
 
 
 ########################################
