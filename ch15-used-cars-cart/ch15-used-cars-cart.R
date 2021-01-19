@@ -13,7 +13,7 @@
 # Chapter 15
 # CH15A Predicting used car value with regression trees
 # using the used-cars dataset
-# version 0.9 2020-09-09
+# version 0.91 2021-01-19
 #########################################################################################
 
 
@@ -249,11 +249,11 @@ save_fig("ch15-figure-2b-usedcars-tree2-stepfn", output , "small")
 
 ############
 # Splits go on according to rpart defaults
-
+# NB: typo in book, CART is with cp=0.01 not cp=0.001
 cart3 <- train(
-  model1, data = data_train, method = "rpart2",
+  model1, data = data_train, method = "rpart",
   trControl = trainControl(method="none"),
-  tuneGrid= data.frame(maxdepth=3))
+  tuneGrid= expand.grid(cp = 0.01))
 
 summary(cart3)
 pred_cart3 <- predict(cart3, data_test)
