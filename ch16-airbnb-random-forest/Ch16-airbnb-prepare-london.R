@@ -54,7 +54,7 @@ create_output_if_doesnt_exist(output)
 
 #-------------------------------------------------------
 # Import data
-data <- read_csv(paste(data_in,"airbnb_london_cleaned.csv", sep = ""))
+data <- read_csv(paste(data_in,"airbnb_london_cleaned_book.csv", sep = ""))
 
 
 # keep if property type is Apartment, House or Townhouse
@@ -143,11 +143,11 @@ data <- data %>%
   select(matches("^d_.*|^n_.*|^f_.*|^p_.*|^usd_.*"), price, id,
          neighbourhood_cleansed,cancellation_policy,room_type,property_type)
 
-write_csv(data, paste0(data_out, "airbnb_london_workfile.csv"))
+write_csv(data, paste0(data_out, "airbnb_london_workfile_book.csv"))
 
 
 #--------------------------------
-data <- read_csv(paste(data_out,"airbnb_london_workfile.csv", sep = ""))
+data <- read_csv(paste(data_out,"airbnb_london_workfile_book.csv", sep = ""))
 
 #####################
 ### look at price ###
@@ -257,4 +257,4 @@ to_filter[to_filter > 0]
 
 # N=51646
 
-write_csv(data, paste0(data_out, "airbnb_london_workfile_adj.csv"))
+write_csv(data, paste0(data_out, "airbnb_london_workfile_adj_book.csv"))

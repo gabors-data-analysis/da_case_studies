@@ -70,7 +70,7 @@ create_output_if_doesnt_exist(output)
 
 # Used area
 area <- "london"
-data <- read_csv(paste0(data_in, "airbnb_", area, "_workfile_adj.csv")) %>%
+data <- read_csv(paste0(data_in, "airbnb_", area, "_workfile_adj_book.csv")) %>%
   mutate_if(is.character, factor) %>%
   filter(!is.na(price))
 
