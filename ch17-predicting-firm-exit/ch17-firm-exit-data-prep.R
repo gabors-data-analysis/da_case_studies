@@ -306,17 +306,19 @@ summary(ols_s)
 ########################################################################
 # sales change
 ########################################################################
-
+# Note: graphs not in book
 
 # lowess
 Hmisc::describe(data$d1_sales_mil_log) # no missing
 
-ggplot(data = data, aes(x=d1_sales_mil_log, y=as.numeric(default))) +
- geom_point(size=2,  shape=20, stroke=2, fill="blue", color="blue") +
- geom_smooth(method="loess", se=F, colour="black", size=1.5, span=0.9) +
- labs(x = "d1_sales_mil_log",y = "default") +
+d1sale_1<-ggplot(data = data, aes(x=d1_sales_mil_log, y=as.numeric(default))) +
+  geom_point(size=0.3,  shape=20, stroke=2, fill=color[2], color=color[2]) +
+  geom_smooth(method="loess", se=F, colour=color[1], size=1.5, span=0.9) +
+ labs(x = "ln(sales change)",y = "default") +
  theme_bg() +
  scale_x_continuous(limits = c(-6,10), breaks = seq(-5,10, 5))
+d1sale_1
+save_fig("ch17-extra-1", output, "small")
 
 # generate variables ---------------------------------------------------
 
@@ -341,12 +343,25 @@ Hmisc::describe(data$age)
 data <- data %>%
   mutate_at(vars(colnames(data)[sapply(data, is.factor)]), funs(fct_drop))
 
-ggplot(data = data, aes(x=d1_sales_mil_log_mod, y=as.numeric(default))) +
-  geom_point(size=2,  shape=20, stroke=2, fill="blue", color="blue") +
-  geom_smooth(method="loess", se=F, colour="black", size=1.5, span=0.9) +
-  labs(x = "d1_sales_mil_log",y = "default") +
+d1sale_2<-ggplot(data = data, aes(x=d1_sales_mil_log_mod, y=as.numeric(default))) +
+  geom_point(size=0.3,  shape=20, stroke=2, fill=color[2], color=color[2]) +
+  geom_smooth(method="loess", se=F, colour=color[1], size=1.5, span=0.9) +
+  labs(x = "ln(sales change)",y = "default") +
   theme_bg() +
   scale_x_continuous(limits = c(-1.5,1.5), breaks = seq(-1.5,1.5, 0.5))
+d1sale_2
+save_fig("ch17-extra-2", output, "small")
+
+d1sale_3<-ggplot(data = data, aes(x=d1_sales_mil_log, y=d1_sales_mil_log_mod)) +
+  geom_point(size=0.3,  shape=20, stroke=2, fill=color[2], color=color[2]) +
+  labs(x = "ln(sales change) (original)",y = "ln(sales change) (winsorized)") +
+  theme_bg() +
+  scale_x_continuous(limits = c(-5,5), breaks = seq(-5,5, 1)) +
+scale_y_continuous(limits = c(-3,3), breaks = seq(-3,3, 1))
+d1sale_3
+save_fig("ch17-extra-3", output, "small")
+
+
 
 # check variables
 datasummary_skim(data, type="numeric")
