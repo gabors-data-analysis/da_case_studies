@@ -497,3 +497,35 @@ cart4_var_imp_plot
 #save_fig("ch15_varimp_cart4", output, "large")
 save_fig("ch15-figure-7-varimp-cart4", output, "large")
 
+
+############################################################x
+
+## a note for varimp 
+
+# https://topepo.github.io/caret/variable-importance.html
+# Recursive Partitioning: The reduction in the loss function (e.g. mean squared error) attributed to each variable at each split is tabulated and the sum is returned. Also, since there may be candidate variables that are important but are not used in a split, the top competing variables are also tabulated at each split. This can be turned off using the maxcompete argument in rpart.control.
+# To avoid this, we can rerun cart4 with a new control fn to ensure matching 
+  
+cart4 <- train(
+  model2, data=data_train, method = "rpart",
+  trControl = trainControl(method="none"),
+  tuneGrid= expand.grid(cp = 0.01),
+  control = rpart.control(minsplit = 20, maxcompete = FALSE),
+  na.action = na.pass)
+
+  cart4_var_imp <- varImp(cart4)$importance
+  cart4_var_imp_df <-
+    data.frame(varname = rownames(cart4_var_imp),imp = cart4_var_imp$Overall) %>%
+    mutate(varname = gsub("cond_", "Condition:", varname) ) %>%
+    arrange(desc(imp)) %>%
+    mutate(imp_percentage = imp/sum(imp))
+  
+  cart4_var_imp_plot <- ggplot(cart4_var_imp_df, aes(x=reorder(varname, imp), y=imp_percentage)) +
+    geom_point(color=color[1], size=2) +
+    geom_segment(aes(x=varname,xend=varname,y=0,yend=imp_percentage), color=color[1], size=1.5) +
+    ylab("Importance") +
+    xlab("Variable Name") +
+    coord_flip() +
+    scale_y_continuous(expand = c(0.01,0.01),labels = scales::percent_format(accuracy = 1)) +
+    theme_bg()
+  cart4_var_imp_plot_rev
