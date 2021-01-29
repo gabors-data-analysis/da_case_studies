@@ -13,7 +13,7 @@
 # Chapter 16
 # CH16A Predicting apartment prices with random forest
 # using the airbnb dataset
-# version 0.9 2020-09-09
+# version 0.92 2021-01-29
 #########################################################################################
 
 
@@ -34,6 +34,7 @@ library(huxtable)
 library(estimatr)
 library(lmtest)
 library(modelsummary)
+library(fixest)
 
 
 # set working directory
@@ -149,7 +150,9 @@ fe_lm2 <- lm_robust(surv ~ imm + lngdppc + lnpop + year,
 # ch23-table-2-immun-fe
 huxreg(fe_lm, fe_lm2, 
   statistics = c(N = "nobs", R2 = "r.squared"), 
-  coefs = c("imm", "lngdppc", "lnpop"))
+  coefs = c("Immunization rate"= "imm", "ln GDP per capita"= "lngdppc","ln population"= "lnpop"))
+
+
 
 # *************************
 # ** CLUSTER SE VS BIASED SE 
@@ -163,7 +166,7 @@ fe_lm3 <- lm_robust(surv ~ imm + lngdppc + lnpop + year,
 # ch23-table-3-immun-fese
 huxreg(list("Clustered SE" = fe_lm2, "Simple SE" = fe_lm3), 
   statistics = c(N = "nobs", R2 = "r.squared"), 
-  coefs = c("imm", "lngdppc", "lnpop"))
+  coefs = c("Immunization rate"= "imm", "ln GDP per capita"= "lngdppc","ln population"= "lnpop"))
 
 # *************************
 # * FD REGRESSIONS 
@@ -209,10 +212,33 @@ fd_lm_5_cumul_lead <- lm_robust(fd_lm_5_cumul_lead_formula,
                 clusters = c
               )
 
+
 # h23-table-4-immun-fd1
-huxreg(fd_lm, fd_lm_5, fd_lm_5_cumul, fd_lm_5_cumul_lead,
+# 1st, 2nd column
+huxreg(fd_lm, fd_lm_5,
+       coefs = c("d_imm"="lag(d_imm, 0)", 
+                 "d_imm"="d_imm", 
+                 "d_imm lag1"="lag(d_imm, 1)",
+                 "d_imm lag2"="lag(d_imm, 2)",
+                 "d_imm lag3"="lag(d_imm, 3)",
+                 "d_imm lag4"="lag(d_imm, 4)",
+                 "d_imm lag5"="lag(d_imm, 5)",
+                 "Constant"= "(Intercept)" 
+                 ),
   statistics = c(N = "nobs", R2 = "r.squared")
 )
+
+# thrid, fourth column
+huxreg("(3)"=fd_lm_5_cumul, "(4)"=fd_lm_5_cumul_lead,
+       coefs = c("d_imm cumulative"="lag(d_imm, 5)",
+                 "d_imm lead 1"="lead(d_imm, 1)",
+                 "d_imm lead 2"="lead(d_imm, 2)",
+                 "d_imm lead 3"="lead(d_imm, 3)",
+                 "Constant"= "(Intercept)" ),
+       statistics = c(N = "nobs", R2 = "r.squared")
+)
+
+
 
 # *************************
 # * AGGREG TREND, CONFOUNDERS, CTRY TRENDS
@@ -273,12 +299,14 @@ fd_lm_5_cumul_trend_c_country <- lm_robust(fd_lm_5_cumul_trend_c_country_formula
               ) 
 
 # ch23-table-5-immun-fd2
+# Just keeping cumul, but if delete last row, you can see details
 huxreg(fd_lm_5_cumul_trend, fd_lm_5_cumul_trend_c, fd_lm_5_cumul_trend_c_country,
   statistics = c(N = "nobs", R2 = "r.squared"), 
-  omit_coefs = c(paste("year", levels(data_balanced$year), sep= ""), paste("c", levels(data_balanced$c), sep= ""))
-)
+  #omit_coefs = c(paste("year", levels(data_balanced$year), sep= ""), paste("c", levels(data_balanced$c), sep= "")),
+  coefs = c("d_imm cumulative" = "lag(d_imm, 5)")
+  )
 
 
-
+# TODO combine two pieces of table + add lines for Fixed effects
  
 
