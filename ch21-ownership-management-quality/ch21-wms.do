@@ -13,7 +13,7 @@
 * Chapter 21
 * CH21A Founder/family ownership and quality of management
 * using the wms-management-survey dataset
-* version 0.9 2020-09-13
+* version 0.91 2021-02-24
 ********************************************************************
 
 
@@ -22,7 +22,6 @@
 * STEP 1: set working directory for da_case_studies.
 * for example:
 * cd "C:/Users/xy/Dropbox/gabors_data_analysis/da_case_studies"
-cd "C:/Users/kezdi/GitHub/da_case_studies"
 
 * STEP 2: * Directory for data
 * Option 1: run directory-setting do file
@@ -53,9 +52,12 @@ global output 	"$work/output"
 * Data prep
 ***************************************************************
 
+* Tech note.
+* In some Stata versions, this is needed, others will ignore it.  
+set matsize 2000
+* Some versions of Stata IC allows a maximum matsize of 800, but more is needed for the last psmatch2. There is nothing we can do. 
 
 clear
-set matsize 2000
 use "$data_in\wms_da_textbook-xsec.dta"
 
 
