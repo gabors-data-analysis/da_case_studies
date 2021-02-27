@@ -13,7 +13,7 @@
 # CHAPTER 20
 # CH20A Working from home and employee performance
 # using the wfh dataset
-# version 0.9 2020-09-11
+# version 0.91 2021-02-27
 #########################################################################################
 
 
@@ -61,7 +61,7 @@ data <- read_csv(paste0(data_in, "wfh_tidy_person.csv"))
 data <- data %>% 
   dplyr::select(personid:perform11, age, male, second_technical, high_school, tertiary_technical, university,
                         prior_experience, tenure, married, children, ageyoungestchild, rental,
-                        costofcommute, internet, bedroom, basewage, bonus, grosswage)
+                        costofcommute, internet, bedroom, basewage, bonus, grosswage, phonecalls1 )
 
 
 # Balance ------------------------------------------------------------
@@ -116,7 +116,7 @@ print(table)
 # outcomes:
 # quit firm during 8 months of experiment
 # phone calls worked, for order takers
-varlabel(data, var.name = c("quitjob", "phonecalls1"))
+#
 
 quitjob <- data %>%
   group_by(treatment) %>%
