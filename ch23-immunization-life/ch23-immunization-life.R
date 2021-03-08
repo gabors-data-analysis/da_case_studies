@@ -13,7 +13,7 @@
 # Chapter 16
 # CH16A Predicting apartment prices with random forest
 # using the airbnb dataset
-# version 0.92 2021-01-29
+# version 0.93 2021-03-08
 #########################################################################################
 
 
@@ -300,11 +300,19 @@ fd_lm_5_cumul_trend_c_country <- lm_robust(fd_lm_5_cumul_trend_c_country_formula
 
 # ch23-table-5-immun-fd2
 # Just keeping cumul, but if delete last row, you can see details
-huxreg(fd_lm_5_cumul_trend, fd_lm_5_cumul_trend_c, fd_lm_5_cumul_trend_c_country,
+tab5<-huxreg(fd_lm_5_cumul_trend, fd_lm_5_cumul_trend_c, fd_lm_5_cumul_trend_c_country,
   statistics = c(N = "nobs", R2 = "r.squared"), 
   #omit_coefs = c(paste("year", levels(data_balanced$year), sep= ""), paste("c", levels(data_balanced$c), sep= "")),
   coefs = c("d_imm cumulative" = "lag(d_imm, 5)")
   )
+
+# produce table 5
+tab5 %>%
+insert_row(c("Year dummies", "Yes", "Yes", "Yes"), after = 3) %>%
+insert_row(c("Confounder variables", "No", "Yes", "Yes"), after = 4) %>%
+insert_row(c("Country-specific trends", "No", "No", "Yes"), after = 5)
+
+
 
 
 # TODO combine two pieces of table + add lines for Fixed effects
