@@ -13,7 +13,7 @@
 # CHAPTER 21
 # CH20A Founder/family ownership and quality of management
 # using the wms-management dataset
-# version 0.9 2020-09-11
+# version 0.92 2020-03-08
 #########################################################################################
 
 # Clear memory
@@ -173,10 +173,10 @@ data_pscore <- data %>%
 formula_pscore1 <- as.formula(paste0(x_var, " ~ ", 
                   paste(c(control_vars, control_vars_to_interact), collapse = " + ")))
 
-# same with factors?
+# default estimand is for avg tr effect on treated "ATT". Change it to ATE to get ATE
 mod_match <- matchit(formula_pscore1, 
                      data = data_pscore, 
-                     method = 'nearest', distance = 'logit', replace=TRUE)
+                     method = 'nearest', distance = 'logit', replace=TRUE, estimand="ATT")
 
 summary(mod_match)
 
@@ -201,10 +201,10 @@ formula_pscore2 <- as.formula(paste(x_var, " ~ " ,
 	" + (", paste(control_vars, collapse = "+"),")*(",
 	paste(control_vars_to_interact, collapse = "+"),")",sep=""))
 
-# same with factors?
+# default estimand is for avg tr effect on treated "ATT". Change it to ATE to get ATE
 mod_match2 <- matchit(formula_pscore2, 
                      data = data_pscore, 
-                     method = 'nearest', distance = 'logit', replace=TRUE)
+                     method = 'nearest', distance = 'logit', replace=TRUE, estimand="ATT")
 
 summary(mod_match2)
 
@@ -224,10 +224,9 @@ ATET_PSME2_SE <- out2$coefficients[2,2]
 out1
 out2
 
+# To get ATE, rerun it all with estimand="ATE" in Matchit
+# For other options: https://cran.r-project.org/web/packages/MatchIt/vignettes/estimating-effects.html 
 
-# fixme
-# add ate
-# https://r.iq.harvard.edu/docs/matchit/2.4-15/Conducting_Analyses_af2.html
 
 # ***************************************************************** 
 # * CHECK common support
