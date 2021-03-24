@@ -13,7 +13,7 @@
 # Chapter 16
 # CH16A Predicting apartment prices with random forest
 # using the airbnb dataset
-# version 0.93 2021-03-08
+# version 0.94 2021-03-24
 #########################################################################################
 
 
@@ -146,12 +146,14 @@ fe_lm2 <- lm_robust(surv ~ imm + lngdppc + lnpop + year,
                 fixed_effect =  ~ c ,
                 clusters = c)
 
-
 # ch23-table-2-immun-fe
 huxreg(fe_lm, fe_lm2, 
-  statistics = c(N = "nobs", R2 = "r.squared"), 
+  statistics = c(N = "nobs"), 
   coefs = c("Immunization rate"= "imm", "ln GDP per capita"= "lngdppc","ln population"= "lnpop"))
 
+# Within-R-squared
+fe_lm$proj_r.squared
+fe_lm2$proj_r.squared
 
 
 # *************************
@@ -165,8 +167,13 @@ fe_lm3 <- lm_robust(surv ~ imm + lngdppc + lnpop + year,
 
 # ch23-table-3-immun-fese
 huxreg(list("Clustered SE" = fe_lm2, "Simple SE" = fe_lm3), 
-  statistics = c(N = "nobs", R2 = "r.squared"), 
+  statistics = c(N = "nobs"), 
   coefs = c("Immunization rate"= "imm", "ln GDP per capita"= "lngdppc","ln population"= "lnpop"))
+
+# Within-R-squared
+fe_lm3$proj_r.squared
+
+
 
 # *************************
 # * FD REGRESSIONS 
