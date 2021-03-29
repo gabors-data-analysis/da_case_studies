@@ -13,7 +13,7 @@
 * Chapter 23
 * CH23B Immunization against measles and saving children
 * using the worldbank-immunization dataset
-* version 0.9 2020-09-13
+* version 0.91 2021-03-29
 ********************************************************************
 
 
@@ -138,6 +138,8 @@ xtreg surv imm lngdppc lnpop i.year [w=avgpop], fe cluster(c)
  outreg2 using "$output\ch23-table-2-immun-fe-Stata", se bdec(3) 2aster tex(fragment) nonotes ///
  label keep( imm lngdppc lnpop ) append
 
+ * not in book - unweighted 
+xtreg surv imm lngdppc lnpop i.year , fe cluster(c)
 
 *************************
 ** CLUSTER SE VS BIASED SE 
