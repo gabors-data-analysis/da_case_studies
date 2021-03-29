@@ -13,7 +13,7 @@
 # Chapter 16
 # CH16A Predicting apartment prices with random forest
 # using the airbnb dataset
-# version 0.94 2021-03-24
+# version 0.95 2021-03-29
 #########################################################################################
 
 
@@ -131,7 +131,6 @@ data_balanced <- data_balanced %>%
 
 # *****************************************************
 # * FE REGRESSSIONS
-
 fe_lm <- lm_robust(surv ~ imm + year,
                 data = data_balanced, 
                 weights = avgpop, 
@@ -154,6 +153,23 @@ huxreg(fe_lm, fe_lm2,
 # Within-R-squared
 fe_lm$proj_r.squared
 fe_lm2$proj_r.squared
+
+####################### not in book
+# no weights
+fe_lm2_nowts <- lm_robust(surv ~ imm + lngdppc + lnpop + year,
+                         data = data_balanced, 
+                         se_type = "stata", 
+                         fixed_effect =  ~ c ,
+                         clusters = c)
+
+huxreg(fe_lm2_nowts, fe_lm2, 
+       statistics = c(N = "nobs"), 
+       coefs = c("Immunization rate"= "imm", "ln GDP per capita"= "lngdppc","ln population"= "lnpop"))
+
+# large difference only in R2
+fe_lm2_nowts$proj_r.squared
+fe_lm2$proj_r.squared
+###########################################################
 
 
 # *************************
