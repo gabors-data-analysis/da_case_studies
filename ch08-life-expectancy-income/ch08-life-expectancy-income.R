@@ -59,43 +59,10 @@ create_output_if_doesnt_exist(output)
 #-----------------------------------------------------------------------------------------
 
 xc <- read_delim(paste0(data_in, "worldbank-lifeexpectancy.csv"), 
-                                       "\t", escape_double = FALSE, trim_ws = TRUE)
+                                       ",", escape_double = FALSE, trim_ws = TRUE)
 
-
-xc <- xc %>% dplyr::rename(year = "Time",
-                    countryname="Country Name",
-                    countrycode = "Country Code",
-                    gdp_per_capita="GDP per capita, PPP (constant 2011 international $) [NY.GDP.PCAP.PP.KD]",
-                    population="Population, total [SP.POP.TOTL]",
-                    lifeexp="Life expectancy at birth, total (years) [SP.DYN.LE00.IN]"
-                    )
-xc<-xc %>% dplyr::select(-"Time Code")
-
-
-
-# SELECT OBSERVATIONS
-xc <- xc %>% filter(countrycode!="")
-
-# CLEAN VARIABLES
-xc<-xc %>% mutate(population=as.numeric(population)/1000000) %>%
-            mutate(gdppc=as.numeric(gdp_per_capita)/1000) %>%
-            mutate(lifeexp=as.numeric(lifeexp))
-
-
-xc %>% tally()
-xc %>% filter(!is.na(gdppc)) %>% tally()
-xc %>% filter(!is.na(lifeexp)) %>% tally()
-xc %>% filter(!is.na(lifeexp)) %>% filter(!is.na(gdppc)) %>% tally()
-
-
-
-# DESCRIBE OBSERVATIONS WITH MISSING VALUE
-xc %>% filter(!is.na(lifeexp)) %>% filter(!is.na(gdppc)) %>% dplyr::select(population) %>% summary()
-xc %>% filter(is.na(lifeexp) | is.na(gdppc)) %>% dplyr::select(population) %>% summary()
-
-xc <- xc %>% filter(year==2017) %>%
-   filter(!is.na(lifeexp)) %>%
-   filter(!is.na(gdppc)) 
+# select year 
+xc <- xc %>% filter(year==2017)
   
 # GDP total, log
 xc <- xc %>% mutate(gdptot=gdppc*population) %>%
