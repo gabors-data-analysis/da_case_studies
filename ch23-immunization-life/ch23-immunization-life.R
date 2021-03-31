@@ -34,7 +34,7 @@ library(huxtable)
 library(estimatr)
 library(lmtest)
 library(modelsummary)
-library(fixest)
+#library(fixest)
 
 
 # set working directory
@@ -61,38 +61,43 @@ create_output_if_doesnt_exist(output)
 #-------------------------------------------------------
 # Import data
 
-data <- read_dta(paste(data_in, "worldbank-immunization-continents.dta", sep = ""))
+data <- read_csv(paste(data_in, "worldbank-immunization-continents.csv", sep = ""))
+
 
 # **************************************************
 # * info graph on measles vaccination continent aggregates
 
-p1 <- ggplot(data, aes(x = year, y = imm6)) +
+p1 <- ggplot(data, aes(x = year, y = imm_SAS)) +
   geom_line(color = color[1], size = 0.7) +
-  geom_line(aes(x = year, y = imm7), color = color[2], size = 0.7) +
+  geom_line(aes(x = year, y = imm_SSF), color = color[2], size = 0.7) +
   geom_text(data = data[12,], aes(label = "South Asia"), hjust = 1.2, vjust = 1, size=2) +
-  geom_text(data = data[16,], aes(y = imm7, label = "Sub-Saharan Africa"), hjust = 0.4, vjust = 1.5, size=2) +
+  geom_text(data = data[16,], aes(y = imm_SSF, label = "Sub-Saharan Africa"), hjust = 0.4, vjust = 1.5, size=2) +
   labs(y = "Immunization rate (percent)", x="Date (year)") + 
   scale_y_continuous(expand=c(0,0), breaks = seq(50, 100, by = 10), limits = c(50, 100)) +
   scale_x_continuous(expand=c(0,0), breaks = seq(1998, 2018, by = 5), limits = c(1998, 2018)) +
   theme_bg()
 
-for (i in seq(1,5)) {
-	p1 <- p1 + geom_line(aes_string(x = "year", y = paste0("imm",i)), color = "grey", size=0.5)
+for (name in names(data)[2:6]) {
+	p1 <- p1 + geom_line(aes_string(x = "year", y = name), color = "grey", size=0.5)
 }
 p1
 save_fig("ch23-figure-2a-tsimmun", output, size = "small")
 
-p2 <- ggplot(data, aes(x = year, y = surv6)) +
+
+data[,9:15] <- data[,9:15] / 10
+
+p2 <- ggplot(data, aes(x = year, y = surv_SAS)) +
   geom_line(color = color[1], size = 0.7) +
-  geom_line(aes(x = year, y = surv7), color = color[2], size = 0.7) +
+  geom_line(aes(x = year, y = surv_SSF), color = color[2], size = 0.7) +
   geom_text(data = data[11,], aes(label = "South Asia"), hjust = 0, vjust = 1.5, size=2) +
-  geom_text(data = data[15,], aes(y = surv7, label = "Sub-Saharan Africa"), hjust = 0.2, vjust = 1.5, size=2) +
+  geom_text(data = data[15,], aes(y = surv_SSF, label = "Sub-Saharan Africa"), hjust = 0.2, vjust = 1.5, size=2) +
   labs(y = "Child survival rate (percent)", x="Date (year)") + 
   scale_y_continuous(expand=c(0,0), breaks = seq(80, 100, by = 5), limits = c(80, 100)) +
   scale_x_continuous(expand=c(0,0), breaks = seq(1998, 2018, by = 5), limits = c(1998, 2018)) +
   theme_bg()
-for (i in seq(1,5)) {
-	p2 <- p2 + geom_line(aes_string(x = "year", y = paste0("surv",i)), color = "grey", size=0.5)
+
+for (name in names(data)[9:13]) {
+  p2 <- p2 + geom_line(aes_string(x = "year", y = name), color = "grey", size=0.5)
 }
 p2
 save_fig("ch23-figure-2b-tssurvival", output, size = "small")
@@ -100,7 +105,7 @@ save_fig("ch23-figure-2b-tssurvival", output, size = "small")
 # **************************************************
 # * regressions on countries
 
-data_panel <- read_dta(paste(data_in, "worldbank-immunization-panel.dta", sep = "/"))
+data_panel <- read_csv(paste(data_in, "worldbank-immunization-panel.csv", sep = "/"))
 
 data_panel <- data_panel %>%
   filter(!(is.na(imm) | is.na(gdppc))) %>%
