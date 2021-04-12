@@ -54,7 +54,7 @@ create_output_if_doesnt_exist(output)
 
 # Read in data ------------------------------------------------------------
 
-data <- read_rds(paste0(data_out, "wms_da_textbook-work.rds"))
+data <- read_csv(paste0(data_out, "wms_da_textbook-work.csv"))
 
 data %>% 
   group_by(foundfam_owned) %>% 

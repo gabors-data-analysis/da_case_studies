@@ -202,5 +202,5 @@ data <- data %>%
 
 
 # Save workfile ------------------------------------------------------
-write_rds(data, paste0(data_out, "wms_da_textbook-work.rds"))
+write_csv(data, paste0(data_out, "wms_da_textbook-work.csv"))
 # N=8439
