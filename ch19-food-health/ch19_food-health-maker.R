@@ -227,7 +227,3 @@ data <- data %>%
 # **********************************************-
 
 write_csv(data, paste0(data_in,"food-health.csv"))
-
-
-
-export delimited using "$data_out/food-health.csv", replace
