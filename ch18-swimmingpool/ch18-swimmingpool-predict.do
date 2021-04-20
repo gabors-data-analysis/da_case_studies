@@ -123,6 +123,16 @@ gen natholiday = 0
  replace natholiday = 8 if month==9 & dayofweek==1 & day<=7
  replace natholiday = 9 if month==10 & dayofweek==1 & day>=8 & day<=14 
  replace natholiday = 10 if month==11 & dayofweek==4 & day>=25 
+******************************************************************  
+* NOTE
+* In the R code the holidays are defined using a built-in function called holidayNYSE
+* no such fundtion exists in Stata
+* instead, as you see, we created the holidays by hand
+* these turn out to be a little different 
+* as a result, the CV RMSE results are a little different in Stata 
+* from what's in R and what's published in the book (Table 18.1)
+* but the differences are small and don't affect the conclusions
+******************************************************************  
  
 
 * when school is off
