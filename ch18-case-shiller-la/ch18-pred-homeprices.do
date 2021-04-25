@@ -147,16 +147,21 @@ use "$work\case-shiller-workfile-2000-2017.dta",replace
 qui forvalue fold = 1/4 {
 	regress p t i.month if train`fold'==1
 	predict phat
+	* calculate error squared for mse
 	gen errsq = (p-phat)^2 
 	sum errsq if test`fold'==1
-	local mse`fold' = r(mean)
+	gen mse`fold' = r(mean)
+	gen rmse`fold' = sqrt(mse`fold')
 	drop phat errsq
 }
-gen cv_mse_M`i'=(`mse1'+`mse2'+`mse3'+`mse4')/4
-gen cv_rmse_M`i'=sqrt(cv_mse_M`i')
-keep if t==1 /* one-obervation file with the forecast statistics */
-keep t cv*
-cap merge 1:1 t using "$work/forecast-cv-rmse.dta", nogen
+* average mse across folds and take square root
+gen cv_mse=(mse1+mse2+mse3+mse4)/4
+gen cv_rmse=sqrt(cv_mse)
+* now create data table with one observation that has the mse & rmse stats
+keep if t==1 /* keep one obervation only */
+keep t cv* rmse* mse*
+gen str2 model="M`i'"
+order model rmse* cv_rmse
 save "$work/forecast-cv-rmse.dta", replace
 
 * Model M2
@@ -172,14 +177,20 @@ qui forvalue fold = 1/4 {
 	 replace phat = phat[_n-1] + dphat if test`fold'==1 & month>=2 & month<=12
 	gen errsq = (p-phat)^2  if test`fold'==1
 	sum errsq if test`fold'==1
-	local mse`fold' = r(mean)
+	gen mse`fold' = r(mean)
+	gen rmse`fold' = sqrt(mse`fold')
 	drop phat dphat errsq
 }
-gen cv_mse_M`i'=(`mse1'+`mse2'+`mse3'+`mse4')/4
-gen cv_rmse_M`i'=sqrt(cv_mse_M`i')
-keep if t==1 /* one-obervation file with the forecast statistics */
-keep t cv*
-cap merge 1:1 t using "$work/forecast-cv-rmse.dta", nogen
+* average mse across folds and take square root
+gen cv_mse=(mse1+mse2+mse3+mse4)/4
+gen cv_rmse=sqrt(cv_mse)
+* create data table with one observation that has the mse & rmse stats
+keep if t==1 /* keep one obervation only */
+keep t cv* rmse* mse*
+gen str2 model="M`i'"
+order model rmse* cv_rmse
+* add this one row to the previously created data table with the mse and rmse statistics
+append using "$work/forecast-cv-rmse.dta"
 save "$work/forecast-cv-rmse.dta", replace
 
 * Model M3
@@ -195,14 +206,19 @@ qui forvalue fold = 1/4 {
 	 replace phat = phat[_n-1] + dphat if test`fold'==1 & month>=2 & month<=12
 	gen errsq = (p-phat)^2 if test`fold'==1
 	sum errsq if test`fold'==1
-	local mse`fold' = r(mean)
+	gen mse`fold' = r(mean)
+	gen rmse`fold' = sqrt(mse`fold')
 	drop phat dphat errsq
 }
-gen cv_mse_M`i'=(`mse1'+`mse2'+`mse3'+`mse4')/4
-gen cv_rmse_M`i'=sqrt(cv_mse_M`i')
-keep if t==1 /* one-obervation file with the forecast statistics */
-keep t cv*
-cap merge 1:1 t using "$work/forecast-cv-rmse.dta", nogen
+* average mse across folds and take square root
+gen cv_mse=(mse1+mse2+mse3+mse4)/4
+gen cv_rmse=sqrt(cv_mse)
+* create data table with one observation that has the mse & rmse stats
+keep if t==1 /* keep one obervation only */
+gen str2 model="M`i'"
+order model rmse* cv_rmse
+* add this one row to the previously created data table with the mse and rmse statistics
+append using "$work/forecast-cv-rmse.dta"
 save "$work/forecast-cv-rmse.dta", replace
 
 * Model M4
@@ -216,15 +232,20 @@ qui forvalue fold = 1/4 {
 	predict phat , dynamic(`start') /* "dynamic" forecast: further ahead using predicted values */
 	gen errsq = (p-phat)^2 
 	sum errsq if test`fold'==1
-	local mse`fold' = r(mean)
+	gen mse`fold' = r(mean)
+	gen rmse`fold' = sqrt(mse`fold')
 	drop phat errsq
 }
-gen cv_mse_M`i'=(`mse1'+`mse2'+`mse3'+`mse4')/4
-gen cv_rmse_M`i'=sqrt(cv_mse_M`i')
-keep if t==1 /* one-obervation file with the forecast statistics */
-keep t cv*
-cap merge 1:1 t using "$work/forecast-cv-rmse.dta", nogen
-aorder
+* average mse across folds and take square root
+gen cv_mse=(mse1+mse2+mse3+mse4)/4
+gen cv_rmse=sqrt(cv_mse)
+* create data table with one observation that has the mse & rmse stats
+keep if t==1 /* keep one obervation only */
+keep t cv* rmse* mse*
+gen str2 model="M`i'"
+order model rmse* cv_rmse
+* add this one row to the previously created data table with the mse and rmse statistics
+append using "$work/forecast-cv-rmse.dta"
 save "$work/forecast-cv-rmse.dta", replace
 
 	
@@ -239,15 +260,20 @@ qui forvalue fold = 1/4 {
 	 replace phat = phat[_n-1] + dphat if test`fold'==1 & month>=2 & month<=12
 	gen errsq = (p-phat)^2 if test`fold'==1
 	sum errsq if test`fold'==1
-	local mse`fold' = r(mean)
+	gen mse`fold' = r(mean)
+	gen rmse`fold' = sqrt(mse`fold')
 	drop phat dphat errsq
 }
-gen cv_mse_M`i'=(`mse1'+`mse2'+`mse3'+`mse4')/4
-gen cv_rmse_M`i'=sqrt(cv_mse_M`i')
-keep if t==1 /* one-obervation file with the forecast statistics */
-keep t cv*
-cap merge 1:1 t using "$work/forecast-cv-rmse.dta", nogen
-aorder
+* average mse across folds and take square root
+gen cv_mse=(mse1+mse2+mse3+mse4)/4
+gen cv_rmse=sqrt(cv_mse)
+* create data table with one observation that has the mse & rmse stats
+keep if t==1 /* keep one obervation only */
+keep t cv* rmse* mse*
+gen str2 model="M`i'"
+order model rmse* cv_rmse
+* add this one row to the previously created data table with the mse and rmse statistics
+append using "$work/forecast-cv-rmse.dta"
 save "$work/forecast-cv-rmse.dta", replace
 
 * Model M6
@@ -269,17 +295,26 @@ qui forvalue fold = 1/4 {
 	gen phat = exp(lnphat) * exp(`sig'^2/2) 
 	gen errsq = (p-phat)^2 if test`fold'==1
 	sum errsq if test`fold'==1
-	local mse`fold' = r(mean)
+	gen mse`fold' = r(mean)
+	gen rmse`fold' = sqrt(mse`fold')
 	drop d2lnphat dlnphat lnphat temp phat errsq 
 }
-gen cv_mse_M`i'=(`mse1'+`mse2'+`mse3'+`mse4')/4
-gen cv_rmse_M`i'=sqrt(cv_mse_M`i')
-keep if t==1 /* one-obervation file with the forecast statistics */
-keep t cv*
-cap merge 1:1 t using "$work/forecast-cv-rmse.dta", nogen
-aorder
+* average mse across folds and take square root
+gen cv_mse=(mse1+mse2+mse3+mse4)/4
+gen cv_rmse=sqrt(cv_mse)
+* create data table with one observation that has the mse & rmse stats
+keep if t==1 /* keep one obervation only */
+keep t cv* rmse* mse*
+gen str2 model="M`i'"
+order model rmse* cv_rmse
+* add this one row to the previously created data table with the mse and rmse statistics
+append using "$work/forecast-cv-rmse.dta"
 save "$work/forecast-cv-rmse.dta", replace
-tabstat cv_rmse*, s(mean) col(s)
+
+**** Cross-validated RMSE statistics for TABLE 18.2
+sort model
+format cv_rmse %4.1f
+lis model cv_rmse, separator(0)
 
 
 **********************************************
@@ -322,7 +357,7 @@ graph export "$output/ch18-figure-9a-p-phat-ts-Stata.png", replace
 clear
 use "$work\case-shiller-workfile-2000-2017.dta",replace
 
-* time series graphs of unemployment and employment
+/* time series graphs of unemployment and employment
 * Figure 18.10a
 tsline u , lw(thick) lc("$b") ///
   ylab(, grid) tlab(2000m1(36)2018m1, grid) ///
@@ -335,19 +370,19 @@ tsline du , lw(thick) lc("$b") ///
  ytitle(Change in unemployment rate (percentage point)) xtitle(Date (month)) 
  graph export "$output/ch18-figure-10b-du-ts-Stata.png", replace
 
- * Figure 18.10c
+* Figure 18.10c
 tsline emp , lw(thick) lc("$b") ///
   ylab(, grid) tlab(2000m1(36)2018m1, grid) ///
  ytitle(Employment (in thousands)) xtitle(Date (month)) 
  graph export "$output/ch18-figure-10c-emp-ts-Stata.png", replace
 
- * Figure 18.10d
+* Figure 18.10d
 tsline dlnemp , lw(thick) lc("$b") ///
   ylab(, grid) tlab(2000m1(36)2018m1, grid) ///
  ytitle(Change in ln(employment, in thousands)) xtitle(Date (month)) 
  graph export "$output/ch18-figure-10d-dlnemp-ts-Stata.png", replace
-
- 
+*/
+/* 
 * VAR(1) + season dummies estimation and forecast
 qui forvalue testy = 2013/2016 {
 	use "$work\case-shiller-workfile-2000-2017.dta",replace
@@ -367,13 +402,42 @@ qui forvalue testy = 2013/2016 {
 	sum errsq if year==`testy'
 	local mse_`testy' = r(mean)
 	noisily dis "mse_`testy'  =  "  `mse_`testy''
+*/
+*use "$work\case-shiller-workfile-2000-2017.dta",replace
+forvalue fold = 1/4 {
+	qui var dp du dlnemp if train`fold'==1, lags(1) exog(mo*) 
+	 estimate store var`fold'
+	 forecast create var`fold', replace
+	 forecast estimates var`fold'
+	 forecast exogenous mo2-mo12
+	 forecast identity p = L.p + dp
+	 sum ym if test`fold'==1 & month==1
+	 local start = r(mean) /* to tell Stata where to start the actual forecast */
+	qui forecast solve, prefix(yhat) begin(`start')
+	gen phat = yhatp
+	gen errsq = (p-phat)^2 if test`fold'==1
+	sum errsq if test`fold'==1
+	gen mse`fold' = r(mean)
+	gen rmse`fold' = sqrt(mse`fold')
+	drop yhat* phat* errsq
 }
-gen cv_mse_var=(`mse_2013'+`mse_2014'+`mse_2015'+`mse_2016')/4
-gen cv_rmse_var=sqrt(cv_mse_var)
-keep if t==1 /* one-obervation file with the forecast statistics */
-sum cv*
+* average mse across folds and take square root
+gen cv_mse=(mse1+mse2+mse3+mse4)/4
+gen cv_rmse=sqrt(cv_mse)
+* create data table with one observation that has the mse & rmse stats
+keep if t==1 /* keep one obervation only */
+keep t cv* rmse* mse*
+gen str2 model="M7"
+order model rmse* cv_rmse
+* add this one row to the previously created data table with the mse and rmse statistics
+append using "$work/forecast-cv-rmse.dta"
+save "$work/forecast-cv-rmse.dta", replace
 
-
+** TABLE 18.3
+sort model
+format rmse* %4.2f
+format cv_* %4.1f
+lis model rmse1 rmse2 rmse3 rmse4 cv_rmse, separator(0)
 
 
  
