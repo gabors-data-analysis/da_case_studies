@@ -44,13 +44,31 @@ cap mkdir 		"$work/output"
 global output 	"$work/output"
 
 
+******************************************
+* SET UP VIRIDIS COLORS
+*
+colorpalette viridis, n(4)
+return list
+global p =r(p1) /* dark purple */
+global b =r(p2) /* blue */
+global g =r(p3) /* green */
+global y =r(p4) /* yellow */
+
+
+
 *******************************************
 ** IMPORT RAW DATA
 ** MULTIPLE CSV FILES
 
 * home price indices
 clear
-insheet using "$data_in\houseprices-data-1990-2018.csv", names
+insheet using "$data_in\houseprices-data-1990-2018-f.csv", names
+* NOTE
+* this data table contains observations up to 2018 
+* the 2018 data are used only at the very end of the case stufy
+* the main part of the case study ends with 2017
+* to reflect that we create two workfiles, one ending with 2017, one with 2018
+
 
 gen year=int((_n-1)/12)+1990
 gen month = _n - (year-1990)*12
@@ -78,18 +96,29 @@ gen dlnp = D.lnp
 gen du = d.u
 gen lnemp = ln(emp)
 gen dlnemp = D.lnemp
-tab month, gen(mo)
+qui tab month, gen(mo) /* generate month dummies */
 
 
-preserve
-keep if year>=2000 & year<=2017
-save "$work\case-shiller-workfile.dta",replace
-restore
-preserve
+* now save the workfile with data from 2000 through 2018
 keep if year>=2000 & year<=2018
 order ym year month t date p u emp
-save "$work\case-shiller-workfile-1990-2018dta",replace
-restore
+save "$work\case-shiller-workfile-2000-2018.dta",replace
+
+* and now create and save the workfile with data from 2000 through 2017
+keep if year>=2000 & year<=2017
+
+* create work and holdout sets
+gen holdout = year==2017 /* holdout set */
+gen workset = year!=2017 /* work set */
+
+* create training and test sets for 4 folds
+forvalue y = 2013/2016 {
+	local fold=`y'-2012
+	gen test`fold'=year==`y'
+	gen train`fold' = year<=`y'-1 & year>=`y'-13 
+	* tabstat test`fold' train`fold', by(year) /* check training-test splits */
+}
+save "$work\case-shiller-workfile-2000-2017.dta",replace
 
  
 
@@ -98,198 +127,187 @@ restore
 
 **********************************************
 * EXPLORE
-use "$work\case-shiller-workfile.dta",replace
+use "$work\case-shiller-workfile-2000-2017.dta",replace
 
 * Fig 18.8
-colorpalette viridis, n(4) select(2) nograph
-tsline p, lw(thick) lc(`r(p)') ///
+tsline p, lw(thick) lc("$b") ///
   ylab(50(50)300, grid) tlab(2000m1(36)2018m1, grid) ///
   ytitle("Case-Shiller home price index") xtitle(Date (month))
 graph export "$output/ch18-figure-8-price-ts-Stata.png", replace
 
 
-
 **********************************************
 ** FORECASTS, CROSS-VALIDATON
-cap rm "$work/forecast1-cv-rmse.dta"
+cap rm "$work/forecast-cv-rmse.dta"
 
 * Model M1
+* p on trend & seasonality
 local i=1
-qui forvalue testy = 2013/2016 {
-	use "$work\case-shiller-workfile.dta",replace
-	drop if year==2017 /* holdout set */
-	local trainy_hi = `testy'-1 /*last year of training set */
-	local trainy_lo = `trainy_hi'-13 /*first year of training set */
-	regress p t i.month if year>=`trainy_lo' & year<=`trainy_hi'
-	predict yhat 
-	gen sqerr = (p-yhat)^2 
-	sum sqerr if year==`testy'
-	local mse_`testy' = r(mean)
-	}
-gen cv_mse_M`i'=(`mse_2013'+`mse_2014'+`mse_2015'+`mse_2016')/4
+use "$work\case-shiller-workfile-2000-2017.dta",replace
+qui forvalue fold = 1/4 {
+	regress p t i.month if train`fold'==1
+	predict phat
+	gen errsq = (p-phat)^2 
+	sum errsq if test`fold'==1
+	local mse`fold' = r(mean)
+	drop phat errsq
+}
+gen cv_mse_M`i'=(`mse1'+`mse2'+`mse3'+`mse4')/4
 gen cv_rmse_M`i'=sqrt(cv_mse_M`i')
 keep if t==1 /* one-obervation file with the forecast statistics */
 keep t cv*
-cap merge 1:1 t using "$work/forecast1-cv-rmse.dta", nogen
-save "$work/forecast1-cv-rmse.dta", replace
-tabstat cv_rmse*, s(mean) col(s)
+cap merge 1:1 t using "$work/forecast-cv-rmse.dta", nogen
+save "$work/forecast-cv-rmse.dta", replace
 
 * Model M2
+* p ARIMA(1,1,2) 
 local i=2
-qui forvalue testy = 2013/2016 {
-	use "$work\case-shiller-workfile.dta",replace
-	drop if year==2017 /* holdout set */
-	local trainy_hi = `testy'-1 /*last year of training set */
-	local trainy_lo = `trainy_hi'-13 /*first year of training set */
-	arima dp if year>=`trainy_lo' & year<=`trainy_hi', ar(1) ma(1/2)
-	 sum ym if year==`testy' & month==1 /*when the forecast starts */
+use "$work\case-shiller-workfile-2000-2017.dta",replace
+qui forvalue fold = 1/4 {
+	arima dp if train`fold'==1, ar(1) ma(1/2) /* this is ARIMA(1,1,2) as left-hand-side is dp */
+	 sum ym if test`fold'==1 & month==1 /*when the forecast starts */
 	 local start = r(mean)
-	predict dyhat , dynamic(`start') /* "dynamic" forecast: further ahead using predicted values */
-	gen yhat = p[_n-1] + dyhat if year==`testy' & month==1
-	 replace yhat = yhat[_n-1] + dyhat if year==`testy' & month>=2 & month<=12
-	gen sqerr = (p-yhat)^2 
-	sum sqerr if year==`testy'
-	local mse_`testy' = r(mean)
-	}
-gen cv_mse_M`i'=(`mse_2013'+`mse_2014'+`mse_2015'+`mse_2016')/4
+	 predict dphat , dynamic(`start') /* "dynamic" forecast: further ahead using predicted values */
+	gen phat = p[_n-1] + dphat if test`fold'==1 & month==1
+	 replace phat = phat[_n-1] + dphat if test`fold'==1 & month>=2 & month<=12
+	gen errsq = (p-phat)^2  if test`fold'==1
+	sum errsq if test`fold'==1
+	local mse`fold' = r(mean)
+	drop phat dphat errsq
+}
+gen cv_mse_M`i'=(`mse1'+`mse2'+`mse3'+`mse4')/4
 gen cv_rmse_M`i'=sqrt(cv_mse_M`i')
 keep if t==1 /* one-obervation file with the forecast statistics */
 keep t cv*
-cap merge 1:1 t using "$work/forecast1-cv-rmse.dta", nogen
-save "$work/forecast1-cv-rmse.dta", replace
-tabstat cv_rmse*, s(mean) col(s)
-	
+cap merge 1:1 t using "$work/forecast-cv-rmse.dta", nogen
+save "$work/forecast-cv-rmse.dta", replace
+
 * Model M3
+* p ARIMA(1,1,0) & seasonality
 local i=3
-qui forvalue testy = 2013/2016 {
-	use "$work\case-shiller-workfile.dta",replace
-	drop if year==2017 /* holdout set */
-	local trainy_hi = `testy'-1 /*last year of training set */
-	local trainy_lo = `trainy_hi'-13 /*first year of training set */
-	arima dp mo2-mo12 if year>=`trainy_lo' & year<=`trainy_hi', ar(1) ma(1)
-	 sum ym if year==`testy' & month==1 /*when the forecast starts */
+use "$work\case-shiller-workfile-2000-2017.dta",replace
+qui forvalue fold = 1/4 {
+	arima dp mo2-mo12 if train`fold'==1, ar(1) 
+	 sum ym if test`fold'==1 & month==1 /*when the forecast starts */
 	 local start = r(mean)
-	predict dyhat , dynamic(`start') /* "dynamic" forecast: further ahead using predicted values */
-	gen yhat = p[_n-1] + dyhat if year==`testy' & month==1
-	 replace yhat = yhat[_n-1] + dyhat if year==`testy' & month>=2 & month<=12
-	gen sqerr = (p-yhat)^2 
-	sum sqerr if year==`testy'
-	local mse_`testy' = r(mean)
-	}
-gen cv_mse_M`i'=(`mse_2013'+`mse_2014'+`mse_2015'+`mse_2016')/4
+	 predict dphat , dynamic(`start') /* "dynamic" forecast: further ahead using predicted values */
+	gen phat = p[_n-1] + dphat if test`fold'==1 & month==1
+	 replace phat = phat[_n-1] + dphat if test`fold'==1 & month>=2 & month<=12
+	gen errsq = (p-phat)^2 if test`fold'==1
+	sum errsq if test`fold'==1
+	local mse`fold' = r(mean)
+	drop phat dphat errsq
+}
+gen cv_mse_M`i'=(`mse1'+`mse2'+`mse3'+`mse4')/4
 gen cv_rmse_M`i'=sqrt(cv_mse_M`i')
 keep if t==1 /* one-obervation file with the forecast statistics */
 keep t cv*
-cap merge 1:1 t using "$work/forecast1-cv-rmse.dta", nogen
-save "$work/forecast1-cv-rmse.dta", replace
-tabstat cv_rmse*, s(mean) col(s)
-	
-	
+cap merge 1:1 t using "$work/forecast-cv-rmse.dta", nogen
+save "$work/forecast-cv-rmse.dta", replace
+
 * Model M4
+* dp ARIMA(2,0,0) & trend & seasonality (or p ARIMA(2,1,0) & trend & seasonality)
 local i=4
-qui forvalue testy = 2013/2016 {
-	use "$work\case-shiller-workfile.dta",replace
-	drop if year==2017 /* holdout set */
-	local trainy_hi = `testy'-1 /*last year of training set */
-	local trainy_lo = `trainy_hi'-13 /*first year of training set */
-	arima p t mo2-mo12 if year>=`trainy_lo' & year<=`trainy_hi', ar(1 2) 
-	 sum ym if year==`testy' & month==1 /*when the forecast starts */
+use "$work\case-shiller-workfile-2000-2017.dta",replace
+qui forvalue fold = 1/4 {
+	arima p mo2-mo12 t if train`fold'==1, ar(1/2) 
+	sum ym if test`fold'==1 & month==1 /*when the forecast starts */
 	 local start = r(mean)
-	predict yhat , dynamic(`start') /* "dynamic" forecast: further ahead using predicted values */
-	gen sqerr = (p-yhat)^2 
-	sum sqerr if year==`testy'
-	local mse_`testy' = r(mean)
-	}
-gen cv_mse_M`i'=(`mse_2013'+`mse_2014'+`mse_2015'+`mse_2016')/4
+	predict phat , dynamic(`start') /* "dynamic" forecast: further ahead using predicted values */
+	gen errsq = (p-phat)^2 
+	sum errsq if test`fold'==1
+	local mse`fold' = r(mean)
+	drop phat errsq
+}
+gen cv_mse_M`i'=(`mse1'+`mse2'+`mse3'+`mse4')/4
 gen cv_rmse_M`i'=sqrt(cv_mse_M`i')
 keep if t==1 /* one-obervation file with the forecast statistics */
 keep t cv*
-cap merge 1:1 t using "$work/forecast1-cv-rmse.dta", nogen
+cap merge 1:1 t using "$work/forecast-cv-rmse.dta", nogen
 aorder
-save "$work/forecast1-cv-rmse.dta", replace
-tabstat cv_rmse*, s(mean) col(s)
+save "$work/forecast-cv-rmse.dta", replace
+
 	
 * Model M5
+* dp on trend & seasonality (or p (ARIMA(0,1,0) & trend & seasonality)
+use "$work\case-shiller-workfile-2000-2017.dta",replace
 local i=5
-qui forvalue testy = 2013/2016 {
-	use "$work\case-shiller-workfile.dta",replace
-	drop if year==2017 /* holdout set */
-	local trainy_hi = `testy'-1 /*last year of training set */
-	local trainy_lo = `trainy_hi'-13 /*first year of training set */
-	reg dp t mo2-mo12 if year>=`trainy_lo' & year<=`trainy_hi'
-	predict dyhat 
-	gen yhat = p[_n-1] + dyhat if year==`testy' & month==1
-	 replace yhat = yhat[_n-1] + dyhat if year==`testy' & month>=2 & month<=12
-	gen sqerr = (p-yhat)^2 
-	sum sqerr if year==`testy'
-	local mse_`testy' = r(mean)
-	}
-gen cv_mse_M`i'=(`mse_2013'+`mse_2014'+`mse_2015'+`mse_2016')/4
+qui forvalue fold = 1/4 {
+	reg dp t mo2-mo12  if train`fold'==1
+	 predict dphat 
+	gen phat = p[_n-1] + dphat if test`fold'==1 & month==1
+	 replace phat = phat[_n-1] + dphat if test`fold'==1 & month>=2 & month<=12
+	gen errsq = (p-phat)^2 if test`fold'==1
+	sum errsq if test`fold'==1
+	local mse`fold' = r(mean)
+	drop phat dphat errsq
+}
+gen cv_mse_M`i'=(`mse1'+`mse2'+`mse3'+`mse4')/4
 gen cv_rmse_M`i'=sqrt(cv_mse_M`i')
 keep if t==1 /* one-obervation file with the forecast statistics */
 keep t cv*
-cap merge 1:1 t using "$work/forecast1-cv-rmse.dta", nogen
+cap merge 1:1 t using "$work/forecast-cv-rmse.dta", nogen
 aorder
-save "$work/forecast1-cv-rmse.dta", replace
-tabstat cv_rmse*, s(mean) col(s)
-	
+save "$work/forecast-cv-rmse.dta", replace
+
 * Model M6
+* lnp ARIMA(0,2,0) $ seasonality (it's twice differenced lnp & seasonality)
 local i=6
-qui forvalue testy = 2013/2016 {
-	use "$work\case-shiller-workfile.dta",replace
-	drop if year==2017 /* holdout set */
-	local trainy_hi = `testy'-1 /*last year of training set */
-	local trainy_lo = `trainy_hi'-13 /*first year of training set */
-	gen d2lnp = d.dlnp
-	reg d2lnp mo2-mo12 if year>=`trainy_lo' & year<=`trainy_hi'
-	predict d2lnyhat
-	 gen dlnyhat = dlnp[_n-1] + d2lnyhat if year==`testy' & month==1
-	 replace dlnyhat = dlnyhat[_n-1] + d2lnyhat if year==`testy' & month>=2 & month<=12
-	 gen lnyhat = lnp[_n-1] + dlnyhat if year==`testy' & month==1
-	 replace lnyhat = lnyhat[_n-1] + dlnyhat if year==`testy' & month>=2 & month<=12
-	 gen temp = (lnyhat-lnp)^2
-	 sum temp if year==`testy'
-	 local sig=r(mean)
-	gen yhat = exp(lnyhat) * exp(`sig'^2/2) 
-	gen sqerr = (p-yhat)^2 
-	sum sqerr if year==`testy'
-	local mse_`testy' = r(mean)
-	}
-gen cv_mse_M`i'=(`mse_2013'+`mse_2014'+`mse_2015'+`mse_2016')/4
+use "$work\case-shiller-workfile-2000-2017.dta",replace
+gen d2lnp = d.dlnp
+qui forvalue fold = 1/4 {
+	reg d2lnp mo2-mo12 if train`fold'==1
+	predict d2lnphat
+	 gen dlnphat = dlnp[_n-1] + d2lnphat if test`fold'==1 & month==1
+	 replace dlnphat = dlnphat[_n-1] + d2lnphat if test`fold'==1 & month>=2 & month<=12
+	 gen lnphat = lnp[_n-1] + dlnphat if test`fold'==1 & month==1
+	 replace lnphat = lnphat[_n-1] + dlnphat if test`fold'==1 & month>=2 & month<=12
+	 * now the log correction
+	 gen temp = (lnphat-lnp)^2 if test`fold'==1
+	 sum temp if test`fold'==1
+	 local sig=r(mean) 
+	gen phat = exp(lnphat) * exp(`sig'^2/2) 
+	gen errsq = (p-phat)^2 if test`fold'==1
+	sum errsq if test`fold'==1
+	local mse`fold' = r(mean)
+	drop d2lnphat dlnphat lnphat temp phat errsq 
+}
+gen cv_mse_M`i'=(`mse1'+`mse2'+`mse3'+`mse4')/4
 gen cv_rmse_M`i'=sqrt(cv_mse_M`i')
 keep if t==1 /* one-obervation file with the forecast statistics */
 keep t cv*
-cap merge 1:1 t using "$work/forecast1-cv-rmse.dta", nogen
+cap merge 1:1 t using "$work/forecast-cv-rmse.dta", nogen
 aorder
-save "$work/forecast1-cv-rmse.dta", replace
+save "$work/forecast-cv-rmse.dta", replace
 tabstat cv_rmse*, s(mean) col(s)
-	
+
 
 **********************************************
 * EVALUATION ON HOLDOUT SET
 clear
-use "$work\case-shiller-workfile.dta",replace
-gen holdout = year==2017 /* holdout set */
-gen workset = year!=2017 /* work set */
-tabstat holdout workset, by(year) s(sum)
-sum ym year month if year==2017 & month==1
+use "$work\case-shiller-workfile-2000-2017.dta",replace
+* tabstat holdout workset, by(year) s(sum) /* check if workset - holdout set are fine */
 
-* estimate best model on entire work set
-* M4
-qui reg p L(1/2).p t mo2-mo12 if workset==1
-est store m4
-forecast create m4holdout, replace
-forecast estimates m4
-forecast solve, begin(684)
-replace f_p=. if workset
+* estimate best model (M4) on entire work set
+arima p mo2-mo12 t if workset==1, ar(1/2) 
+ sum ym if holdout==1 & month==1 /*when the forecast starts */
+ local start = r(mean)
+ predict phat , dynamic(`start') /* "dynamic" forecast: further ahead using predicted values */
+  replace phat=. if holdout!=1
+  gen errsq = (p-phat)^2 
+  sum errsq if holdout==1
+ local mse_holdout = r(mean)
+ local rmse_holdout = sqrt(`mse_holdout')
+dis "Holdout set RMSE = " `rmse_holdout'
+
 
 * time series graph of point predictions
 * Figure 18.9a
-colorpalette viridis, n(4) select(2) nograph
-tsline p f_p if year>=2015, lw(thick thick) lc(`r(p)') ///
+tsline p phat if year>=2015, lw(thick thick) lc("$p" "$g") ///
  ylab(, grid) xlab(, grid) ///
  ytitle(Case-Shiller price index) xtitle(Date (month)) ///
- legend(label(1 Actual) label(2 Predicted))
+ legend(label(1 Actual) label(2 Predicted) ///
+  ring(0) position(5) row(1) region(lstyle(none)))
 graph export "$output/ch18-figure-9a-p-phat-ts-Stata.png", replace
 
 * time series graph of point and interval predictions
@@ -302,37 +320,29 @@ graph export "$output/ch18-figure-9a-p-phat-ts-Stata.png", replace
 **********************************************
 * VECTOR AUTOREGRESSION
 clear
-use "$work\case-shiller-workfile.dta",replace
-gen holdout = year==2017 /* holdout set */
-gen workset = year!=2017 /* work set */
-tabstat holdout workset, by(year) s(sum)
-sum ym year month if year==2017 & month==1
+use "$work\case-shiller-workfile-2000-2017.dta",replace
 
 * time series graphs of unemployment and employment
 * Figure 18.10a
-colorpalette viridis, n(4) select(2) nograph
-tsline u , lw(thick) lc(`r(p)') ///
+tsline u , lw(thick) lc("$b") ///
   ylab(, grid) tlab(2000m1(36)2018m1, grid) ///
   ytitle(Unemployment rate (percent)) xtitle(Date (month)) 
  graph export "$output/ch18-figure-10a-u-ts-Stata.png", replace
 
 * Figure 18.10a
-colorpalette viridis, n(4) select(2) nograph
-tsline du , lw(thick) lc(`r(p)') ///
+tsline du , lw(thick) lc("$b") ///
   ylab(, grid) tlab(2000m1(36)2018m1, grid) ///
  ytitle(Change in unemployment rate (percentage point)) xtitle(Date (month)) 
  graph export "$output/ch18-figure-10b-du-ts-Stata.png", replace
 
  * Figure 18.10c
-colorpalette viridis, n(4) select(2) nograph
-tsline emp , lw(thick) lc(`r(p)') ///
+tsline emp , lw(thick) lc("$b") ///
   ylab(, grid) tlab(2000m1(36)2018m1, grid) ///
  ytitle(Employment (in thousands)) xtitle(Date (month)) 
  graph export "$output/ch18-figure-10c-emp-ts-Stata.png", replace
 
  * Figure 18.10d
-colorpalette viridis, n(4) select(2) nograph
-tsline dlnemp , lw(thick) lc(`r(p)') ///
+tsline dlnemp , lw(thick) lc("$b") ///
   ylab(, grid) tlab(2000m1(36)2018m1, grid) ///
  ytitle(Change in ln(employment, in thousands)) xtitle(Date (month)) 
  graph export "$output/ch18-figure-10d-dlnemp-ts-Stata.png", replace
@@ -340,7 +350,7 @@ tsline dlnemp , lw(thick) lc(`r(p)') ///
  
 * VAR(1) + season dummies estimation and forecast
 qui forvalue testy = 2013/2016 {
-	use "$work\case-shiller-workfile.dta",replace
+	use "$work\case-shiller-workfile-2000-2017.dta",replace
 	drop if year>=2017 /* keep work set */
 	local trainy_hi = `testy'-1 /*last year of training set */
 	local trainy_lo = `trainy_hi'-13 /*first year of training set */
@@ -353,8 +363,8 @@ qui forvalue testy = 2013/2016 {
 	 forecast identity p = L.p + dp
 	qui forecast solve, prefix(fvar_) begin(tm(`testy'm1))
 	gen f_p = fvar_p if year==`testy'
-	gen sqerr = (p-f_p)^2 
-	sum sqerr if year==`testy'
+	gen errsq = (p-f_p)^2 
+	sum errsq if year==`testy'
 	local mse_`testy' = r(mean)
 	noisily dis "mse_`testy'  =  "  `mse_`testy''
 }
@@ -367,3 +377,33 @@ sum cv*
 
 
  
+*************************************************
+* new holdout set: 2018
+* home price indices
+use "$work\case-shiller-workfile-2000-2018.dta",replace
+gen holdout = year==2018
+gen workset = year!=2018
+* tabstat holdout workset, by(year) s(sum) /* check if workset - holdout set are fine */
+
+* estimate best model (M4) on entire work set
+arima p mo2-mo12 t if workset==1, ar(1/2) 
+ sum ym if holdout==1 & month==1 /*when the forecast starts */
+ local start = r(mean)
+ predict phat , dynamic(`start') /* "dynamic" forecast: further ahead using predicted values */
+  replace phat=. if holdout!=1
+  gen errsq = (p-phat)^2 
+  sum errsq if holdout==1
+ local mse_holdout = r(mean)
+ local rmse_holdout = sqrt(`mse_holdout')
+dis "Holdout set RMSE = " `rmse_holdout'
+
+
+* time series graph of point predictions
+* Figure 18.11
+tsline p phat if year>=2015, lw(thick thick) lc("$p" "$g") ///
+ ylab(, grid) xlab(, grid) ///
+ ytitle(Case-Shiller price index) xtitle(Date (month)) ///
+ legend(label(1 Actual) label(2 Predicted) ///
+  ring(0) position(5) row(1) region(lstyle(none)))
+graph export "$output/ch18-figure-11-p-phat-ts-Stata.png", replace
+
