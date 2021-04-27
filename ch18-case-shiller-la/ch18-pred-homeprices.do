@@ -13,7 +13,7 @@
 * Chapter 18
 * CH18B Forecasting a home price index
 * using the case-shiller-la dataset
-* version 0.9 2020-09-12
+* version 0.92 2021-04-25
 ********************************************************************
 
 
@@ -22,7 +22,6 @@
 * STEP 1: set working directory for da_case_studies.
 * for example:
 * cd "C:/Users/xy/Dropbox/gabors_data_analysis/da_case_studies"
-cd "C:/Users/kezdi/GitHub/da_case_studies"
 
 * STEP 2: * Directory for data
 * Option 1: run directory-setting do file
