@@ -22,6 +22,8 @@
 * STEP 1: set working directory for da_case_studies.
 * for example:
 * cd "C:/Users/xy/Dropbox/gabors_data_analysis/da_case_studies"
+cd "C:/Users/kezdi/GitHub/da_case_studies"
+
 
 * STEP 2: * Directory for data
 * Option 1: run directory-setting do file
@@ -158,7 +160,7 @@ gen cv_mse=(mse1+mse2+mse3+mse4)/4
 gen cv_rmse=sqrt(cv_mse)
 * now create data table with one observation that has the mse & rmse stats
 keep if t==1 /* keep one obervation only */
-keep t cv* rmse* mse*
+keep cv* rmse* mse*
 gen str2 model="M`i'"
 order model rmse* cv_rmse
 save "$work/forecast-cv-rmse.dta", replace
@@ -185,7 +187,7 @@ gen cv_mse=(mse1+mse2+mse3+mse4)/4
 gen cv_rmse=sqrt(cv_mse)
 * create data table with one observation that has the mse & rmse stats
 keep if t==1 /* keep one obervation only */
-keep t cv* rmse* mse*
+keep cv* rmse* mse*
 gen str2 model="M`i'"
 order model rmse* cv_rmse
 * add this one row to the previously created data table with the mse and rmse statistics
@@ -240,7 +242,7 @@ gen cv_mse=(mse1+mse2+mse3+mse4)/4
 gen cv_rmse=sqrt(cv_mse)
 * create data table with one observation that has the mse & rmse stats
 keep if t==1 /* keep one obervation only */
-keep t cv* rmse* mse*
+keep cv* rmse* mse*
 gen str2 model="M`i'"
 order model rmse* cv_rmse
 * add this one row to the previously created data table with the mse and rmse statistics
@@ -268,7 +270,7 @@ gen cv_mse=(mse1+mse2+mse3+mse4)/4
 gen cv_rmse=sqrt(cv_mse)
 * create data table with one observation that has the mse & rmse stats
 keep if t==1 /* keep one obervation only */
-keep t cv* rmse* mse*
+keep cv* rmse* mse*
 gen str2 model="M`i'"
 order model rmse* cv_rmse
 * add this one row to the previously created data table with the mse and rmse statistics
@@ -303,7 +305,7 @@ gen cv_mse=(mse1+mse2+mse3+mse4)/4
 gen cv_rmse=sqrt(cv_mse)
 * create data table with one observation that has the mse & rmse stats
 keep if t==1 /* keep one obervation only */
-keep t cv* rmse* mse*
+keep cv* rmse* mse*
 gen str2 model="M`i'"
 order model rmse* cv_rmse
 * add this one row to the previously created data table with the mse and rmse statistics
@@ -425,7 +427,7 @@ gen cv_mse=(mse1+mse2+mse3+mse4)/4
 gen cv_rmse=sqrt(cv_mse)
 * create data table with one observation that has the mse & rmse stats
 keep if t==1 /* keep one obervation only */
-keep t cv* rmse* mse*
+keep cv* rmse* mse*
 gen str2 model="M7"
 order model rmse* cv_rmse
 * add this one row to the previously created data table with the mse and rmse statistics
