@@ -13,7 +13,7 @@
 * Chapter 18
 * CH18B Forecasting a home price index
 * using the case-shiller-la dataset
-* version 0.92 2021-04-25
+* version 0.92 2021-05-01
 ********************************************************************
 
 
@@ -22,7 +22,6 @@
 * STEP 1: set working directory for da_case_studies.
 * for example:
 * cd "C:/Users/xy/Dropbox/gabors_data_analysis/da_case_studies"
-cd "C:/Users/kezdi/GitHub/da_case_studies"
 
 
 * STEP 2: * Directory for data
@@ -358,7 +357,7 @@ graph export "$output/ch18-figure-9a-p-phat-ts-Stata.png", replace
 clear
 use "$work\case-shiller-workfile-2000-2017.dta",replace
 
-/* time series graphs of unemployment and employment
+* time series graphs of unemployment and employment
 * Figure 18.10a
 tsline u , lw(thick) lc("$b") ///
   ylab(, grid) tlab(2000m1(36)2018m1, grid) ///
@@ -382,29 +381,8 @@ tsline dlnemp , lw(thick) lc("$b") ///
   ylab(, grid) tlab(2000m1(36)2018m1, grid) ///
  ytitle(Change in ln(employment, in thousands)) xtitle(Date (month)) 
  graph export "$output/ch18-figure-10d-dlnemp-ts-Stata.png", replace
-*/
-/* 
-* VAR(1) + season dummies estimation and forecast
-qui forvalue testy = 2013/2016 {
-	use "$work\case-shiller-workfile-2000-2017.dta",replace
-	drop if year>=2017 /* keep work set */
-	local trainy_hi = `testy'-1 /*last year of training set */
-	local trainy_lo = `trainy_hi'-13 /*first year of training set */
-	sum dp du dlnemp if year>=`trainy_lo' & year<=`trainy_hi'
-	qui var dp du dlnemp if year>=`trainy_lo' & year<=`trainy_hi', lags(1) exog(mo*) 
-	 estimate store var_`testy'
-	 forecast create var_`testy', replace
-	 forecast estimates var_`testy'
-	 forecast exogenous mo2-mo12
-	 forecast identity p = L.p + dp
-	qui forecast solve, prefix(fvar_) begin(tm(`testy'm1))
-	gen f_p = fvar_p if year==`testy'
-	gen errsq = (p-f_p)^2 
-	sum errsq if year==`testy'
-	local mse_`testy' = r(mean)
-	noisily dis "mse_`testy'  =  "  `mse_`testy''
-*/
-*use "$work\case-shiller-workfile-2000-2017.dta",replace
+*
+
 forvalue fold = 1/4 {
 	qui var dp du dlnemp if train`fold'==1, lags(1) exog(mo*) 
 	 estimate store var`fold'
