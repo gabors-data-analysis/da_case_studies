@@ -182,6 +182,9 @@ summary(mod_match)
 
 # Step 2 - restrict data to matched 
 data_match <- match.data(mod_match)
+
+# Please note that nhe "number of matched observations" calculated by 
+# this code varies marginally from the one on p607 in the textbook.
 dim(data_match)
 
 # Step 3 - Estimate treatment effects
@@ -214,6 +217,9 @@ summary(mod_match2)
 
 # Step 2 - restrict data to matched 
 data_match2 <- match.data(mod_match2)
+
+# Please note that nhe "number of matched observations" calculated by 
+# this code varies marginally from the one on p607 in the textbook.
 dim(data_match2)
 
 # Step 3 - Estimate treatment effects
