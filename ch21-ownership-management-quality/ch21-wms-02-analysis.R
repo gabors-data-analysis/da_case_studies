@@ -103,8 +103,8 @@ ols3 <- lm(formula3, data=data)
 stargazer_r(
 	list_of_models = list(ols1, ols2, ols3), 
 	keep.stat=c("n", "rsq"), keep = c(x_var, "Constant"), dep.var.labels.include = FALSE, dep.var.caption = "", 
-	column.labels = c("'no confounders'", "'with confounders'", "'with confounders interacted'")) %>%
-cat(.,file= paste0(output, "ch21-foundfam-reg1.tex"))
+	column.labels = c("'no confounders'", "'with confounders'", "'with confounders interacted'")) #%>%
+#cat(.,file= paste0(output, "ch21-foundfam-reg1.tex"))
 
 
 # *************************************************************
@@ -161,7 +161,8 @@ data_agg %>%
 # * Matching on the propensity score 
 # ***************************************************************** 
 
-# SOLUTION With replacement
+# NOTE: ATE is not calculated in the R code.
+
 # Function only works with non-missing values
 data_pscore <- data %>% 
   dplyr::select(c(y_var, x_var, control_vars, control_vars_to_interact)) %>%
@@ -173,7 +174,6 @@ data_pscore <- data %>%
 formula_pscore1 <- as.formula(paste0(x_var, " ~ ", 
                   paste(c(control_vars, control_vars_to_interact), collapse = " + ")))
 
-# default estimand is for avg tr effect on treated "ATT". Change it to ATE to get ATE
 mod_match <- matchit(formula_pscore1, 
                      data = data_pscore, 
                      method = 'nearest', distance = 'logit', replace=TRUE, estimand="ATT")
@@ -185,13 +185,18 @@ data_match <- match.data(mod_match)
 dim(data_match)
 
 # Step 3 - Estimate treatment effects
+# NOTE: We use weights here,to account for control observations that were matchet to multiple treated osb
+#       This is different from weights used to estimate ATE!
 reg_match <- lm(management ~ foundfam_owned, 
-                data = data_match, weights = data_match$weights)
+                data = data_match, 
+               weights = data_match$weights
+                )
 
 out1 <- summary(reg_match)
 
 ATET_PSME1 <- out1$coefficients[2]
 ATET_PSME1_SE <- out1$coefficients[2,2]
+
 
 # with all controls + interactions -------------------------------------------------------
 
@@ -201,7 +206,6 @@ formula_pscore2 <- as.formula(paste(x_var, " ~ " ,
 	" + (", paste(control_vars, collapse = "+"),")*(",
 	paste(control_vars_to_interact, collapse = "+"),")",sep=""))
 
-# default estimand is for avg tr effect on treated "ATT". Change it to ATE to get ATE
 mod_match2 <- matchit(formula_pscore2, 
                      data = data_pscore, 
                      method = 'nearest', distance = 'logit', replace=TRUE, estimand="ATT")
@@ -213,6 +217,8 @@ data_match2 <- match.data(mod_match2)
 dim(data_match2)
 
 # Step 3 - Estimate treatment effects
+# NOTE: We use weights here,to account for control observations that were matchet to multiple treated osb
+#       This is different from weights used to estimate ATE!
 reg_match2 <- lm(management ~ foundfam_owned, 
                 data = data_match2, weights = data_match2$weights)
 
@@ -220,12 +226,6 @@ out2 <- summary(reg_match2)
 
 ATET_PSME2 <- out2$coefficients[2]
 ATET_PSME2_SE <- out2$coefficients[2,2]
-
-out1
-out2
-
-# To get ATE, rerun it all with estimand="ATE" in Matchit
-# For other options: https://cran.r-project.org/web/packages/MatchIt/vignettes/estimating-effects.html 
 
 
 # ***************************************************************** 
