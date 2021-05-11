@@ -55,7 +55,7 @@ create_output_if_doesnt_exist(output)
 
 # import data
 # raw <- read.dta13(paste0(data_in,'asia-industry_tidy.dta'))
-raw <- read_dta(paste(data_in, 'asia-industry_tidy.dta', sep = ""))
+raw <- read_csv(paste(data_in, 'asia-industry_tidy.csv', sep = ""))
 
 data <- raw %>%
   filter(year >= 1998) %>%
