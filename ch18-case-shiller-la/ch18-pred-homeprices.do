@@ -22,6 +22,7 @@
 * STEP 1: set working directory for da_case_studies.
 * for example:
 * cd "C:/Users/xy/gabors_data_analysis/da_case_studies"
+ 
 
 
 * STEP 2: * Directory for data
@@ -78,10 +79,11 @@ order ym t
 tsset ym
 
 * define variables we'll work with
-* not seasonally adjusted series
+* not seasonally adjusted price index
 gen p = pn
-gen u = un
-gen emp = empn
+* seasonally adjusted unemployment rate and total employment
+gen u = us
+gen emp = emps
 
 order ym t year month date p u emp
 keep ym t year month date p u emp
