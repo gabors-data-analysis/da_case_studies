@@ -22,7 +22,6 @@
 * STEP 1: set working directory for da_case_studies.
 * for example:
 * cd "C:/Users/xy/Dropbox/gabors_data_analysis/da_case_studies"
-cd "C:\Users\kezdi\GitHub\da_case_studies"
 
 
 * STEP 2: * Directory for data
@@ -54,7 +53,7 @@ global data_in_raw "$data_in/raw"
 
 *********************************************************************
 * load in clean and tidy data and create workfile
-use "$data_in_clean/hotels-vienna.dta", clear
+import delimited "$data_in_clean/hotels-vienna.csv", clear
 keep hotel_id price accommodation_type distance stars rating rating_count
 
 * look at accomodation types
