@@ -47,10 +47,6 @@ output <- paste0(use_case_dir,"output/")
 create_output_if_doesnt_exist(output)
 
 
-
-
-
-
 #############################
 # RMSE functions
 #############################
@@ -75,16 +71,10 @@ get_MSE_from_forecast <- function(forecast, groupby = c(".id", ".model")){
 #############################
 # DATA PREP
 #############################
-#load data
+#load raw data
 
-data <- read_rds(paste0(data_in,"houseprices-data-1990-2018-f.rds"))
-#%>%
-#as.data.frame() %>%
-#mutate(date = yearmonth(date)) %>%
-#as_tsibble(index = date)
+data <- read_csv(paste0(data_in,"homeprices-data-2000-2018.csv"))
 
-data <- data %>%
-  filter(date>="2000-01-01" & date<"2018-01-01")
 # 18 years data
 # 1 year holdout
 # 4 years of test
@@ -118,6 +108,43 @@ data <- data %>%
     trend = 1:nrow(data),
     month = as.factor(month(date))
   )
+
+data <- data %>% as_tsibble(index=date)
+
+# now save the workfile with data from 2000 through 2018
+data %>% write_rds(paste(data_in,"case-shiller-workfile-2000-2018.rds",sep=""))
+
+
+# and now create and save the workfile with data from 2000 through 2017
+data <- data %>% filter(year <= 2017)
+
+data %>% write_rds(paste(data_in,"case-shiller-workfile-2000-2017.rds",sep=""))
+
+
+#############################
+# EXPLORE
+#############################
+
+data <- read_rds(paste(data_in,"case-shiller-workfile-2000-2017.rds",sep=""))
+
+# Last year of data
+data_holdout <- data %>%
+  slice((n()-11):n())
+
+# Rest of data for work set
+data_work <- data %>%
+  slice(1:(n()-12))
+
+# Prepare for cross-validation, define size of train
+train_length=13
+data_tr <- data_work %>%
+  slice(1:(n()-12)) %>% # last year of training data not used in any fold as training
+  slide_tsibble(.size = train_length*12, .step = 12)
+
+data_cv_test <- data_work %>%
+  slice(train_length*12+1:n()) %>% 
+  slide_tsibble(.size = 12, .step = 12) %>%
+  select(trend, month)
 
 
 #############################
@@ -534,43 +561,7 @@ save_fig("ch18-figure-9b-pred-p-mp-fan", output, "small")
 # do the prediction for an extra year
 ###########################
 
-
-data <- read_rds(paste0(data_in,"houseprices-data-1990-2018-f.rds"))
-#%>%
-#as.data.frame() %>%
-#mutate(date = yearmonth(date)) %>%
-#as_tsibble(index = date)
-
-data <- data %>%
-  filter(date>="2000-01-01" & date<"2019-01-01")
-
-data <- data %>% mutate(date = yearmonth(date))
-
-# pick if seasonal or non seasonal version used, will be cut later
-data <- data %>%
-  mutate(
-    p=pn,
-    u=us,
-    emp=emps,
-  )
-
-data <- data %>%
-  mutate(
-    dp   = difference(p, lag=1, order_by = date),
-    p_lag = lag(p),
-    lnp = log(p),
-    dlnp   = difference(lnp, lag=1, order_by = date),
-    lnp_lag = lag(lnp),
-    dlnp_lag   = lag(dlnp),
-    du     = difference(u, lag=1, order_by = date),
-    lnemp = log(emp),
-    dlnemp = difference(lnemp, lag=1, order_by = date)
-  )%>%
-  mutate(
-    trend = 1:nrow(data),
-    month = as.factor(month(date))
-  )
-
+data <- read_rds(paste(use_case_dir,"case-shiller-workfile-2000-2018.rds",sep=""))
 
 # Last year of data
 data_holdout<- data %>%
