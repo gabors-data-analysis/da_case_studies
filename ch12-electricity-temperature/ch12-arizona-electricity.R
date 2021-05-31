@@ -49,8 +49,8 @@ source("ch00-tech-prep/theme_bg.R")
 source("ch00-tech-prep/da_helper_functions.R")
 
 # set directory for code and data
-data_in <- paste(data_dir,"arizona-electricity","raw/", sep = "/")
-use_case_dir          <- "ch12-electrictiy-temperature/"
+data_in <- paste(data_dir,"arizona-electricity","clean/", sep = "/")
+use_case_dir <- "ch12-electricity-temperature/"
 
 
 data_out <- use_case_dir
