@@ -242,7 +242,6 @@ huxreg(DlnQ_simple_SE=reg4,
 
 reg7 <- dyn$lm(DlnQ ~ DCLDD_avg + lag(DCLDD_avg) + lag(lag(DCLDD_avg))
                + DHTDD_avg + lag(DHTDD_avg) + lag(lag(DHTDD_avg)) + as.factor(month), data=data)
-reg7 <- coeftest(reg7, vcov.=NeweyWest(reg7, prewhite=FALSE, lag=18, verbose=TRUE)) 
 
 
 data<-data %>% mutate(DDCLDD_avg=(DCLDD_avg-lag(DCLDD_avg)),
@@ -250,6 +249,7 @@ data<-data %>% mutate(DDCLDD_avg=(DCLDD_avg-lag(DCLDD_avg)),
 
 
 reg8 <- dyn$lm(DlnQ ~ lag(lag(DCLDD_avg)) + lag(lag(DHTDD_avg)) + DDCLDD_avg + DDHTDD_avg + lag(DDCLDD_avg) + lag(DDHTDD_avg) + as.factor(month), data=data)
+
 huxreg(reg7,reg8,statistics = c(N = "nobs"))
 
 #ch12-table-1-stocks-stats
