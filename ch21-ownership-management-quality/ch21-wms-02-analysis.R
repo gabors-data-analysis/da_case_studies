@@ -161,7 +161,7 @@ data_agg %>%
 # * Matching on the propensity score 
 # ***************************************************************** 
 
-# NOTE: ATE is not calculated in the R code.
+# NOTE: the R code calculates ATET with the estimand=="ATT" option
 
 # Function only works with non-missing values
 data_pscore <- data %>% 
