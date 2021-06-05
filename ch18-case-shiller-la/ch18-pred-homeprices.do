@@ -13,7 +13,7 @@
 * Chapter 18
 * CH18B Forecasting a home price index
 * using the case-shiller-la dataset
-* version 0.9 2020-09-12
+* version 0.92 2021-05-01
 ********************************************************************
 
 
@@ -21,8 +21,9 @@
 
 * STEP 1: set working directory for da_case_studies.
 * for example:
-* cd "C:/Users/xy/Dropbox/gabors_data_analysis/da_case_studies"
-cd "C:/Users/kezdi/GitHub/da_case_studies"
+* cd "C:/Users/xy/gabors_data_analysis/da_case_studies"
+ 
+
 
 * STEP 2: * Directory for data
 * Option 1: run directory-setting do file
@@ -34,7 +35,7 @@ do set-data-directory.do
 
 * Option 2: set directory directly here
 * for example:
-* global data_dir "C:/Users/xy/gabors_data_analysis/da_data_repo"
+ global data_dir "/Users/vigadam/Dropbox/work/data_book/da_data_repo"
 
 
 global data_in  "$data_dir/case-shiller-la/clean"
@@ -57,12 +58,9 @@ global y =r(p4) /* yellow */
 
 
 *******************************************
-** IMPORT RAW DATA
-** MULTIPLE CSV FILES
+** IMPORT TIDY DATA
 
-* home price indices
-clear
-insheet using "$data_in\houseprices-data-1990-2018-f.csv", names
+use "$data_in/homeprices-data-2000-2018.dta", clear
 * NOTE
 * this data table contains observations up to 2018 
 * the 2018 data are used only at the very end of the case stufy
@@ -70,25 +68,24 @@ insheet using "$data_in\houseprices-data-1990-2018-f.csv", names
 * to reflect that we create two workfiles, one ending with 2017, one with 2018
 
 
-gen year=int((_n-1)/12)+1990
-gen month = _n - (year-1990)*12
-*lis year month date
+* generate running t index
+gen t=_n
+* tell Statat this is time series data
+* and define year-month variable
 gen ym = ym(year,month)
 format ym %tm
-codebook ym
-sort ym
-
-gen p = pn
-gen u = caur
-gen emp = cana
-
-order ym year month date p u emp
-keep ym year month date p u emp
-
-keep if year>=2000
-tsset ym
-gen t=_n
 order ym t
+tsset ym
+
+* define variables we'll work with
+* not seasonally adjusted price index
+gen p = pn
+* seasonally adjusted unemployment rate and total employment
+gen u = us
+gen emp = emps
+
+order ym t year month date p u emp
+keep ym t year month date p u emp
 
 gen dp = D.p
 gen lnp = ln(p)
@@ -100,7 +97,6 @@ qui tab month, gen(mo) /* generate month dummies */
 
 
 * now save the workfile with data from 2000 through 2018
-keep if year>=2000 & year<=2018
 order ym year month t date p u emp
 save "$work\case-shiller-workfile-2000-2018.dta",replace
 
@@ -159,7 +155,7 @@ gen cv_mse=(mse1+mse2+mse3+mse4)/4
 gen cv_rmse=sqrt(cv_mse)
 * now create data table with one observation that has the mse & rmse stats
 keep if t==1 /* keep one obervation only */
-keep t cv* rmse* mse*
+keep cv* rmse* mse*
 gen str2 model="M`i'"
 order model rmse* cv_rmse
 save "$work/forecast-cv-rmse.dta", replace
@@ -186,7 +182,7 @@ gen cv_mse=(mse1+mse2+mse3+mse4)/4
 gen cv_rmse=sqrt(cv_mse)
 * create data table with one observation that has the mse & rmse stats
 keep if t==1 /* keep one obervation only */
-keep t cv* rmse* mse*
+keep cv* rmse* mse*
 gen str2 model="M`i'"
 order model rmse* cv_rmse
 * add this one row to the previously created data table with the mse and rmse statistics
@@ -241,7 +237,7 @@ gen cv_mse=(mse1+mse2+mse3+mse4)/4
 gen cv_rmse=sqrt(cv_mse)
 * create data table with one observation that has the mse & rmse stats
 keep if t==1 /* keep one obervation only */
-keep t cv* rmse* mse*
+keep cv* rmse* mse*
 gen str2 model="M`i'"
 order model rmse* cv_rmse
 * add this one row to the previously created data table with the mse and rmse statistics
@@ -269,7 +265,7 @@ gen cv_mse=(mse1+mse2+mse3+mse4)/4
 gen cv_rmse=sqrt(cv_mse)
 * create data table with one observation that has the mse & rmse stats
 keep if t==1 /* keep one obervation only */
-keep t cv* rmse* mse*
+keep cv* rmse* mse*
 gen str2 model="M`i'"
 order model rmse* cv_rmse
 * add this one row to the previously created data table with the mse and rmse statistics
@@ -304,7 +300,7 @@ gen cv_mse=(mse1+mse2+mse3+mse4)/4
 gen cv_rmse=sqrt(cv_mse)
 * create data table with one observation that has the mse & rmse stats
 keep if t==1 /* keep one obervation only */
-keep t cv* rmse* mse*
+keep cv* rmse* mse*
 gen str2 model="M`i'"
 order model rmse* cv_rmse
 * add this one row to the previously created data table with the mse and rmse statistics
@@ -357,7 +353,7 @@ graph export "$output/ch18-figure-9a-p-phat-ts-Stata.png", replace
 clear
 use "$work\case-shiller-workfile-2000-2017.dta",replace
 
-/* time series graphs of unemployment and employment
+* time series graphs of unemployment and employment
 * Figure 18.10a
 tsline u , lw(thick) lc("$b") ///
   ylab(, grid) tlab(2000m1(36)2018m1, grid) ///
@@ -381,29 +377,8 @@ tsline dlnemp , lw(thick) lc("$b") ///
   ylab(, grid) tlab(2000m1(36)2018m1, grid) ///
  ytitle(Change in ln(employment, in thousands)) xtitle(Date (month)) 
  graph export "$output/ch18-figure-10d-dlnemp-ts-Stata.png", replace
-*/
-/* 
-* VAR(1) + season dummies estimation and forecast
-qui forvalue testy = 2013/2016 {
-	use "$work\case-shiller-workfile-2000-2017.dta",replace
-	drop if year>=2017 /* keep work set */
-	local trainy_hi = `testy'-1 /*last year of training set */
-	local trainy_lo = `trainy_hi'-13 /*first year of training set */
-	sum dp du dlnemp if year>=`trainy_lo' & year<=`trainy_hi'
-	qui var dp du dlnemp if year>=`trainy_lo' & year<=`trainy_hi', lags(1) exog(mo*) 
-	 estimate store var_`testy'
-	 forecast create var_`testy', replace
-	 forecast estimates var_`testy'
-	 forecast exogenous mo2-mo12
-	 forecast identity p = L.p + dp
-	qui forecast solve, prefix(fvar_) begin(tm(`testy'm1))
-	gen f_p = fvar_p if year==`testy'
-	gen errsq = (p-f_p)^2 
-	sum errsq if year==`testy'
-	local mse_`testy' = r(mean)
-	noisily dis "mse_`testy'  =  "  `mse_`testy''
-*/
-*use "$work\case-shiller-workfile-2000-2017.dta",replace
+*
+
 forvalue fold = 1/4 {
 	qui var dp du dlnemp if train`fold'==1, lags(1) exog(mo*) 
 	 estimate store var`fold'
@@ -426,7 +401,7 @@ gen cv_mse=(mse1+mse2+mse3+mse4)/4
 gen cv_rmse=sqrt(cv_mse)
 * create data table with one observation that has the mse & rmse stats
 keep if t==1 /* keep one obervation only */
-keep t cv* rmse* mse*
+keep cv* rmse* mse*
 gen str2 model="M7"
 order model rmse* cv_rmse
 * add this one row to the previously created data table with the mse and rmse statistics

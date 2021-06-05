@@ -46,7 +46,7 @@ output <- paste0(use_case_dir,"output/")
 create_output_if_doesnt_exist(output)
 
 # load in clean and tidy data and create workfile
-data <- read_dta(paste0(data_in_clean,"/hotels-vienna.dta",sep=""))
+data <- read_csv(paste0(data_in_clean,"/hotels-vienna.csv",sep=""))
 data <- data %>% select(hotel_id, accommodation_type ,distance, stars,rating,rating_count,price)
 
 # look at accomodation types
