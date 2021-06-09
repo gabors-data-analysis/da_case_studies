@@ -2,7 +2,7 @@ patsy==0.5.1
 matplotlib==3.3.2
 pandas==1.2.1
 plotnine==0.7.1
-statsmodels==0.13.0.dev0+319.g77bb1d276
+statsmodels==0.12.2
 mizani==0.7.1
 seaborn==0.11.0
 scipy==1.5.2
