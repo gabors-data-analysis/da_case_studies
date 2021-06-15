@@ -107,3 +107,20 @@ def create_calibration_plot(
     )
 
     return plot
+
+
+def poly(x, degree=1):
+    """
+    Fit Polynomial
+
+    These are non orthogonal factors, but it may not matter if
+    we only need this for predictions (without interpreting the
+    coefficients) or visualisation.
+    """
+    d = {}
+    for i in range(degree+1):
+        if i == 1:
+            d['x'] = x
+        else:
+            d[f'x**{i}'] = np.power(x, i)
+    return pd.DataFrame(d)
