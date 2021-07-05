@@ -51,7 +51,7 @@ options(digits = 3)
 
 #-------------------------------------------------------
 # Import data
-data <- read_csv(paste(data_in,"airbnb_london_cleaned.csv", sep = ""))
+data <- read_csv(paste(data_in,"airbnb_london_cleaned_book.csv", sep = ""))
 
 
 # keep if property type is Apartment, House or Townhouse
@@ -144,17 +144,15 @@ data <- data %>%
 data <- data %>%
   drop_na(price)
 
-write_csv(data, paste0(data_out, "airbnb_london_workfile.csv"))
 
 library(skimr)
 ##################################
 # DESCRIBE
 
 #--------------------------------
-data <- read_csv(paste(data_out,"airbnb_london_workfile.csv", sep = ""))
 data <- data %>%
   filter(neighbourhood_cleansed == "Hackney")
-write_csv(data, paste0(data_out, "airbnb_hackney_workfile.csv"))
+write_csv(data, paste0(data_out, "airbnb_hackney_workfile_book.csv"))
 
 N=nrow(data)
 N
@@ -171,10 +169,6 @@ describe(data$price)
 data <- data %>%
   mutate(ln_price = log(price))
 
-# Remove extreme values + missing from prices (this case: only 3 missing values)
-data <- data %>%
-  filter(price <1000)
-
 # Histograms
 R_F14_h_lnprice <- ggplot(data, aes(ln_price)) +
   geom_histogram(binwidth = 0.15, fill = color[1], color = color.outline, alpha = 0.8, size = 0.25) +
@@ -182,12 +176,6 @@ R_F14_h_lnprice <- ggplot(data, aes(ln_price)) +
   xlab("Log price") +
   theme_bg()
 R_F14_h_lnprice
-ggsave(paste0(output, "R_F14_h_lnprice.png"), width=mywidth_small, height=myheight_small, units = "cm", dpi = 1200)
-cairo_ps(filename = paste0(output, "R_F14_h_lnprice.eps"),
-         width = mywidth_small, height = myheight_small, pointsize = 8,
-         fallback_resolution = 1200)
-print(R_F14_h_lnprice)
-dev.off()
 
 R_F14_h_price <- ggplot(data, aes(price)) +
   geom_histogram(binwidth = 25, fill = color[1], color = color.outline, alpha = 0.8, size = 0.25) +
@@ -195,12 +183,6 @@ R_F14_h_price <- ggplot(data, aes(price)) +
   xlab("Price") +
   theme_bg()
 R_F14_h_price
-ggsave(paste0(output, "R_F14_h_price.png"), width=mywidth_small, height=myheight_small, units = "cm", dpi = 1200)
-cairo_ps(filename = paste0(output, "R_F14_h_price.eps"),
-         width = mywidth_small, height = myheight_small, pointsize = 12,
-         fallback_resolution = 1200)
-print(R_F14_h_price)
-dev.off()
 
 
 ################################################
@@ -220,13 +202,6 @@ R_14_s_n_accommodates <- ggplot(data = data, aes(x=n_accommodates, y=price)) +
   labs(x="Number of people accomodated",y="Price")+
   geom_smooth(method="lm", colour=color[1], se=FALSE)+
   theme_bg()
-
-ggsave(paste0(output, "R_14_s_n_accommodates.png"), width=mywidth_small, height=myheight_small, units = "cm", dpi = 1200)
-cairo_ps(filename = paste0(output, "R_14_s_n_accommodates.eps"),
-         width = mywidth_small, height = myheight_small, pointsize = 12,
-         fallback_resolution = 1200)
-print(R_14_s_n_accommodates)
-dev.off()
 
 # Squares and further values to create
 data <- data %>%
@@ -367,7 +342,7 @@ for (i in 1:length(categoricals)) {
 # Change Infinite values with NaNs
 for (j in 1:ncol(data) ) data.table::set(data, which(is.infinite(data[[j]])), j, NA)
 
-write_csv(data, paste0(data_out, "airbnb_hackney_workfile_adj.csv"))
+write_csv(data, paste0(data_out, "airbnb_hackney_workfile_adj_book1.csv"))
 
 #------------------------------------------------------------------------------------------------
 

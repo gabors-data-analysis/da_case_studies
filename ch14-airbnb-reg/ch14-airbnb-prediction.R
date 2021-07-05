@@ -72,7 +72,7 @@ options(digits = 3)
 # Used area
 area <- "hackney"
 data <-
-  read_csv(paste0(data_in, "airbnb_", area, "_workfile_adj.csv")) %>%
+  read_csv(paste0(data_in, "airbnb_", area, "_workfile_adj_book1.csv")) %>%
   mutate_if(is.character, factor)
 
 
@@ -164,7 +164,7 @@ data <- data %>%
 skimr::skim(data)
 
 # save workfile
-write.csv(data, paste0(data_out, "airbnb_hackney_work.csv"), row.names = F)
+write.csv(data, paste0(data_out, "airbnb_hackney_work_book.csv"), row.names = F)
 
 
 #####################################
@@ -412,7 +412,6 @@ t14_2 <- t1 %>%
 colnames(t14_2) <- column_names
 print(xtable(t14_2, type = "latex", digits=c(0,0,0,2,0,2,2)), file = paste0(output, "ch14_table_fit_level.tex"),
       include.rownames=FALSE, booktabs=TRUE, floating = FALSE)
-
 
 # RMSE training vs test graph
 t1_levels <- t1 %>%
