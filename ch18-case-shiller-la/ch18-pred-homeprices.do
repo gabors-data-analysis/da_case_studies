@@ -415,6 +415,12 @@ format cv_* %4.1f
 lis model rmse1 rmse2 rmse3 rmse4 cv_rmse, separator(0)
 
 
+* Comment: 
+* In the textbook, Table 18.3 has VAR RMSE values for the model without seasonality. 
+* It’s noted at \url{https://gabors-data-analysis.com/errata/#part-iii} 
+* Without seasonality, we have: RMSE (average) =7.6. With seasonality, we have: RMSE (average) =4.5. 
+
+
  
 *************************************************
 * new holdout set: 2018

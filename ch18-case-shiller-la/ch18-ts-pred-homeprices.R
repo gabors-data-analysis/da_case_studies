@@ -410,13 +410,11 @@ summary_table_18_2
 ############################################
 # VAR
 
-# Note. This VAR doesn't include month dummies, 
-# because we couldn't figure out how to do it.
-# The 1st print of the textbook has these results.
-# Subsequent prints of the textbook should replace  
-# the results with the better VAR that with month dummies.
-# (Those results are obtained from Stata.)
-# The conclusions of the case study are the SAME either way 
+# Comment: In the textbook, Table 18.3 has VAR RMSE values for the model without seasonality. 
+# It’s noted at \url{https://gabors-data-analysis.com/errata/#part-iii} 
+# Without seasonality, we have: RMSE (average) =8.0. With seasonality, we have: RMSE (average) =4.5. 
+# In R we could do not figure out how to add seasonality. Let us know if you solved it...    
+
 
 var_formula <- "vars(dp, du, dlnemp) ~ AR(1) "
 var <- VAR(as.formula(var_formula))
