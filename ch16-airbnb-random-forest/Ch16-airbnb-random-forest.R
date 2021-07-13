@@ -410,13 +410,6 @@ save_fig("ch16-figure-2a-rf-varimp-group",output, "small")
 # Partial Dependence Plots -------------------------------------------------------
 #########################################################################################
 
-# TODO
-# : somehow adding scale screws up. ideadlly both graphs y beween 70 and 130,
-# n:accom should be 1,7 by=1
-
-# FIXME
-# should be on holdout, right? pred.grid = distinct_(data_train, "), --> pred.grid = distinct_(data_holdout, )
-
 pdp_n_acc <- pdp::partial(rf_model_2, pred.var = "n_accommodates", pred.grid = distinct_(data_holdout, "n_accommodates"), train = data_train)
 pdp_n_acc_plot <- pdp_n_acc %>%
   autoplot( ) +
