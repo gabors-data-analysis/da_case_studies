@@ -22,7 +22,7 @@ Data is hosted on OSF.io
 ## Status (15 July, 2021)
 1. **R** -- All code ready. Used for graphs in textbook. Minor edits, bug fixes happening, `renv` coming soon.
 2. **Stata** -- All code ready. In the lack of machine learning capabilities, no code for chapters 15,16,17, some limitations for chapter 18. Minor edits happening.
-3. **Python**  -- All code ready, minor differences to book and R are in ch14, ch15 and ch16, `pipenv` ready. 
+3. **Python**  -- All code ready. Moderate differences to book and R are in ch14-ch16, `pipenv` ready. 
 
 ## Organization
 1. Each case study has a separate folder.
