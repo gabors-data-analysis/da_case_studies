@@ -13,7 +13,7 @@
 # Chapter 14
 # CH14B Predicting AirBnB apartment prices: selecting a regression model
 # using the airbnb dataset
-# version 0.91 2020-01-05
+# version 0.92 2021-07-05
 #########################################################################################
 
 
@@ -72,7 +72,7 @@ options(digits = 3)
 # Used area
 area <- "hackney"
 data <-
-  read_csv(paste0(data_in, "airbnb_", area, "_workfile_adj.csv")) %>%
+  read_csv(paste0(data_in, "airbnb_", area, "_workfile_adj_book1.csv")) %>%
   mutate_if(is.character, factor)
 
 
@@ -124,6 +124,24 @@ data <- data %>%
           )
 table(data$flag_days_since)
 
+
+
+# redo features
+# Create variables, measuring the time since: squared, cubic, logs
+data <- data %>%
+  mutate(
+    ln_days_since = log(n_days_since+1),
+    ln_days_since2 = log(n_days_since+1)^2,
+    ln_days_since3 = log(n_days_since+1)^3 ,
+    n_days_since2=n_days_since^2,
+    n_days_since3=n_days_since^3,
+    ln_review_scores_rating = log(n_review_scores_rating),
+    ln_days_since=ifelse(is.na(ln_days_since),0, ln_days_since),
+    ln_days_since2=ifelse(is.na(ln_days_since2),0, ln_days_since2),
+    ln_days_since3=ifelse(is.na(ln_days_since3),0, ln_days_since3),
+  )
+
+
 # Look at data
 summary(data$price)
 
@@ -141,13 +159,12 @@ to_filter[to_filter > 0]
 data <- data %>%
   filter(n_accommodates < 8
          )
-# Note: slight difference from book: N=4396 not 4393 as in book
 
 # that's gonna be our sample
 skimr::skim(data)
 
 # save workfile
-write.csv(data, paste0(data_out, "airbnb_hackney_work.csv"), row.names = F)
+write.csv(data, paste0(data_out, "airbnb_hackney_work_book.csv"), row.names = F)
 
 
 #####################################
@@ -387,17 +404,14 @@ t1
 column_names <- c("Model", "N predictors", "R-squared", "BIC", "Training RMSE",
                  "Test RMSE")
 
-# Nice table produced and saved as .tex without \beign{table}
-# -R2, BIC on full work data-n.
-# -In sample rmse: average on training data; avg test : average on test data
+# R2, BIC on full work data-n.
+# In sample rmse: average on training data; avg test : average on test data
 
 t14_2 <- t1 %>%
   select("model_pretty_name", "nvars", "r2" , "BIC", "rmse_train", "rmse_test")
 colnames(t14_2) <- column_names
 print(xtable(t14_2, type = "latex", digits=c(0,0,0,2,0,2,2)), file = paste0(output, "ch14_table_fit_level.tex"),
       include.rownames=FALSE, booktabs=TRUE, floating = FALSE)
-
-
 
 # RMSE training vs test graph
 t1_levels <- t1 %>%
@@ -465,10 +479,6 @@ lasso_cv_rmse <- lasso_model$results %>%
   filter(lambda == lasso_model$bestTune$lambda) %>%
   dplyr::select(RMSE)
 print(lasso_cv_rmse[1, 1])
-
-# Note: re book
-# The textbook contains a somewhat different table and graph for train and test RMSE. 
-# The ordering is the same but the numbers are not. This is because of some minor change in cleaing file. Sory. 
 
 
 ########################################
