@@ -19,10 +19,10 @@ Data is hosted on OSF.io
 
 [Get data by datasets](https://osf.io/7epdj/)  
 
-## Status (06 May, 2021)
-1. **R** -- All codes ready. Used for graphs in textbook. Minor edits, bug fixes happening, `renv` coming soon.
-2. **Stata** -- All codes ready. In the lack of machine learning capabilities, no code for chapters 15,16,17, some limitations for chapter 18. Minor edits happening.
-3. **Python**  -- Under preparation. Chapters 01-11 ready, chapters 12-24 are under development, should be ready by summer 2021. `pip install requirements.txt` ready. 
+## Status (15 July, 2021)
+1. **R** -- All code ready. Used for graphs in textbook. Minor edits, bug fixes happening, `renv` coming soon.
+2. **Stata** -- All code ready. In the lack of machine learning capabilities, no code for chapters 15,16,17, some limitations for chapter 18. Minor edits happening.
+3. **Python**  -- All code ready, minor differences to book and R are in ch14, ch15 and ch16, `pipenv` ready. 
 
 ## Organization
 1. Each case study has a separate folder.
@@ -32,7 +32,7 @@ Data is hosted on OSF.io
 ## Code language versions
 1. **R** -- We used R 4.0.2. 
 2. **Stata** -- We used version 15, allmost all code should work in version 13 up.
-3. **Python** -- We used Python 3.6.0.
+3. **Python** -- We used Python 3.8.0.
 
 ## How to run case studies
 
