@@ -107,7 +107,7 @@ data <- data %>%
 data <- data %>%
   filter(year <=2013)
 
-Hmisc::describe(data$default3)
+Hmisc::describe(data$default)
 
 # Size and growth
 summary(data$sales) # There will be NAs, we'll drop them soon
