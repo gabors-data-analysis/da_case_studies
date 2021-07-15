@@ -10,12 +10,10 @@
 # License: Free to share, modify and use for educational purposes. 
 # 	Not to be used for commercial purposes.
 
-# To install libraries
-# Using R 4.0.2
-# version 0.8 2020-09-07
-
-
-# NOT READY!!!
+# This file was written to install libraries
+# Using R 4.0.2, version 0.8 2020-09-07
+# We suggest using renv instead
+# kept it for continuity
 
 #########################################################################################
 
