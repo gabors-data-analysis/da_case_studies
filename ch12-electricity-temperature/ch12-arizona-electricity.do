@@ -13,7 +13,7 @@
 * Chapter 12
 * CH12B Electricity consumption and temperature
 * using the arizona-electricity dataset
-* version 0.9 2020-09-10
+* version 0.91 2021-06-03
 ********************************************************************
 
 

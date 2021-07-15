@@ -13,7 +13,7 @@
 * Chapter 11
 * CH11A Does smoking pose a health risk?
 * using the share-health dataset
-* version 0.9 2020-09-06
+* version 0.91 2020-09-10
 ********************************************************************
 
 
@@ -22,7 +22,7 @@
 * STEP 1: set working directory for da_case_studies.
 * for example:
 * cd "C:/Users/xy/Dropbox/gabors_data_analysis/da_case_studies"
-cd "C:/Users/kezdi/GitHub/da_case_studies"
+
 
 * STEP 2: * Directory for data
 * Option 1: run directory-setting do file

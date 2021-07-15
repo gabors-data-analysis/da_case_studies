@@ -13,7 +13,7 @@
 * Chapter 18
 * CH18A Forecasting daily ticket volumes for a swimming pool
 * using the swim-transactions dataset
-* version 0.9 2020-09-12
+* version 0.92 2021-04-20
 ********************************************************************
 
 
