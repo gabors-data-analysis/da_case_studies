@@ -14,7 +14,7 @@
 
 * set folders
 *cd "D:\Dropbox (MTA KRTK)\bekes_kezdi_textbook"
-cd "C:\Users\bekes.gabor\Dropbox (MTA KRTK)\bekes_kezdi_textbook"
+
 * define folders 
 global data_in			"da_data_repo\food-health\clean"
 global data_out			"da_data_repo\food-health\clean"
