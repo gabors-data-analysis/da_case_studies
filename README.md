@@ -18,7 +18,7 @@ To see options for various languages, check out:
 
 ## Status (15 July, 2021)
 
-Release (https://gabors-data-analysis.com/contact-us/)`v0.8.0` is available as of 16 July 2021.   
+The [Latest release](https://github.com/gabors-data-analysis/da_case_studies/releases/tag/v0.8.0) `v0.8.0` is available as of 16 July 2021.   
 There will be additional bugfixes, edits, and `v1.0.0` expected in September. 
 
 1. **R** -- All code ready. Used for graphs in textbook. An environment with all librariries necessary, as `renv` is now available. 
