@@ -1,0 +1,86 @@
+---
+title: "report_new_pckgs"
+output: 
+  pdf_document:
+    extra_dependencies: ["float"]
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE , fig.pos = "!H", out.extra = "")
+
+```
+
+```{r packages, include= FALSE }
+
+rm(list=ls())
+library(modelsummary)
+library(tidyverse)
+library(fixest)
+library(kableExtra)
+
+
+# Data
+url <- 'https://vincentarelbundock.github.io/Rdatasets/csv/palmerpenguins/penguins.csv'
+df <- read.csv(url)
+
+```
+
+## Datasummary
+
+Here, I try simple datasummary customization.
+
+
+```{r summary}
+# Raw, but uncontrolled
+datasummary_skim( df )
+
+# Spice up:
+range_ds <- function( x ){ max( x , na.rm = TRUE ) - min( x , na.rm = TRUE ) }
+tab1 <- datasummary( Heading("Bill length (mm)") * bill_length_mm + 
+                    Heading("Bill depth (mm)") * bill_depth_mm 
+                    ~ Mean + Median + SD + Heading("Range") * range_ds + Min + Max + N , 
+                    data = df ,
+                    output = 'kableExtra',  title = 'My favorite Descriptives' ) 
+tab1 %>%
+    # column labels
+    add_header_above(c(" " = 1, "Central Tendency" = 2, "Dispersion" = 2, "Others" = 3 )) %>%
+    # text and background color
+    row_spec(1, color = 'red') %>%
+    row_spec(2, background = 'yellow') %>% 
+    # add fotenotes to table
+    add_footnote( c("I have created this", "Believe me, this is true!!"), notation = "none" )
+```
+
+## Etable
+
+Here, I try simple etable outputs.
+
+```{r analysis, echo = FALSE , warning = FALSE }
+
+lm_1 <- feols( bill_length_mm ~ bill_depth_mm , data = df )
+
+# Set the variable names
+setFixest_dict(c( bill_length_mm = "Length of bill (mm)", 
+                  bill_depth_mm = "Depth of bill (mm)" ) )
+
+kable( etable( lm_1 ) ,  booktabs = T )
+
+tab2 <- kable( etable( lm_1 , 
+                     digits.stats = 2,
+                     coefstat = "confint",
+                     fitstat = c("n","r2"),
+                     sdBelow = TRUE ,
+                     ci = 0.95 ,
+                     title = c("model 1") ) ,
+            booktab = TRUE )
+
+tab2 %>% 
+  add_footnote( c("This is pretty cool"), notation = "none" ) 
+
+# More on etable:
+# https://cran.r-project.org/web/packages/fixest/vignettes/exporting_tables.html
+
+# More on kable:
+# http://haozhu233.github.io/kableExtra/awesome_table_in_pdf.pdf
+
+```
