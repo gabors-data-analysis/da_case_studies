@@ -27,6 +27,8 @@
 #
 # Notes: linearHypothesis uses a Chi2 is there a good package to use a t-test?
 #
+# install_github("lrberge/fixest")
+
 rm( list = ls() )
 
 #install.packages(fixest)
@@ -127,7 +129,7 @@ summary( ts_1 )
 df <- df %>% mutate( period = 1 : N , id = 1 )
 ts_2 <- feols(Y ~ X1, df, panel.id = ~id + period )
 summary( ts_2 , "newey-west" )
-etable(ts_2 , se = "white")
+etable(ts_2 , se = "NW")
 
 # Lags: Y_1
 ts_3 <- feols( Y ~ lag( Y , 1 ) , df )
