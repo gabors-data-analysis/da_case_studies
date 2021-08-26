@@ -27,11 +27,13 @@
 #
 # Notes: linearHypothesis uses a Chi2 is there a good package to use a t-test?
 #
-# install_github("lrberge/fixest")
+
 
 rm( list = ls() )
 
 #install.packages(fixest)
+# library(devtools)
+# install_github("lrberge/fixest")
 library(fixest)
 library(tidyverse)
 
@@ -55,28 +57,29 @@ lm1 <- feols(Y ~ X1 , df )
 # Give summary
 summary( lm1 )
 # Estimate Heteroskedastic robust se
-summary( lm1 , "hetero" )
-# Report 1
-etable(lm1, subtitles = c("OLS"))
+lm2 <- feols( Y ~ X1 , df , vcov = "hetero")
+summary( lm2 )
+# Report 1 and 2 model
+etable(lm1, lm2, subtitles = c("OLS","OLS w robust SE"))
 
 ###
 # 2) Estimate multivariate XSEC with feols
-lm2 <- feols( Y ~ X1 + X2 , df )
+lm3 <- feols( Y ~ X1 + X2 , df , vcov = "hetero")
 # Give a summary
-summary( lm2 )
+summary( lm3 )
 # Give a comparison with model lm1
-etable(lm1, lm2 , subtitles = c("Simple","Multiple"))
+etable(lm1, lm2 , lm3 , subtitles = c("Simple","Simple w Robust","Multiple w Robust"))
 
 
 ###
 # 3) Hypothesis testing
 # Beta_2 := 0 - simply read out from summary
-summary( lm2 )
+summary( lm3 )
 # Beta_1 := 0.5
 library( car )
-linearHypothesis( lm2 , "X1 = 0.5")
+linearHypothesis( lm3 , "X1 = 0.5")
 # Beta_1 - Beta_2 := 0
-linearHypothesis( lm2 , "X1 = X2")
+linearHypothesis( lm3 , "X1 = X2")
 
 ###
 # 4) Binary models
@@ -124,29 +127,35 @@ modelsummary( models )
 ts_1 = feols(Y ~ X1, df )
 summary( ts_1 )
 
-# Estimate Newey-West SE:
-# First add identifiers: period and ids
+
+# Newey-West and Lags and leads: - !!Inf SE!! (probably because id = 1)
+# 1) Convert to a quasy panel
 df <- df %>% mutate( period = 1 : N , id = 1 )
-ts_2 <- feols(Y ~ X1, df, panel.id = ~id + period )
-summary( ts_2 , "newey-west" )
-etable(ts_2 , se = "NW")
+df_p <- panel( df , ~ id + period )
 
-# Lags: Y_1
-ts_3 <- feols( Y ~ lag( Y , 1 ) , df )
+# Estimate Newey-West SE:
+ts_2 <- feols( Y ~ X1, df , panel.id = ~id + period , vcov = "NW" )
+summary( ts_2  )
+# etable note: does not work with se = "NW"...
+etable(ts_2 )
+
+# Lagged X variables
+ts_3 <- feols( Y ~ l( X1 , 0 : 1) , df_p , vcov = "NW" )
 summary( ts_3 )
-
-# Lags: Y_1 to Y_3 ???
-ts_4 <- feols( Y ~ lag( Y , 1 ) + lag( Y , 2 ) + lag( Y , 3 ) , df, 
-               panel.id = ~id + period )
+# Lagged Y variables
+ts_4 <- feols( Y ~ l( Y , 1 : 2) , df_p , vcov = "NW" )
 summary( ts_4 )
 
-# Lags with X
-ts_5 <- feols( Y ~ X1 + lag( X1 , 1 ) , df , panel.id = ~id + period )
+# Lagged X and Y variables - KILLS THE OUTPUT !!!
+ts_5 <- feols( Y ~ l( Y , 1 : 2) + l( X , 0 : 2 ) , df_p , vcov = "NW" )
 summary( ts_5 )
 
-# Lags with Y and X
-ts_6 <- feols( Y ~ lag( Y , 1 ) + X1 + lag( X1 , 1 ) , df , panel.id = ~id + period )
+# Leads and lags for Y and X - KILLS THE OUTPUT !!!
+ts_6 <- feols( f(Y) ~ l( X1 , -1 : 1 ) , df_p , vcov = "NW" )
 summary( ts_6 )
 
-# Summary
+# Summary - stupid values for SE... or does not work with "NW"
+etable( ts_1 , ts_2 , ts_3 , ts_4 )
+
+# Summary - !!DOES NOT WORK!!!
 etable( ts_1 , ts_2 , ts_3 , ts_4 , ts_5 , ts_6 )
