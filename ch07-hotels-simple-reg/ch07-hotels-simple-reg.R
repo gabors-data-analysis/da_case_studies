@@ -99,16 +99,15 @@ hotels<-left_join(hotels,dist2)
 hotels <- hotels %>%  mutate(dist2 = recode(dist2,`0` = "Close",`1` = "Far"))
 
 hotels %>% group_by(dist2) %>% 
-  dplyr::summarize(mean_dist=mean(distance), 
-                                         sd_dist=sd(distance),
-                                         min_dist=min(distance),
-                                         max_dist=max(distance),
-                                         mean_dist=mean(price), 
-                                         sd_dist=sd(price),
-                                         min_dist=min(price),
-                                         max_dist=max(price),
-                                         N=n()
-                                         )
+  dplyr::summarize(mean_dist = mean(distance), 
+                               sd_dist=sd(distance),
+                               min_dist=min(distance),
+                               max_dist=max(distance),
+                               mean_price=mean(price),
+                               sd_price=sd(price),
+                               min_price=min(price),
+                               max_price=max(price),
+                               N=n())
 
 
 ############
@@ -131,15 +130,17 @@ save_fig("ch07-figure-1a-scatter-nonpar1", output, "small")
 hotels <-hotels %>% mutate(dist4=0.5+ 1*as.numeric(hotels$distance>=1) + 1*as.numeric(hotels$distance>=2) + 2.5*as.numeric(hotels$distance>=3))
 dist4 <- hotels %>% group_by(dist4) %>% dplyr::summarize(Eprice_cat4=mean(price))
 hotels<-left_join(hotels,dist4)
-hotels %>% group_by(dist4) %>% dplyr::summarize(mean_dist=mean(distance), 
-                                         sd_dist=sd(distance),
-                                         min_dist=min(distance),
-                                         max_dist=max(distance),
-                                         mean_dist=mean(price), 
-                                         sd_dist=sd(price),
-                                         min_dist=min(price),
-                                         max_dist=max(price),
-                                         N=n())
+hotels %>% 
+  group_by(dist4) %>% 
+  dplyr::summarize(mean_dist = mean(distance), 
+                               sd_dist=sd(distance),
+                               min_dist=min(distance),
+                               max_dist=max(distance),
+                               mean_price=mean(price),
+                               sd_price=sd(price),
+                               min_price=min(price),
+                               max_price=max(price),
+                               N=n())
 
 #######################
 # Figure 7.1b
