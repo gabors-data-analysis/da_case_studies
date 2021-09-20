@@ -81,7 +81,7 @@ View(epl_games)
 
 football_managers <- read_csv(paste0(data_in, "football_managers.csv"))
 View(football_managers)
-Hmisc:: describe(football_managers_merged$manager_id)
+Hmisc:: describe(football_managers$manager_id)
 
 
 #--------------------------------------------------------------------------------------------------------
