@@ -23,11 +23,11 @@ rm(list=ls())
 
 # Import libraries 
 library(tidyverse)
-library(arm)
+#!library(arm)
 #!library(lmtest)
 #!library(estimatr)
 #!library(sandwich)
-library(segmented)
+#!library(segmented)
 #!library(stargazer)
 library(cowplot)
 #!library(huxtable)
@@ -199,7 +199,7 @@ cps %>% filter(female==1)
 
 reg11 <- feols(lnw ~ age, data=cps %>% filter(female==1), vcov = "HC1")
 reg12 <- feols(lnw ~ age, data=cps %>% filter(female==0), vcov = "HC1")
-reg13 <- feols(lnw ~ female + age + age*female, data=cps, vcov = "HC1")
+reg13 <- feols(lnw ~ female + age + age*female, data=select(cps,female,age,lnw), vcov = "HC1")
 
 #!huxreg(reg11, reg12, reg13,statistics = c(N = "nobs", R2 = "r.squared"))
 etable( reg11, reg12, reg13 , fitstat = c('n','r2') ) #, sdBelow = TRUE
@@ -228,13 +228,17 @@ etable( reg14, reg15, reg16 , fitstat = c('n','r2')  ) #, sdBelow = TRUE
 # PREDICTION AND GRAPH LINEAR
 ## NEEDS TO BE CHECKED !!! NO se.fit INPUT FOR FIXEST!!!
 data_m <- cps %>% filter(female==0)
-#!pred <- predict(reg13, newdata = data_m , se.fit=T)
-pred    <- predict(reg13, newdata = data_m )
-pred_se <- predict(reg13, newdata = data_m )
-data_m <- bind_cols(data_m,as_tibble(pred$fit))
-data_m <- data_m %>% mutate(CIup=value+2*pred$se.fit,
-                            CIlo=value+-2*pred$se.fit 
-)
+#! reg23 <- lm_robust( lnw ~ female + age + female * age , data = cps )
+#! pred <- predict(reg23, newdata = data_m , se.fit=T)
+#!data_m <- bind_cols(data_m,as_tibble(pred$fit))
+#!data_m <- data_m %>% mutate(CIup=value+2*pred$se.fit,
+#!                            CIlo=value+-2*pred$se.fit )
+
+# add the se(y) function
+
+pred2 <- predict( reg13 , newdata = data_m , partial = TRUE )
+pred_se <- se.fit.fixest( reg13 )
+#xx <- relpred( reg13 , newdata = select( data_m , female , age , lnw ) , level = 0.95 )
 
 
 data_f <- cps %>% filter(female==1)
