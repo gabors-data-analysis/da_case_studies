@@ -228,19 +228,12 @@ etable( reg14, reg15, reg16 , fitstat = c('n','r2')  ) #, sdBelow = TRUE
 # PREDICTION AND GRAPH LINEAR
 ## NEEDS TO BE CHECKED !!! NO se.fit INPUT FOR FIXEST!!!
 data_m <- cps %>% filter(female==0)
-#! reg23 <- lm_robust( lnw ~ female + age + female * age , data = cps )
-#! pred <- predict(reg23, newdata = data_m , se.fit=T)
-#!data_m <- bind_cols(data_m,as_tibble(pred$fit))
-#!data_m <- data_m %>% mutate(CIup=value+2*pred$se.fit,
-#!                            CIlo=value+-2*pred$se.fit )
+pred <- predict( reg13 , newdata = data_m , se.fit = TRUE )
+data_m <- bind_cols(data_m,as_tibble(pred$fit))
+data_m <- data_m %>% mutate(CIup=value+2*pred$se.fit,
+                            CIlo=value+-2*pred$se.fit )
 
 # add the se(y) function
-
-pred2 <- predict( reg13 , newdata = data_m , partial = TRUE )
-pred_se <- se.fit.fixest( reg13 )
-#xx <- relpred( reg13 , newdata = select( data_m , female , age , lnw ) , level = 0.95 )
-
-
 data_f <- cps %>% filter(female==1)
 pred <- predict(reg13, newdata = data_f, se.fit=T)
 data_f <- bind_cols(data_f,as_tibble(pred$fit))
