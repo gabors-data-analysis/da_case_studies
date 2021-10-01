@@ -27,6 +27,7 @@ library(cowplot)
 library(grid)
 library(scales)
 library(Hmisc)
+#! library(modelsummary)
 
 
 # set working directory
@@ -57,6 +58,8 @@ create_output_if_doesnt_exist(output)
 df <- read.csv(paste0(data_in,"epl_games.csv"),
                 stringsAsFactors = F)
 
+#! df <- read_csv( "https://osf.io/bdjt5/download" )
+
 # look at 2016/17 season only
 df <- subset(df, season==2016)
 glimpse(df)
@@ -68,6 +71,7 @@ df <-  df %>%
 # Summary statistics
 summary(df$home_goaladv)
 describe(df$home_goaladv)
+#! datasummary_skim( df$home_goaladv )
 
 
 # Histogram

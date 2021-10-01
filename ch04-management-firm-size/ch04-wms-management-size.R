@@ -33,6 +33,7 @@ library(haven)
 library(Hmisc)
 library(binsreg)
 library(xtable)
+library(modelsummary)
 
 # set working directory
 # option A: open material as project
@@ -57,13 +58,14 @@ create_output_if_doesnt_exist(output)
 ########################################################################
 # Import data
 df <- read_csv(paste0(data_in,"wms_da_textbook.csv"))
+#! df <- read_csv( "https://osf.io/uzpce/download" )
 
 # Sample selection
 df <- df %>%
   filter(country=="Mexico" & wave==2013 & emp_firm>=100  & emp_firm<=5000)
 
 # Summary
-summary(df$emp_firm)
+datasummary_skim( df$emp_firm )
 describe(df$emp_firm)
 
 # Save workfile
@@ -72,9 +74,10 @@ write.csv(data, paste0(data_out, "ch04-wms-work.csv"), row.names = F)
 ########################################################################
 
 # Summary
-df %>%
-  dplyr::select(management, emp_firm) %>% 
-  summarise_all(tibble::lst(min, max, mean, median, sd, length))
+datasummary( management + emp_firm ~ mean + Median + SD + Min + Max + N , data = df )
+#!df %>%
+#!  dplyr::select(management, emp_firm) %>% 
+#!  summarise_all(tibble::lst(min, max, mean, median, sd, length))
 
 # Histogram
 g1<-ggplot(data = df, aes (x = management)) +
@@ -173,20 +176,22 @@ save_fig("ch04-figure-3b-wms-mex-perf2-emp3bins",output , "small")
 # Option 1: create 3 bins as defined by thresholds
 
 # Summary
-df %>%
-  select(emp_firm, emp3bins) %>% 
-  group_by(emp3bins) %>% 
-  dplyr::summarise_all(tibble::lst(min, max, mean, median, sd, length))
+datasummary( emp_firm * emp3bins ~ mean + Median + SD + Min + Max + N , data = df )
+#!df %>%
+#!  select(emp_firm, emp3bins) %>% 
+#!  group_by(emp3bins) %>% 
+#!  dplyr::summarise_all(tibble::lst(min, max, mean, median, sd, length))
 
 # Recode employee bins
 df$emp3bins <- ifelse(df$emp3bins == 1 , 150, 
                       ifelse(df$emp3bins == 2, 600,
                              ifelse(df$emp3bins == 3, 3000, NA)))
 # Summary
-df %>%
-  select(emp_firm, emp3bins) %>% 
-  group_by(emp3bins) %>%
-  summarise_all(tibble::lst(min, max, mean, median, sd, length))
+datasummary( emp_firm * Factor( emp3bins ) ~ Mean + Median + SD + Min + Max + N , data = df )
+#!df %>%
+#!  select(emp_firm, emp3bins) %>% 
+#!  group_by(emp3bins) %>%
+#!  summarise_all(tibble::lst(min, max, mean, median, sd, length))
 
 # Generate variables by mean
 df1<-df %>% group_by(emp3bins) %>%
@@ -217,7 +222,7 @@ df$emp10bins <- df$emp_firm %>% cut_number(10)
 df_summary<-df %>%
   select(emp_firm, emp10bins) %>% 
   group_by(emp10bins) %>%
-  summarise_all(ftibble::lst(min, max, mean, median, sd, length))
+  summarise_all(tibble::lst(min, max, mean, median, sd, length))
 df_summary
 
 # Recode
@@ -312,7 +317,8 @@ save_fig("ch04-figure-6b-wms-mex-violin-mgmt-emp3bins", output, "small")
 # Correlation
 cor(df$management, df$emp_firm, use = "complete.obs")
 
-table(df$sic)
+datasummary( Factor( sic ) ~ N + Percent() , data = df )
+#!table(df$sic)
 
 # by industry
 df$industry_broad[df$sic<=21] <- 'food_drinks_tobacco'
@@ -324,7 +330,8 @@ df$industry_broad[df$sic>=35 & df$sic<37] <- 'electronics'
 df$industry_broad[df$sic==37 ] <- 'auto'
 df$industry_broad[df$sic>=38]             <- 'other'
 
-table(df$industry_broad)
+datasummary( industry_broad ~ N , data = df )
+#!table(df$industry_broad)
 
 # Correlation
 df %>%
@@ -332,25 +339,26 @@ df %>%
   dplyr::summarize(COR=cor(management, emp_firm))
 
 # Summary
-df %>%
-  select(management, industry_broad) %>% 
-  filter(!is.na(industry_broad)) %>% 
-  group_by(industry_broad) %>%
-  dplyr::summarise(Min = min(management), 
-                   Max= max(management),
-                   SD = sd(management),
-                   Median = median(management),
-                   n())
+datasummary( Median + SD + Min + Max + N ~ Factor( industry_broad ) * ( emp_firm + management ) , data = df )
+#!df %>%
+#!  select(management, industry_broad) %>% 
+#!  filter(!is.na(industry_broad)) %>% 
+#!  group_by(industry_broad) %>%
+#!  dplyr::summarise(Min = min(management), 
+#!                   Max= max(management),
+#!                   SD = sd(management),
+#!                   Median = median(management),
+#!                   n())
 
-df %>%
-  select(emp_firm, industry_broad) %>% 
-  filter(!is.na(industry_broad)) %>% 
-  group_by(industry_broad) %>%
-  dplyr::summarise(Min = min(emp_firm), 
-                   Max= max(emp_firm),
-                   SD = sd(emp_firm),
-                   Median = median(emp_firm),
-                   n())
+#!df %>%
+#!  select(emp_firm, industry_broad) %>% 
+#!  filter(!is.na(industry_broad)) %>% 
+#!  group_by(industry_broad) %>%
+#!  dplyr::summarise(Min = min(emp_firm), 
+#!                   Max= max(emp_firm),
+#!                   SD = sd(emp_firm),
+#!                   Median = median(emp_firm),
+#!                   n())
 
 
 cor<-df %>%

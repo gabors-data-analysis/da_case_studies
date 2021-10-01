@@ -23,6 +23,7 @@ rm(list=ls())
 # Import libraries
 library(tidyverse)
 library(scales)
+#!library(modelsummary)
 
 
 # set working directory
@@ -50,6 +51,7 @@ create_output_if_doesnt_exist(output)
 #-----------------------------------------------------------------------------------------
 # load in clean and tidy data and create workfile
 hrs <-  read.csv(paste(data_in,"hrs_height_income.csv", sep = "/"))
+# hrs <- read_csv("https://osf.io/rnuh2/download")
 
 #------------------------------------------------------------------------------------------------------
 
@@ -57,13 +59,15 @@ hrs$height <- as.numeric(as.character(hrs$height))
 
 # NORMAL: height of women age 55-59 
 Hmisc::describe(hrs$height)
+#! datasummary_skim(hrs$height)
 filtered_women <-  hrs %>%
   filter(age >= 55 & age < 60 & female == 1)
 Hmisc::describe(hrs$height)
+#! datasummary_skim(filtered_women$height)
 filtered_women_height <-  hrs %>%
   filter(age >= 55 & age < 60 & female == 1 & height > 1.3 & height < 2.1)
 Hmisc::describe(filtered_women_height$height)
-
+#! datasummary_skim(filtered_women_height$height)
 
 # graph --height  
 ch03_normal_height <- ggplot(filtered_women_height, aes(x = height)) +
@@ -87,6 +91,7 @@ save_fig("ch03-figure-10-hist-height", output, "small")
 filtered_women_income <-  hrs %>%
   filter(age >= 55 & age < 60 & female == 1 & hhincome > 1 & hhincome < 1000)
 Hmisc::describe(filtered_women_income$hhincome)
+#! datasummary_skim(filtered_women_income$height)
 
 
 # graph --income 

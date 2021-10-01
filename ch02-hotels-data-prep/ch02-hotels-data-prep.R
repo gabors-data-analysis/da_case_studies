@@ -25,6 +25,7 @@ library(haven)
 library(Hmisc)
 library(desc)
 library(reshape2)
+library(modelsummary)
 
 # set working directory
 # option A: open material as project
@@ -47,6 +48,7 @@ create_output_if_doesnt_exist(output)
 
 # load in clean and tidy data and create workfile
 data <- read_csv(paste0(data_in_clean,"/hotels-vienna.csv",sep=""))
+# data <- read_csv("https://osf.io/y6jvb/download")
 data <- data %>% select(hotel_id, accommodation_type ,distance, stars,rating,rating_count,price)
 
 # look at accomodation types
@@ -86,6 +88,7 @@ data %>% select(hotel_id,price,distance) %>% slice(1:3)
 # need to transform then to numbers that we can use
 
 data <- read_csv(paste0(data_in_raw,"/hotelbookingdata-vienna.csv",sep=""))
+# data <- read_csv( "https://osf.io/g5dmw/download" )
 
 # distance to center entered as string in miles with one decimal
 # generate numerical variable of rating variable from string variable
@@ -97,7 +100,7 @@ data <- data %>% separate(center1distance,c("distance",NA),sep = " ") %>%
   separate(guestreviewsrating,c("rating",NA),sep = " ")
   
 
-# check: frequency table of all values incl. missing varlues
+# check: frequency table of all values incl. missing values
 
 tab_rating <- data %>%
   group_by(rating) %>%
@@ -106,6 +109,9 @@ tab_rating <- data %>%
          cumpercent = round(cumsum(freq = n / sum(n)),3))
 
 View(tab_rating)
+
+#! same thing with datasumary, except cummulative percentrages
+#! datasummary(rating + 1 ~ N + Percent(), data = data)
 
 # check: frequency table of all values incl. missing varlues
 
@@ -162,12 +168,11 @@ data <- data %>% distinct()
 #     Missing values in text
 #**********************************************
 
-summary(data)
+#!summary(data)
+#!summary_df <- t(stat.desc(data))
+#!View(summary_df)
 
-
-summary_df <- t(stat.desc(data))
-
-View(summary_df)
+datasummary_skim(data=data,histogram=F)
 
 data <-  data %>% mutate(misrating = ifelse(is.na(rating),1,0))
 

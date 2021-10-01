@@ -24,6 +24,7 @@ rm(list=ls())
 library(tidyverse)
 library(scales)
 library(xtable)
+library(modelsummary)
 
 
 # set working directory
@@ -51,13 +52,15 @@ create_output_if_doesnt_exist(output)
 
 # load vienna
 vienna <- read_csv(paste0(data_in,"hotels-vienna.csv"))
+#! vienna <- read_csv("https://osf.io/y6jvb/download" )
 
 
 ####################################################################################
 # Figures 1a and 1b
 ####################################################################################
 # apply filters: Hotels
-table(vienna$accommodation_type)
+#! table(vienna$accommodation_type)
+datasummary( accommodation_type ~ N , data = vienna )
 
 vienna_cut <- vienna %>% filter(accommodation_type=="Hotel")
 
@@ -99,8 +102,10 @@ vienna_cut <- vienna %>% filter(accommodation_type=="Hotel") %>%
 
 
 # brief look at data
-table(vienna_cut$city)
-table(vienna_cut$stars)
+vienna_cut$stars <- factor( vienna_cut$stars )
+datasummary( city + stars ~ N , data = vienna_cut )
+#!table(vienna_cut$city)
+#!table(vienna_cut$stars)
 
 ####################################################################################
 # Figure 3.2 a) and b)
@@ -200,7 +205,8 @@ save_fig("ch03-figure-5-hist-dist-annot-large", output, "large")
 
 
 # look at actual city
-table(vienna_cut$city_actual)
+datasummary( city_actual ~ N , data = vienna_cut )
+#! table(vienna_cut$city_actual)
 
 
 
