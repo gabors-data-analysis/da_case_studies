@@ -19,6 +19,7 @@
 # CLEAR MEMORY
 rm(list=ls())
 
+# install.packages("tidyverse")
 library(tidyverse)
 #----------------------------------------------------------------------------------------------------
 
@@ -29,8 +30,12 @@ library(tidyverse)
 #           example: setwd("C:/Users/bekes.gabor/Documents/github/da_case_studies/")
 
 # set data dir, load theme and functions
+
 source("ch00-tech-prep/theme_bg.R")
 source("ch00-tech-prep/da_helper_functions.R")
+# If source code does not run, install the following packages:
+# install.packages("urca")
+# install.packages("stargazer")
 
 # data used
 source("set-data-directory.R") #data_dir must be first defined #
@@ -45,6 +50,8 @@ create_output_if_doesnt_exist(output)
 
 # load in clean and tidy data and create workfile
 df <-  read.csv(paste0(data_in,"hotels-vienna.csv"))
+# or from the website
+# df <- read_csv("https://osf.io/y6jvb/download")
 
 ############################################
 # First look
@@ -55,6 +62,7 @@ df <- df%>%
           weekend, holiday, nnights, price, scarce_room, offer, offer_cat)
 
 summary(df)
+glimpse(df)
 
 # export list
 df <- subset(df, select = c(hotel_id, accommodation_type, country, city, city_actual, center1label, distance, stars, rating, price))
