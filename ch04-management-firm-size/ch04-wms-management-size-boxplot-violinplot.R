@@ -59,6 +59,8 @@ create_output_if_doesnt_exist(output)
 
 # Import data
 df <- read_csv(paste0(data_in,"wms_da_textbook.csv"))
+# From the web
+# df <- read_csv( "https://osf.io/uzpce/download" )
 
 # Sample selection
 df <- df %>%
@@ -69,6 +71,16 @@ df <- df %>%
 
 # ---------------------------------------------------------------
 # Figure 3.6
+
+# Code employee bins
+df$emp3bins <- ifelse(df$emp_firm<200, 1, 
+                      ifelse(df$emp_firm>=200 & df$emp_firm<1000, 2,
+                             ifelse(df$emp_firm>=1000, 3,100)
+                      ) )
+# Box plots by emp bins
+df$emp3bins <- as.factor(df$emp3bins)
+levels(df$emp3bins) <- c('Small','Medium', 'Large')
+
 # Boxplot
 df2 <- df %>%
   select(emp3bins, management) %>%

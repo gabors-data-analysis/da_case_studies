@@ -32,6 +32,7 @@ library(rms)
 library(xtabs)
 library(lspline)
 library(huxtable)
+library(plyr)
 
 # set working directory
 # option A: open material as project
@@ -61,6 +62,9 @@ create_output_if_doesnt_exist(output)
 # load in clean and tidy data and create workfile
 hotels_europe_price <- read_csv(paste0(data_in,"hotels-europe_price.csv"))
 hotels_europe_features <- read_csv(paste0(data_in,"hotels-europe_features.csv"))
+# From web
+# hotels_europe_price <- read_csv("https://osf.io/p6tyr/download")
+# hotels_europe_features <- read_csv("https://osf.io/utwjs/download")
 
 data <- left_join(hotels_europe_price, hotels_europe_features, by = "hotel_id")
 rm(hotels_europe_price)
@@ -196,9 +200,8 @@ rm(reg, reg_rob, i, coeff_intercept, coeff_dist_0_2, coeff_dist_2_7, d)
 # same with hotels restricted to be the same
 
 # first create variable that counts the number of times a hotel is in the data
-data <- data %>%
-  group_by(hotel_id) %>%
-  mutate(hotelcount = n())
+data <- left_join( data , data %>% group_by(hotel_id) %>% dplyr::summarise( n() ) , by = "hotel_id" )
+data <- dplyr::rename( data , hotelcount = `n()` )            
 table(data$hotelcount)
 
 data <- data[data$hotelcount==4, ]

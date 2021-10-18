@@ -70,6 +70,7 @@ create_output_if_doesnt_exist(output)
 
 #location folders
 stock_data<-read_csv(paste0(data_in,"ready_sp500_45_cos.csv"))
+
 # filter on MSFT
 MSFT <- stock_data %>% filter(ticker == "MSFT")
 
@@ -352,6 +353,6 @@ p_candle <- stock_data %>%
   layout(title = "Microsoft monthly aggregated adjusted closing price",
          xaxis = list(rangeslider = list(visible = F)))
 p_candle
-htmlwidgets::saveWidget(as_widget(g02), paste0(output,"ch12_g02.html"))
+htmlwidgets::saveWidget(as_widget(p_candle), paste0(output,"ch12_g02.html"))
 dev.off()
 

@@ -48,6 +48,8 @@ create_output_if_doesnt_exist(output)
 
 # look at basic data
 epl_games <-  read_csv(paste0(data_in,"epl_games.csv"))
+# Import directly from web
+# epl_games <- read_csv("https://osf.io/bdjt5/download")
 
 #---------------------------------------------------------------------------------------------------------
 
@@ -66,6 +68,8 @@ View(epl_games)
 # look at data for team-game level
 # TODO: change to csv when we have it
 epl_teams_games <-  read_csv(paste0(data_in, "epl-teams-games.csv"))
+# From the web
+# epl_teams_games <- read_csv("https://osf.io/bck6q/download")
 
 epl_teams_games <-  epl_teams_games %>%
   arrange(.,team)
@@ -80,6 +84,8 @@ epl_teams_games <-  epl_teams_games %>%
 View(epl_games)
 
 football_managers <- read_csv(paste0(data_in, "football_managers.csv"))
+# From the web
+# football_managers <- read_csv("https://osf.io/pcu6s/download")
 View(football_managers)
 Hmisc:: describe(football_managers$manager_id)
 
@@ -90,6 +96,8 @@ Hmisc:: describe(football_managers$manager_id)
 
 # read.csv accent problem, using read_csv
 football_managers_merged <-  read_csv(paste0(data_in,"football_managers_workfile.csv"))
+# From the web
+# football_managers_merged <- read_csv("https://osf.io/t6dgh/download")
 
 football_managers_merged <-  football_managers_merged %>%
   arrange(.,season, team)

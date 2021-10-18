@@ -22,8 +22,11 @@ rm(list=ls())
 
 # Import libraries
 library(tidyverse)
+#install.packages("arm")
 library(arm)
+#install.packages("pastecs")
 library(pastecs)
+#install.packages("DataCombine")
 library(DataCombine)
 library(janitor)
 
@@ -53,6 +56,8 @@ create_output_if_doesnt_exist(output)
 #-----------------------------------------------------------------------------------------
 # LOAD  DATA
 sp500 <- read_csv(paste0(data_in,"SP500_2006_16_data.csv"),na = c("", "#N/A"))
+# From web
+# sp500 <- read_csv("https://osf.io/h64z2/download" , na = c("", "#N/A") )
 sp500 <- subset(sp500, VALUE != "NA")
 
 
