@@ -13,7 +13,7 @@
 # Chapter 09
 # CH09A Estimating gender and age differences in earnings
 # using the cps-earnings dataset
-# version 0.9 2020-09-07
+# version 0.92 2021-10-18
 #########################################################################################
 
 
@@ -61,8 +61,11 @@ create_output_if_doesnt_exist(output)
 #-----------------------------------------------------------------------------------------
 
 
-#import data
-data_all <- read_csv(paste0(data_in,"morg-2014-emp.csv"))
+#import data (state must be as character: it's a mix of double and character in raw)
+data_all <- read_csv(paste0(data_in,"morg-2014-emp.csv"), 
+                     col_types = cols(.default = "?", 
+                                      state = "c"))
+janitor::tabyl(data_all$state)
 
 #SELECT OCCUPATION
 # keep only two occupation types: Market research analysts and marketing specialists 
