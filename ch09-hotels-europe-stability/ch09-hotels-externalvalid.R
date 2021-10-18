@@ -32,7 +32,7 @@ library(rms)
 library(xtabs)
 library(lspline)
 library(huxtable)
-library(plyr)
+library(modelsummary)
 
 # set working directory
 # option A: open material as project
@@ -119,9 +119,7 @@ summary(data$lnprice)
 # TODO simplify, make it nicer as before
 
 # summary stats by variables
-ddply(data,~date,summarise,mean=mean(distance), min=min(distance), max=max(distance), median=median(distance), n=length(distance))
-ddply(data,~date,summarise,mean=mean(price), min=min(price), max=max(price), median=median(price), n=length(price))
-ddply(data,~date,summarise,mean=mean(lnprice), min=min(lnprice), max=max(lnprice), median=median(lnprice), n=length(lnprice))
+datasummary( date*(distance + price + lnprice) ~ mean + Min + Max + Median + N , data = data )
 
 
 t <-data %>% group_by(date) %>% dplyr::summarize(mean=mean(distance), 
@@ -243,9 +241,7 @@ data <- data[data$stars>=3 & data$stars<=4, ]
 data <- data[data$accommodation_type=="Hotel",]
 data <- data[data$date=="2017-NOV-weekday",]
 
-ddply(data,~city,summarise,mean=mean(distance), min=min(distance), max=max(distance), median=median(distance), n=length(distance))
-ddply(data,~city,summarise,mean=mean(price), min=min(price), max=max(price), median=median(price), n=length(price))
-ddply(data,~city,summarise,mean=mean(lnprice), min=min(lnprice), max=max(lnprice), median=median(lnprice), n=length(lnprice))
+datasummary( city*(distance+price+lnprice)~mean+Min+Max+Median+N, data=data)
 
 # Regressions for three cities
 # original regression
@@ -285,10 +281,7 @@ data <- data[data$date=="2017-NOV-weekday",]
 
 table(data$accommodation_type, data$stars)
 
-
-ddply(data,~stars,summarise,mean=mean(distance), min=min(distance), max=max(distance), median=median(distance), n=length(distance))
-ddply(data,~stars,summarise,mean=mean(price), min=min(price), max=max(price), median=median(price), n=length(price))
-ddply(data,~stars,summarise,mean=mean(lnprice), min=min(lnprice), max=max(lnprice), median=median(lnprice), n=length(lnprice))
+datasummary( as.factor(stars)*(distance+price+lnprice)~mean+Min+Max+Median+N,data=data)
 
 
 # regressions
