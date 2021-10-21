@@ -8,10 +8,10 @@
 #
 ###############################################################################################x
 
-# CHAPTER 03
-# CH03B Comparing hotel prices in Europe: Vienna vs. London 	
-# hotels-europe dataset
-# version 0.9 2020-08-28
+# CHAPTER 05
+# CH05A What likelihood of loss to expect on a stock portfolio?
+# using the sp500 dataset
+# version 0.91 2021-10-21
 
 
 # ------------------------------------------------------------------------------------------------------
