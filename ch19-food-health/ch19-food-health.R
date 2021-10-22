@@ -13,7 +13,7 @@
 # CHAPTER 19
 # CH19A Food and health
 # using the food-health dataset
-# version 0.9 2020-09-11
+# version 0.91 2021-03-10
 #########################################################################################
 
 
@@ -84,7 +84,7 @@ workfile <- workfile %>%
 workfile <-  workfile %>%
   mutate(pchips=gr_potato_chips)
 
-
+Hmisc::describe(workfile$hh_income)
 
 # Descriptive table -------------------------------------------------------------
 
@@ -182,6 +182,9 @@ ggplot(workfile, aes(exerc, fv)) +
 fv_exerc
 save_fig("ch19-figure-9b-fv-exerc", output, "small")
 
+
+
+
 # potato chips (potato_chips) and amount of fruit and vegetables per day (fv)
 pchips <- workfile %>%
   filter(pchips<400)
@@ -219,4 +222,59 @@ msummary(list(reg1, reg2, reg3, reg4),
 
 
 
+###########################################
+# not in book but useful to talk confounders
+###########################################
 
+# additional simpler graphs
+bp_inc <-  
+  ggplot(workfile, aes(lninc, bp)) +
+  geom_smooth_da(method="lm") +
+  theme_bg() +
+  labs(x="ln(household income per capita, US dollars)",
+       y = "Blood pressure (systolic+diastolic)") +
+  scale_y_continuous(expand = c(0.01,0.01),breaks = seq(180,200,5)) +
+  scale_x_continuous(expand = c(0.01,0.01),breaks=c(6,7,8,9,10,11,12)) +
+  coord_cartesian(xlim=c(6,12), ylim =c(180,200), expand=TRUE) 
+bp_inc
+save_fig("ch19-figure-notbook-bp-inc", output, "small")
+
+bp_exerc <-  
+  ggplot(workfile, aes(exerc, bp)) +
+  geom_smooth_da(method="lm") +
+  theme_bg() +
+  labs(x="Days per week exercising",
+       y = "Blood pressure (systolic+diastolic)") +
+  scale_x_continuous(expand = c(0.01,0.01),breaks = seq(0,7,1)) +
+  scale_y_continuous(expand = c(0.01,0.01),breaks = seq(180,200,5)) +
+  coord_cartesian(xlim=c(0,7), ylim =c(180,200), expand=TRUE) 
+bp_exerc
+save_fig("ch19-figure-notbook-bp-exerc", output, "small")
+
+
+
+
+fv_exerc <-  
+  ggplot(workfile, aes(exerc, fv)) +
+  geom_smooth_da(method="lm") +
+  theme_bg() +
+  labs(x="Days per week exercising",
+       y = "Fruit and vegetables per day (grams)") +
+  scale_x_continuous(expand = c(0.01,0.01),breaks = seq(0,7,1)) +
+  scale_y_continuous(expand = c(0.01,0.01),breaks=c(0,200,400,600, 800)) +
+  coord_cartesian(xlim=c(0,7), ylim =c(0,800), expand=TRUE) 
+fv_exerc
+save_fig("ch19-figure-notbook-fv-exerc", output, "small")
+
+
+fv_inc <-  
+  ggplot(workfile, aes(lninc, fv)) +
+  geom_smooth_da(method="lm") +
+  theme_bg() +
+  labs(x="ln(household income per capita, US dollars)",
+       y = "Fruit and vegetables per day (grams)") +
+  scale_y_continuous(expand = c(0.01,0.01),breaks=c(0,200,400,600, 800)) +
+  scale_x_continuous(expand = c(0.01,0.01),breaks=c(6,7,8,9,10,11,12)) +
+  coord_cartesian(xlim=c(6,12), ylim =c(0,800), expand=TRUE) 
+fv_inc
+save_fig("ch19-figure-notbook-fv-inc", output, "small")
