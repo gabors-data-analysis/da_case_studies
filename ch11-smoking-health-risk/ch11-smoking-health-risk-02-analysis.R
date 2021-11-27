@@ -63,6 +63,7 @@ create_output_if_doesnt_exist(data_work)
 
 
 share <- read_csv(paste0(data_work,'share-health-filtered.csv'))
+# share <- read_csv("https://osf.io/3ze58/download")
 share%>%nrow()
 
 
