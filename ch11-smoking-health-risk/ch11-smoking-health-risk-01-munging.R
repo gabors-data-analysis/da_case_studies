@@ -132,35 +132,6 @@ share$ever_smoked[share$ever_smoked == 5] <- 0
 share <- share %>% filter( smoking == 1 | smoking == 0 ,
                            ever_smoked == 1 | ever_smoked == 0 )
 
-##
-# Adjust other variables: 
-# exerc - doing weekly exercises more than once: if br015 = 1,
-#         otherwise it is 0, if negative -> missing value
-share$exerc <- ifelse(share$br015==1, 1, ifelse(share$br015>0 & share$br015!=1 , 0, NA))
-table(share$exerc)
-
-# bmi - Body mass index
-share$bmi <- ifelse(share$bmi<0, NA, share$bmi)
-summary(share$bmi)
-
-# Rename:income_pct_w4 to income10
-names(share)[names(share) == 'income_pct_w4'] <- 'income10'
-# Married status: 1-married, 2-registered partner status, others are non-married categories
-share$married <- ifelse(share$mar_stat==1 | share$mar_stat==2, 1, 0 )
-# Education years
-share$eduyears <- ifelse(share$eduyears_mod<0, NA, share$eduyears_mod)
-summary(share$eduyears)
-# Remove eduyears_mod value
-share$eduyears_mod <- NULL
-
-# Remove if any of a newly created variable is missing
-share <- share[!is.na(share$bmi) & !is.na(share$eduyears) & !is.na(share$exerc), ]
-
-
-# Make descriptive statistics for selected variables
-datasummary(stayshealthy+smoking+ever_smoked+female+age+income10+eduyears+bmi+exerc~
-              mean + median + min + max + sd , data = share )
-
 
 ##
 # TO DO:
