@@ -11,7 +11,7 @@
 # CHAPTER 11
 # CH11 smoking
 # share-health dataset
-# version 0.93 2021-11-27 - revised, two files now (cleaning separate)
+# version 0.94 2021-11-29 - revised, two files now (cleaning separate)
 
 
 #########################################
@@ -24,14 +24,18 @@
 # CLEAR MEMORY
 rm(list=ls())
 
+# you may need this
+#install.packages("mfx")
+#install.packages("skimr")
+
 
 # Import libraries
 library(haven)
 library(tidyverse)
 library(modelsummary)
 library(lspline)
+library(skimr)
 library(fixest)
-#install.packages("mfx")
 library(mfx)
 
 
@@ -61,35 +65,17 @@ create_output_if_doesnt_exist(data_work)
 
 #-----------------------------------------------------------------------------------------
 
+# load work data
+#share <- read_csv(paste0(data_work,'share-health-filtered.csv'))
 
-share <- read_csv(paste0(data_work,'share-health-filtered.csv'))
-# share <- read_csv("https://osf.io/3ze58/download")
+# load directly from OSF.io
+share <- read_csv("https://osf.io/3ze58/download")
 share%>%nrow()
 
+# let us review the data
+skimr::skim(share)
 
-# Prep
-##
-# Adjust other variables: 
-# exerc - doing weekly exercises more than once: if br015 = 1,
-#         otherwise it is 0, if negative -> missing value
-share$exerc <- ifelse(share$br015==1, 1, ifelse(share$br015>0 & share$br015!=1 , 0, NA))
-table(share$exerc)
-
-# bmi - Body mass index
-share$bmi <- ifelse(share$bmi<0, NA, share$bmi)
-summary(share$bmi)
-
-# Rename:income_pct_w4 to income10
-names(share)[names(share) == 'income_pct_w4'] <- 'income10'
-# Married status: 1-married, 2-registered partner status, others are non-married categories
-share$married <- ifelse(share$mar_stat==1 | share$mar_stat==2, 1, 0 )
-# Education years
-share$eduyears <- ifelse(share$eduyears_mod<0, NA, share$eduyears_mod)
-summary(share$eduyears)
-# Remove eduyears_mod value
-share$eduyears_mod <- NULL
-
-# Remove if any of a newly created variable is missing
+# Remove if any of important variable is missing
 share <- share[!is.na(share$bmi) & !is.na(share$eduyears) & !is.na(share$exerc), ]
 
 
@@ -142,8 +128,9 @@ save_fig("ch11-figure-1-health-smoking-lpm", output, "small")
 lpm2 <- feols( stayshealthy ~ smoking + ever_smoked , data = share , vcov = 'hetero' )
 lpm2
 
-# Compare models
-etable( lpm1 , lpm2 )
+# Table 11.1 Compare models
+etable( lpm1 , lpm2,
+        digits=3)
 
 
 ####
@@ -207,17 +194,23 @@ g2d
 #     -> it automatically drops the first category: 11 (Austria), which is now the reference category
 
 lpm3 <-feols( stayshealthy ~ smoking + ever_smoked + female +
-             age + lspline(eduyears,c(8,18)) + income10 + lspline(bmi,c(18.5,25,35)) +
+             age + lspline(eduyears,c(8,18)) + income10 + lspline(bmi,c(35)) +
              exerc + as.factor(country),
            data = share , vcov = 'hetero')
-etable(lpm3)
+
+# etable is very versatile to produce tables, can keep/drap vars, etc
+# Table 11.2
+etable(lpm3, 
+       drop="country", digits=3
+       )
 
 
 # Check predicted probabilities: is there any interesting values?
 # predicted probabilities
 share$pred_lpm <- predict( lpm3 )
 # Make a descriptive summary of the predictions!
-datasummary( pred_lpm ~ min + max + mean + median + sd , data = share )
+datasummary( pred_lpm ~ min + max + mean + median + sd , 
+             data = share, fmt="%.3f"  )
 
 # Show the predicted probabilities' distribution (ggplot)
 ggplot( share , aes( x = pred_lpm ) ) +
@@ -275,12 +268,16 @@ model_formula <- formula( stayshealthy ~ smoking + ever_smoked + female + age +
 
 # lpm (repeating the previous regression)
 lpm <-feols( model_formula , data=share, vcov = 'hetero')
-etable(lpm)
+etable(lpm,        
+       drop="country", digits=3)
+
 
 # logit coefficients:
 #   alternatively: familiy='binomial' automatically gives you logit, but not probit...
 logit <- feglm( model_formula , data=share, family = binomial( link = "logit" ) )
-etable(logit)
+etable(logit,
+       drop="country", digits=3)
+
 
 # predicted probabilities 
 share$pred_logit <- predict( logit, type="response" )
@@ -306,11 +303,22 @@ datasummary(pred_logit + pred_probit~min+P25+Median+Mean+P75+Max,data=share)
 
 ###
 # Creating a model summary output
-etable( lpm, logit, probit )
+etable( lpm, logit, probit,
+        drop="country", digits=3)
+
 
 # If you want to include the marginals:
 cm <- c('(Intercept)' = 'Constant')
 pmodels <- list(lpm, logit, logit_marg, probit, probit_marg)
+
+msummary( pmodels ,
+          fmt="%.3f",
+          gof_omit = 'DF|Deviance|Log.Lik.|F|R2 Adj.|AIC|BIC|R2|PseudoR2',
+          stars=c('*' = .05, '**' = .01),
+          coef_rename = cm,
+          coef_omit = 'as.factor(country)*')
+
+# could also save it by adding output...
 msummary( pmodels ,
           fmt="%.3f",
           gof_omit = 'DF|Deviance|Log.Lik.|F|R2 Adj.|AIC|BIC|R2|PseudoR2',
@@ -319,6 +327,7 @@ msummary( pmodels ,
           coef_omit = 'as.factor(country)*',
           output = paste0(output,"prob_models_coeff.html")
 )
+
 
 # adding pseudo R2 (not work for mfx)
 glance_custom.glm <- function(x) data.frame(`PseudoR2` = pR2(x)["McFadden"])
@@ -432,7 +441,7 @@ datasummary(pred_lpmbase+pred_lpm+pred_logit+pred_probit~mean+median+min+max+sd,
 bias <- mean( share$pred_logit ) - mean(share $stayshealthy)
 # 
 
-# calibration curves
+# calibration curves using the create_calibration_plot function we wrote
 
 share %>% 
   ungroup() %>%
@@ -482,11 +491,15 @@ rm(df, i, j)
 ################################################################################
 # 8. PART - LOGIT & PROBIT CURVES
 ################################################################################
+library(psych)
 
 # ILLUSTRATION LOGIT AND PROBIT CURVES
-share <- read.csv(paste0(data_out,"ch11_share.csv"),stringsAsFactors = F)
 
+share <- read_csv("https://osf.io/3ze58/download")
+
+# Remove if any of important variable is missing
 share <- share[!is.na(share$bmi) & !is.na(share$eduyears) & !is.na(share$exerc), ]
+
 
 # estimate logit, predict bx instead of p
 logit <- glm(stayshealthy ~ smoking + ever_smoked + female + age + lspline(eduyears, c(8,18)) + 
