@@ -133,6 +133,34 @@ share <- share %>% filter( smoking == 1 | smoking == 0 ,
                            ever_smoked == 1 | ever_smoked == 0 )
 
 
+# additional prep
+# Prep
+##
+# Adjust other variables: 
+# exerc - doing weekly exercises more than once: if br015 = 1,
+#         otherwise it is 0, if negative -> missing value
+share$exerc <- ifelse(share$br015==1, 1, ifelse(share$br015>0 & share$br015!=1 , 0, NA))
+table(share$exerc)
+
+# bmi - Body mass index
+share$bmi <- ifelse(share$bmi<0, NA, share$bmi)
+summary(share$bmi)
+
+# Rename:income_pct_w4 to income10
+names(share)[names(share) == 'income_pct_w4'] <- 'income10'
+# Married status: 1-married, 2-registered partner status, others are non-married categories
+share$married <- ifelse(share$mar_stat==1 | share$mar_stat==2, 1, 0 )
+# Education years
+share$eduyears <- ifelse(share$eduyears_mod<0, NA, share$eduyears_mod)
+summary(share$eduyears)
+# Remove eduyears_mod value
+share$eduyears_mod <- NULL
+
+
+# Married status: 1-married, 2-registered partner status, others are non-married categories
+share$married <- ifelse(share$mar_stat==1 | share$mar_stat==2, 1, 0 )
+
+
 ##
 # TO DO:
 #   read 'country_id.csv' and join by country to share data
@@ -146,6 +174,8 @@ share <- left_join( share , country_id, by = "country" )
 
 # Check the number of people stayed healthy by countries
 table(share$country_str,share$stayshealthy)
+
+
 
 # Remove non-needed variables
 rm(country_id )
