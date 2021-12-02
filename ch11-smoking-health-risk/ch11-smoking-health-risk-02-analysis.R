@@ -306,24 +306,13 @@ datasummary(pred_logit + pred_probit~min+P25+Median+Mean+P75+Max,data=share)
 etable( lpm, logit, probit,
         drop="country", digits=3 , fitstat = c('r2','pr2'))
 
-###
-# Replicate table 11.5
-fitstat_register("brier", function(x){mean(x$residual^2)}, "Brier score")
-fitstat_register("logloss", function(x){
-  log_id <- !is.na( x$fitted.values ) & x$fitted.values != 1 & x$fitted.values != 0
-  y   <- x$fitted.values[ log_id ] + x$residuals[ log_id ]
-  lp  <- log( x$fitted.values[log_id] )
-  lnp <- log( 1 - x$fitted.values[log_id] )
-  nobs <- sum( log_id )
-  return( 1 / nobs * sum( y * lp + ( 1 - y ) * lnp ) )
-}, "log-loss")
-
-etable( lpm, logit, probit , drop = "factor|lspline|income|exerc",fitstat = ~ r2 + brier + pr2 + logloss )
-
 # If you want to include the marginals:
 cm <- c('(Intercept)' = 'Constant')
 pmodels <- list(lpm, logit, logit_marg, probit, probit_marg)
 
+##########################
+# Table 11.3 Marginal differences
+##########################
 msummary( pmodels ,
           fmt="%.3f",
           gof_omit = 'DF|Deviance|Log.Lik.|F|R2 Adj.|AIC|BIC|R2|PseudoR2',
@@ -353,6 +342,30 @@ msummary(list(lpm, logit, probit),
          coef_omit = 'as.factor(country)*'
 )
 
+
+
+###############################
+# 5. PART - GOODNESS OF FIT
+###############################
+
+
+##########################
+# Table 11.5
+##########################
+fitstat_register("brier", function(x){mean(x$residual^2)}, "Brier score")
+fitstat_register("logloss", function(x){
+  log_id <- !is.na( x$fitted.values ) & x$fitted.values != 1 & x$fitted.values != 0
+  y   <- x$fitted.values[ log_id ] + x$residuals[ log_id ]
+  lp  <- log( x$fitted.values[log_id] )
+  lnp <- log( 1 - x$fitted.values[log_id] )
+  nobs <- sum( log_id )
+  return( 1 / nobs * sum( y * lp + ( 1 - y ) * lnp ) )
+}, "log-loss")
+
+etable( lpm, logit, probit , drop = "factor|lspline|income|exerc",fitstat = ~ r2 + brier + pr2 + logloss )
+
+
+
 ##
 # Comparing predicted probabilities of logit and probit to LPM
 
@@ -374,10 +387,6 @@ g5
 #save_fig("pred_scatter_3models_R", output, "small")
 save_fig("ch11-figure-5-pred-scatter-3models", output, "small")
 
-
-####
-# 5. PART - GOODNESS OF FIT
-#
 
 
 # re-estimate the simplest lpm
