@@ -74,9 +74,7 @@ gen ptotalAA = shareAA*passengers
 gen ptotalUS = shareUS*passengers 
 gen ptotallargest = sharelargest*passengers 
 
-collapse (first) after before airports-stops ///
- (sum) ptotal* passengers itinfare ///
-  , by(origin finaldest return year)
+collapse (first) after before airports return_sym stops (sum) ptotal* passengers itinfare , by(origin finaldest return year)
 
 gen avgprice = itinfare/passengers
 gen shareAA = ptotalAA/passengers
