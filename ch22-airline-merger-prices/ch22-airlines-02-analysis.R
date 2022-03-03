@@ -23,12 +23,13 @@ rm(list=ls())
 
 # Descriptive statistics and regressions
 library(tidyverse)
-library(haven)
+#library(haven)
 library(zoo)
-library(stargazer)
-library(estimatr)
-library(modelsummary)
+#library(stargazer)
+#library(estimatr)
+#library(modelsummary)
 library(cowplot)
+library(fixest)
 
 # set data dir, data used
 source("set-data-directory.R")             # data_dir must be first defined 
@@ -42,7 +43,7 @@ source("ch00-tech-prep/theme_bg.R")
 source("ch00-tech-prep/da_helper_functions.R")
 options(digits = 3)
 
-data_in <- paste(data_dir,"airline-tickets-usa","clean/", sep = "/")
+data_in <- paste(data_dir,"airline-tickets-usa","clean", sep = "/")
 use_case_dir <- "ch22-airline-merger-prices/"
 
 
@@ -68,6 +69,9 @@ data_work <- read_rds(paste0(data_out,"ch22-airline-workfile.rds")) %>%
 # *  and merge to it treated-untreated 
 # *	(keep matched ones; no unmatched from "using")
 data <- read_dta(paste(data_in, "originfinal-panel.dta", sep="/"))
+# from OSF
+#data <- read_dta("https://osf.io/zw2h9/download")
+
 data <- merge(data, data_work, by = c("origin", "finaldest", "return"))
 
 
@@ -178,19 +182,19 @@ data_agg <- read_rds(paste0(data_out,"ch22-airline-workfile.rds"))
 data_balanced <- data_agg %>%
   filter(balanced == 1)  
 
-fd <- lm(d_lnavgp ~ treated, weights = data_balanced$pass_bef, data = data_balanced)
-fd_small <- lm(d_lnavgp ~ treated, weights = filter(data_balanced, smallmkt==1)$pass_bef, data = filter(data_balanced, smallmkt==1))
-fd_large <- lm(d_lnavgp ~ treated, weights = filter(data_balanced, smallmkt==0)$pass_bef, data = filter(data_balanced, smallmkt==0))
+
+fd <- feols(d_lnavgp ~ treated, weights = data_balanced$pass_bef, data = data_balanced , vcov = 'hetero' )
+fd_small <- feols(d_lnavgp ~ treated, weights = filter(data_balanced, smallmkt==1)$pass_bef, data = filter(data_balanced, smallmkt==1), vcov = 'hetero' )
+fd_large <- feols(d_lnavgp ~ treated, weights = filter(data_balanced, smallmkt==0)$pass_bef, data = filter(data_balanced, smallmkt==0), vcov = 'hetero' )
 
 
 summary(fd)
 summary(fd_small)
 summary(fd_large)
 
-stargazer_r(list(fd, fd_small, fd_large), se = 'robust', 
-  column.labels = c("All markets", "Small markets", "Large markets"), 
-  float=TRUE, digits=3, out=paste0(output,"airlines-reg1.tex")
-) 
+etable( fd , fd_small , fd_large , headers = c("All markets", "Small markets", "Large markets"),
+        digits = 3 )
+
 
 # Corresponding diff-in-diffs table
 data_balanced %>%
@@ -214,23 +218,22 @@ data_balanced <- data_balanced %>%
   ) %>%
   ungroup()
 
-formula2 <- as.formula(d_lnavgp ~ treated + lnpass_bef + return + stops + sharelarge_bef)
-fd2 <- lm(formula2, weights = data_balanced$pass_bef, data = data_balanced)
-fd2_small <- lm(formula2, weights = filter(data_balanced, smallmkt==1)$pass_bef, data = filter(data_balanced, smallmkt==1))
-fd2_large <- lm(formula2, weights = filter(data_balanced, smallmkt==0)$pass_bef, data = filter(data_balanced, smallmkt==0))
+formula2 <- as.formula(d_lnavgp ~ treated + lnpass_bef + return + stops + sharelarge_bef )
+fd2 <- feols(formula2, weights = data_balanced$pass_bef, data = data_balanced , vcov = 'hetero')
+fd2_small <- feols(formula2, weights = filter(data_balanced, smallmkt==1)$pass_bef, data = filter(data_balanced, smallmkt==1), vcov = 'hetero')
+fd2_large <- feols(formula2, weights = filter(data_balanced, smallmkt==0)$pass_bef, data = filter(data_balanced, smallmkt==0), vcov = 'hetero')
 
 summary(fd2)
 summary(fd2_small)
 summary(fd2_large)
 
-stargazer_r(list(fd2, fd2_small, fd2_large), se = 'robust', 
-  column.labels = c("All markets", "Small markets", "Large markets"), 
-  float=TRUE, digits=3, out=paste0(output,"airlines-reg2.tex")
-)
+etable( fd2, fd2_small, fd2_large,
+  headers = c("All markets", "Small markets", "Large markets"), 
+  digits=3 )
 
 # **************************************************************************
 # * ANALYSIS
-# * Diff-in-diffs regerssion with quantitative treatment
+# * Diff-in-diffs regression with quantitative treatment
 # *  weighted by # passengers on market, in before period
 # **************************************************************************
 
@@ -250,21 +253,20 @@ ggplot(data_balanced, aes(x=share_bef,  y = (..count..)/sum(..count..))) +
 save_fig("ch22-figure-4-airlines-sharehist", output, size = "small")
 
 formula3 <- as.formula(d_lnavgp ~ share_bef + lnpass_bef + return + stops + sharelarge_bef)
-fd3 <- lm(formula3, weights = data_balanced$pass_bef, data = data_balanced)
-fd3_small <- lm(formula3, weights = filter(data_balanced, smallmkt==1)$pass_bef, data = filter(data_balanced, smallmkt==1))
-fd3_large <- lm(formula3, weights = filter(data_balanced, smallmkt==0)$pass_bef, data = filter(data_balanced, smallmkt==0))
+fd3 <- feols(formula3, weights = data_balanced$pass_bef, data = data_balanced , vcov = 'hetero')
+fd3_small <- feols(formula3, weights = filter(data_balanced, smallmkt==1)$pass_bef, data = filter(data_balanced, smallmkt==1), vcov = 'hetero')
+fd3_large <- feols(formula3, weights = filter(data_balanced, smallmkt==0)$pass_bef, data = filter(data_balanced, smallmkt==0), vcov = 'hetero')
 
 summary(fd3)
 summary(fd3_small)
 summary(fd3_large)
 
-stargazer_r(list(fd3, fd3_small, fd3_large), se = 'robust', 
-  column.labels = c("All markets", "Small markets", "Large markets"), 
-  float=TRUE, digits=3, out=paste0(output,"airlines-reg3.tex")
-)
+etable( fd3, fd3_small, fd3_large,
+  headers = c("All markets", "Small markets", "Large markets"), 
+  digits=3 )
 
 # **************************************************************************
-# * Diff-in-diffs on pooled cross-sections regeression 
+# * Diff-in-diffs on pooled cross-sections regression 
 # * use entire unbalanced panel 
 # *   - errr... after only is dropped here see later
 # *  weighted by # passengers on market, in before period
@@ -301,15 +303,14 @@ data_agg %>%
 
 # conditioning on observed confounders
 formula4 <- as.formula(lnavgp ~ (treatment + lnpass_bef + return + stops + sharelarge_bef)*after )
-fd4 <- lm(formula4, weights = data_agg$pass_bef, data = data_agg)
-fd4_small <- lm(formula4, weights = filter(data_agg, smallmkt==1)$pass_bef, data = filter(data_agg, smallmkt==1))
-fd4_large <- lm(formula4, weights = filter(data_agg, smallmkt==0)$pass_bef, data = filter(data_agg, smallmkt==0))
+fd4 <- feols(formula4, weights = data_agg$pass_bef, data = data_agg, vcov = 'hetero' )
+fd4_small <- feols(formula4, weights = filter(data_agg, smallmkt==1)$pass_bef, data = filter(data_agg, smallmkt==1), vcov = 'hetero' )
+fd4_large <- feols(formula4, weights = filter(data_agg, smallmkt==0)$pass_bef, data = filter(data_agg, smallmkt==0), vcov = 'hetero' )
 
 summary(fd4)
 summary(fd4_small)
 summary(fd4_large)
 
-stargazer_r(list(fd4, fd4_small, fd4_large), se = 'robust', 
-  column.labels = c("All markets", "Small markets", "Large markets"), 
-  float=TRUE, digits=3, out=paste0(output,"airlines-reg4.tex")
-)
+etable( fd4, fd4_small, fd4_large,
+  headers = c("All markets", "Small markets", "Large markets"), 
+  digits=3 )
