@@ -27,7 +27,6 @@ rm(list=ls())
 # Import libraries
 library(tidyverse)
 library(modelsummary)
-#library(car)
 library(fixest)
 
 
@@ -136,25 +135,25 @@ data_balanced <- data_balanced %>%
 # Set the panel.id for all estimation
 setFixest_estimation(panel.id = ~c + year)
 
-fe_lm <- feols( surv ~ imm | c + year, 
+fe_lm <- feols( surv ~ imm + year | c , 
                 data = data_balanced,
                 weights = data_balanced$avgpop,
                 cluster = "c" )
 
-fe_lm2 <- feols(surv ~ imm + lngdppc + lnpop | c + year,
+fe_lm2 <- feols(surv ~ imm + lngdppc + lnpop + year | c ,
                 data = data_balanced, 
                 weights = data_balanced$avgpop, 
                 cluster = "c" )
 
-etable(fe_lm, fe_lm2 )
+etable(fe_lm, fe_lm2  , drop = 'year')
 
 ####################### not in book
 # no weights
-fe_lm2_nowts <- feols(surv ~ imm + lngdppc + lnpop | c + year,
+fe_lm2_nowts <- feols(surv ~ imm + lngdppc + lnpop + year| c ,
                       data = data_balanced, 
                       cluster = "c" )
 
-etable( fe_lm2, fe_lm2_nowts )
+etable( fe_lm2, fe_lm2_nowts , drop = 'year')
 
 ###########################################################
 
@@ -162,12 +161,12 @@ etable( fe_lm2, fe_lm2_nowts )
 # *************************
 # ** CLUSTER SE VS BIASED SE 
 
-fe_lm3 <- feols(surv ~ imm + lngdppc + lnpop | c + year,
+fe_lm3 <- feols(surv ~ imm + lngdppc + lnpop + year | c ,
                 data = data_balanced, 
                 weights = data_balanced$avgpop,
                 vcov = 'iid')
 
-etable( fe_lm2 , fe_lm3 )
+etable( fe_lm2 , fe_lm3 , drop = 'year' )
 
 
 # *************************
@@ -186,6 +185,16 @@ fd_lm_5 <- feols(d_surv ~ l(d_imm,0:5),
                  cluster = "c"
 )
 
+# Showing only the d_imm renamed
+dictName = c("l(d_imm,1)"="d_imm lag1",
+             "l(d_imm,2)"="d_imm lag2",
+             "l(d_imm,3)"="d_imm lag3",
+             "l(d_imm,4)"="d_imm lag4",
+             "l(d_imm,5)"="d_imm lag5",
+             "(Intercept)"="Constant")
+etable( fd_lm, fd_lm_5,dict = dictName,
+        keep = 'd_imm|Constant', digits = 3)
+
 
 # * FD, 5 lags, cumul
 fd_lm_5_cumul <- feols( d_surv ~ l( d_imm , 5 )+ l( d2_imm , 0:4) ,
@@ -193,19 +202,21 @@ fd_lm_5_cumul <- feols( d_surv ~ l( d_imm , 5 )+ l( d2_imm , 0:4) ,
                         weights = data_balanced$pop,
                         cluster = "c" )
 
-# * FD, 5 lags, cumul, lead
+# * FD, 5 lags, cumul, lead (different than in book!)
 fd_lm_5_cumul_lead <- feols( d_surv ~ l( d_imm , 5 ) + l( d2_imm , -3:4 ) ,
                              data = data_balanced, 
                              weights = data_balanced$pop,
                              cluster = "c" )
 
 
-etable( fd_lm, fd_lm_5, fd_lm_5_cumul, fd_lm_5_cumul_lead )
-
-# Showing only the d_imm
-etable( fd_lm, fd_lm_5, fd_lm_5_cumul, fd_lm_5_cumul_lead,
-        keep = 'd_imm')
-
+# Showing only the d_imm renamed
+dictName2 = c("l(d_imm,5)"="d_imm cumulative",
+              "f(d2_imm,1)"="d_imm lead 1",
+              "f(d2_imm,2)"="d_imm lead 2",
+              "f(d2_imm,3)"="d_imm lead 3",
+              "(Intercept)"="Constant")
+etable( fd_lm_5_cumul, fd_lm_5_cumul_lead, dict=dictName2,
+         digits = 3,drop="d2_imm")
 
 
 
@@ -247,7 +258,7 @@ fd_lm_5_cumul_trend_c_country <- feols(d_surv ~ l( d_imm , 5 ) + l(d2_imm , 0 : 
 
 # etable format for output
 etable(fd_lm_5_cumul_trend, fd_lm_5_cumul_trend_c, fd_lm_5_cumul_trend_c_country,
-       keep = "d_imm",
+       keep = "d_imm",digits=3,
        extralines = list("Confounders" = c(F,T,T)))
 
 
