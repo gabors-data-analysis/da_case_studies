@@ -202,7 +202,7 @@ fd_lm_5_cumul <- feols( d_surv ~ l( d_imm , 5 )+ l( d2_imm , 0:4) ,
                         weights = data_balanced$pop,
                         cluster = "c" )
 
-# * FD, 5 lags, cumul, lead (different than in book!)
+# * FD, 5 lags, cumul, lead (!different than in book!)
 fd_lm_5_cumul_lead <- feols( d_surv ~ l( d_imm , 5 ) + l( d2_imm , -3:4 ) ,
                              data = data_balanced, 
                              weights = data_balanced$pop,
