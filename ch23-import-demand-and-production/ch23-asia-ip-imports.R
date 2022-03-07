@@ -23,10 +23,6 @@ rm(list=ls())
 # Libraries
 library(tidyverse)
 library(haven)
-#library(estimatr)
-#library(huxtable)
-#library(Hmisc)
-#library(modelsummary)
 library(fixest)
 
 # set data dir, data used
