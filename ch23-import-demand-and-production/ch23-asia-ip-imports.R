@@ -23,11 +23,10 @@ rm(list=ls())
 # Libraries
 library(tidyverse)
 library(haven)
-library(estimatr)
-library(huxtable)
-library(Hmisc)
-library(modelsummary)
-
+#library(estimatr)
+#library(huxtable)
+#library(Hmisc)
+#library(modelsummary)
 library(fixest)
 
 # set data dir, data used
@@ -232,15 +231,15 @@ thai_reg <- feols(dln_ip ~ l(dln_usa_imports,0:4)+l(dln_ip,1:2),
 # long-term coeff, lagged dy, countries separately
 lt_formula <- formula(dln_ip ~ l(dln_usa_imports,4)+l(ddln_usa_imports,0:3)+l(dln_ip,1))
 
-tha_reg_lt <- feols(lt_formula, data = filter(work, countrycode=="THA"), vcov = NW(24))
-mys_reg_lt <- feols(lt_formula, data = filter(work, countrycode=="MYS"), vcov = NW(24))
-phl_reg_lt <- feols(lt_formula, data = filter(work, countrycode=="PHL"), vcov = NW(24))
-sgp_reg_lt <- feols(lt_formula, data = filter(work, countrycode=="SGP"), vcov = NW(24))
+tha_reg_lt <- feols(lt_formula, data = filter(work, countrycode=="THA"), vcov = 'iid' )
+mys_reg_lt <- feols(lt_formula, data = filter(work, countrycode=="MYS"), vcov = 'iid' )
+phl_reg_lt <- feols(lt_formula, data = filter(work, countrycode=="PHL"), vcov = 'iid' )
+sgp_reg_lt <- feols(lt_formula, data = filter(work, countrycode=="SGP"), vcov = 'iid' )
 
 
 # long-term coeff, lagged dy, countries pooled
 pooled_reg_lt <- feols(dln_ip ~ l(dln_usa_imports,4) + l(ddln_usa_imports,0:3) 
-                              + l(dln_ip,1) + cc , data = work, vcov = NW(24) )
+                              + l(dln_ip,1) + cc , data = work, vcov = 'iid' )
 
 
 #ch23-table-1-asia-reg
