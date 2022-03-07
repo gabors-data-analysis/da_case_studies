@@ -27,14 +27,7 @@ rm(list=ls())
 # Import libraries
 library(tidyverse)
 library(modelsummary)
-library(haven)
-library(stargazer)
-library(car)
-library(huxtable)
-library(estimatr)
-library(lmtest)
-library(modelsummary)
-#library(fixest)
+library(fixest)
 
 
 # set working directory
@@ -139,135 +132,91 @@ data_balanced <- data_balanced %>%
 
 # *****************************************************
 # * FE REGRESSSIONS
-fe_lm <- lm_robust(surv ~ imm + year,
-                   data = data_balanced, 
-                   weights = avgpop, 
-                   se_type = "stata", 
-                   fixed_effect =  ~ c ,
-                   clusters = c)
+# Set the panel.id for all estimation
+setFixest_estimation(panel.id = ~c + year)
 
-fe_lm2 <- lm_robust(surv ~ imm + lngdppc + lnpop + year,
-                    data = data_balanced, 
-                    weights = avgpop, 
-                    se_type = "stata", 
-                    fixed_effect =  ~ c ,
-                    clusters = c)
+fe_lm <- feols( surv ~ imm + year | c , 
+                data = data_balanced,
+                weights = data_balanced$avgpop,
+                cluster = "c" )
 
-# ch23-table-2-immun-fe
-huxreg(fe_lm, fe_lm2, 
-       statistics = c(N = "nobs"), 
-       coefs = c("Immunization rate"= "imm", "ln GDP per capita"= "lngdppc","ln population"= "lnpop"))
+fe_lm2 <- feols(surv ~ imm + lngdppc + lnpop + year | c ,
+                data = data_balanced, 
+                weights = data_balanced$avgpop, 
+                cluster = "c" )
 
-# Within-R-squared
-fe_lm$proj_r.squared
-fe_lm2$proj_r.squared
+etable(fe_lm, fe_lm2  , drop = 'year')
 
 ####################### not in book
 # no weights
-fe_lm2_nowts <- lm_robust(surv ~ imm + lngdppc + lnpop + year,
-                          data = data_balanced, 
-                          se_type = "stata", 
-                          fixed_effect =  ~ c ,
-                          clusters = c)
+fe_lm2_nowts <- feols(surv ~ imm + lngdppc + lnpop + year| c ,
+                      data = data_balanced, 
+                      cluster = "c" )
 
-huxreg(fe_lm2_nowts, fe_lm2, 
-       statistics = c(N = "nobs"), 
-       coefs = c("Immunization rate"= "imm", "ln GDP per capita"= "lngdppc","ln population"= "lnpop"))
+etable( fe_lm2, fe_lm2_nowts , drop = 'year')
 
-# large difference only in R2
-fe_lm2_nowts$proj_r.squared
-fe_lm2$proj_r.squared
 ###########################################################
 
 
 # *************************
 # ** CLUSTER SE VS BIASED SE 
 
-fe_lm3 <- lm_robust(surv ~ imm + lngdppc + lnpop + year,
-                    data = data_balanced, 
-                    weights = avgpop, 
-                    se_type = "stata", 
-                    fixed_effect =  ~ c )
+fe_lm3 <- feols(surv ~ imm + lngdppc + lnpop + year | c ,
+                data = data_balanced, 
+                weights = data_balanced$avgpop,
+                vcov = 'iid')
 
-# ch23-table-3-immun-fese
-huxreg(list("Clustered SE" = fe_lm2, "Simple SE" = fe_lm3), 
-       statistics = c(N = "nobs"), 
-       coefs = c("Immunization rate"= "imm", "ln GDP per capita"= "lngdppc","ln population"= "lnpop"))
-
-# Within-R-squared
-fe_lm3$proj_r.squared
-
+etable( fe_lm2 , fe_lm3 , drop = 'year' )
 
 
 # *************************
 # * FD REGRESSIONS 
 
 # * basic FD 
-fd_lm <- lm_robust(d_surv ~ d_imm,
-                   data = data_balanced, 
-                   weights = pop,
-                   se_type = "stata", 
-                   clusters = c)
+fd_lm <- feols(d_surv ~ d_imm ,
+               data = data_balanced, 
+               weights = data_balanced$pop,
+               cluster = "c")
 
 # * FD, 5 lags
-lags_helper <- paste(paste0("lag(d_imm,", c(0:5), ")"), collapse = " + ")
-fd_lm_5_formula <- as.formula(paste0("d_surv ~ ", lags_helper))
-
-fd_lm_5 <- lm_robust(fd_lm_5_formula,
-                     data = data_balanced, 
-                     weights = pop,
-                     se_type = "stata", 
-                     clusters = c
+fd_lm_5 <- feols(d_surv ~ l(d_imm,0:5),
+                 data = data_balanced, 
+                 weights = data_balanced$pop,
+                 cluster = "c"
 )
+
+# Showing only the d_imm renamed
+dictName = c("l(d_imm,1)"="d_imm lag1",
+             "l(d_imm,2)"="d_imm lag2",
+             "l(d_imm,3)"="d_imm lag3",
+             "l(d_imm,4)"="d_imm lag4",
+             "l(d_imm,5)"="d_imm lag5",
+             "(Intercept)"="Constant")
+etable( fd_lm, fd_lm_5,dict = dictName,
+        keep = 'd_imm|Constant', digits = 3)
 
 
 # * FD, 5 lags, cumul
-lags_helper <- paste(paste0("lag(d2_imm,", c(0:4), ")"), collapse = " + ")
-fd_lm_5_cumul_formula <- as.formula(paste0("d_surv ~ lag(d_imm, 5) + ", lags_helper))
-fd_lm_5_cumul <- lm_robust(fd_lm_5_cumul_formula,
-                           data = data_balanced, 
-                           weights = pop,
-                           se_type = "stata", 
-                           clusters = c
-)
+fd_lm_5_cumul <- feols( d_surv ~ l( d_imm , 5 )+ l( d2_imm , 0:4) ,
+                        data = data_balanced, 
+                        weights = data_balanced$pop,
+                        cluster = "c" )
 
-# * FD, 5 lags, cumul, lead
-lags_helper <- paste(paste0("lag(d2_imm,", c(0:4), ")"), collapse = " + ")
-lead_helper <- paste(paste0("lead(d_imm,", c(1:3), ")"), collapse = " + ")
-
-fd_lm_5_cumul_lead_formula <- as.formula(paste0("d_surv ~ lag(d_imm, 5) + ", lags_helper, " + ", lead_helper))
-fd_lm_5_cumul_lead <- lm_robust(fd_lm_5_cumul_lead_formula,
-                                data = data_balanced, 
-                                weights = pop,
-                                se_type = "stata", 
-                                clusters = c
-)
+# * FD, 5 lags, cumul, lead (!different than in book!)
+fd_lm_5_cumul_lead <- feols( d_surv ~ l( d_imm , 5 ) + l( d2_imm , -3:4 ) ,
+                             data = data_balanced, 
+                             weights = data_balanced$pop,
+                             cluster = "c" )
 
 
-# h23-table-4-immun-fd1
-# 1st, 2nd column
-huxreg(fd_lm, fd_lm_5,
-       coefs = c("d_imm"="lag(d_imm, 0)", 
-                 "d_imm"="d_imm", 
-                 "d_imm lag1"="lag(d_imm, 1)",
-                 "d_imm lag2"="lag(d_imm, 2)",
-                 "d_imm lag3"="lag(d_imm, 3)",
-                 "d_imm lag4"="lag(d_imm, 4)",
-                 "d_imm lag5"="lag(d_imm, 5)",
-                 "Constant"= "(Intercept)" 
-       ),
-       statistics = c(N = "nobs", R2 = "r.squared")
-)
-
-# thrid, fourth column
-huxreg("(3)"=fd_lm_5_cumul, "(4)"=fd_lm_5_cumul_lead,
-       coefs = c("d_imm cumulative"="lag(d_imm, 5)",
-                 "d_imm lead 1"="lead(d_imm, 1)",
-                 "d_imm lead 2"="lead(d_imm, 2)",
-                 "d_imm lead 3"="lead(d_imm, 3)",
-                 "Constant"= "(Intercept)" ),
-       statistics = c(N = "nobs", R2 = "r.squared")
-)
+# Showing only the d_imm renamed
+dictName2 = c("l(d_imm,5)"="d_imm cumulative",
+              "f(d2_imm,1)"="d_imm lead 1",
+              "f(d2_imm,2)"="d_imm lead 2",
+              "f(d2_imm,3)"="d_imm lead 3",
+              "(Intercept)"="Constant")
+etable( fd_lm_5_cumul, fd_lm_5_cumul_lead, dict=dictName2,
+         digits = 3,drop="d2_imm")
 
 
 
@@ -275,17 +224,47 @@ huxreg("(3)"=fd_lm_5_cumul, "(4)"=fd_lm_5_cumul_lead,
 # * AGGREG TREND, CONFOUNDERS, CTRY TRENDS
 # * FD, 5 lags, cumul, aggreg trend
 
-lags_helper <- paste(paste0("lag(d2_imm,", c(0:4), ")"), collapse = " + ")
-fd_lm_5_cumul_trend_formula <- as.formula(paste0("d_surv ~ lag(d_imm, 5) + ", lags_helper, "+ year"))
-fd_lm_5_cumul_trend <- lm_robust(fd_lm_5_cumul_trend_formula,
-                                 data = data_balanced, 
-                                 weights = pop,
-                                 se_type = "stata", 
-                                 clusters = c
-) 
+fd_lm_5_cumul_trend <- feols(d_surv ~ l( d_imm , 5 ) + l(d2_imm , 0 : 4) | year,
+                             data = data_balanced, 
+                             weights = data_balanced$pop,
+                             cluster = "c" ) 
 
 # * FD, 5 lags, cumul, aggreg trend, confounders 
-lags_helper <- paste(paste0("lag(d2_imm, ", c(0:4), ")"), collapse = " + ")
+fd_lm_5_cumul_trend_c <- feols( d_surv ~ l( d_imm , 5 ) + l(d2_imm , 0 : 4)
+                                + l(d_lngdppc , 0:5) + l(d_lnpop,0:5) | year,
+                                data = data_balanced, 
+                                weights = data_balanced$pop,
+                                cluster = "c") 
+
+# * check: it's not the number of observations
+data_balanced_filtered <- data_balanced %>%
+  filter(!is.na(d_lngdppc))
+fd_lm_5_cumul_trend2 <- feols(d_surv ~ l( d_imm , 5 ) + l(d2_imm , 0 : 4) | year,
+                              data = data_balanced_filtered, 
+                              weights = data_balanced_filtered$pop,
+                              cluster = "c")
+
+# * FD, 5 lags, cumul, aggreg trend, cofounders, country linear trend
+fd_lm_5_cumul_trend_c_country <- feols(d_surv ~ l( d_imm , 5 ) + l(d2_imm , 0 : 4)
+                                       + l(d_lngdppc , 0:5) + l(d_lnpop,0:5) | year + c,
+                                       data = data_balanced, 
+                                       weights = data_balanced$pop,
+                                       cluster = "c"
+) 
+
+# etable format for output
+etable(fd_lm_5_cumul_trend, fd_lm_5_cumul_trend_c, fd_lm_5_cumul_trend_c_country,
+       keep = "d_imm",digits=3,
+       extralines = list("Confounders" = c(F,T,T)))
+
+###
+# To carry out hypothesis test for cumulative coeffs on the confounders:
+
+library(estimatr)
+library(car)
+library(lmtest)
+# * FD, 5 lags, cumul, aggreg trend, confounders 
+lags_helper  <- paste(paste0("lag(d2_imm, ", c(0:4), ")"), collapse = " + ")
 lags_helper2 <- paste(paste0("lag(d_lngdppc, ", c(0:5), ")"), collapse = " + ")
 lags_helper3 <- paste(paste0("lag(d_lnpop, ", c(0:5), ")"), collapse = " + ")
 
@@ -300,51 +279,7 @@ fd_lm_5_cumul_trend_c <- lm_robust(fd_lm_5_cumul_trend_c_formula,
                                    se_type = "stata", 
                                    clusters = c
 ) 
-
-# * check: cumulative coeffs on the confounders
+# run tests
 linearHypothesis(fd_lm_5_cumul_trend_c, paste0(lags_helper2," =0"))
 linearHypothesis(fd_lm_5_cumul_trend_c, paste0(lags_helper3," =0"))
-
-# * check: it's not the number of obsrevations
-data_balanced_filtered <- data_balanced %>%
-  filter(!is.na(d_lngdppc))
-fd_lm_5_cumul_trend2 <- lm_robust(formula = fd_lm_5_cumul_trend_formula,
-                                  data = data_balanced_filtered, 
-                                  weights = pop,
-                                  se_type = "stata", 
-                                  clusters = c
-)
-
-# * FD, 5 lags, cumul, aggreg trend, cofounders, country linear trend
-fd_lm_5_cumul_trend_c_country_formula <- as.formula(paste0("d_surv ~ lag(d_imm, 5) + ", 
-                                                           lags_helper, "+",
-                                                           lags_helper2, "+",
-                                                           lags_helper3, "+",
-                                                           "+ year + c"))
-
-fd_lm_5_cumul_trend_c_country <- lm_robust(fd_lm_5_cumul_trend_c_country_formula,
-                                           data = data_balanced, 
-                                           weights = pop,
-                                           se_type = "stata", 
-                                           clusters = c
-) 
-
-# ch23-table-5-immun-fd2
-# Just keeping cumul, but if delete last row, you can see details
-tab5<-huxreg(fd_lm_5_cumul_trend, fd_lm_5_cumul_trend_c, fd_lm_5_cumul_trend_c_country,
-             statistics = c(N = "nobs", R2 = "r.squared"), 
-             #omit_coefs = c(paste("year", levels(data_balanced$year), sep= ""), paste("c", levels(data_balanced$c), sep= "")),
-             coefs = c("d_imm cumulative" = "lag(d_imm, 5)")
-)
-
-# produce table 5
-tab5 %>%
-  insert_row(c("Year dummies", "Yes", "Yes", "Yes"), after = 3) %>%
-  insert_row(c("Confounder variables", "No", "Yes", "Yes"), after = 4) %>%
-  insert_row(c("Country-specific trends", "No", "No", "Yes"), after = 5)
-
-
-
-
-# TODO combine two pieces of table + add lines for Fixed effects
 
