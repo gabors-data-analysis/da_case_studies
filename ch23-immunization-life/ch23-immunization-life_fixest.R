@@ -236,10 +236,6 @@ fd_lm_5_cumul_trend_c <- feols( d_surv ~ l( d_imm , 5 ) + l(d2_imm , 0 : 4)
                                 weights = data_balanced$pop,
                                 cluster = "c") 
 
-# Missing: * check: cumulative coeffs on the confounders
-#linearHypothesis(fd_lm_5_cumul_trend_c, paste0(lags_helper2," =0"))
-#linearHypothesis(fd_lm_5_cumul_trend_c, paste0(lags_helper3," =0"))
-
 # * check: it's not the number of observations
 data_balanced_filtered <- data_balanced %>%
   filter(!is.na(d_lngdppc))
@@ -261,5 +257,29 @@ etable(fd_lm_5_cumul_trend, fd_lm_5_cumul_trend_c, fd_lm_5_cumul_trend_c_country
        keep = "d_imm",digits=3,
        extralines = list("Confounders" = c(F,T,T)))
 
+###
+# To carry out hypothesis test for cumulative coeffs on the confounders:
 
+library(estimatr)
+library(car)
+library(lmtest)
+# * FD, 5 lags, cumul, aggreg trend, confounders 
+lags_helper  <- paste(paste0("lag(d2_imm, ", c(0:4), ")"), collapse = " + ")
+lags_helper2 <- paste(paste0("lag(d_lngdppc, ", c(0:5), ")"), collapse = " + ")
+lags_helper3 <- paste(paste0("lag(d_lnpop, ", c(0:5), ")"), collapse = " + ")
+
+fd_lm_5_cumul_trend_c_formula <- as.formula(paste0("d_surv ~ lag(d_imm, 5) + ", 
+                                                   lags_helper, "+",
+                                                   lags_helper2, "+",
+                                                   lags_helper3, "+",
+                                                   "+ year"))
+fd_lm_5_cumul_trend_c <- lm_robust(fd_lm_5_cumul_trend_c_formula,
+                                   data = data_balanced, 
+                                   weights = pop,
+                                   se_type = "stata", 
+                                   clusters = c
+) 
+# run tests
+linearHypothesis(fd_lm_5_cumul_trend_c, paste0(lags_helper2," =0"))
+linearHypothesis(fd_lm_5_cumul_trend_c, paste0(lags_helper3," =0"))
 
