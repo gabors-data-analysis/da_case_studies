@@ -23,7 +23,7 @@ rm(list=ls())
 
 # Descriptive statistics and regressions
 library(tidyverse)
-#library(haven)
+library(haven)
 library(zoo)
 #library(stargazer)
 #library(estimatr)
@@ -75,7 +75,7 @@ data <- read_dta(paste(data_in, "originfinal-panel.dta", sep="/"))
 data <- merge(data, data_work, by = c("origin", "finaldest", "return"))
 
 
-# * aggreagete data to create average price by treated-untreated and year-quarter
+# * aggregate data to create average price by treated-untreated and year-quarter
 # * and draw time series graphs of log avg price
 # * all markets
 data_agg <- data %>%
@@ -183,9 +183,9 @@ data_balanced <- data_agg %>%
   filter(balanced == 1)  
 
 
-fd <- feols(d_lnavgp ~ treated, weights = data_balanced$pass_bef, data = data_balanced , vcov = 'hetero' )
-fd_small <- feols(d_lnavgp ~ treated, weights = filter(data_balanced, smallmkt==1)$pass_bef, data = filter(data_balanced, smallmkt==1), vcov = 'hetero' )
-fd_large <- feols(d_lnavgp ~ treated, weights = filter(data_balanced, smallmkt==0)$pass_bef, data = filter(data_balanced, smallmkt==0), vcov = 'hetero' )
+fd <- feols(d_lnavgp ~ treated, weights = data_balanced$pass_bef, data = data_balanced , cluster = 'market' )
+fd_small <- feols(d_lnavgp ~ treated, weights = filter(data_balanced, smallmkt==1)$pass_bef, data = filter(data_balanced, smallmkt==1), cluster = 'market' )
+fd_large <- feols(d_lnavgp ~ treated, weights = filter(data_balanced, smallmkt==0)$pass_bef, data = filter(data_balanced, smallmkt==0), cluster = 'market' )
 
 
 summary(fd)
@@ -203,7 +203,7 @@ data_balanced %>%
 
 
 # **************************************************************************
-# * Diff-in-diffs regerssion with confounder variables
+# * Diff-in-diffs regression with confounder variables
 # *  weighted by # passengers on market, in before period
 # **************************************************************************
 
@@ -219,9 +219,9 @@ data_balanced <- data_balanced %>%
   ungroup()
 
 formula2 <- as.formula(d_lnavgp ~ treated + lnpass_bef + return + stops + sharelarge_bef )
-fd2 <- feols(formula2, weights = data_balanced$pass_bef, data = data_balanced , vcov = 'hetero')
-fd2_small <- feols(formula2, weights = filter(data_balanced, smallmkt==1)$pass_bef, data = filter(data_balanced, smallmkt==1), vcov = 'hetero')
-fd2_large <- feols(formula2, weights = filter(data_balanced, smallmkt==0)$pass_bef, data = filter(data_balanced, smallmkt==0), vcov = 'hetero')
+fd2 <- feols(formula2, weights = data_balanced$pass_bef, data = data_balanced , cluster = 'market')
+fd2_small <- feols(formula2, weights = filter(data_balanced, smallmkt==1)$pass_bef, data = filter(data_balanced, smallmkt==1), cluster = 'market')
+fd2_large <- feols(formula2, weights = filter(data_balanced, smallmkt==0)$pass_bef, data = filter(data_balanced, smallmkt==0), cluster = 'market')
 
 summary(fd2)
 summary(fd2_small)
@@ -253,9 +253,9 @@ ggplot(data_balanced, aes(x=share_bef,  y = (..count..)/sum(..count..))) +
 save_fig("ch22-figure-4-airlines-sharehist", output, size = "small")
 
 formula3 <- as.formula(d_lnavgp ~ share_bef + lnpass_bef + return + stops + sharelarge_bef)
-fd3 <- feols(formula3, weights = data_balanced$pass_bef, data = data_balanced , vcov = 'hetero')
-fd3_small <- feols(formula3, weights = filter(data_balanced, smallmkt==1)$pass_bef, data = filter(data_balanced, smallmkt==1), vcov = 'hetero')
-fd3_large <- feols(formula3, weights = filter(data_balanced, smallmkt==0)$pass_bef, data = filter(data_balanced, smallmkt==0), vcov = 'hetero')
+fd3 <- feols(formula3, weights = data_balanced$pass_bef, data = data_balanced , cluster = 'market')
+fd3_small <- feols(formula3, weights = filter(data_balanced, smallmkt==1)$pass_bef, data = filter(data_balanced, smallmkt==1), cluster = 'market')
+fd3_large <- feols(formula3, weights = filter(data_balanced, smallmkt==0)$pass_bef, data = filter(data_balanced, smallmkt==0), cluster = 'market')
 
 summary(fd3)
 summary(fd3_small)
@@ -303,9 +303,9 @@ data_agg %>%
 
 # conditioning on observed confounders
 formula4 <- as.formula(lnavgp ~ (treatment + lnpass_bef + return + stops + sharelarge_bef)*after )
-fd4 <- feols(formula4, weights = data_agg$pass_bef, data = data_agg, vcov = 'hetero' )
-fd4_small <- feols(formula4, weights = filter(data_agg, smallmkt==1)$pass_bef, data = filter(data_agg, smallmkt==1), vcov = 'hetero' )
-fd4_large <- feols(formula4, weights = filter(data_agg, smallmkt==0)$pass_bef, data = filter(data_agg, smallmkt==0), vcov = 'hetero' )
+fd4 <- feols(formula4, weights = data_agg$pass_bef, data = data_agg, cluster = 'market' )
+fd4_small <- feols(formula4, weights = filter(data_agg, smallmkt==1)$pass_bef, data = filter(data_agg, smallmkt==1), cluster = 'market' )
+fd4_large <- feols(formula4, weights = filter(data_agg, smallmkt==0)$pass_bef, data = filter(data_agg, smallmkt==0), cluster = 'market' )
 
 summary(fd4)
 summary(fd4_small)
