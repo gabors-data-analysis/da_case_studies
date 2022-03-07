@@ -272,7 +272,7 @@ fd_lm_5_cumul_trend_c_formula <- as.formula(paste0("d_surv ~ lag(d_imm, 5) + ",
                                                    lags_helper, "+",
                                                    lags_helper2, "+",
                                                    lags_helper3, "+",
-                                                   "+ year"))
+                                                   "year"))
 fd_lm_5_cumul_trend_c <- lm_robust(fd_lm_5_cumul_trend_c_formula,
                                    data = data_balanced, 
                                    weights = pop,
