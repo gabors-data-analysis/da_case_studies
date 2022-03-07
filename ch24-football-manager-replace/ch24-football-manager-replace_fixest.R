@@ -230,13 +230,13 @@ data_balanced_agg %>%
 
 # FD REGRESSIONS
 fd_treatment <- feols( Dp6avg ~ after_1_6 + after_7_12, 
-                       data = filter(data_balanced_agg, treated == 1) , vcov = 'hetero' )
+                       data = filter(data_balanced_agg, treated == 1) , cluster = 'teamseason' )
 
 fd_control <- feols( Dp6avg ~ after_1_6 + after_7_12, 
-                       data = filter(data_balanced_agg, treated == 0) , vcov = 'hetero' )
+                       data = filter(data_balanced_agg, treated == 0) , cluster = 'teamseason' )
 
 fd <- feols(Dp6avg ~ after_1_6 + after_7_12 + treated + I(treated*after_1_6) + I(treated*after_7_12),
-         data = data_balanced_agg , vcov = 'hetero' )
+         data = data_balanced_agg , cluster = 'teamseason')
 
 summary(fd_treatment)
 summary(fd_control)
@@ -253,7 +253,7 @@ etable(fd_treatment, fd_control, fd,
 # FD REGRESSIONS
 setFixest_estimation( panel.id = ~teamseason + t6_event)
 fd_panel <- feols( d(points6avg) ~ d(after_1_6) + d(after_7_12) + d(treated) + d(treated*after_1_6) + d(treated*after_7_12),
-                   data = data_balanced_agg )
+                   data = data_balanced_agg , cluster = 'teamseason')
 
 etable(fd_panel)
 
@@ -261,15 +261,15 @@ etable(fd_panel)
 # FE REGRESSIONS
 fe_panel_treatment <- feols(points6avg ~ before_7_12 + after_1_6 + after_7_12 | teamseason,
                           data = filter( data_balanced_agg , treated==1 ),
-                          vcov = 'hetero')
+                          cluster = 'teamseason')
 fe_panel_control <- feols(points6avg ~ before_7_12 + after_1_6 + after_7_12 | teamseason,
                             data = filter( data_balanced_agg , treated==0 ),
-                            vcov = 'hetero')
+                          cluster = 'teamseason')
 fe_panel <- feols(points6avg ~ before_7_12 + after_1_6 + after_7_12 +
                                treated*before_7_12 + treated*after_1_6 + 
                                treated*after_7_12 | teamseason,
                         data = data_balanced_agg,
-                        vcov = 'hetero' )
+                        cluster = 'teamseason' )
 
 etable(fe_panel_treatment, fe_panel_control, fe_panel)
 
