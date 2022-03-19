@@ -61,7 +61,7 @@ data <- read_csv(paste0(data_in,"football_managers_workfile.csv")) %>%
   mutate(date = as.Date(date, format = "%d%m%Y"))
 
 # From OSF
-#data <- read_csv("https://osf.io/t6dgh/download")
+data <- read_csv("https://osf.io/t6dgh/download")
 
 # describe data
 data %>%
@@ -179,7 +179,8 @@ data_balanced %>%
 # Note: In the textbook (2021 edition) we say  "When there was more than one candidate game within the same season for the same team, we selected the first one in the season."
 # In fact we mean "..., we selected **one in the season randomly**."
 
-data_balanced <- chooseRandomPseudo(data_balanced)
+# control group - there is random generation, so results may be slightly different to one in book.
+data_balanced <- chooseRandomPseudo(data_balanced, seed=1001)
 
 table(data_balanced$pseudo, useNA = "always")
 data_balanced %>%
@@ -242,6 +243,7 @@ summary(fd_treatment)
 summary(fd_control)
 summary(fd)
 
+# Note: there was random generation for columns 2,3, so results may be slightly different to one in book.
 etable(fd_treatment, fd_control, fd,
        digits = 3 )
 
