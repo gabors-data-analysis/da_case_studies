@@ -56,7 +56,7 @@ create_output_if_doesnt_exist(output)
 
 data <- read_csv(paste(data_in, "worldbank-immunization-continents.csv", sep = ""))
 # Load from OSF
-# data <- read_csv("https://osf.io/58zrj/download")
+data <- read_csv("https://osf.io/58zrj/download")
 
 # **************************************************
 # * info graph on measles vaccination continent aggregates
@@ -101,7 +101,7 @@ save_fig("ch23-figure-2b-tssurvival", output, size = "small")
 
 data_panel <- read_csv(paste(data_in, "worldbank-immunization-panel.csv", sep = "/"))
 # From OSF
-#data_panel <- read_csv("https://osf.io/gk5cn/download")
+data_panel <- read_csv("https://osf.io/gk5cn/download")
 
 data_panel <- data_panel %>%
   filter(!(is.na(imm) | is.na(gdppc))) %>%
@@ -202,8 +202,8 @@ fd_lm_5_cumul <- feols( d_surv ~ l( d_imm , 5 )+ l( d2_imm , 0:4) ,
                         weights = data_balanced$pop,
                         cluster = "c" )
 
-# * FD, 5 lags, cumul, lead (!different than in book!)
-fd_lm_5_cumul_lead <- feols( d_surv ~ l( d_imm , 5 ) + l( d2_imm , -3:4 ) ,
+# * FD, 5 lags, cumul, lead 
+fd_lm_5_cumul_lead <- feols( d_surv ~ l( d_imm , 5 )+ l( d2_imm , 0:4) + f( d_imm , 1:3 ) ,
                              data = data_balanced, 
                              weights = data_balanced$pop,
                              cluster = "c" )
