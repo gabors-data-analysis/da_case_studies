@@ -21,7 +21,7 @@ To see options for various languages, check out:
 The [Latest release](https://github.com/gabors-data-analysis/da_case_studies/releases/tag/v0.8.2) `v0.8.2` (aka " Very Little Gravitas Indeed" is available as of 21 March 2022.   
 There will be additional minor bugfixes, edits, and `v1.0.0` expected later. 
 
-1. **R** -- All code arw ready. Used for graphs in textbook. An environment with all librariries necessary, as `renv` is now available. 
+1. **R** -- All code are ready. Used for graphs in textbook. An environment with all librariries necessary, as `renv` is now available. 
 2. **Stata** -- All code are ready. In the lack of native machine learning capabilities, no code for chapters 15,16,17, some limitations for chapter 18. This shall change, once we test the new python link-ups. Only planned for version `v1.1.0` expected late 2021. 
 3. **Python**  -- All all codes are ready. Some minor diff to book due to variation in akgos, An environment with all librariries necessary, as `pipenv` is available.  
 
