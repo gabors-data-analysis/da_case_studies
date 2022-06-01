@@ -34,9 +34,15 @@ library(haven)
 library(tidyverse)
 library(modelsummary)
 library(lspline)
-library(skimr)
 library(fixest)
-library(mfx)
+if (!require(marginaleffects)){
+  install.packages("marginaleffects")
+  library(marginaleffects)
+}
+if (!require(skimr)){
+  install.packages("skimr")
+  library(skimr)
+}
 
 
 # set working directory
@@ -130,7 +136,7 @@ lpm2
 
 # Table 11.1 Compare models
 etable( lpm1 , lpm2,
-        digits=3)
+        digits="r3")
 
 
 ####
@@ -195,14 +201,12 @@ g2d
 
 lpm3 <-feols( stayshealthy ~ smoking + ever_smoked + female +
              age + lspline(eduyears,c(8,18)) + income10 + lspline(bmi,c(35)) +
-             exerc + as.factor(country),
+             exerc + as.factor(country_str),
            data = share , vcov = 'hetero')
 
-# etable is very versatile to produce tables, can keep/drap vars, etc
+# etable is very versatile to produce tables, can keep/drop vars, etc
 # Table 11.2
-etable(lpm3, 
-       drop="country", digits=3
-       )
+etable(lpm3, drop="country", digits="r3" )
 
 
 # Check predicted probabilities: is there any interesting values?
@@ -262,85 +266,80 @@ rm(lpm3)
 
 # If comparing different estimation methods for the same model setup:
 #   good practice to make a 'formula' variable!
+
+# To have pretty outcomes, we need to create spline variables
+aux_1 <- lspline(share$eduyears, c(8,18))
+aux_2 <- lspline(share$bmi, c(35))
+share <- share %>% add_column( eduyears_l8   = aux_1[ , 1 ],
+                               eduyears_8n18 = aux_1[ , 2 ],
+                               eduyears_m18  = aux_1[ , 3 ],
+                               bmi_l35       = aux_2[ , 1 ],
+                               bmi_m35       = aux_2[ , 2 ] )
+rm(aux_1,aux_2)
+
 model_formula <- formula( stayshealthy ~ smoking + ever_smoked + female + age + 
-                            lspline(eduyears, c(8,18)) + 
-                            income10 + lspline(bmi, c(35)) + exerc + as.factor(country) )
+                          eduyears_l8 + eduyears_8n18 + eduyears_m18 + income10 +
+                           bmi_l35 + bmi_m35 + exerc + as.factor(country_str) )
+
+# Alternatively
+# model_formula <- formula( stayshealthy ~ smoking + ever_smoked + female + age + 
+#                            lspline(eduyears, c(8,18)) + 
+#                            income10 + lspline(bmi, c(35)) + exerc + as.factor(country_str) )
 
 # lpm (repeating the previous regression)
 lpm <-feols( model_formula , data=share, vcov = 'hetero')
-etable(lpm,        
-       drop="country", digits=3)
+etable(lpm, drop="country", digits="r3")
 
 
 # logit coefficients:
 #   alternatively: familiy='binomial' automatically gives you logit, but not probit...
-logit <- feglm( model_formula , data=share, family = binomial( link = "logit" ) )
-etable(logit,
-       drop="country", digits=3)
+logit_model <- feglm( model_formula , data = share, family = binomial( link = "logit" ) )
+etable(logit_model, drop="country", digits="r3")
 
 
 # predicted probabilities 
-share$pred_logit <- predict( logit, type="response" )
+share$pred_logit <- predict( logit_model, type="response" )
 
-# Calculate logit marginal differences
-logit_marg <- logitmfx( model_formula, data=share, atmean=FALSE, robust = T )
-print(logit_marg)
+logit_marg <- marginaleffects( logit_model )
+summary( logit_marg )
 
 ##
 # Probit coefficients: replicate logit, but now use 'probit'
-probit <- feglm( model_formula , data=share, family = binomial( link = "probit" ) )
-probit
+probit_model <- feglm( model_formula , data=share, family = binomial( link = "probit" ) )
+etable(probit_model,drop=c('country'))
 
 # predicted probabilities 
-share$pred_probit<- predict( probit , type = "response" )
+share$pred_probit<- predict( probit_model , type = "response" )
 
 # probit marginal differences
-probit_marg <- probitmfx(  model_formula, data=share, atmean=FALSE, robust = T)
-print( probit_marg )
+probit_marg <- marginaleffects(  probit_model )
+summary( probit_marg )
 
 # Comparing predictions from the two models
 datasummary(pred_logit + pred_probit~min+P25+Median+Mean+P75+Max,data=share)
 
 ###
 # Creating a model summary output
-etable( lpm, logit, probit,
-        drop="country", digits=3 , fitstat = c('r2','pr2'))
+etable( lpm, logit_model, probit_model,
+        drop="country", digits="r3" , fitstat = c('r2','pr2'))
 
-# If you want to include the marginals:
-cm <- c('(Intercept)' = 'Constant')
-pmodels <- list(lpm, logit, logit_marg, probit, probit_marg)
+
+# Comparing Marginal effects ->!!! MAKE THIS MORE PRETTY!!!
+
+
+
+
 
 ##########################
 # Table 11.3 Marginal differences
 ##########################
-msummary( pmodels ,
-          fmt="%.3f",
-          gof_omit = 'DF|Deviance|Log.Lik.|F|R2 Adj.|AIC|BIC|R2|PseudoR2',
-          stars=c('*' = .05, '**' = .01),
-          coef_rename = cm,
-          coef_omit = 'as.factor(country)*')
+modelsummary( list( "LPM" = lpm, "logit coeffs" = logit_model, 
+                    "logit marginals" = logit_marg, "probit coeffs" = probit_model,
+                    "probit marginals" = probit_marg ),
+              coef_omit = 'country|Intercept', gof_omit = 'Within|AIC|BIC|Log.Lik|Std.Errors|R2',
+              stars=c('*' = .05, '**' = .01),
+              )# output = paste0(output,"prob_models_coeff.html") ) # Uncomment if want to save:
 
-# could also save it by adding output...
-msummary( pmodels ,
-          fmt="%.3f",
-          gof_omit = 'DF|Deviance|Log.Lik.|F|R2 Adj.|AIC|BIC|R2|PseudoR2',
-          stars=c('*' = .05, '**' = .01),
-          coef_rename = cm,
-          coef_omit = 'as.factor(country)*',
-          output = paste0(output,"prob_models_coeff.html")
-)
-
-
-# adding pseudo R2 (not work for mfx)
-glance_custom.glm <- function(x) data.frame(`PseudoR2` = pR2(x)["McFadden"])
-cm <- c('(Intercept)' = 'Constant')
-msummary(list(lpm, logit, probit),
-         fmt="%.3f",
-         gof_omit = 'DF|Deviance|Log.Lik.|F|R2 Adj.|AIC|BIC',
-         stars=c('*' = .05, '**' = .01),
-         coef_rename = cm,
-         coef_omit = 'as.factor(country)*'
-)
 
 
 
@@ -349,20 +348,29 @@ msummary(list(lpm, logit, probit),
 ###############################
 
 
+
+fitstat_register("modr2", function(x){
+  y <- x$fitted.values + x$residuals
+  ss_res <- sum(x$residual^2,na.rm=T)
+  ss_tot <- sum( (y - mean( y , na.rm = T ) )^2 , na.rm = T )
+  1 - ss_res/ss_tot }, "R2")
+fitstat_register("brier", function(x){mean(x$residual^2)}, "Brier score")
+fitstat_register("logloss", function(x){
+  log_id <- !is.na( x$fitted.values ) & x$fitted.values < 1 & x$fitted.values > 0
+  y   <- x$fitted.values[ log_id ] + x$residuals[ log_id ]
+  lp  <- log( x$fitted.values[ log_id ] )
+  lnp <- log( 1 - x$fitted.values[ log_id ] )
+  nobs <- sum( log_id )
+  return( 1 / nobs * sum( y * lp + ( 1 - y ) * lnp ) )
+  }, "log-loss")
+
 ##########################
 # Table 11.5
 ##########################
-fitstat_register("brier", function(x){mean(x$residual^2)}, "Brier score")
-fitstat_register("logloss", function(x){
-  log_id <- !is.na( x$fitted.values ) & x$fitted.values != 1 & x$fitted.values != 0
-  y   <- x$fitted.values[ log_id ] + x$residuals[ log_id ]
-  lp  <- log( x$fitted.values[log_id] )
-  lnp <- log( 1 - x$fitted.values[log_id] )
-  nobs <- sum( log_id )
-  return( 1 / nobs * sum( y * lp + ( 1 - y ) * lnp ) )
-}, "log-loss")
-
-etable( lpm, logit, probit , drop = "factor|lspline|income|exerc",fitstat = ~ r2 + brier + pr2 + logloss )
+etable( lpm, logit_model, probit_model ,
+        drop = "factor|lspline|income|exerc",
+        digits.stats = 3,
+        fitstat = ~ modr2 + brier + pr2 + logloss )
 
 
 
@@ -460,7 +468,7 @@ datasummary(pred_lpmbase+pred_lpm+pred_logit+pred_probit~mean+median+min+max+sd,
 #
 # Biased prediction? Calculate bias!
 #   Hint: bias = mean(prediction) - mean(actual)
-bias <- mean( share$pred_logit ) - mean(share $stayshealthy)
+bias <- mean( share$pred_logit ) - mean(share$stayshealthy)
 # 
 
 # calibration curves using the create_calibration_plot function we wrote
@@ -513,9 +521,16 @@ rm(df, i, j)
 ################################################################################
 # 8. PART - LOGIT & PROBIT CURVES
 ################################################################################
-library(psych)
+if (!require(psych)){
+  install.packages("psych")
+  library(psych)
+}
 
 # ILLUSTRATION LOGIT AND PROBIT CURVES
+# Note: for this exercise we use the classical
+#   'glm' and 'lm' functions as we need a linear prediction of the 
+#       logit/probit model coefficients, which is not supported by fixest.
+# 
 
 share <- read_csv("https://osf.io/3ze58/download")
 
@@ -524,10 +539,10 @@ share <- share[!is.na(share$bmi) & !is.na(share$eduyears) & !is.na(share$exerc),
 
 
 # estimate logit, predict bx instead of p
-logit <- glm(stayshealthy ~ smoking + ever_smoked + female + age + lspline(eduyears, c(8,18)) + 
+logit_m2 <- glm(stayshealthy ~ smoking + ever_smoked + female + age + lspline(eduyears, c(8,18)) + 
                income10 + lspline(bmi, c(35)) + exerc + as.factor(country), data=share, family='binomial')
-summary(logit)
-share$bx_logit <- predict.lm(logit)
+summary(logit_m2)
+share$bx_logit <- predict.lm( logit_m2 )
 share$illustr_logit <- logistic(share$bx_logit)
 
 # estimate probit, predict bx instead of p
