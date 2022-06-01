@@ -324,14 +324,8 @@ etable( lpm, logit_model, probit_model,
         drop="country", digits="r3" , fitstat = c('r2','pr2'))
 
 
-# Comparing Marginal effects ->!!! MAKE THIS MORE PRETTY!!!
-
-
-
-
-
 ##########################
-# Table 11.3 Marginal differences
+# Table 11.3 Marginal differences: comparing models
 ##########################
 modelsummary( list( "LPM" = lpm, "logit coeffs" = logit_model, 
                     "logit marginals" = logit_marg, "probit coeffs" = probit_model,
