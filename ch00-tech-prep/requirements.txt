@@ -9,7 +9,7 @@ scipy ==1.6.2
 linearmodels ==4.23
 ipython ==7.31.1
 scikit-learn ==0.24.2
-notebook == 6.4.1
+notebook == 6.4.12
 jupyter-nbextensions-configurator ==0.4.1
 stargazer ==0.0.5
 regex ==2021.4.4
