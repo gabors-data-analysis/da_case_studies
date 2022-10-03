@@ -1,11 +1,11 @@
 ####################################################
 # Import packages
 ####################################################
-import numpy as np
 import copy
+
+import numpy as np
 import pandas as pd
 from plotnine import *
-
 
 ####################################################
 # Define global vars
@@ -52,6 +52,7 @@ def lspline(series, knots):
     design_matrix = np.column_stack((design_matrix, vector))
     # print(design_matrix)
     return design_matrix
+
 
 def create_calibration_plot(
     data,
@@ -118,9 +119,9 @@ def poly(x, degree=1):
     coefficients) or visualisation.
     """
     d = {}
-    for i in range(degree+1):
+    for i in range(degree + 1):
         if i == 1:
-            d['x'] = x
+            d["x"] = x
         else:
-            d[f'x**{i}'] = np.power(x, i)
+            d[f"x**{i}"] = np.power(x, i)
     return pd.DataFrame(d)
