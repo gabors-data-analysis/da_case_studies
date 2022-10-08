@@ -145,8 +145,8 @@ def ols_crossvalidator(
     """OLS cross-validator
 
 
-    Estimates `formula` equation with OLS and returns values of R`2, No. coefficients,
-    BIC. Does k-fold cross-validation and either returns train and test RMSE for each
+    Estimates `formula` equation with OLS and returns values of RMSE, R`2, No. coefficients,
+    BIC on `data`. Does k-fold cross-validation and either returns train and test RMSE for each
     fold, or return averarage train and test RMSEs.
 
     Parameters
@@ -163,6 +163,10 @@ def ols_crossvalidator(
 
     """
 
+    # Get dependent variable
+
+    y = formula.split("~")[0].strip()
+
     # Get statistics on the whole work data
 
     model = smf.ols(formula, data=data).fit()
@@ -170,6 +174,7 @@ def ols_crossvalidator(
     rsquared = model.rsquared
     n_coefficients = model.params.shape[0]
     bic = model.bic
+    rmse_alldata = rmse(model.predict(), data[y])
 
     # Calculating test and train RMSE-s for each fold
 
@@ -184,17 +189,62 @@ def ols_crossvalidator(
 
         model = smf.ols(formula, data=data_train).fit()
 
-        rmse_train.append(rmse(data_train["price"], model.predict(data_train)))
-        rmse_test.append(rmse(data_test["price"], model.predict(data_test)))
+        rmse_train.append(rmse(data_train[y], model.predict(data_train)))
+        rmse_test.append(rmse(data_test[y], model.predict(data_test)))
 
     if average_rmse:
         rmse_train = np.mean(rmse_train)
         rmse_test = np.mean(rmse_test)
 
     return {
-        "Training RMSE": rmse_train,
-        "Test RMSE": rmse_test,
+        "RMSE": rmse_alldata,
         "R-squared": rsquared,
         "BIC": bic,
         "Coefficients": n_coefficients,
+        "Training RMSE": rmse_train,
+        "Test RMSE": rmse_test,
+    }
+
+
+import statsmodels
+
+
+def predict_interval(
+    regression: statsmodels.regression.linear_model.RegressionResultsWrapper,
+    new_datapoint: pd.DataFrame,
+    interval_precision=0.95,
+) -> dict:
+    """
+    Does point prediction and interval prediction for a new datapoint.
+
+        Parameters
+    ----------
+    regression : statsmodels.regression.linear_model.RegressionResultsWrapper
+        Fitted regression model.
+    new_datapoint: pd.DataFrame
+        Database containing a new observation.
+    interval_precision : float, default=0.95
+        Precision of interval prediction.
+    """
+
+    summaryframe = regression.get_prediction(new_datapoint).summary_frame(
+        alpha=1 - interval_precision
+    )
+
+    point_prediction = round(summaryframe["mean"].values[0], 2)
+
+    conf_int = (
+        "["
+        + "–".join(
+            [
+                str(round(i, 2))
+                for i in summaryframe[["obs_ci_lower", "obs_ci_upper"]].values[0]
+            ]
+        )
+        + "]"
+    )
+
+    return {
+        "Point prediction": point_prediction,
+        f"Prediction Interval ({round(interval_precision*100)}%)": conf_int,
     }
