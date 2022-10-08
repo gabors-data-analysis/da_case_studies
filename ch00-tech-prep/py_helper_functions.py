@@ -172,7 +172,8 @@ def ols_crossvalidator(
     model = smf.ols(formula, data=data).fit()
 
     rsquared = model.rsquared
-    n_coefficients = model.params.shape[0]
+    #n_coefficients = model.params.shape[0]
+    n_coefficients = model.df_model + 1 # This might differ from model.params.shape[0], because of collinear predictors
     bic = model.bic
     rmse_alldata = rmse(model.predict(), data[y])
 
