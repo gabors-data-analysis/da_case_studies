@@ -22,7 +22,7 @@
 * set working directory for da_case_studies.
 * for example:
 * cd "C:/Users/xy/Dropbox/gabors_data_analysis/da_case_studies"
-cd "C:/Users/kezdi/Github/da_case_studies"
+
 
 global work  	"ch03-simulations"
 

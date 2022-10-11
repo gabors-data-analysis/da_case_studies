@@ -56,6 +56,9 @@ create_output_if_doesnt_exist(output)
        
 # load vienna
 hotels <- read_csv(paste0(data_in,"hotels-vienna.csv"))
+# From web
+# hotels <- read_csv( "https://osf.io/y6jvb/download" )
+
 # ------------------------------------------------------------------------------------------------------
 ####SAMPLE SELECTION
 # Apply filters:  3-4 stars, Vienna actual, without  extreme value
@@ -119,7 +122,7 @@ stargazer_r(list(reg1, reg2, reg3, reg4), se = 'robust', digits=3, out=paste(out
 
 # List of 5 best deals
 hotels %>%
-  select(hotel_id, price, lnprice_resid, distance, stars, rating) %>%
+  dplyr::select(hotel_id, price, lnprice_resid, distance, stars, rating) %>%
   arrange(lnprice_resid) %>%
   .[1:5,] %>%
   as.data.frame() %>% 

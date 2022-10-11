@@ -22,7 +22,7 @@
 * STEP 1: set working directory for da_case_studies.
 * for example:
 * cd "C:/Users/xy/Dropbox/gabors_data_analysis/da_case_studies"
-cd "C:/Users/kezdi/GitHub/da_case_studies"
+
 
 
 * STEP 2: * Directory for data
@@ -74,9 +74,7 @@ gen ptotalAA = shareAA*passengers
 gen ptotalUS = shareUS*passengers 
 gen ptotallargest = sharelargest*passengers 
 
-collapse (first) after before airports-stops ///
- (sum) ptotal* passengers itinfare ///
-  , by(origin finaldest return year)
+collapse (first) after before airports return_sym stops (sum) ptotal* passengers itinfare , by(origin finaldest return year)
 
 gen avgprice = itinfare/passengers
 gen shareAA = ptotalAA/passengers

@@ -24,6 +24,7 @@ rm(list=ls())
 library(tidyverse)
 library(xtable)
 library(broom)
+library(modelsummary)
 
 # set working directory
 # option A: open material as project
@@ -51,6 +52,8 @@ create_output_if_doesnt_exist(output)
 
 # load data
 pd <- read.csv(paste0(data_in,"online_offline_ALL_clean.csv"))
+# Load from the web
+# pd <- read_csv( "https://osf.io/yhbr5/download" )
 
 
 # FILTER DATA
@@ -67,9 +70,8 @@ pd <- pd %>% filter(price<1000)
 # Compare variables
 pd<-pd %>% mutate(diff = price_online-price)
 
-descr <- pd %>% summarise(mean = mean(diff,na.rm=T), sd = sd(diff,na.rm=T), min=min(diff,na.rm=T),
-                          median=median(diff,na.rm=T), max=max(diff,na.rm=T))
-descr
+# Check the main descriptives
+datasummary( diff ~ Mean + SD + Min + Max + Median + Max , data = pd )
 
 hist1<- ggplot(data=pd, aes(diff))+
   geom_histogram(binwidth = 5, boundary=0, closed="left",

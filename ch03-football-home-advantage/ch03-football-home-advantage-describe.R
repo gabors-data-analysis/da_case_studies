@@ -56,6 +56,8 @@ create_output_if_doesnt_exist(output)
 # Import dataset
 df <- read.csv(paste0(data_in,"epl_games.csv"),
                 stringsAsFactors = F)
+# Or can load from web
+#! df <- read_csv( "https://osf.io/bdjt5/download" )
 
 # look at 2016/17 season only
 df <- subset(df, season==2016)
@@ -68,7 +70,6 @@ df <-  df %>%
 # Summary statistics
 summary(df$home_goaladv)
 describe(df$home_goaladv)
-
 
 # Histogram
 p1<-ggplot(data = df, aes (x = home_goaladv, y = (..count..)/sum(..count..))) +

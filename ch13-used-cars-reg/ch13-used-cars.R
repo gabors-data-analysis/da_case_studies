@@ -25,9 +25,11 @@ rm(list=ls())
 
 # import libraries
 library(tidyverse)
+library(modelsummary)
+library(fixest)
 library(lmtest)
 library(sandwich)
-library(haven)
+#library(haven)
 library(stargazer)
 library(caret)
 library(grid)
@@ -56,6 +58,12 @@ create_output_if_doesnt_exist(output)
 
 # DATA IMPORT
 data <- read.csv(paste0(data_in,"used-cars_2cities_prep.csv"), stringsAsFactors = TRUE)
+# From OSF:
+#data <- read.csv( 'https://osf.io/7gvz9/download', stringsAsFactors = TRUE)
+
+# check the datatable
+glimpse( data )
+
 
 # SAMPLE DESIGN
 
@@ -133,8 +141,8 @@ data <- data %>%
 # cylinders
 data <- data %>%
   mutate(cylind6 = ifelse(cylinders=="6 cylinders",1,0))
-table(data$cylinders)
-table(data$cylind6)
+
+datasummary( cylinders + as.factor( cylind6 ) ~ N + Percent() , data = data )
 
 
 # age: quadratic, cubic
@@ -155,37 +163,25 @@ data <- read.csv(paste0(data_out, "usedcars_work.csv"), stringsAsFactors = FALSE
 
 # Frequency tables
 
-# area
-data %>%
-  group_by(area) %>%
-  dplyr::summarize(frequency=n(), mean=mean(price))
+# area 
+datasummary( area * price ~ N + Mean , data = data )
 
 # focus only on Chicago
 data <- data %>%
   filter(area=="chicago")
 
 # condition
-data %>%
-  group_by(condition) %>%
-  dplyr::summarize(frequency=n(), mean=mean(price))
+datasummary( condition * price ~ N + Mean , data = data )
 
 # drive
-data %>%
-  group_by(drive) %>%
-  dplyr::summarize(frequency=n(), mean=mean(price))
+datasummary( drive * price ~ N + Mean , data = data )
 
 # dealer
-data %>%
-  group_by(dealer) %>%
-  dplyr::summarize(frequency=n(), mean=mean(price))
-
+datasummary( as.factor( dealer ) * price ~ N + Mean , data = data )
 
 # data summary
-data %>%
-  dplyr::select(age, odometer, LE, XLE, SE, cond_likenew, cond_excellent, cond_good, cylind6) %>%
-    summary()
-
-Hmisc::describe(data$age)
+datasummary( age + odometer + LE + XLE + SE + cond_likenew + cond_excellent + cond_good + cylind6 + age ~
+               Mean + Median + Min + Max + P25 + P75 + N , data = data )
 
 # Histograms not in textbook
 # price
@@ -249,14 +245,25 @@ model5 <- as.formula(price ~ age + agesq + agecu + odometer + odometersq + LE*ag
                        cond_likenew*age + cond_excellent*age + cond_good*age + cylind6*age + odometer*age + dealer*age)
 
 
+# Running simple OLS
+reg1 <- feols(model1, data=data, vcov = 'hetero')
+reg2 <- feols(model2, data=data, vcov = 'hetero')
+reg3 <- feols(model3, data=data, vcov = 'hetero')
+reg4 <- feols(model4, data=data, vcov = 'hetero')
+reg5 <- feols(model5, data=data, vcov = 'hetero')
+
+# evaluation of the models
+fitstat_register("k", function(x){length( x$coefficients ) - 1}, "No. Variables")
+etable( reg1 , reg2 , reg3 , reg4 , reg5 , fitstat = c('aic','bic','rmse','r2','n','k') )
+
+##
+# EXTRA: for writing out with stargazer: use lm instead
 reg1 <- lm(model1, data=data)
 reg2 <- lm(model2, data=data)
 reg3 <- lm(model3, data=data)
 reg4 <- lm(model4, data=data)
 reg5 <- lm(model5, data=data)
-
 # evaluation of the models
-
 models <- c("reg1", "reg2","reg3", "reg4", "reg5")
 AIC <- c()
 BIC <- c()
@@ -264,7 +271,7 @@ RMSE <- c()
 RSquared <- c()
 regr <- c()
 k <- c()
-
+# Get for all models
 for ( i in 1:length(models)){
   AIC[i] <- AIC(get(models[i]))
   BIC[i] <- BIC(get(models[i]))
@@ -274,11 +281,12 @@ for ( i in 1:length(models)){
   k[i] <- get(models[i])$rank -1
 }
 
+# Model 1
+#stargazer(regr[[1]],  out=paste(output,"Ch13_reg_age_R.tex",sep=""), digits=2, float = F, no.space = T)
+
 ############################################################
 # Linear regression evaluation
 
-# Model 1
-#stargazer(regr[[1]],  out=paste(output,"Ch13_reg_age_R.tex",sep=""), digits=2, float = F, no.space = T)
 
 # Lowess vs. quadratic (reg1) regression
 Ch13_p_age_quad_vs_lowess_R <- ggplot(data = data, aes(x=age)) +
@@ -370,39 +378,40 @@ data <- data %>% dplyr::select(age, agesq, odometer, odometersq, SE, LE, XLE, co
                         cond_excellent, cond_good, dealer,price, cylind6)
 
 # Add new observation
-new <- list(age=10, agesq=10^2,odometer=12,odometersq=12^2,SE=0,XLE=0, LE=1, 
+new <- tibble(age=10, agesq=10^2,odometer=12,odometersq=12^2,SE=0,XLE=0, LE=1, 
             cond_likenew=0,cond_excellent=1,cond_good=0, 
             dealer=0, cylind6=0, price=NA)
 
 
-# Predict price with all predictors (Model3)
-reg1 <- lm(model1, data=data)
+# Predict price with only 2 predictors (Model1)
+pred1 <- feols(model1, data=data, vcov = 'hetero')
 # Standard errors of residuals
-p1 <- predict(reg3, data)
+p1 <- predict(pred1, data)
 resid_p1 <- p1-data$price
 summary(resid_p1)
 # predict value for newly added obs
-pred1_new <- predict(reg1, newdata = new,se.fit = TRUE, interval = "prediction")
+pred1_new <- predict(pred1, newdata = new ,se.fit = TRUE, interval = "prediction")
 p1<- pred1_new$fit
 
 # Predict price with all predictors (Model3)
-reg3 <- lm(model3, data=data)
+pred3 <- feols(model3, data=data,vcov = 'hetero')
 # Standard errors of residuals
-p2 <- predict(reg3, data)
-resid_p2 <- p2-data$price
-summary(resid_p2)
+p3 <- predict(pred3, data)
+resid_p3 <- p3-data$price
+summary(resid_p3)
 # predict value for newly added obs
-pred2_new <- predict(reg3, newdata = new,se.fit = TRUE, interval = "prediction")
-p2<- pred2_new$fit
-pred2_new 
+pred3_new <- predict(pred3, newdata = new, se.fit = TRUE, interval = "prediction")
+p3<- pred3_new$fit
+pred3_new 
 
 #get model rmse
-data$p2a <- predict(reg3, data)
-rmse2 <- RMSE(data$p2a,data$price)
-rmse2
+data$p3a <- predict( pred3, data)
+log_na <- is.na( data$p3a )
+rmse3 <- RMSE(data$p3a[!log_na],data$price[!log_na])
+rmse3
 
 # Result summary
-sum1 <- cbind(t(p1), t(p2))
+sum1 <- cbind(t(pred1_new[,c(1,3,4)]), t(pred3_new[,c(1,3,4)]))
 colnames(sum1) <- c('Model1', 'Model3')
 rownames(sum1) <- c('Predicted', 'PI_low (95%)', 'PI_high (95%)')
 
@@ -412,24 +421,23 @@ stargazer(sum1, summary = F, digits=0, float=F, out=paste(output,"ch13-table-3-p
 stargazer(sum1, summary = F, digits=0, float=F, type="text",  out=paste(output,"ch13-table-3-pred-new.txt",sep=""))
 # old name: Ch13_pred_R.txt
 
-# prediction
-
+# prediction with 80%
 
 # summary of predictions and PI 80% version
 # predict value for newly added obs
-pred1_new80 <- predict(reg1, newdata = new, se.fit=TRUE, interval = "prediction", leve=0.8)
+pred1_new80 <- predict(pred1, newdata = new, se.fit=TRUE, interval = "prediction", level=0.8)
 p180<- pred1_new80$fit
-pred2_new80 <- predict(reg3, newdata = new,se.fit = TRUE, interval = "prediction", level=0.8)
-p280<- pred2_new80$fit
+pred3_new80 <- predict(pred3, newdata = new,se.fit = TRUE, interval = "prediction", level=0.8)
+p380<- pred3_new80$fit
 
 # Result summary
-sum2 <- cbind(t(p180), t(p280))
+sum2 <- cbind(t(pred1_new80[,c(1,3,4)]), t(pred3_new80[,c(1,3,4)]))
 colnames(sum2) <- c('Model1', 'Model3')
 rownames(sum2) <- c('Predicted', 'PI_low (80%)', 'PI_high (80%)')
 sum2
 
- stargazer(sum2, summary = F, digits=0, float=F, out=paste(output,"ch13-table-3-pred-new80.tex",sep=""))
- stargazer(sum2, summary = F, digits=0, float=F, type="text",  out=paste(output,"ch13-table-3-pred-new80.txt",sep=""))
+stargazer(sum2, summary = F, digits=0, float=F, out=paste(output,"ch13-table-3-pred-new80.tex",sep=""))
+stargazer(sum2, summary = F, digits=0, float=F, type="text",  out=paste(output,"ch13-table-3-pred-new80.txt",sep=""))
 
- # in book sum1 and sum2 are combined in Table 3
+# in book sum1 and sum2 are combined in Table 3
  

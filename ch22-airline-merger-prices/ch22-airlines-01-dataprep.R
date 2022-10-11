@@ -63,7 +63,8 @@ create_output_if_doesnt_exist(output)
 # CREATE Workfile : only before and after period
 
 data <- read_dta(file.path(data_in, "originfinal-panel.dta"))
-
+# from OSF
+#data <- read_dta("https://osf.io/zw2h9/download")
 # ***************************************************************************
 # * market = origin X final destination 
 # * (note final destination is:

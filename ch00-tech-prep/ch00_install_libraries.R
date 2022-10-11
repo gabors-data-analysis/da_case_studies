@@ -10,12 +10,10 @@
 # License: Free to share, modify and use for educational purposes. 
 # 	Not to be used for commercial purposes.
 
-# To install libraries
-# Using R 4.0.2
-# version 0.8 2020-09-07
-
-
-# NOT READY!!!
+# This file was written to install libraries
+# Using R 4.0.2, version 0.8 2020-09-07
+# We suggest using renv instead
+# kept it for continuity
 
 #########################################################################################
 
@@ -43,8 +41,12 @@ install_github('vincentarelbundock/modelsummary')
 
 
 # Part II
-pacman::p_load(viridis, grid, gridExtra, dyn, estimatr, huxtable, segmented, rms)
+pacman::p_load(viridis, grid, gridExtra, dyn, estimatr, huxtable, segmented, rms, fixest)
 pacman::p_load(mfx, margins, psych) 
+
+# temp fix 
+install.packages(‘remotes’)
+remotes::install_github(‘lrberge/fixest’)
 
 #Part III
 pacman::p_load(lmtest, caret, glmnet, skimr, directlabels, 

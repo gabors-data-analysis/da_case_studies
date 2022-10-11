@@ -29,9 +29,9 @@ library(tidyverse)
 library(modelsummary)
 library(purrr)
 library(kableExtra)
-library(plm)
 library(cowplot)
 library(gridExtra)
+library(fixest)
 
 
 # set working directory
@@ -59,6 +59,9 @@ create_output_if_doesnt_exist(output)
 
 data <- read_csv(paste0(data_in,"football_managers_workfile.csv")) %>%
   mutate(date = as.Date(date, format = "%d%m%Y"))
+
+# From OSF
+#data <- read_csv("https://osf.io/t6dgh/download")
 
 # describe data
 data %>%
@@ -226,59 +229,49 @@ data_balanced_agg %>%
   summary()
 
 # FD REGRESSIONS
-fd_treatment <- lm(Dp6avg ~ after_1_6 + after_7_12, 
-                   data = filter(data_balanced_agg, treated == 1))
-fd_control <- lm(Dp6avg ~ after_1_6 + after_7_12, 
-                 data = filter(data_balanced_agg, treated == 0))
-fd <- lm(Dp6avg ~ after_1_6 + after_7_12 + treated + I(treated*after_1_6) + I(treated*after_7_12),
-                 data = data_balanced_agg)
+fd_treatment <- feols( Dp6avg ~ after_1_6 + after_7_12, 
+                       data = filter(data_balanced_agg, treated == 1) , cluster = 'teamseason' )
+
+fd_control <- feols( Dp6avg ~ after_1_6 + after_7_12, 
+                       data = filter(data_balanced_agg, treated == 0) , cluster = 'teamseason' )
+
+fd <- feols(Dp6avg ~ after_1_6 + after_7_12 + treated + I(treated*after_1_6) + I(treated*after_7_12),
+         data = data_balanced_agg , cluster = 'teamseason')
 
 summary(fd_treatment)
 summary(fd_control)
 summary(fd)
 
-stargazer_r(list(fd_treatment, fd_control, fd), se = 'robust', 
-            float=T, digits=3, out=paste(output,"football-manager-reg1.tex",sep=""))
-
-
-
-data_panel <- pdata.frame(data_balanced_agg, index=c("teamseason","t6_event"), drop.index=TRUE, row.names=TRUE)
-head(data_panel)
+etable(fd_treatment, fd_control, fd,
+       digits = 3 )
 
 
 ###################
 # EXTENSIONS: NOT USED
 ###################
 
+# FD REGRESSIONS
+setFixest_estimation( panel.id = ~teamseason + t6_event)
+fd_panel <- feols( d(points6avg) ~ d(after_1_6) + d(after_7_12) + d(treated) + d(treated*after_1_6) + d(treated*after_7_12),
+                   data = data_balanced_agg , cluster = 'teamseason')
 
-fd_panel <- plm(points6avg ~ after_1_6 + after_7_12 + treated + treated*after_1_6 + treated*after_7_12,
-          data = data_panel, model = "fd")
-summary(fd_panel)
-
-stargazer_r(list(fd_panel)) %>%
-  cat(.,file= paste0(output, "football-manager-reg1_panel.tex"))
+etable(fd_panel)
 
 
 # FE REGRESSIONS
-data_panel_treatmemnt <- pdata.frame(filter(data_balanced_agg, treated == 1),
-                                     index=c("teamseason","t6_event"), drop.index=TRUE, row.names=TRUE)
-data_panel_control <- pdata.frame(filter(data_balanced_agg, treated == 0),
-                                  index=c("teamseason","t6_event"), drop.index=TRUE, row.names=TRUE)
+fe_panel_treatment <- feols(points6avg ~ before_7_12 + after_1_6 + after_7_12 | teamseason,
+                          data = filter( data_balanced_agg , treated==1 ),
+                          cluster = 'teamseason')
+fe_panel_control <- feols(points6avg ~ before_7_12 + after_1_6 + after_7_12 | teamseason,
+                            data = filter( data_balanced_agg , treated==0 ),
+                          cluster = 'teamseason')
+fe_panel <- feols(points6avg ~ before_7_12 + after_1_6 + after_7_12 +
+                               treated*before_7_12 + treated*after_1_6 + 
+                               treated*after_7_12 | teamseason,
+                        data = data_balanced_agg,
+                        cluster = 'teamseason' )
 
-
-fe_panel_treatment <- plm(points6avg ~ before_7_12 + after_1_6 + after_7_12,
-                data = data_panel_treatmemnt, model = "within")
-fe_panel_control <- plm(points6avg ~ before_7_12 + after_1_6 + after_7_12,
-                data = data_panel_control, model = "within")
-fe_panel <- plm(points6avg ~ before_7_12 + after_1_6 + after_7_12 + treated*before_7_12 + treated*after_1_6 + treated*after_7_12,
-                data = data_panel, model = "within")
-
-summary(fe_panel_treatment)
-summary(fe_panel_control)
-summary(fe_panel)
-
-stargazer_r(list(fe_panel_treatment, fe_panel_control, fe_panel)) %>%
-  cat(.,file= paste0(output, "football-manager-reg2.tex"))
+etable(fe_panel_treatment, fe_panel_control, fe_panel)
 
 #ch24-table-1-football-manager-reg1
 

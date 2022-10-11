@@ -13,7 +13,7 @@
 * Chapter 20
 * CH20B Fine tuning social media advertising
 * using the ab-test-social-media dataset
-* version 0.9 2020-09-13
+* version 0.91 2020-05-25
 ********************************************************************
 
 
@@ -22,7 +22,7 @@
 * STEP 1: set working directory for da_case_studies.
 * for example:
 * cd "C:/Users/xy/Dropbox/gabors_data_analysis/da_case_studies"
-cd "C:/Users/kezdi/GitHub/da_case_studies"
+
 
 
 * STEP 2: * Directory for data
@@ -38,7 +38,7 @@ do set-data-directory.do
 * global data_dir "C:/Users/xy/gabors_data_analysis/da_data_repo"
 
 
-global data_in  "$data_dir/ab-test-social-media/raw"
+global data_in  "$data_dir/ab-test-social-media/clean"
 global work  	"ch20-ab-test-social-media"
 
 cap mkdir 		"$work/output"

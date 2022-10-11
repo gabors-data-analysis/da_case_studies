@@ -10,7 +10,7 @@
 
 # CHAPTER 10
 # CH10A Understanding the gender difference in earnings
-# version 0.9 2020-08-31
+# version 0.92 2021-10-18
 
 
 # ------------------------------------------------------------------------------------------------------
@@ -59,7 +59,13 @@ create_output_if_doesnt_exist(output)
 
 
 # load in clean and tidy data and create workfile
-cps <- read_csv(paste0(data_in,"morg-2014-emp.csv"))
+#import data (state must be as character: it's a mix of double and character in raw)
+cps <- read_csv(paste0(data_in,"morg-2014-emp.csv"), 
+                     col_types = cols(.default = "?", 
+                                      state = "c"))
+janitor::tabyl(cps$state)
+
+
 
 # SELECT OBSERVATIONS
 cps <- cps %>% filter(uhours>=20 & earnwke>0 & age>=24 & age<=64 & grade92>=44)

@@ -21,7 +21,8 @@
 
 * STEP 1: set working directory for da_case_studies.
 * for example:
-* cd "C:/Users/xy/Dropbox/gabors_data_analysis/da_case_studies"
+* cd "C:/Users/xy/gabors_data_analysis/da_case_studies"
+ 
 
 
 * STEP 2: * Directory for data
@@ -34,7 +35,7 @@ do set-data-directory.do
 
 * Option 2: set directory directly here
 * for example:
-* global data_dir "C:/Users/xy/gabors_data_analysis/da_data_repo"
+ global data_dir "/Users/vigadam/Dropbox/work/data_book/da_data_repo"
 
 
 global data_in  "$data_dir/case-shiller-la/clean"
@@ -57,12 +58,9 @@ global y =r(p4) /* yellow */
 
 
 *******************************************
-** IMPORT RAW DATA
-** MULTIPLE CSV FILES
+** IMPORT TIDY DATA
 
-* home price indices
-clear
-insheet using "$data_in\houseprices-data-1990-2018-f.csv", names
+use "$data_in/homeprices-data-2000-2018.dta", clear
 * NOTE
 * this data table contains observations up to 2018 
 * the 2018 data are used only at the very end of the case stufy
@@ -70,25 +68,24 @@ insheet using "$data_in\houseprices-data-1990-2018-f.csv", names
 * to reflect that we create two workfiles, one ending with 2017, one with 2018
 
 
-gen year=int((_n-1)/12)+1990
-gen month = _n - (year-1990)*12
-*lis year month date
+* generate running t index
+gen t=_n
+* tell Statat this is time series data
+* and define year-month variable
 gen ym = ym(year,month)
 format ym %tm
-codebook ym
-sort ym
-
-gen p = pn
-gen u = caur
-gen emp = cana
-
-order ym year month date p u emp
-keep ym year month date p u emp
-
-keep if year>=2000
-tsset ym
-gen t=_n
 order ym t
+tsset ym
+
+* define variables we'll work with
+* not seasonally adjusted price index
+gen p = pn
+* seasonally adjusted unemployment rate and total employment
+gen u = us
+gen emp = emps
+
+order ym t year month date p u emp
+keep ym t year month date p u emp
 
 gen dp = D.p
 gen lnp = ln(p)
@@ -100,7 +97,6 @@ qui tab month, gen(mo) /* generate month dummies */
 
 
 * now save the workfile with data from 2000 through 2018
-keep if year>=2000 & year<=2018
 order ym year month t date p u emp
 save "$work\case-shiller-workfile-2000-2018.dta",replace
 
@@ -417,6 +413,12 @@ sort model
 format rmse* %4.2f
 format cv_* %4.1f
 lis model rmse1 rmse2 rmse3 rmse4 cv_rmse, separator(0)
+
+
+* Comment: 
+* In the textbook, Table 18.3 has VAR RMSE values for the model without seasonality. 
+* It’s noted at \url{https://gabors-data-analysis.com/errata/#part-iii} 
+* Without seasonality, we have: RMSE (average) =7.6. With seasonality, we have: RMSE (average) =4.5. 
 
 
  

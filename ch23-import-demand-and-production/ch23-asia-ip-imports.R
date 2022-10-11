@@ -23,10 +23,7 @@ rm(list=ls())
 # Libraries
 library(tidyverse)
 library(haven)
-library(estimatr)
-library(huxtable)
-library(Hmisc)
-library(modelsummary)
+library(fixest)
 
 # set data dir, data used
 source("set-data-directory.R")             # data_dir must be first defined 
@@ -55,7 +52,10 @@ create_output_if_doesnt_exist(output)
 
 # import data
 # raw <- read.dta13(paste0(data_in,'asia-industry_tidy.dta'))
-raw <- read_dta(paste(data_in, 'asia-industry_tidy.dta', sep = ""))
+raw <- read_csv(paste(data_in, 'asia-industry_tidy.csv', sep = ""))
+
+# From OSF
+#raw <- read_dta("https://osf.io/3kd4c/download")
 
 data <- raw %>%
   filter(year >= 1998) %>%
@@ -216,46 +216,39 @@ dlnusaimp
 # We recommended two ways to address this problem: estimate Newey–West standard errors
 # or include the lag of the dependent variable in the regression. (Used here.)
 
+# Set panel properties:
+setFixest_estimation(panel.id = ~country + time)
 
-# Thailand
-lags_usa <- paste(paste0("lag(dln_usa_imports,", c(0:4), ")"), collapse = " + ")
-lags_ip <- paste(paste0("lag(dln_ip,", c(1:2), ")"), collapse = " + ")
-
-thai_formula <- as.formula(paste0("dln_ip ~ ", lags_usa, " + ",lags_ip))
-
-thai_reg <- lm(thai_formula, data = filter(work, countrycode=="THA"))
+# Thailand (using Newey-West SE)
+thai_reg <- feols(dln_ip ~ l(dln_usa_imports,0:4)+l(dln_ip,1:2),
+                  data = filter(work, countrycode=="THA"),
+                  vcov = NW(24))
 
 # long-term coeff, lagged dy, countries separately
-lags_usa <- paste(paste0("lag(ddln_usa_imports,", c(0:3), ")"), collapse = " + ")
-lt_formula <- as.formula(paste0("dln_ip ~ lag(dln_usa_imports, 4) + ", lags_usa, " + lag(dln_ip, 1)"))
+lt_formula <- formula(dln_ip ~ l(dln_usa_imports,4)+l(ddln_usa_imports,0:3)+l(dln_ip,1))
 
-tha_reg_lt <- lm(lt_formula, data = filter(work, countrycode=="THA"))
-mys_reg_lt <- lm(lt_formula, data = filter(work, countrycode=="MYS"))
-phl_reg_lt <- lm(lt_formula, data = filter(work, countrycode=="PHL"))
-sgp_reg_lt <- lm(lt_formula, data = filter(work, countrycode=="SGP"))
+tha_reg_lt <- feols(lt_formula, data = filter(work, countrycode=="THA"), vcov = 'iid' )
+mys_reg_lt <- feols(lt_formula, data = filter(work, countrycode=="MYS"), vcov = 'iid' )
+phl_reg_lt <- feols(lt_formula, data = filter(work, countrycode=="PHL"), vcov = 'iid' )
+sgp_reg_lt <- feols(lt_formula, data = filter(work, countrycode=="SGP"), vcov = 'iid' )
+
 
 # long-term coeff, lagged dy, countries pooled
-lt_formula_pooled <- as.formula(paste0("dln_ip ~ lag(dln_usa_imports, 4) + ", lags_usa, " + lag(dln_ip, 1) + cc"))
-pooled_reg_lt <- lm(lt_formula_pooled, data = work)
+pooled_reg_lt <- feols(dln_ip ~ l(dln_usa_imports,4) + l(ddln_usa_imports,0:3) 
+                              + l(dln_ip,1) + cc , data = work, vcov = 'iid' )
 
 
 #ch23-table-1-asia-reg
-huxreg(
-  list(
-    "Thailand" = tha_reg_lt, 
-    "Malaysia" = mys_reg_lt, 
-    "Philippines" = phl_reg_lt,
-    "Singapore" = sgp_reg_lt,
-    "Pooled" = pooled_reg_lt
-  ), 
-  statistics = c(Observations = "nobs", R2 = "r.squared"), 
-  coefs = c(
-    "USA imports log change, cumulative coeff." = "lag(dln_usa_imports, 4)", 
-    "Industrial production log change, lag" = "lag(dln_ip, 1)", 
-    "Malaysia" = "ccMalaysia", 
-    "Philippines" = "ccPhilippines", 
-    "Singapore" = "ccSingapore", 
-    "Constant" = "(Intercept)"  ))
+etable(tha_reg_lt,mys_reg_lt,phl_reg_lt,sgp_reg_lt,pooled_reg_lt,
+       headers = c("Thailand","Malaysia","Philippines","Singapore","Pooled"),
+       drop = 'ddln_usa', digits = 3, fitstat = c("n","r2"),
+       dict = c(
+         "l(dln_usa_imports,4)" = "USA imports log change, cumulative coeff.",
+         "l(dln_ip,1)" = "Industrial production log change, lag",
+         "ccMalaysia" = "Malaysia", 
+        "ccPhilippines" = "Philippines", 
+        "ccSingapore"="Singapore", 
+        "(Intercept)" = "Constant") )
 
 
 

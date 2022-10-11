@@ -32,6 +32,7 @@ library(rms)
 library(xtabs)
 library(lspline)
 library(huxtable)
+library(modelsummary)
 
 # set working directory
 # option A: open material as project
@@ -61,6 +62,9 @@ create_output_if_doesnt_exist(output)
 # load in clean and tidy data and create workfile
 hotels_europe_price <- read_csv(paste0(data_in,"hotels-europe_price.csv"))
 hotels_europe_features <- read_csv(paste0(data_in,"hotels-europe_features.csv"))
+# From web
+# hotels_europe_price <- read_csv("https://osf.io/p6tyr/download")
+# hotels_europe_features <- read_csv("https://osf.io/utwjs/download")
 
 data <- left_join(hotels_europe_price, hotels_europe_features, by = "hotel_id")
 rm(hotels_europe_price)
@@ -115,9 +119,7 @@ summary(data$lnprice)
 # TODO simplify, make it nicer as before
 
 # summary stats by variables
-ddply(data,~date,summarise,mean=mean(distance), min=min(distance), max=max(distance), median=median(distance), n=length(distance))
-ddply(data,~date,summarise,mean=mean(price), min=min(price), max=max(price), median=median(price), n=length(price))
-ddply(data,~date,summarise,mean=mean(lnprice), min=min(lnprice), max=max(lnprice), median=median(lnprice), n=length(lnprice))
+datasummary( date*(distance + price + lnprice) ~ mean + Min + Max + Median + N , data = data )
 
 
 t <-data %>% group_by(date) %>% dplyr::summarize(mean=mean(distance), 
@@ -196,9 +198,8 @@ rm(reg, reg_rob, i, coeff_intercept, coeff_dist_0_2, coeff_dist_2_7, d)
 # same with hotels restricted to be the same
 
 # first create variable that counts the number of times a hotel is in the data
-data <- data %>%
-  group_by(hotel_id) %>%
-  mutate(hotelcount = n())
+data <- left_join( data , data %>% group_by(hotel_id) %>% dplyr::summarise( n() ) , by = "hotel_id" )
+data <- dplyr::rename( data , hotelcount = `n()` )            
 table(data$hotelcount)
 
 data <- data[data$hotelcount==4, ]
@@ -240,9 +241,7 @@ data <- data[data$stars>=3 & data$stars<=4, ]
 data <- data[data$accommodation_type=="Hotel",]
 data <- data[data$date=="2017-NOV-weekday",]
 
-ddply(data,~city,summarise,mean=mean(distance), min=min(distance), max=max(distance), median=median(distance), n=length(distance))
-ddply(data,~city,summarise,mean=mean(price), min=min(price), max=max(price), median=median(price), n=length(price))
-ddply(data,~city,summarise,mean=mean(lnprice), min=min(lnprice), max=max(lnprice), median=median(lnprice), n=length(lnprice))
+datasummary( city*(distance+price+lnprice)~mean+Min+Max+Median+N, data=data)
 
 # Regressions for three cities
 # original regression
@@ -282,10 +281,7 @@ data <- data[data$date=="2017-NOV-weekday",]
 
 table(data$accommodation_type, data$stars)
 
-
-ddply(data,~stars,summarise,mean=mean(distance), min=min(distance), max=max(distance), median=median(distance), n=length(distance))
-ddply(data,~stars,summarise,mean=mean(price), min=min(price), max=max(price), median=median(price), n=length(price))
-ddply(data,~stars,summarise,mean=mean(lnprice), min=min(lnprice), max=max(lnprice), median=median(lnprice), n=length(lnprice))
+datasummary( as.factor(stars)*(distance+price+lnprice)~mean+Min+Max+Median+N,data=data)
 
 
 # regressions
