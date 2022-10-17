@@ -408,3 +408,37 @@ def format_confidence_interval(conf_int: List[float], round_n=2) -> str:
         return "[" + "–".join([str(int(round(i, round_n))) for i in conf_int]) + "]"
     else:
         return "[" + "–".join([str(round(i, round_n)) for i in conf_int]) + "]"
+
+
+def create_sample_frame(
+    vector: np.array, sample_size: int, n_samples=10000, with_replacement=False, seed=42
+) -> List[np.array]:
+    """
+    Function for a specified number of samples.
+    Draws a specified number of observations from a vector, either with or without replacement.
+    Returns the matrix of samples.
+
+    Used in `ch05-stock-market-loss-generalize.ipynb`
+
+       Parameters
+    ----------
+    vector : np.array
+        Vector of observations.
+    sample_size : int
+        Sample size, you want to draw.
+        Set it len(vector) for bootstrap sampling.
+    n_samples : int, default=10000
+        Number of samples.
+    with_replacement : bool, default=False
+        Whether to perform sampling with or without
+        replacement. Set `True` for bootstrap sampling.
+    seed : int,default=42
+        Random seed for reproducibility.
+    """
+
+    rng = np.random.default_rng(seed)
+    sample_frame = np.zeros((n_samples, sample_size))
+    for i in range(n_samples):
+        sample_frame[i] = rng.choice(vector, size=sample_size, replace=with_replacement)
+
+    return sample_frame
