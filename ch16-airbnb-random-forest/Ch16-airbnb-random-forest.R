@@ -529,6 +529,8 @@ rf_model_unified <- ranger.unify(rf_model_2$finalModel, data_holdout_ohe)
 
 treeshap_res <- treeshap(rf_model_unified, data_holdout_ohe[1:500, ])
 
+
+## Download treeshap_fit.rds from OSF: https://osf.io/6p7r8
 treeshap_res %>% write_rds("ch16-airbnb-random-forest/treeshap_fit.rds")
 
 plot_contribution(treeshap_res, obs = 12)
