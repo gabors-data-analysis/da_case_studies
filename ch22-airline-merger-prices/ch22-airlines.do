@@ -116,8 +116,18 @@ tabstat passengers, by(balanced) s(sum n) format(%12.0fc)
 
 * Define treated and untreated markets
 *  treated: both AA and US present in the before period
-*  untreated: neither AA nor US present in the before period
-*  drop if only AA or only US in before period (neither treated nor untreated)
+*  untreated: neither AA nor US present in the before periodOR only AA or only US in before period
+
+* NOTE There is a error in the book on p628:
+* Original version with error:
+* This definition of treated and untreated markets left some markets neither treated 
+*  nor untreated: those with only American or only US Airways present in 2011. For the
+*  main analysis we **dropped these from the data**.
+*
+* Corrected:
+* This definition of treated and untreated markets left some markets neither treated 
+*  nor untreated: those with only American or only US Airways present in 2011. For the 
+*  main analysis we **kept these in the data as untreated**.
 
 sort market year 
 gen treated = L.AA_and_US
