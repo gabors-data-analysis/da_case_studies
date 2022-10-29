@@ -29,6 +29,7 @@ shap = "==0.41.0"
 stargazer = "==0.0.5"
 statsmodels = "==0.13.2"
 syntheticcontrolmethods = "==1.1.17"
+seaborn = "==0.12.1"
 
 [dev-packages]
 
