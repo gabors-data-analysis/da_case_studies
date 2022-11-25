@@ -16,14 +16,11 @@ To see options for various languages, check out:
 3. **Python** -- [How to run code in Python ](https://gabors-data-analysis.com/howto-python/) 
 
 
-## Status (15 July, 2021)
+## Status (25 November, 2022)
 
-The [Latest release](https://github.com/gabors-data-analysis/da_case_studies/releases/tag/v0.8.0) `v0.8.0` is available as of 16 July 2021.   
-There will be additional bugfixes, edits, and `v1.0.0` expected in September. 
+The [Latest release]([https://github.com/gabors-data-analysis/da_case_studies/releases/tag/v0.8.3](https://github.com/gabors-data-analysis/da_case_studies/releases/tag/v0.8.3)) was released in October 2022
 
-1. **R** -- All code ready. Used for graphs in textbook. An environment with all librariries necessary, as `renv` is now available. 
-2. **Stata** -- All code ready. In the lack of native machine learning capabilities, no code for chapters 15,16,17, some limitations for chapter 18. This shall change, once we test the new python link-ups. Only planned for version `v1.1.0` expected late 2021. 
-3. **Python**  -- Allmost all codes are ready. Moderate differences to book and R are in ch14-ch17, some additional checks planned. An environment with all librariries necessary, as `pipenv` is now available.  
+We continuously monitor bugs and do regular, if mostly minor updates. 
 
 ## Organization
 1. Each case study has a separate folder.
