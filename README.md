@@ -18,9 +18,9 @@ To see options for various languages, check out:
 
 ## Status (25 November, 2022)
 
-The [Latest release, 0.8.3 "Ethics Gradient"]](https://github.com/gabors-data-analysis/da_case_studies/releases/tag/v0.8.3) was released in October 2022
+The [Latest release, 0.8.3 "Ethics Gradient"](https://github.com/gabors-data-analysis/da_case_studies/releases/tag/v0.8.3) was released on 25 November. 
 
-We continuously monitor bugs and do regular, if mostly minor updates. 
+In the latest release we did some refactoring re Python and R codes. We continuously monitor bugs and do regular, if mostly minor updates. 
 
 ## Organization
 1. Each case study has a separate folder.
