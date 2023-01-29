@@ -506,7 +506,40 @@ options(knitr.kable.NA = NULL)
 
 ##########################################
 
+##########################################
+## SHAP VALUES ##
+## Note: development version only
 
+# devtools::install_github('ModelOriented/treeshap')
+
+library(treeshap)
+
+#define one-hot encoding function
+dummy <- dummyVars(" ~ .", data=data_holdout, fullRank=T, sep = NULL)
+
+#perform one-hot encoding on data frame
+data_holdout_ohe <- data.frame(predict(dummy, newdata=data_holdout))
+
+# replace "." character to " " to match model object names
+names(data_holdout_ohe) <- gsub(x = names(data_holdout_ohe),
+                                pattern = "\\.", 
+                                replacement = " ")  
+
+# unify model for treeshap
+rf_model_unified <- ranger.unify(rf_model_2$finalModel, data_holdout_ohe)
+
+treeshap_res <- treeshap(rf_model_unified, data_holdout_ohe[1:500, ])
+
+
+## Download treeshap_fit.rds from OSF: https://osf.io/6p7r8
+treeshap_res %>% write_rds("ch16-airbnb-random-forest/treeshap_fit.rds")
+
+plot_contribution(treeshap_res, obs = 12)
+
+plot_feature_importance(treeshap_res, max_vars = 10)
+
+
+treeshap_inter <- treeshap(rf_model_unified, data_holdout_ohe[1:100, ], interactions = T)
 
 #########################################################################################
 #
