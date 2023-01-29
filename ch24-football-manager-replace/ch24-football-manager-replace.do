@@ -174,7 +174,7 @@ graph export "$output/ch14-figure-4-football-manager-interv-Stata.png",replace
 
 
 *********************************************************************-
-* CREATE CONTORL GROUP WITH PSEUDO-INTERVENTIONS
+* CREATE CONTROL GROUP WITH PSEUDO-INTERVENTIONS
 *********************************************************************-
 
 use "$work/ch24-football-manager.dta",replace

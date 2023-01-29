@@ -131,7 +131,7 @@ p4
 save_fig("ch24-figure-4-football-manager-points1", output, "large")
 
 # *********************************************************************-
-#   * CREATE CONTORL GROUP WITH PSEUDO-INTERVENTIONS
+#   * CREATE CONTROL GROUP WITH PSEUDO-INTERVENTIONS
 # *********************************************************************-
 # for each game, define avg diff of points 12-7 before
 # dip: avg diff of points 6-1 before minus 12-7 before
