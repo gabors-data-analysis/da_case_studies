@@ -21,14 +21,9 @@ rm(list=ls())
 
 # Import libraries 
 library(tidyverse)
-library(arm)
-library(lmtest)
-library(estimatr)
-library(sandwich)
+library(fixest)
 library(segmented)
-library(stargazer)
 library(cowplot)
-library(huxtable)
 
 
 
@@ -60,6 +55,11 @@ create_output_if_doesnt_exist(output)
 
 # load in clean and tidy data and create workfile
 #import data (state must be as character: it's a mix of double and character in raw)
+
+cps <- read_csv("https://osf.io/4ay9x/download",
+                col_types = cols(.default = "?", 
+                                 state = "c"))
+
 cps <- read_csv(paste0(data_in,"morg-2014-emp.csv"), 
                      col_types = cols(.default = "?", 
                                       state = "c"))
@@ -90,13 +90,13 @@ cps %>% dplyr::select(earnwke,uhours,w) %>% filter(w>=1) %>% summary()
 # LN EARNINGS, GENDER, AGE
 # robust standard error
 
-reg <- lm_robust(lnw ~ female, data=cps, se_type = "HC1")
-reg2 <- lm_robust(lnw ~ female+ age, data=cps, se_type = "HC1")
-reg3 <- lm_robust(age ~ female, data=cps, se_type = "HC1")
+reg <- feols(lnw ~ female, data=cps, vcov = "HC1")
+reg2 <- feols(lnw ~ female+ age, data=cps, vcov = "HC1")
+reg3 <- feols(age ~ female, data=cps, vcov = "HC1")
 
 # stargazer makes nice regression tables. _r makes them neater + robust SE
-ht<-huxreg(reg,reg2, reg3,
-           statistics = c(N = "nobs", R2 = "r.squared")) 
+ht<-etable(reg,reg2, reg3,
+           fitstat = c('n','r2')) 
 ht
 
 # not in book
@@ -138,13 +138,13 @@ cps <- cps %>% mutate(agesq=age**2,
 )
 
 
-reg4 <- lm_robust(lnw ~ female, data=cps, se_type = "HC1")
-reg5 <- lm_robust(lnw ~ female+ age, data=cps, se_type = "HC1")
-reg6 <- lm_robust(lnw ~ female + age + agesq, data=cps, se_type = "HC1")
-reg7 <- lm_robust(lnw ~ female + age + agesq + agecu + agequ, data=cps, se_type = "HC1")
+reg4 <- feols(lnw ~ female, data=cps, vcov = "HC1")
+reg5 <- feols(lnw ~ female+ age, data=cps, vcov = "HC1")
+reg6 <- feols(lnw ~ female + age + agesq, data=cps, vcov = "HC1")
+reg7 <- feols(lnw ~ female + age + agesq + agecu + agequ, data=cps, vcov = "HC1")
 
 # show results with robust SE and save them
-huxreg(reg4, reg5, reg6, reg7,statistics = c(N = "nobs", R2 = "r.squared"))
+etable(reg4, reg5, reg6, reg7,fitstat = c('n','r2'))
 
 
 ##########################################
@@ -155,11 +155,11 @@ cps <- cps %>% mutate(ed_MA=as.numeric(grade92==44),
                       ed_PhD = as.numeric(grade92==46)
 )
 
-reg8 <- lm_robust(lnw ~ female, data=cps,se_type = "HC1")
-reg9 <- lm_robust(lnw ~ female + ed_Profess + ed_PhD, data=cps, se_type = "HC1")
-reg10 <- lm_robust(lnw ~ female + ed_MA + ed_PhD, data=cps, se_type = "HC1")
+reg8 <- feols(lnw ~ female, data=cps,vcov = "HC1")
+reg9 <- feols(lnw ~ female + ed_Profess + ed_PhD, data=cps, vcov = "HC1")
+reg10 <- feols(lnw ~ female + ed_MA + ed_PhD, data=cps, vcov = "HC1")
 
-huxreg(reg8, reg9, reg6, reg10,statistics = c(N = "nobs", R2 = "r.squared"))
+etable(reg8, reg9, reg6, reg10,fitstat = c('n','r2'))
 
 
 
@@ -167,11 +167,11 @@ huxreg(reg8, reg9, reg6, reg10,statistics = c(N = "nobs", R2 = "r.squared"))
 #################################################
 # SIMPLE INTERACTION: LINEAR AGE WITH GENDER
 cps %>% filter(female==1)
-reg11 <- lm_robust(lnw ~ age, data=cps %>% filter(female==1), se_type = "HC1")
-reg12 <- lm_robust(lnw ~ age, data=cps %>% filter(female==0), se_type = "HC1")
-reg13 <- lm_robust(lnw ~ female + age + age*female, data=cps, se_type = "HC1")
+reg11 <- feols(lnw ~ age, data=cps %>% filter(female==1), vcov = "HC1")
+reg12 <- feols(lnw ~ age, data=cps %>% filter(female==0), vcov = "HC1")
+reg13 <- feols(lnw ~ female + age + age*female, data=cps, vcov = "HC1")
 
-huxreg(reg11, reg12, reg13,statistics = c(N = "nobs", R2 = "r.squared"))
+etable(reg11, reg12, reg13,fitstat = c('n','r2'))
 
 #####################################################
 # FOR RPEDICTIONL FUNCTIONAL FORMS & INTERACTIONS WITH GENDER
@@ -182,11 +182,11 @@ cps <- cps %>% mutate(agesq=age^2,
 )
 
 
-reg14 <- lm_robust(lnw ~ age + agesq + agecu + agequ, data=cps %>% filter(female==1))
-reg15 <- lm_robust(lnw ~ age + agesq + agecu + agequ, data=cps %>% filter(female==0))
-reg16 <- lm_robust(lnw ~ age + agesq + agecu + agequ + female + female*age + female*agesq + female*agecu + female*agequ, data=cps)
+reg14 <- feols(lnw ~ age + agesq + agecu + agequ, data=cps %>% filter(female==1))
+reg15 <- feols(lnw ~ age + agesq + agecu + agequ, data=cps %>% filter(female==0))
+reg16 <- feols(lnw ~ age + agesq + agecu + agequ + female + female*age + female*agesq + female*agecu + female*agequ, data=cps)
 
-huxreg(reg14, reg15, reg16,statistics = c(N = "nobs", R2 = "r.squared"))
+etable(reg14, reg15, reg16,fitstat = c('n','r2'))
 
 # PREDICTION AND GRAPH LINEAR
 data_m <- cps %>% filter(female==0)
@@ -311,15 +311,15 @@ cps <- cps %>% mutate(uhourssq = uhours^2,
 
 
 #### Extended regressions
-reg1 <- lm_robust(lnw ~ female, data=cps,se_type = "HC1")
+reg1 <- feols(lnw ~ female, data=cps,vcov = "HC1")
 
-reg2 <- lm_robust(lnw ~ female + age + ed_Profess + ed_PhD, data=cps,se_type = "HC1")
+reg2 <- feols(lnw ~ female + age + ed_Profess + ed_PhD, data=cps,vcov = "HC1")
 
-reg3 <- lm_robust(lnw ~ female + age + afram + hisp + asian + othernonw + nonUSborn + ed_Profess + ed_PhD + married + divorced+ wirowed + child1 + child2 + child3 +child4pl + as.factor(stfips) + uhours + fedgov + stagov + locgov + nonprof + union + as.factor(ind2dig) + as.factor(occ2dig), data=cps,se_type = "HC1")
+reg3 <- feols(lnw ~ female + age + afram + hisp + asian + othernonw + nonUSborn + ed_Profess + ed_PhD + married + divorced+ wirowed + child1 + child2 + child3 +child4pl + as.factor(stfips) + uhours + fedgov + stagov + locgov + nonprof + union + as.factor(ind2dig) + as.factor(occ2dig), data=cps,vcov = "HC1")
 
-reg4 <- lm_robust(lnw ~ female + age + afram + hisp + asian + othernonw + nonUSborn + ed_Profess + ed_PhD + married + divorced+ wirowed + child1 + child2 + child3 +child4pl + as.factor(stfips) + uhours + fedgov + stagov + locgov + nonprof + union + as.factor(ind2dig) + as.factor(occ2dig) + agesq + agecu + agequ + uhoursqu + uhourscu + uhourssq, data=cps,se_type = "HC1")
+reg4 <- feols(lnw ~ female + age + afram + hisp + asian + othernonw + nonUSborn + ed_Profess + ed_PhD + married + divorced+ wirowed + child1 + child2 + child3 +child4pl + as.factor(stfips) + uhours + fedgov + stagov + locgov + nonprof + union + as.factor(ind2dig) + as.factor(occ2dig) + agesq + agecu + agequ + uhoursqu + uhourscu + uhourssq, data=cps,vcov = "HC1")
 
-huxreg(reg1, reg2, reg3, reg4,statistics = c(N = "nobs", R2 = "r.squared"))
+etable(reg1, reg2, reg3, reg4,fitstat = c('n','r2'))
 
 #ch10-table-1-gendergap-reg1
 #ch10-table-2-gendergap-reg2
