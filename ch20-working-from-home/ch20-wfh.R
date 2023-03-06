@@ -26,12 +26,8 @@ rm(list=ls())
 # Descriptive statistics and regressions
 library(tidyverse)
 library(haven)
-library(sandwich)
-library(lmtest)
-library(stargazer)
+library(fixest)
 library(reshape)
-library(estimatr)
-library(modelsummary)
 library(cowplot)
 
 # set data dir, data used
@@ -55,7 +51,8 @@ create_output_if_doesnt_exist(output)
 
 
 # Load in data -------------------------------------------------------
-data <- read_csv(paste0(data_in, "wfh_tidy_person.csv"))
+data <- read_csv('https://osf.io/5c3rf/download')
+#data <- read_csv(paste0(data_in, "wfh_tidy_person.csv"))
 
 
 data <- data %>% 
@@ -194,31 +191,19 @@ data %>%
 
 # Regression 1: ATE estimates, no covariates -------------------------
 
-reg1 <- lm_robust(quitjob ~ treatment, data=data , se_type = "HC1")
-reg2 <- lm_robust(phonecalls1 ~ treatment, data=data[data$ordertaker==1, ], se_type = "HC1")
+reg1 <- feols(quitjob ~ treatment, data=data , vcov = "HC1")
+reg2 <- feols(phonecalls1 ~ treatment, data=data[data$ordertaker==1, ], vcov = "HC1")
 
-cm <- c('(Intercept)' = 'Constant')
-msummary(list(reg1, reg2),
-         fmt="%.3f",
-         gof_omit = 'DF|Deviance|Log.Lik.|F|R2 Adj.|AIC|BIC',
-         stars=c('*' = .05, '**' = .01),
-         coef_rename = cm,
-         output = paste(output,"ch20-table-4-wfh-reg1.tex",sep="")
-)
+
+etable(reg1,reg2,fitstat = c('n','r2','rmse'))
 
 
 
 # Regression 2: ATE estimates, with covariates of some unbalance -----
-reg3 <- lm_robust(quitjob ~ treatment + married + children + internet, data=data, se_type = "HC1")
-reg4 <- lm_robust(phonecalls1 ~ treatment + married + children + internet, data=data[data$ordertaker==1, ], se_type = "HC1")
+reg3 <- feols(quitjob ~ treatment + married + children + internet, data=data, vcov = "HC1")
+reg4 <- feols(phonecalls1 ~ treatment + married + children + internet, data=data[data$ordertaker==1, ], vcov = "HC1")
 
-msummary(list(reg1, reg2),
-         fmt="%.3f",
-         gof_omit = 'DF|Deviance|Log.Lik.|F|R2 Adj.|AIC|BIC',
-         stars=c('*' = .05, '**' = .01),
-         coef_rename = cm,
-         output = paste(output,"ch20-table-4-wfh-reg2.tex",sep="")
-)
+etable(reg3,reg4,fitstat = c('n','r2','rmse'))
 
 
 
