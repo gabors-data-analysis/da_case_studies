@@ -22,10 +22,10 @@ rm(list=ls())
 library(tidyverse)
 library(purrr)
 library(haven)
-library(stargazer)
 library(MatchIt)
 library(Matching) # masks dplyr select!!! #
 library(gmodels)
+library(fixest)
 
 getwd()
 # set working directory
@@ -71,7 +71,7 @@ control_vars_to_interact <- c("industry", "countrycode")
 
 
 data %>%
-	dplyr::select(c(control_vars, control_vars_to_interact)) %>%
+	dplyr::select(all_of(c(control_vars, control_vars_to_interact))) %>%
 	summary()
 
 # *************************************************************
@@ -80,14 +80,14 @@ data %>%
 
 # OLS with no control vars. -------------------------------------------------------
 formula1 <- as.formula(paste0(y_var, " ~ ",x_var))
-ols1 <- lm(formula1, data=data)
+ols1 <- feols(formula1, data=data)
 
 # OLS with all control vars -------------------------------------------------------
 
 formula2 <- as.formula(paste0(y_var, " ~ ",x_var," + ", 
                   paste(c(control_vars, control_vars_to_interact), collapse = " + ")))
 
-ols2 <- lm(formula2, data=data)
+ols2 <- feols(formula2, data=data)
 
 
 # OLS with all controls + interactions -------------------------------------------------------
@@ -97,13 +97,18 @@ formula3 <- as.formula(paste(y_var, " ~ ",x_var," + ",
 	" + (", paste(control_vars, collapse = "+"),")*(",
 	paste(control_vars_to_interact, collapse = "+"),")",sep=""))
 
-ols3 <- lm(formula3, data=data)
+ols3 <- feols(formula3, data=data)
 
+etable( ols1,ols2,ols3,
+        fitstat = c('n','r2'),
+        keep = c('Constant',x_var),
+        headers = c("'no confounders'", "'with confounders'", "'with confounders interacted'"),
+        depvar = F )
 
-stargazer_r(
-	list_of_models = list(ols1, ols2, ols3), 
-	keep.stat=c("n", "rsq"), keep = c(x_var, "Constant"), dep.var.labels.include = FALSE, dep.var.caption = "", 
-	column.labels = c("'no confounders'", "'with confounders'", "'with confounders interacted'")) #%>%
+#stargazer_r(
+#	list_of_models = list(ols1, ols2, ols3), 
+#	keep.stat=c("n", "rsq"), keep = c(x_var, "Constant"), dep.var.labels.include = FALSE, dep.var.caption = "", 
+#	column.labels = c("'no confounders'", "'with confounders'", "'with confounders interacted'")) #%>%
 #cat(.,file= paste0(output, "ch21-foundfam-reg1.tex"))
 
 
@@ -163,10 +168,11 @@ data_agg %>%
 
 # NOTE: the R code calculates ATET with the estimand=="ATT" option
 
-# Function only works with non-missing values
+# Function only works with non-missing values and factor variables
 data_pscore <- data %>% 
-  dplyr::select(c(y_var, x_var, control_vars, control_vars_to_interact)) %>%
-  na.omit()
+  dplyr::select(all_of(c(y_var, x_var, control_vars, control_vars_to_interact))) %>%
+  na.omit() %>% mutate( industry = factor( industry ),
+                        countrycode = factor( countrycode ) )
 
 # with all control vars -------------------------------------------------------
 
@@ -190,7 +196,7 @@ dim(data_match)
 # Step 3 - Estimate treatment effects
 # NOTE: We use weights here,to account for control observations that were matchet to multiple treated osb
 #       This is different from weights used to estimate ATE!
-reg_match <- lm(management ~ foundfam_owned, 
+reg_match <- feols(management ~ foundfam_owned, 
                 data = data_match, 
                weights = data_match$weights
                 )
@@ -198,7 +204,7 @@ reg_match <- lm(management ~ foundfam_owned,
 out1 <- summary(reg_match)
 
 ATET_PSME1 <- out1$coefficients[2]
-ATET_PSME1_SE <- out1$coefficients[2,2]
+ATET_PSME1_SE <- out1$se[2]
 
 
 # with all controls + interactions -------------------------------------------------------
@@ -225,13 +231,13 @@ dim(data_match2)
 # Step 3 - Estimate treatment effects
 # NOTE: We use weights here,to account for control observations that were matchet to multiple treated osb
 #       This is different from weights used to estimate ATE!
-reg_match2 <- lm(management ~ foundfam_owned, 
+reg_match2 <- feols(management ~ foundfam_owned, 
                 data = data_match2, weights = data_match2$weights)
 
 out2 <- summary(reg_match2)
 
 ATET_PSME2 <- out2$coefficients[2]
-ATET_PSME2_SE <- out2$coefficients[2,2]
+ATET_PSME2_SE <- out2$se[2]
 
 
 # ***************************************************************** 
