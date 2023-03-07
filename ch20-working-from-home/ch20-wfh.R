@@ -201,7 +201,7 @@ etable(reg1,reg2,fitstat = c('n','r2','rmse'))
 
 # Regression 2: ATE estimates, with covariates of some unbalance -----
 reg3 <- feols(quitjob ~ treatment + married + children + internet, data=data, vcov = "HC1")
-reg4 <- feols(phonecalls1 ~ treatment + married + children + internet, data=data[data$ordertaker==1, ], vcov = "HC1")
+reg4 <- feols(phonecalls1 ~ treatment + married + children, data=data[data$ordertaker==1, ], vcov = "HC1")
 
 etable(reg3,reg4,fitstat = c('n','r2','rmse'))
 
