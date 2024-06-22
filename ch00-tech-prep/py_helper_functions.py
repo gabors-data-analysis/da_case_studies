@@ -14,6 +14,26 @@ from plotnine import *
 ####################################################
 color = ["#3a5e8cFF", "#10a53dFF", "#541352FF", "#ffcf20FF", "#2f9aa0FF"]
 
+dark_gray = ".4"
+light_gray = ".8"
+
+da_theme = {
+    "axes.edgecolor": dark_gray,
+    "axes.facecolor": "white",
+    "axes.linewidth": 1,
+    "axes.spines.bottom": True,
+    "axes.spines.left": True,
+    "axes.spines.right": True,
+    "axes.spines.top": True,
+    "font.family": "sans-serif",
+    "grid.color": light_gray,
+    "grid.linestyle": "-",
+    "text.color": "black",
+    "xtick.bottom": True,
+    "xtick.color": dark_gray,
+    "ytick.color": dark_gray,
+}
+
 
 ####################################################
 # Define helper functions
@@ -442,3 +462,28 @@ def create_sample_frame(
         sample_frame[i] = rng.choice(vector, size=sample_size, replace=with_replacement)
 
     return sample_frame
+
+
+def add_margin(ax, x=0.05, y=0.05) -> None:
+    """
+    This will, by default, add 5% to the x and y margins to matplotlib plots.
+    You can customise this using the x and y arguments when you call it.
+
+       Parameters
+    ----------
+    ax : matplotlib.axes._subplots.AxesSubplot
+        Vector of observations.
+    x : float,default=0.05
+        Margin to add for x axis.
+    y : float,default=0.05
+        Margin to add for x axis.
+    """
+
+    xlim = ax.get_xlim()
+    ylim = ax.get_ylim()
+
+    xmargin = (xlim[1] - xlim[0]) * x
+    ymargin = (ylim[1] - ylim[0]) * y
+
+    ax.set_xlim(xlim[0] - xmargin, xlim[1] + xmargin)
+    ax.set_ylim(ylim[0] - ymargin, ylim[1] + ymargin)
