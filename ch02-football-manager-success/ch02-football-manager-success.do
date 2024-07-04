@@ -44,14 +44,14 @@ global output 	"$work/output"
 
 *********************************************************************
 * look at entire clean data table on games
-use "$data_in/epl_games",clear
+use "$data_in/epl_games.dta",clear
 sort team_home
 sort season  team_home
 keep if season == 2016
 browse
 
 * look at data for team-game level
-use "$data_in/epl_teams_games",clear
+use "$data_in/epl_teams_games.dta",clear
 sort team
 sort season  team
 keep if season == 2016
@@ -59,25 +59,25 @@ sort date
 browse
 
 * look at data table on managers
-use "$data_in/football_managers.dta", clear
+use "$data_in/football-managers.dta", clear
 browse
 
 * look at the clean merged file 
-use "$data_in/football_managers_workfile.dta", clear
+use "$data_in/football-managers-workfile.dta", clear
 sort season team
 browse
 
-gen a=1
-bys team manager_id: egen manager_games=sum(a)
-bys team manager_id: egen manager_points=sum(points)
-gen manager_win_ratio=manager_points /manager_games
+gen a = 1
+bys team manager_id: egen manager_games = sum(a)
+bys team manager_id: egen manager_points = sum(points)
+gen manager_win_ratio = manager_points /manager_games
 
-collapse (mean) manager_games manager_points manager_win_ratio  , by (manager_name team)
+collapse (mean) manager_games manager_points manager_win_ratio, by(manager_name team)
 sort manager_win_ratio
 
 gsort -manager_win_ratio
 
-list if manager_win_ratio>=2
+list if manager_win_ratio >= 2
 
 
 * denote caretakers
