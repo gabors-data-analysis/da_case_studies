@@ -31,6 +31,8 @@ statsmodels = "==0.13.2"
 syntheticcontrolmethods = "==1.1.17"
 seaborn = "==0.12.1"
 holidays = "==0.24"
+lime = "*"
+dalex = "*"
 
 [dev-packages]
 
