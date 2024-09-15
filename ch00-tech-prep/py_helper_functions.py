@@ -467,3 +467,37 @@ def add_margin(ax, x=0.05, y=0.05) -> None:
 
     ax.set_xlim(xlim[0] - xmargin, xlim[1] + xmargin)
     ax.set_ylim(ylim[0] - ymargin, ylim[1] + ymargin)
+
+def pool_and_categorize_continuous_variable(
+    series: pd.Series, pools: List[tuple], categories: list, closed: str = "left"
+):
+    """
+    Categorize a continuous variable based on defined intervals (pools) and corresponding categories.
+
+    Parameters:
+    series (pd.Series): The input series with continuous values to categorize.
+    pools (list of tuples): A list of tuples representing the (min, max) values for each interval.
+    categories (list): A list of categories corresponding to each interval in `pools`.
+    closed (str): Indicates whether the intervals are closed on the 'left', 'right', 'both', or 'neither' sides.
+
+    Returns:
+    pd.Series: A series with categorized values based on the provided intervals and categories.
+
+    Raises:
+    ValueError: If the number of pools does not match the number of categories.
+    """
+
+    # Validate inputs
+    if len(pools) != len(categories):
+        raise ValueError("The number of pools and categories must be the same.")
+
+    # Create bins using IntervalIndex from pools
+    bins = pd.IntervalIndex.from_tuples(pools, closed=closed)
+
+    # Perform the cut operation and map the intervals to categories
+    categories_cut = pd.cut(series, bins=bins)
+    categories_map = {
+        interval: category for interval, category in zip(bins, categories)
+    }
+
+    return categories_cut.map(categories_map)
