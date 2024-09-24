@@ -7,7 +7,7 @@ Run these commands from terminal/PowerShell to install the Anaconda environment 
 
 
 ```
-conda create -n da_env python=3.12
+conda create -n da_env python=3.12.4
 conda activate da_env
 pip install -r ch00-tech-prep/requirements.txt
 jupyter lab
