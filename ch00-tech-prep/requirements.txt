@@ -1,4 +1,3 @@
-numpy ==1.26.4
 arch ==7.0.0
 linearmodels ==6.0
 patchworklib ==0.6.4
@@ -10,5 +9,3 @@ pydotplus ==2.0.2
 scikit-misc ==0.5.1
 stargazer ==0.0.7
 syntheticcontrolmethods ==1.1.17
-ipykernel
-jupyter
