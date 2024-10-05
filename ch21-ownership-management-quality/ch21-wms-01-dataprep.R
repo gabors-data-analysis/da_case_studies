@@ -114,7 +114,6 @@ data$lnemp <- log(data$emp_firm)
 # 4. Competition
 table(data$competition)
 
-#itt van valam gond 1 obs
 data <- data %>%
 	mutate(
 		compet_weak = factor(competition == "0 competitors" | competition == "1-4 competitors"),
@@ -128,9 +127,11 @@ data %>%
             moder = max(compet_moder == TRUE),
             strong = max(compet_strong == TRUE))
 
-#data$competition <- 
-#  ifelse(data$compet_weak == TRUE, "0-4 competitors",
-#        ifelse(data$compet_moder == TRUE, "5-9 competitors", "10+ competitors"))
+data$competition <- 
+  ifelse(data$compet_weak == TRUE, "0-4 competitors",
+        ifelse(data$compet_moder == TRUE, "5-9 competitors", "10+ competitors"))
+
+table(data$competition)
 
 # 5. Industry in 2 digits
 

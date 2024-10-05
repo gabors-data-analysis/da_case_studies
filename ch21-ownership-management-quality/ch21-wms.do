@@ -58,7 +58,7 @@ set matsize 2000
 * Some versions of Stata IC allows a maximum matsize of 800, but more is needed for the last psmatch2. There is nothing we can do. 
 
 clear
-use "$data_in\wms_da_textbook-xsec.dta"
+use "$data_in/wms_da_textbook-xsec.dta"
 
 
 * statistics in text
