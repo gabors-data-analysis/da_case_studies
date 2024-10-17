@@ -64,6 +64,7 @@ create_output_if_doesnt_exist(output)
 ### Import data
 ## source 1: electricity consumption, by month
 electricity <- read_csv(paste0(data_in,"electricity_resid_AZ.csv"))
+#electricity <- read_csv("https://osf.io/download/wbef4/")
 
 electricity <- electricity %>% mutate(date = parse_date_time(as.character(MY), orders = "my"))
 

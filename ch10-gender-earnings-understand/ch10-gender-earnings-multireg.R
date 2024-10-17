@@ -55,10 +55,10 @@ create_output_if_doesnt_exist(output)
 
 # load in clean and tidy data and create workfile
 #import data (state must be as character: it's a mix of double and character in raw)
-
-cps <- read_csv("https://osf.io/4ay9x/download",
-                col_types = cols(.default = "?", 
-                                 state = "c"))
+ 
+# cps <- read_csv("https://osf.io/download/4ay9x/", 
+#                     col_types = cols(.default = "?", 
+#                                      state = "c"))
 
 cps <- read_csv(paste0(data_in,"morg-2014-emp.csv"), 
                      col_types = cols(.default = "?", 

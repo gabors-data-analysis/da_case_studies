@@ -59,7 +59,7 @@ create_output_if_doesnt_exist(output)
 #-----------------------------------------------------------------------------------------
 # load vienna
 hotels <- read_csv(paste0(data_in,"hotels-vienna.csv"))
-
+# df <- read_csv("https://osf.io/y6jvb/download")
 
 # ------------------------------------------------------------------------------------------------------
 ####SAMPLE SELECTION

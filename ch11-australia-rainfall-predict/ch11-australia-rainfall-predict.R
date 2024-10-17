@@ -57,6 +57,10 @@ create_output_if_doesnt_exist(output)
 data <- read.csv(paste(data_in, "rainfall_australia.csv", sep = "/")) %>%
   filter(station_name=="DARWIN AIRPORT")
 
+#data <- read.csv("https://osf.io/download/kdva8/") %>%
+#  filter(station_name=="DARWIN AIRPORT")
+
+
 data <- data %>%
   filter(bd_FC_Before_Start == 39) %>%
   mutate( 

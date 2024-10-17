@@ -66,6 +66,7 @@ hotels_europe_features <- read_csv(paste0(data_in,"hotels-europe_features.csv"))
 # hotels_europe_price <- read_csv("https://osf.io/p6tyr/download")
 # hotels_europe_features <- read_csv("https://osf.io/utwjs/download")
 
+
 data <- left_join(hotels_europe_price, hotels_europe_features, by = "hotel_id")
 rm(hotels_europe_price)
 rm(hotels_europe_features)

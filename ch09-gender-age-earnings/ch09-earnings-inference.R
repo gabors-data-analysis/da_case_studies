@@ -65,6 +65,10 @@ create_output_if_doesnt_exist(output)
 data_all <- read_csv(paste0(data_in,"morg-2014-emp.csv"), 
                      col_types = cols(.default = "?", 
                                       state = "c"))
+# data_all <- read_csv("https://osf.io/download/4ay9x/", 
+#                     col_types = cols(.default = "?", 
+#                                      state = "c"))
+
 janitor::tabyl(data_all$state)
 
 #SELECT OCCUPATION

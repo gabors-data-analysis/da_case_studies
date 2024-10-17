@@ -52,7 +52,7 @@ options(digits = 3)
 #-------------------------------------------------------
 # Import data
 data <- read_csv(paste(data_in,"airbnb_london_cleaned_book.csv", sep = ""))
-
+# data <- read_csv("https://osf.io/download/7n96w/")
 
 # keep if property type is Apartment, House or Townhouse
 table(data$property_type)

@@ -66,7 +66,7 @@ create_output_if_doesnt_exist(output)
 #
 #########################################################################################
 
-
+# !!! make sure you have run ch16-airbnb-prepare-london.R before
 
 # Used area
 area <- "london"

@@ -60,7 +60,8 @@ create_output_if_doesnt_exist(output)
 
 xc <- read_delim(paste0(data_in, "worldbank-lifeexpectancy.csv"), 
                                        ",", escape_double = FALSE, trim_ws = TRUE)
-
+# xc <- read_delim("https://osf.io/download/sh9mu/", 
+                                       ",", escape_double = FALSE, trim_ws = TRUE)
 # select year 
 xc <- xc %>% filter(year==2017)
   

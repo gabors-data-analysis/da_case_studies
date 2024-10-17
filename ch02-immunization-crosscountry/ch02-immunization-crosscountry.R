@@ -43,7 +43,7 @@ create_output_if_doesnt_exist(output)
 
 # load in clean and tidy data and create workfile
 data <- read_csv(paste0(data_in_clean,"worldbank-immunization-panel.csv",sep=""))
-
+#data <- read_csv("https://osf.io/download/gk5cn/")
 # cleaning
  
 data <-  data %>% select(c(countryname,year,imm,gdppc)) %>% 

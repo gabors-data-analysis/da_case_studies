@@ -53,7 +53,7 @@ create_output_if_doesnt_exist(output)
 
 
 # Read in data ------------------------------------------------------------
-
+# !!! make sure you have run ch21-wms-01-dataprep.R before
 data <- read_csv(paste0(data_out, "wms_da_textbook-work.csv"))
 
 data %>% 
