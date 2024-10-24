@@ -70,7 +70,7 @@ create_output_if_doesnt_exist(output)
 
 #location folders
 stock_data<-read_csv(paste0(data_in,"ready_sp500_45_cos.csv"))
-
+#stock_data<-read_csv("https://osf.io/download/4pgrf/")
 # filter on MSFT
 MSFT <- stock_data %>% filter(ticker == "MSFT")
 

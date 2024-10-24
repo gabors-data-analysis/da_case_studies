@@ -63,7 +63,7 @@ create_output_if_doesnt_exist(output)
 # Loading and preparing data ----------------------------------------------
 
 data <- read_dta(paste0(data_in,"haiti-earthquake-mod.dta"))
-
+# data <- read_dta("https://osf.io/download/h5yjm/")
 # donor pool based on threshold calculations below:
 # it is those countries with incomethreshold=1, and a balanced panel for all variables
 dp_countries <- c("Benin","Burkina Faso","Burundi","Bangladesh","Cambodia","Cameroon",

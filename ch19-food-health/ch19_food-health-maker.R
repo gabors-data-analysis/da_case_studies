@@ -12,6 +12,7 @@
 # Clear memory
 rm(list=ls())
 
+
 # Descriptive statistics and regressions
 library(tidyverse)
 library(haven)
@@ -46,6 +47,8 @@ create_output_if_doesnt_exist(output)
 # ********************************************************************************************************-
 
 data <- read_dta(paste0(data_in,"food_dataset_pers_extended_09-11-13.dta"))
+#data <- read_dta("https://osf.io/download/3c9gq/")
+
 
 # **********************************************-
 # * FOOD

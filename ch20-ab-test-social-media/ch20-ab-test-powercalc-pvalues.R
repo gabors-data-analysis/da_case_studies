@@ -78,6 +78,8 @@ pwr.2p.test(h=h, sig.level=0.05, power = 0.8)
 # p-value of tests
 
 data_summary <- read_excel(paste(data_in, "/ab-test-summary.xlsx",sep=""))
+#data_summary <- read_excel("https://osf.io/download/mhybr/")
+
 
 type_b <- 0
 clicks <- c(rep(1, data_summary$clicks[1]), rep(0, data_summary[1,2]-data_summary$clicks[1]))

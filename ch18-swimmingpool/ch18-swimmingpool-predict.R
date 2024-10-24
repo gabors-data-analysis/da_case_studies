@@ -67,6 +67,9 @@ create_output_if_doesnt_exist(output)
 #import data
 daily_agg<-read.csv(file = paste(data_in,"swim_work.csv",sep="")) %>% 
   mutate(date = as.Date(date))
+  
+#daily_agg<-read.csv("https://osf.io/download/jcxmk/") %>% 
+#  mutate(date = as.Date(date))
 
 # dow: 1=Monday, weekend: Sat and Sun.
 daily_agg <- daily_agg %>%
