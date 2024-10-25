@@ -46,6 +46,14 @@ global output 	"$work/output"
 clear
 insheet using "$data_in\city-size-japan.csv"
 
+* OSF: 
+/*
+copy "https://osf.io/download/9mgep/" "workfile.csv"
+import delimited "workfile.csv", clear
+erase "workfile.csv"
+*/
+
+
 sum
 
 gen pop=pop_2015/1000

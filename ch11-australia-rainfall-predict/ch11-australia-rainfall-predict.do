@@ -47,6 +47,14 @@ global output 	"$work/output"
 
 clear
 import delimited "$data_in/rainfall_australia.csv"
+
+* Or download directly from OSF:
+/*
+copy "https://osf.io/download/kdva8/" "workfile.csv"
+import delimited "workfile.csv"
+erase "workfile.csv"
+*/ 
+
 *drop if station_name =="MARREE AERO"
 keep if station_name=="DARWIN AIRPORT"
 compress

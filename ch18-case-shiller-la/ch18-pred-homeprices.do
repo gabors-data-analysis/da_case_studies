@@ -35,8 +35,6 @@ do set-data-directory.do
 
 * Option 2: set directory directly here
 * for example:
- global data_dir "/Users/vigadam/Dropbox/work/data_book/da_data_repo"
-
 
 global data_in  "$data_dir/case-shiller-la/clean"
 global work  	"ch18-case-shiller-la"
@@ -61,6 +59,13 @@ global y =r(p4) /* yellow */
 ** IMPORT TIDY DATA
 
 use "$data_in/homeprices-data-2000-2018.dta", clear
+* Or download directly from OSF:
+/*
+copy "https://osf.io/download/3z428/" "workfile.dta"
+use "workfile.dta", clear
+erase "workfile.dta"
+*/ 
+
 * NOTE
 * this data table contains observations up to 2018 
 * the 2018 data are used only at the very end of the case stufy

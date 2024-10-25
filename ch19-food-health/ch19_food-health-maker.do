@@ -30,6 +30,13 @@ global data_out			"da_data_repo\food-health\clean"
 
 use "$data_in/food_dataset_pers_extended_09-11-13.dta", clear
 
+* Or download directly from OSF:
+/*
+copy "https://osf.io/download/8ueht/" "workfile.dta"
+use "workfile.dta", clear
+erase "workfile.dta"
+*/ 
+
 
 **********************************************-
 * FOOD

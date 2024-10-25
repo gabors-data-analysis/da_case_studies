@@ -60,6 +60,13 @@ set matsize 2000
 clear
 use "$data_in\wms_da_textbook-xsec.dta"
 
+* Or download directly from OSF:
+/*
+copy "https://osf.io/download/qx4fn/" "workfile.dta"
+use "workfile.dta", clear
+erase "workfile.dta"
+*/ 
+
 
 * statistics in text
 * Section A1

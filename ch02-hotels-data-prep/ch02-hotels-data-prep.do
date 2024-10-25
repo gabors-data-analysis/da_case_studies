@@ -54,6 +54,15 @@ global data_in_raw "$data_in/raw"
 *********************************************************************
 * load in clean and tidy data and create workfile
 use "$data_in_clean/hotels-vienna.dta", clear
+
+* Or download directly from OSF:
+
+/*
+copy "https://osf.io/download/dn8je/" "workfile.dta"
+use "workfile.dta", clear
+erase "workfile.dta"
+*/ 
+
 keep hotel_id price accommodation_type distance stars rating rating_count
 
 * look at accomodation types
@@ -106,6 +115,14 @@ listtab hotel_id price distance if _n<=3 ///
 
 import delimited using "$data_in_raw/hotelbookingdata-vienna.csv", clear
 
+* Or download directly from OSF:
+
+
+/*
+copy "https://osf.io/g5dmw/download" "workfile.csv"
+import delimited "workfile.csv", clear
+erase "workfile.csv"
+*/
 
 * generate numerical variable of rating variable from string variable
 *  trick: ignore charecters listed in option

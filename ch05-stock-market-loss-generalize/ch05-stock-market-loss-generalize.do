@@ -54,6 +54,14 @@ global loss 5
 * load data 
 use "$data_in/SP500_2006_16_data.dta", clear
 
+* Or download directly from OSF:
+/*
+copy "https://osf.io/download/gds5t/" "workfile.dta"
+use "workfile.dta", clear
+erase "workfile.dta"
+*/ 
+
+
 * create gap variable 
 gen gap=date-date[_n-1]-1
 

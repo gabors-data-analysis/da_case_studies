@@ -48,6 +48,14 @@ global output 	"$work/output"
 
 use "$data_in/hrs_height_income.dta",clear
 
+* Or download directly from OSF:
+
+/*
+copy "https://osf.io/download/2bqsg/" "workfile.dta"
+use "workfile.dta", clear
+erase "workfile.dta"
+*/ 
+
 * Normal distribution: height of women age 55-59 
 sum height if age>=55 & age<60 & female==1 
 tab height if height>1.80 & age>=55 & age<60 & female==1 ,mis

@@ -48,6 +48,12 @@ global output 	"$work/output"
 
 
 use "$data_in\asia-industry_tidy.dta", clear
+* Or download directly from OSF:
+/*
+copy "https://osf.io/download/3kd4c/" "workfile.dta"
+use "workfile.dta", clear
+erase "workfile.dta"
+*/ 
 
 keep if year>=1998
 drop if year==1998 & month==1 /* missin data */

@@ -70,6 +70,13 @@ save                   "$data_in\airbnb_london_listing.dta", replace
 clear
 import delimited "$data_in/airbnb_london_cleaned.csv", bindquote(strict) 
 
+* Or download directly from OSF:
+/*
+copy "https://osf.io/download/ey5p7/" "workfile.csv"
+import delimited "workfile.csv", bindquote(strict) 
+erase "workfile.csv"
+*/ 
+
 *****************
 * sample design
 * keep Hackney borough 
@@ -77,18 +84,28 @@ keep if neighbourhood_cleansed=="Hackney"
 
 * quantitative variables
 
-*search renvars /* nice program to rename variables; 
+*search renvars 
+/* nice program to rename variables; 
 				click on appropriate link on screen to install */
 
-rename price temp
-destring temp, gen(price) ignore(",")
+* rename price temp
+* destring temp, gen(price) ignore(",")
 
 rename cleaning_fee usd_cleaning_fee 
 
-destring host_response_rate, gen (p_host_response_rate) force
+*destring host_response_rate, gen (p_host_response_rate) force
+rename host_response_rate p_host_response_rate
+gen n_accommodates = accommodates
+gen n_bathrooms = bathrooms
+gen n_review_scores_rating = review_scores_rating
+gen n_number_of_reviews = number_of_reviews
+gen n_guests_included = guests_included
+gen n_reviews_per_month = reviews_per_month 
 
+/*
 tab accommodates
 destring accommodates, gen (n_accommodates) force
+
 
 tab bathrooms
 destring bathrooms, gen(n_bathrooms) force
@@ -100,8 +117,8 @@ destring guests_included     , force gen(n_guests_included)
 
 codebook first_review
 destring reviews_per_month  , force gen (n_reviews_per_month)
-
-renvars extra_people minimum_nights beds, prefix (n_)
+*/
+rename (extra_people minimum_nights beds) n_=
 
 
 * create days since first review
@@ -137,7 +154,7 @@ encode neighbourhood_cleansed, gen (f_neighbourhood_cleansed)
 
 
 * dummy vars
-renvars hourcheckin - wirelessinternet, prefix(d_)
+rename (hourcheckin - wirelessinternet) d_=
 
 keep price d_* n_* f_* p_* usd_* neighbourhood_cleansed neighbourhood_cleansed cancellation_policy room_type property_type
 

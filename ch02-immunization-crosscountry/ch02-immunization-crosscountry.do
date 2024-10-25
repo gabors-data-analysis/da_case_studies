@@ -46,6 +46,14 @@ global output 	"$work/output"
 * load in clean and tidy data and create workfile
 use "$data_in/worldbank-immunization-panel.dta", clear
 
+* Or download directly from OSF:
+
+/*
+copy "https://osf.io/download/ku4fd/" "workfile.dta"
+use "workfile.dta", clear
+erase "workfile.dta"
+*/ 
+
 keep countryname year imm gdppc 
 keep if imm!=.
 keep if year>=2015

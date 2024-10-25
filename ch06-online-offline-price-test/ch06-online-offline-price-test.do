@@ -52,6 +52,15 @@ clear
 
 use "$data_in/online_offline_ALL_clean.dta",replace
 
+* Or download directly from OSF:
+/*
+copy "https://osf.io/download/wm6ge/" "workfile.dta"
+use "workfile.dta", clear
+erase "workfile.dta"
+*/ 
+
+
+
 * filter dataset
 tab country
 keep if country == "USA"

@@ -48,6 +48,12 @@ global output 	"$work/output"
 
 use "$data_in/football_managers_workfile",clear
 
+* Or download directly from OSF:
+/*
+copy "https://osf.io/download/hycmg/" "workfile.dta"
+use "workfile.dta", clear
+erase "workfile.dta"
+*/ 
 * describe data
 tab season
 codebook gameno

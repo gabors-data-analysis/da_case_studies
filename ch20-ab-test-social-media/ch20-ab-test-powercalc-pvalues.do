@@ -87,6 +87,13 @@ power twoproportions `proportionA' `proportionB'
 clear
 import excel "$data_in/ab-test-summary.xlsx", sheet("Sheet1") firstrow
 
+* Or download directly from OSF:
+/*
+copy "https://osf.io/download/mhybr/" "workfile.xlsx"
+import excel "workfile.xlsx", sheet('Sheet1') firstrow
+erase "workfile.xlsx"
+*/ 
+
 foreach ab in A B{
 	foreach var in show clicks action {
 	su `var' if action_type =="Action `ab'", meanonly
