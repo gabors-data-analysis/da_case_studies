@@ -46,6 +46,14 @@ global output 	"$work/output"
 clear
 use "$data_in\wms_da_textbook.dta"
 
+* Or download directly from OSF:
+/*
+copy "https://osf.io/download/gwfbk/" "workfile.dta"
+use "workfile.dta", clear
+erase "workfile.dta"
+*/ 
+
+
 * sample selection
 cap drop lean1_1-talent6_5
 cap drop aa*

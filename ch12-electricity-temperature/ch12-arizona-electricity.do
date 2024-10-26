@@ -36,7 +36,7 @@ do set-data-directory.do
 * global data_dir "C:/Users/xy/gabors_data_analysis/da_data_repo"
 
 
-global data_in  "$data_dir/arizona-electricity/raw"
+global data_in  "$data_dir/arizona-electricity/clean"
 global work  	"ch12-electrictiy-temperature"
 
 cap mkdir 		"$work/output"
@@ -50,7 +50,15 @@ global output 	"$work/output"
 * source 1: electricity consumption, by month
 
 clear
-insheet using "$data_in\electricity_resid_AZ.csv", comma 
+insheet using "$data_in\electricity_resid_AZ.csv", comma
+
+* Or download directly from OSF:
+/*
+copy "https://osf.io/download/wbef4/" "workfile.csv"
+insheet using "workfile.csv", comma
+erase "workfile.csv"
+*/ 
+
 rename my mystring
 gen date=date(mystring,"MY", 2020)
 format date %td
@@ -73,6 +81,13 @@ save "$work\electricity_resid_AZ",replace
 clear
 
 insheet using "$data_in\climate_Phoenix_AZ.csv" 
+* Or download directly from OSF:
+/*
+copy "https://osf.io/download/g3tj7/" "workfile.csv"
+insheet using "workfile.csv", comma
+erase "workfile.csv"
+*/ 
+
 gen tempdate=date(date,"YM")
 format tempdate %td
 gen year=year(tempdate)

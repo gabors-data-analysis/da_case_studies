@@ -50,7 +50,26 @@ global temp 	"$work/temp"
 
 * load in clean and tidy data and create workfile
 use "$data_in/hotels-europe_price", clear
+
 merge m:m hotel_id using "$data_in/hotels-europe_features.dta", nogen
+
+* Or download directly from OSF:
+/*
+copy "https://osf.io/download/hz4gw/" "workfile.dta"
+use "workfile.dta", clear
+erase "workfile.dta"
+preserve
+	copy "https://osf.io/download/j9mkf/" "workfile.dta"
+	use "workfile.dta", clear
+	erase "workfile.dta"
+	tempfile hotels_features
+	save `hotels_features'
+restore
+merge m:m hotel_id using `hotels_features', nogen
+*/
+
+
+
 
 * sample design
 * KEEP NOV 2017 weekend, 3-4 star hotels

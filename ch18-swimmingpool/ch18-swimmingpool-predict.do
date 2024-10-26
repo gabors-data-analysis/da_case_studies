@@ -51,6 +51,13 @@ global output 	"$work/output"
 * DATA, SAMPLE DESIGN, AGGREGATION TO DAILY, FEATURES
 ***********************************************************
 import delimited "$data_in/SwimmingPoolAdmissionsCABQ-en-us.csv", varnames(1) encoding(utf8) clear
+
+* Or download directly from OSF:
+/*
+copy "https://osf.io/download/48qts/" "workfile.csv"
+import delimited "workfile.csv", varnames(1) encoding(utf8) clear
+erase "workfile.csv"
+*/ 
 keep if location =="AQSP01" /* a single outdoor pool Sunport*/
 
 * inspect category

@@ -52,6 +52,13 @@ global output 	"$work/output"
 ************************************
 
 use "$data_in/stock-prices-daily.dta",clear
+* Or download directly from OSF:
+/*
+copy "https://osf.io/download/de8uc/" "workfile.dta"
+use "workfile.dta", clear
+erase "workfile.dta"
+*/ 
+
 tsset date
 
 * EXPLORING DAILY TIME SERIES 
@@ -188,6 +195,13 @@ graph export "$output/ch12-figure-6b-returns-together-2017-9-Stata.png", replace
 * ADDITIONAL REGRESSIONS: LOG CHAGE, DAILY FREQ
 * MONTHLY
 use "$data_in/stock-prices-daily.dta",clear
+* Or download directly from OSF:
+/*
+copy "https://osf.io/download/de8uc/" "workfile.dta"
+use "workfile.dta", clear
+erase "workfile.dta"
+*/ 
+
 keep if month!=month[_n+1] /* keep last day of month */
 tsset ym
 
@@ -211,6 +225,13 @@ reg r_MSFT r_SP500, robust
  
 * DAILY:Y
 use "$data_in/stock-prices-daily.dta",clear
+* Or download directly from OSF:
+/*
+copy "https://osf.io/download/de8uc/" "workfile.dta"
+use "workfile.dta", clear
+erase "workfile.dta"
+*/ 
+
 tsset date
 
 

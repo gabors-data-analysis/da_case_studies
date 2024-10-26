@@ -51,6 +51,13 @@ global output 	"$work/output"
 
 use "$data_in\originfinal-panel",replace
 
+* Or download directly from OSF:
+/*
+copy "https://osf.io/download/zw2h9/" "workfile.dta"
+use "workfile.dta", clear
+erase "workfile.dta"
+*/ 
+
 ***************************************************************************
 *   market = origin X final destination 
 *  (note final destination is:
@@ -260,6 +267,12 @@ save "$work/ch22-airline-trends",replace
 *	(keep matched ones; no unmatched from "using")
 
 use "$data_in\originfinal-panel",replace
+* Or download directly from OSF:
+/*
+copy "https://osf.io/download/zw2h9/" "workfile.dta"
+use "workfile.dta", clear
+erase "workfile.dta"
+*/ 
 merge m:1 origin finaldest return using "$work/ch22-airline-trends", keep(3) nogen
 
 gen yq=yq(year,quarter)

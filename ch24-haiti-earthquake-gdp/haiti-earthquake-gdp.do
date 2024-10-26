@@ -49,6 +49,13 @@ global temp 	"$work/temp"
 
 
 use "$data_in/haiti-earthquake-mod.dta", clear	
+* Or download directly from OSF:
+/*
+copy "https://osf.io/download/h5yjm/" "workfile.dta"
+use "workfile.dta", clear
+erase "workfile.dta"
+*/ 
+
 
 *donor pool based on threshold calculations below: it is those countries with incomethreshold=1, and a balanced panel for all variables	
 	gen dp=0

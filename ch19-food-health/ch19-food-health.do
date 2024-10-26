@@ -44,10 +44,14 @@ global work  	"ch19-food-health"
 cap mkdir 		"$work/output"
 global output 	"$work/output"
 
-
-
 * load clean data
 use "$data_in/food-health.dta", clear
+* Or download directly from OSF:
+/*
+copy "https://osf.io/download/wtybg/" "workfile.dta"
+use "workfile.dta", clear
+erase "workfile.dta"
+*/ 
 
 * simpler variable names
 * fruit and vegetables

@@ -53,7 +53,13 @@ global output 	"$work/output"
 * load in clean and tidy data and create workfile
 use "$data_in/hotels-vienna.dta", clear
 
+* Or download directly from OSF:
 
+/*
+copy "https://osf.io/download/dn8je/" "workfile.dta"
+use "workfile.dta", clear
+erase "workfile.dta"
+*/ 
 *** SAMPLE SELECTION
 
 *** 3 to 4-star hotels (incl 3.5 stars)

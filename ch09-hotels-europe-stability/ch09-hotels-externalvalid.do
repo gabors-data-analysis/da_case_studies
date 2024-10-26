@@ -50,6 +50,22 @@ global output 	"$work/output"
 * load in clean and tidy data and create workfile
 use "$data_in/hotels-europe_price", clear
 merge m:m hotel_id using "$data_in/hotels-europe_features.dta"
+
+* Or download directly from OSF:
+/*
+copy "https://osf.io/download/hz4gw/" "workfile.dta"
+use "workfile.dta", clear
+erase "workfile.dta"
+preserve
+	copy "https://osf.io/download/j9mkf/" "workfile.dta"
+	use "workfile.dta", clear
+	erase "workfile.dta"
+	tempfile hotels_features
+	save `hotels_features'
+restore
+merge m:m hotel_id using `hotels_features', nogen
+*/
+
 drop _m
 label var distance "Distance to city center, miles"
 

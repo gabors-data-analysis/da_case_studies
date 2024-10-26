@@ -51,6 +51,13 @@ global output 	"$work/output"
 ** IMPORT AND SELECT DATA
 use "$data_in/share-health.dta", clear
 
+* Or download directly from OSF:
+/*
+copy "https://osf.io/download/kdva8/" "workfile.csv"
+import delimited "workfile.csv"
+erase "workfile.csv"
+*/ 
+
 * create outcome
 gen healthy = sphus==1 | sphus==2 if sphus>0 & sphus<=5
 tab healthy,mis
