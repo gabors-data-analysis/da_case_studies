@@ -12,3 +12,5 @@ stargazer ==0.0.7
 syntheticcontrolmethods ==1.1.17
 ipykernel
 jupyter
+regex ==2024.9.11
+openpyxl ==3.1.5
