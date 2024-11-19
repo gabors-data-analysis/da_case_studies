@@ -521,6 +521,7 @@ dependencies:
       - pydotplus==2.0.2
       - pyhdfe==0.2.0
       - pyluach==2.2.0
+      - pysyncon==1.5.1
       - qdldl==0.1.7.post4
       - scikit-misc==0.5.1
       - scs==3.2.7
@@ -529,5 +530,4 @@ dependencies:
       - slicer==0.0.8
       - stanio==0.5.1
       - stargazer==0.0.7
-      - syntheticcontrolmethods==1.1.17
 prefix: /opt/anaconda3/envs/daenv
