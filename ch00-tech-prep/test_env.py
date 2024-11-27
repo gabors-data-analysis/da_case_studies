@@ -53,6 +53,7 @@ NOTEBOOKS = [
     "ch23-import-demand-and-production",
     "ch24-football-manager-replace",
     "ch24-haiti-earthquake-gdp",
+    "da_illustrations",
 ]
 
 notebook_files = []
