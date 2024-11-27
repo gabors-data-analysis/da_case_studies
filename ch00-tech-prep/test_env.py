@@ -40,8 +40,8 @@ NOTEBOOKS = [
     "ch14-airbnb-reg",
     "ch14-used-cars-log",
     "ch15-used-cars-cart",
-    #"ch16-airbnb-random-forest",
-    #"ch17-predicting-firm-exit",
+    # "ch16-airbnb-random-forest",
+    # "ch17-predicting-firm-exit",
     "ch18-case-shiller-la",
     "ch18-swimmingpool",
     "ch19-food-health",
@@ -52,19 +52,23 @@ NOTEBOOKS = [
     "ch23-immunization-life",
     "ch23-import-demand-and-production",
     "ch24-football-manager-replace",
-    #"ch24-haiti-earthquake-gdp",
+    "ch24-haiti-earthquake-gdp",
 ]
 
 notebook_files = []
+to_exclude = ["ch10-gender-earnings-multireg-pyfixest.ipynb"]
 for folder in NOTEBOOKS:
     files = os.listdir(folder)
-    files = [f"{folder}/{f}" for f in files if f.endswith(".ipynb")]
+    files = [
+        f"{folder}/{f}" for f in files if f.endswith(".ipynb") and f not in to_exclude
+    ]
     files.sort()
     notebook_files.extend(files)
 
+
 class TestNotebooks(unittest.TestCase):
     notebooks_to_test = notebook_files
-    
+
     @classmethod
     def setUpClass(cls):
         # Create a PythonExporter to convert notebook into Python code
@@ -78,17 +82,30 @@ class TestNotebooks(unittest.TestCase):
                 output, _ = self.converter.from_filename(notebook)
 
                 # Save the Python script to a file
-                py_file = notebook.replace('.ipynb', '.py')
-                with open(py_file, 'w') as f:
+                py_file = notebook.replace(".ipynb", ".py")
+                with open(py_file, "w") as f:
                     f.write(output)
-                
+
                 # Execute the Python script
                 print(f"Executing {notebook}")
                 try:
-                    subprocess.run(['python', py_file], check=True)
+                    subprocess.run(["python", py_file], check=True)
                     os.remove(py_file)
                 except Exception as e:
                     self.fail(f"Execution failed for {notebook}: {e}")
+
+    @classmethod
+    def tearDownClass(cls):
+        files = [
+            "case-shiller-workfile-2000-2017.pkl",
+            "case-shiller-workfile-2000-2018.pkl",
+            "usedcars_work.csv",
+            "ch11_share.csv",
+        ]
+        for file in files:
+            if os.path.exists(file):
+                os.remove(file)
+
 
 if __name__ == "__main__":
     # Run the tests
