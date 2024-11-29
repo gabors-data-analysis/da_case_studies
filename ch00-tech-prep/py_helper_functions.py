@@ -14,6 +14,26 @@ from plotnine import *
 ####################################################
 color = ["#3a5e8cFF", "#10a53dFF", "#541352FF", "#ffcf20FF", "#2f9aa0FF"]
 
+dark_gray = ".4"
+light_gray = ".8"
+
+da_theme = {
+    "axes.edgecolor": dark_gray,
+    "axes.facecolor": "white",
+    "axes.linewidth": 1,
+    "axes.spines.bottom": True,
+    "axes.spines.left": True,
+    "axes.spines.right": True,
+    "axes.spines.top": True,
+    "font.family": "sans-serif",
+    "grid.color": light_gray,
+    "grid.linestyle": "-",
+    "text.color": "black",
+    "xtick.bottom": True,
+    "xtick.color": dark_gray,
+    "ytick.color": dark_gray,
+}
+
 
 ####################################################
 # Define helper functions
