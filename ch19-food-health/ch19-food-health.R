@@ -52,7 +52,7 @@ create_output_if_doesnt_exist(output)
 
 
 # ------------------------------------------------------------------------------------------------------
-
+# !!! make sure you have run ch19-food-health.R before
 # import data
 data <- read_csv(paste0(data_in,"food-health.csv"))
 

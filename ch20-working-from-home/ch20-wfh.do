@@ -53,6 +53,13 @@ global output 	"$work/output"
 * so balance table is easier to make
 
 use "$data_in/wfh_tidy_person", clear
+* Or download directly from OSF:
+/*
+copy "https://osf.io/download/jrydb/" "workfile.dta"
+use "workfile.dta", clear
+erase "workfile.dta"
+*/ 
+
 order personid treatment ordertaker type quitjob phonecalls0 phonecalls1 ///
   perform10 perform11 age male second_techn high_school tertiary_tec university ///
   prior_experi tenure married children ageyoungestc rental costofcommut ///

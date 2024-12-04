@@ -34,8 +34,9 @@ global output 	"$work/output"
 
 clear
 set matsize 1000
-
-
+********************
+* !!! make sure you have run ch14_airbnb_prepare.do beforehand !!! 
+********************
 use "$work/airbnb_hackney_workfile.dta" , replace
 count
 keep if price<1000

@@ -46,6 +46,13 @@ global output 	"$work/output"
 * use full 11 season data table on games
 use "$data_in\epl_games.dta", clear
 
+* Or download directly from OSF:
+/*
+copy "https://osf.io/download/tyjp8/" "workfile.dta"
+use "workfile.dta", clear
+erase "workfile.dta"
+*/ 
+
 * sample design: keep one season
 keep if season == 2016
 

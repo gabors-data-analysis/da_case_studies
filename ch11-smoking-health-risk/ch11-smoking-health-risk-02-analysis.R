@@ -66,10 +66,10 @@ create_output_if_doesnt_exist(data_work)
 #-----------------------------------------------------------------------------------------
 
 # load work data
-#share <- read_csv(paste0(data_work,'share-health-filtered.csv'))
+share <- read_csv(paste0(data_work,'share-health-filtered.csv'))
 
 # load directly from OSF.io
-share <- read_csv("https://osf.io/3ze58/download")
+# share <- read_csv("https://osf.io/3ze58/download")
 share%>%nrow()
 
 # let us review the data

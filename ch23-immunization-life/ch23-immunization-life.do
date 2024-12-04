@@ -52,6 +52,12 @@ global output 	"$work/output"
 * info graph on measles vaccination continent aggregates
 
 use "$data_in/worldbank-immunization-continents.dta", clear
+* Or download directly from OSF:
+/*
+copy "https://osf.io/download/d9k6v/" "workfile.dta"
+use "workfile.dta", clear
+erase "workfile.dta"
+*/ 
 
 line imm* year, lw(. . . . . thick thick) ///
  lc(gs10 gs10 gs10 gs10 gs10 navy*0.8 green*0.6) ///
@@ -78,6 +84,12 @@ graph export "$output\ch23-figure-2b-tssurvival-Stata.png",replace
 
 clear
 use "$data_in/worldbank-immunization-panel.dta"
+* Or download directly from OSF:
+/*
+copy "https://osf.io/download/ku4fd/" "workfile.dta"
+use "workfile.dta", clear
+erase "workfile.dta"
+*/ 
 
 xtdes
 

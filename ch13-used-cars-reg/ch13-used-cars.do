@@ -48,6 +48,13 @@ global output 	"$work/output"
 
 
 use "$data_in/used-cars_2cities_prep.dta", clear
+* Or download directly from OSF:
+/*
+copy "https://osf.io/download/3zf8e/" "workfile.dta"
+use "workfile.dta", clear
+erase "workfile.dta"
+*/ 
+
 
 
 * Sample design

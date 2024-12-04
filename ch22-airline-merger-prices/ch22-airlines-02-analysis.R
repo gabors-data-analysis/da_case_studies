@@ -56,6 +56,10 @@ create_output_if_doesnt_exist(output)
 # I.  Examining pre-treatment trends in avg ln price
 #------------------------------
 
+
+
+# !!! make sure you have run ch22-airlines-01-dataprep.R before
+
 # workfile to identify treated and untreated markets
 data_work <- read_rds(paste0(data_out,"ch22-airline-workfile.rds")) %>%
   filter(balanced==1 & year == 2011) %>%

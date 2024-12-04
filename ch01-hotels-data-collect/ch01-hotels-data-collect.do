@@ -44,6 +44,15 @@ global output 	"$work/output"
 
 * load in clean and tidy data and create workfile
 use "$data_in/hotels-vienna.dta", clear
+
+* Or download directly from OSF:
+
+/*
+copy "https://osf.io/download/dn8je/" "workfile.dta"
+use "workfile.dta", clear
+erase "workfile.dta"
+*/ 
+
 order hotel_id accommodation_type country city city_actual neighbourhood center1label distance center2label distance_alter stars rating rating_count ratingta ratingta_count year month weekend holiday nnights price scarce_room offer offer_cat
 sum
 

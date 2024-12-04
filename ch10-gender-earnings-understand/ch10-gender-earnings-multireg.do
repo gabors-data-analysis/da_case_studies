@@ -46,7 +46,12 @@ global output 	"$work/output"
 
 clear
 use "$data_in/morg-2014-emp.dta"
-count
+* Or download directly from OSF:
+/*
+copy "https://osf.io/download/rtmga/" "workfile.dta"
+use "workfile.dta", clear
+erase "workfile.dta"
+*/ 
 
 count
 

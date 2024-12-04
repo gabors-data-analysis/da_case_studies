@@ -49,6 +49,16 @@ global output 	"$work/output"
 *** IMPORT DATA
 use "$data_in/worldbank-lifeexpectancy.dta", clear
 
+* Or download directly from OSF:
+/*
+copy "https://osf.io/download/vxc67/" "workfile.dta"
+use "workfile.dta", clear
+erase "workfile.dta"
+*/ 
+
+*** SAMPLE SELECTION
+
+
 
 keep if year==2017
 count

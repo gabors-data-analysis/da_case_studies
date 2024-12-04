@@ -45,6 +45,14 @@ global output 	"$work/output"
 *********************************************************************
 * look at entire clean data table on games
 use "$data_in/epl_games.dta",clear
+
+* Or download directly from OSF:
+/*
+copy "https://osf.io/download/tyjp8/" "workfile.dta"
+use "workfile.dta", clear
+erase "workfile.dta"
+*/ 
+
 sort team_home
 sort season  team_home
 keep if season == 2016
@@ -52,6 +60,14 @@ browse
 
 * look at data for team-game level
 use "$data_in/epl_teams_games.dta",clear
+
+* Or download directly from OSF:
+/*
+copy "https://osf.io/download/qzvx7/" "workfile.dta"
+use "workfile.dta", clear
+erase "workfile.dta"
+*/
+
 sort team
 sort season  team
 keep if season == 2016
@@ -60,10 +76,26 @@ browse
 
 * look at data table on managers
 use "$data_in/football-managers.dta", clear
+
+* Or download directly from OSF:
+/*
+copy "https://osf.io/download/w6uph/" "workfile.dta"
+use "workfile.dta", clear
+erase "workfile.dta"
+*/
+
 browse
 
 * look at the clean merged file 
 use "$data_in/football-managers-workfile.dta", clear
+
+* Or download directly from OSF:
+/*
+copy "https://osf.io/download/hycmg/" "workfile.dta"
+use "workfile.dta", clear
+erase "workfile.dta"
+*/
+
 sort season team
 browse
 

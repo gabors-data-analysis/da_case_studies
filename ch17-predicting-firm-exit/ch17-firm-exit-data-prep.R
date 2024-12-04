@@ -75,6 +75,8 @@ create_output_if_doesnt_exist(output)
 ###########################################################
 
 data <- read_csv(paste(data_in,"cs_bisnode_panel.csv", sep = "/"))
+#data <- read_csv("https://osf.io/download/3qyut/")
+
 
 # drop variables with many NAs
 data <- data %>%

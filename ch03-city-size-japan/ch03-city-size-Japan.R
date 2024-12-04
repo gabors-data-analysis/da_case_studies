@@ -48,6 +48,7 @@ create_output_if_doesnt_exist(output)
 #-----------------------------------------------------------------------------------------
 # import data
 city_size <- read_csv(paste0(data_in, "city-size-japan.csv"))
+# city_size <- read_csv("https://osf.io/download/9mgep/")
 Hmisc::describe(city_size)
 # create variables
 

@@ -77,6 +77,7 @@ create_output_if_doesnt_exist(output)
 # THIS IS THE SECOND PART OF THE ch17 CODE
 # USES INTERMEDIATE OUTPUT by ch17-firm-exit-data-prep.R
 
+# !!! make sure you have run ch17-firm-exit-data-prep.R before
 
 # Loading and preparing data ----------------------------------------------
 

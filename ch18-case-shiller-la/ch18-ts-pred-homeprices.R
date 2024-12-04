@@ -74,6 +74,7 @@ get_MSE_from_forecast <- function(forecast, groupby = c(".id", ".model")){
 #load raw data
 
 data <- read_csv(paste0(data_in,"homeprices-data-2000-2018.csv"))
+data <- read_csv("https://osf.io/download/n3jty/")
 
 # 18 years data
 # 1 year holdout

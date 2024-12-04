@@ -64,6 +64,7 @@ create_output_if_doesnt_exist(output)
  
  # DATA IMPORT
  data <- read.csv(paste0(data_in,"used-cars_2cities_prep.csv"), stringsAsFactors = TRUE)
+ # data <- read.csv( 'https://osf.io/7gvz9/download', stringsAsFactors = TRUE)
  
  # SAMPLE DESIGN
  

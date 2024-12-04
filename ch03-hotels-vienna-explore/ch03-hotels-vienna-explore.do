@@ -45,7 +45,13 @@ global output 	"$work/output"
 
 * load in clean and tidy data and create workfile
 use "$data_in/hotels-vienna.dta", clear
+* Or download directly from OSF:
 
+/*
+copy "https://osf.io/download/dn8je/" "workfile.dta"
+use "workfile.dta", clear
+erase "workfile.dta"
+*/ 
 
 * DISTRIBUTIONS
 
@@ -86,6 +92,14 @@ hist stars , ///
 * Price
 
  use "$data_in/hotels-vienna.dta", clear
+ * Or download directly from OSF:
+
+/*
+copy "https://osf.io/download/dn8je/" "workfile.dta"
+use "workfile.dta", clear
+erase "workfile.dta"
+*/ 
+
 * sample design
 * KEEP hotels in Vienna, stars 3 to 4
 * DROP observation with erroneous price variable (price>1000)
