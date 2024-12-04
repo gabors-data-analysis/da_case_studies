@@ -26,6 +26,7 @@ da_theme = {
     "axes.spines.right": True,
     "axes.spines.top": True,
     "font.family": "sans-serif",
+    "figure.figsize": (7, 5.5),
     "grid.color": light_gray,
     "grid.linestyle": "-",
     "text.color": "black",
@@ -487,6 +488,7 @@ def add_margin(ax, x=0.05, y=0.05) -> None:
 
     ax.set_xlim(xlim[0] - xmargin, xlim[1] + xmargin)
     ax.set_ylim(ylim[0] - ymargin, ylim[1] + ymargin)
+
 
 def pool_and_categorize_continuous_variable(
     series: pd.Series, pools: List[tuple], categories: list, closed: str = "left"
