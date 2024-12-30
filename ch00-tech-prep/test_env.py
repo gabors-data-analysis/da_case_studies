@@ -46,7 +46,6 @@ NOTEBOOKS = [
     "ch17-predicting-firm-exit/ch17-firm-exit-data-prep.ipynb",
     # "ch17-predicting-firm-exit/ch17-predicting-firm-exit.ipynb",
     "ch18-case-shiller-la/ch18-ts-pred-homeprices.ipynb",
-    "ch18-swimmingpool/ch18-swimmingpool-predict copy.ipynb",
     "ch18-swimmingpool/ch18-swimmingpool-predict.ipynb",
     "ch19-food-health/ch19-food-health.ipynb",
     "ch19-food-health/ch19_food-health-maker.ipynb",
