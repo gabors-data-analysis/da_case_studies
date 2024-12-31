@@ -65,47 +65,33 @@ def skew(l: npt.ArrayLike, round_n=3) -> float:
     return round((np.mean(l) - np.median(l)) / np.std(l), round_n)
 
 
-def knot_ceil(vector: np.array, knot: float) -> np.array:
-    vector_copy = copy.deepcopy(vector)
-    vector_copy[vector_copy > knot] = knot
-    return vector_copy
-
-
 def lspline(series: pd.Series, knots: List[float]) -> np.array:
-    """
-    Function to create design matrix to esitmate a piecewise
-    linear spline regression.
+    """Generate a linear spline design matrix for the input series based on knots.
 
-       Parameters
+    Parameters
     ----------
     series : pd.Series
-        Your variable in a pandas Series.
+        The input series to generate the design matrix for.
     knots : List[float]
-        The knots, that result in n + 1 line segments.
-    """
+        The list of knots to use for the linear spline.
 
-    if type(knots) != list:
-        knots = [knots]
-    design_matrix = None
+    Returns
+    -------
+    np.array
+        The design matrix for the linear spline."""
     vector = series.values
+    columns = []
 
-    for i in range(len(knots)):
-        # print(i)
-        # print(vector)
-        if i == 0:
-            column = knot_ceil(vector, knots[i])
-        else:
-            column = knot_ceil(vector, knots[i] - knots[i - 1])
-        # print(column)
-        if i == 0:
-            design_matrix = column
-        else:
-            design_matrix = np.column_stack((design_matrix, column))
-        # print(design_matrix)
+    for i, knot in enumerate(knots):
+        column = np.minimum(vector, knot if i == 0 else knot - knots[i - 1])
+        columns.append(column)
         vector = vector - column
-    design_matrix = np.column_stack((design_matrix, vector))
-    # print(design_matrix)
-    return design_matrix
+
+    # Add the remainder as the last column
+    columns.append(vector)
+
+    # Combine columns into a design matrix
+    return np.column_stack(columns)
 
 
 def create_calibration_plot(
