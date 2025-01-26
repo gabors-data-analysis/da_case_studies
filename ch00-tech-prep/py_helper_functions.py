@@ -14,6 +14,27 @@ from plotnine import *
 ####################################################
 color = ["#3a5e8cFF", "#10a53dFF", "#541352FF", "#ffcf20FF", "#2f9aa0FF"]
 
+dark_gray = ".4"
+light_gray = ".8"
+
+da_theme = {
+    "axes.edgecolor": dark_gray,
+    "axes.facecolor": "white",
+    "axes.linewidth": 1,
+    "axes.spines.bottom": True,
+    "axes.spines.left": True,
+    "axes.spines.right": True,
+    "axes.spines.top": True,
+    "font.family": "sans-serif",
+    "figure.figsize": (7, 5.5),
+    "grid.color": light_gray,
+    "grid.linestyle": "-",
+    "text.color": "black",
+    "xtick.bottom": True,
+    "xtick.color": dark_gray,
+    "ytick.color": dark_gray,
+}
+
 
 ####################################################
 # Define helper functions
@@ -44,47 +65,33 @@ def skew(l: npt.ArrayLike, round_n=3) -> float:
     return round((np.mean(l) - np.median(l)) / np.std(l), round_n)
 
 
-def knot_ceil(vector: np.array, knot: float) -> np.array:
-    vector_copy = copy.deepcopy(vector)
-    vector_copy[vector_copy > knot] = knot
-    return vector_copy
-
-
 def lspline(series: pd.Series, knots: List[float]) -> np.array:
-    """
-    Function to create design matrix to esitmate a piecewise
-    linear spline regression.
+    """Generate a linear spline design matrix for the input series based on knots.
 
-       Parameters
+    Parameters
     ----------
     series : pd.Series
-        Your variable in a pandas Series.
+        The input series to generate the design matrix for.
     knots : List[float]
-        The knots, that result in n + 1 line segments.
-    """
+        The list of knots to use for the linear spline.
 
-    if type(knots) != list:
-        knots = [knots]
-    design_matrix = None
+    Returns
+    -------
+    np.array
+        The design matrix for the linear spline."""
     vector = series.values
+    columns = []
 
-    for i in range(len(knots)):
-        # print(i)
-        # print(vector)
-        if i == 0:
-            column = knot_ceil(vector, knots[i])
-        else:
-            column = knot_ceil(vector, knots[i] - knots[i - 1])
-        # print(column)
-        if i == 0:
-            design_matrix = column
-        else:
-            design_matrix = np.column_stack((design_matrix, column))
-        # print(design_matrix)
+    for i, knot in enumerate(knots):
+        column = np.minimum(vector, knot if i == 0 else knot - knots[i - 1])
+        columns.append(column)
         vector = vector - column
-    design_matrix = np.column_stack((design_matrix, vector))
-    # print(design_matrix)
-    return design_matrix
+
+    # Add the remainder as the last column
+    columns.append(vector)
+
+    # Combine columns into a design matrix
+    return np.column_stack(columns)
 
 
 def create_calibration_plot(
@@ -467,3 +474,38 @@ def add_margin(ax, x=0.05, y=0.05) -> None:
 
     ax.set_xlim(xlim[0] - xmargin, xlim[1] + xmargin)
     ax.set_ylim(ylim[0] - ymargin, ylim[1] + ymargin)
+
+
+def pool_and_categorize_continuous_variable(
+    series: pd.Series, pools: List[tuple], categories: list, closed: str = "left"
+):
+    """
+    Categorize a continuous variable based on defined intervals (pools) and corresponding categories.
+
+    Parameters:
+    series (pd.Series): The input series with continuous values to categorize.
+    pools (list of tuples): A list of tuples representing the (min, max) values for each interval.
+    categories (list): A list of categories corresponding to each interval in `pools`.
+    closed (str): Indicates whether the intervals are closed on the 'left', 'right', 'both', or 'neither' sides.
+
+    Returns:
+    pd.Series: A series with categorized values based on the provided intervals and categories.
+
+    Raises:
+    ValueError: If the number of pools does not match the number of categories.
+    """
+
+    # Validate inputs
+    if len(pools) != len(categories):
+        raise ValueError("The number of pools and categories must be the same.")
+
+    # Create bins using IntervalIndex from pools
+    bins = pd.IntervalIndex.from_tuples(pools, closed=closed)
+
+    # Perform the cut operation and map the intervals to categories
+    categories_cut = pd.cut(series, bins=bins)
+    categories_map = {
+        interval: category for interval, category in zip(bins, categories)
+    }
+
+    return categories_cut.map(categories_map)
