@@ -101,9 +101,7 @@ ols3 <- feols(formula3, data=data)
 
 etable( ols1,ols2,ols3,
         fitstat = c('n','r2'),
-        keep = c(x_var, "Constant"),
-        order = c(x_var, "Constant"),
-        dict = c("(Intercept)" = "Constant"),
+        keep = c('Constant',x_var),
         headers = c("'no confounders'", "'with confounders'", "'with confounders interacted'"),
         depvar = F )
 
@@ -246,7 +244,7 @@ ATET_PSME2_SE <- out2$se[2]
 # * CHECK common support
 # ***************************************************************** 
 
-# Country, competition, industry
+# Country, cometition, industry
 c1 <- CrossTable(data$foundfam_owned, data$compet_moder, na.rm=T )
 c2 <- CrossTable(data$foundfam_owned, data$compet_strong, na.rm=T)
 
