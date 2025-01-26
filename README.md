@@ -13,7 +13,7 @@ On the [textbook's website]((https://gabors-data-analysis.com/)), we have detail
 To see options for various languages, check out:
 1. **R** --  [How to run code in R ](https://gabors-data-analysis.com/howto-r/)
 2. **Stata** -- [How to run code in Stata ](https://gabors-data-analysis.com/howto-stata/)
-3. **Python** -- [How to run code in Python ](https://gabors-data-analysis.com/howto-python/) 
+3. **Python** -- [How to run code in Python ](https://gabors-data-analysis.com/howto-python/) [OUTDATED]
 
 
 ## Status (25 November, 2022)
@@ -30,7 +30,7 @@ In the latest release we did some refactoring re Python and R codes. We continuo
 ## Code language versions
 1. **R** -- We used R 4.0.2. 
 2. **Stata** -- We used version 15, allmost all code should work in version 13 up.
-3. **Python** -- We used Python 3.8.0.
+3. **Python** -- We used Python 3.12.0.
 
 ## Get data
 Data is hosted on OSF.io

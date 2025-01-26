@@ -15,6 +15,7 @@
 __pycache__/
 .ipynb_checkpoints/
 .ipynb_checkpoints
+.virtual_documents/
 set-data-directory.do
 set-data-directory.R
 renv/
