@@ -8,6 +8,7 @@ import numpy as np
 import numpy.typing as npt
 import pandas as pd
 from plotnine import *
+import matplotlib.pyplot as plt
 
 ####################################################
 # Define global vars
@@ -93,6 +94,25 @@ def lspline(series: pd.Series, knots: List[float]) -> np.array:
     # Combine columns into a design matrix
     return np.column_stack(columns)
 
+def plot_loess(data: pd.DataFrame, x: str, y: str, span: float, color: str = color[1]):
+    """
+    Plots a LOESS (Locally Estimated Scatterplot Smoothing) curve for the given data.
+    Parameters:
+    data (pd.DataFrame): The input data as a pandas DataFrame.
+    x (str): The column name of the independent variable in the DataFrame.
+    y (str): The column name of the dependent variable in the DataFrame.
+    span (float): The span parameter for the LOESS model, controlling the degree of smoothing.
+    """
+
+    from skmisc.loess import loess
+
+    data = data.copy(deep=True)
+
+    loess_pred = loess(data[x], data[y], span=span)
+    loess_pred.fit()
+    x_plot = np.linspace(data[x].min(), data[x].max(), 1000)
+    y_plot = loess_pred.predict(x_plot, stderror=False).values
+    plt.plot(x_plot, y_plot, color=color, linewidth=2)
 
 def create_calibration_plot(
     data: pd.DataFrame,
