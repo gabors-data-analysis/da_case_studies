@@ -94,6 +94,7 @@ def lspline(series: pd.Series, knots: List[float]) -> np.array:
     # Combine columns into a design matrix
     return np.column_stack(columns)
 
+
 def plot_loess(data: pd.DataFrame, x: str, y: str, span: float, color: str = color[1]):
     """
     Plots a LOESS (Locally Estimated Scatterplot Smoothing) curve for the given data.
@@ -113,6 +114,7 @@ def plot_loess(data: pd.DataFrame, x: str, y: str, span: float, color: str = col
     x_plot = np.linspace(data[x].min(), data[x].max(), 1000)
     y_plot = loess_pred.predict(x_plot, stderror=False).values
     plt.plot(x_plot, y_plot, color=color, linewidth=2)
+
 
 def create_calibration_plot(
     data: pd.DataFrame,
@@ -529,3 +531,73 @@ def pool_and_categorize_continuous_variable(
     }
 
     return categories_cut.map(categories_map)
+
+
+from io import StringIO
+from IPython.display import Image, display
+from sklearn.tree import export_graphviz, DecisionTreeRegressor
+import pydotplus
+
+
+def plot_decision_tree(model, **kwargs):
+    dot_data = StringIO()
+    export_graphviz(model, dot_data, **kwargs)
+    graph = pydotplus.graph_from_dot_data(dot_data.getvalue())
+    display(Image(graph.create_png()))
+
+
+def plot_model_predictions(
+    model, df, x_col: str, y_col: str, resolution=100, color=color[1]
+):
+    """
+    Plots a scatterplot of data and overlays model predictions.
+
+    - Uses horizontal stepwise predictions for DecisionTree-based models.
+    - Uses a smooth line for continuous models (e.g., OLS, Logit).
+
+    Parameters:
+    - model: A fitted model with `.predict()`.
+    - df: Pandas DataFrame containing the data.
+    - x_col: Name of the predictor variable (e.g., "Age").
+    - y_col: Name of the target variable (e.g., "Price").
+    - color: Color for the prediction line/steps.
+    - resolution: Number of points for smooth predictions.
+    """
+    # Scatter plot
+    plt.figure(figsize=(8, 6))
+    sns.scatterplot(data=df, x=x_col, y=y_col, alpha=0.6)
+
+    # Generate sorted unique x values
+    x_vals = np.linspace(df[x_col].min(), df[x_col].max(), resolution).reshape(-1, 1)
+    x_vals_df = pd.DataFrame(x_vals, columns=[x_col])
+    y_preds = model.predict(x_vals_df)
+
+    # Decision Tree: Draw only horizontal lines
+    if isinstance(model, DecisionTreeRegressor):
+        for i in range(len(x_vals) - 1):
+            plt.hlines(
+                y=y_preds[i],
+                xmin=x_vals[i],
+                xmax=x_vals[i + 1],
+                colors=color,
+                linewidth=2,
+            )
+        # Extend last step to the max x value
+        plt.hlines(
+            y=y_preds[-1],
+            xmin=x_vals[-1],
+            xmax=df[x_col].max(),
+            colors=color,
+            linewidth=2,
+        )
+
+    else:
+        plt.plot(x_vals, y_preds, color=color, linewidth=2)
+
+    plt.xlim(0, 26)
+    plt.xticks(range(0, 26, 5))
+    plt.ylim(0, 20000)
+    plt.yticks(range(0, 20001, 2500))
+    plt.xlabel("Age (years)")
+    plt.ylabel("Price (US dollars)")
+    plt.show()
