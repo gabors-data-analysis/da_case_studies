@@ -601,3 +601,93 @@ def plot_model_predictions(
     plt.xlabel("Age (years)")
     plt.ylabel("Price (US dollars)")
     plt.show()
+
+
+import sklearn
+import seaborn as sns
+import matplotlib.ticker as mticker
+import math
+import shap
+
+
+def plot_variable_importance(
+    data: pd.DataFrame,
+    x: str = "imp_percentage",
+    y: str = "varname",
+    title: str | None = None,
+):
+    data = data.sort_values(by=x, ascending=False)
+
+    sns.scatterplot(data=data, x=x, y=y, s=60)
+
+    # Add horizontal lines from 0 to imp_percentage
+    for _, row in data.iterrows():
+        plt.hlines(y=row[y], xmin=0, xmax=row[x], linewidth=2.5)
+    xtick_max = data[x].max()
+    if xtick_max > 0.2:
+        xtick_diff = 0.1
+    else:
+        xtick_diff = 0.05
+    plt.xticks(np.arange(0, xtick_max, xtick_diff))
+    plt.gca().xaxis.set_major_formatter(mticker.PercentFormatter(xmax=1, decimals=0))
+    plt.title(title)
+    plt.xlabel("Importance (Percent)")
+    plt.ylabel("Variable Name")
+    plt.show()
+
+
+def plot_partial_dependence(
+    model: sklearn.base.BaseEstimator, data: pd.DataFrame, variable: str, varlabel: str
+):
+
+    pdp_results = sklearn.inspection.partial_dependence(
+        model, data, [variable], kind="average"
+    )
+
+    pdp_results = pd.DataFrame(
+        [pdp_results["average"][0], pdp_results["values"][0]],
+        index=["average", "values"],
+    ).T
+
+    if pdp_results["values"].dtype == "object":
+        linestyle = "none"
+    else:
+        linestyle = "-"
+
+    sns.pointplot(
+        data=pdp_results, x="values", y="average", scale=0.8, linestyle=linestyle
+    )
+    ymax = math.ceil(pdp_results["average"].max() / 10) * 10
+    ymin = math.floor(pdp_results["average"].min() / 10) * 10
+    plt.ylim(ymin, ymax)
+    plt.yticks(np.arange(ymin, ymax + 1, 10))
+    plt.grid(axis="x", linestyle="-", alpha=0.7)
+    plt.xlabel(varlabel)
+    plt.ylabel("Predicted price")
+    plt.show()
+
+
+def plot_shap_interactions(features: tuple[str, str], shap_values: shap.Explanation):
+    fig, axes = plt.subplots(
+        1, len(features), figsize=(5 * len(features), 4), sharey=True
+    )
+    fig.suptitle(
+        f"SHAP values and best proposed interaction for {', '.join(label for _, label in features)}",
+        fontsize=15,
+    )
+
+    for ax, (feature, label) in zip(axes, features):
+        shap.plots.scatter(
+            shap_values[:, feature],
+            color=shap_values,
+            show=False,
+            cmap=plt.get_cmap("viridis_r"),
+            ax=ax,
+        )
+        ax.set_xlabel(label)
+        ax.set_xlim(-0.2, 1.2)
+        ax.set_xticks([0, 1], labels=[0, 1])
+        ax.set_ylabel(None)
+
+    axes[0].set_ylabel("SHAP values")
+    plt.show()
