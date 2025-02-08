@@ -210,68 +210,64 @@ def poly(x: npt.ArrayLike, degree=1) -> pd.DataFrame:
     return pd.DataFrame(d)
 
 
-def price_diff_by_variables(
-    df: pd.DataFrame, factor_var: str, dummy_var: str, factor_lab: str, dummy_lab: str
-) -> ggplot:
+def plot_bar(
+    df: pd.DataFrame,
+    x: str,
+    y: str,
+    hue: str,
+    ax: plt.Axes,
+    errorbar: str = "se",
+    legend_title: str | None = None,
+):
     """
-    Price difference by selected factor and dummy variables.
-
-    This function creates a barplots looking for interactions.
-    Used in `ch14-airbnb-prediction.ipynb`.
-
-        Parameters
-    ----------
-    df : pd.DataFrame
-        Your dataframe.
-    factor_var : str
-        Your factor variable (like room_type).
-    dummy_var : str
-        The dummy variable you are interested in (like TV).
-    factor_lab : str
-        The label on the final plot for the `factor_var`.
-    dummy_lab : str
-        The label on the final plot for the `dummy_var`.
+    Plot interaction between two variables using a bar plot.
     """
-
-    stats = df.groupby([factor_var, dummy_var]).agg(
-        Mean=("price", np.mean), sd=("price", np.std), size=("price", "size")
+    sns.barplot(
+        x=x,
+        y=y,
+        hue=hue,
+        data=df,
+        ax=ax,
+        errorbar=errorbar,
+        capsize=0.1,
+        err_kws={"linewidth": 2},
     )
-    stats["se"] = stats["sd"] / stats["size"] ** (1 / 2)
-    stats["Mean_l"] = stats["Mean"] - (1.96 * stats["se"])
-    stats["Mean_u"] = stats["Mean"] + (1.96 * stats["se"])
-    stats = stats.drop(["sd", "size"], axis=1).reset_index()
 
-    return (
-        ggplot(
-            stats,
-            aes(
-                stats.columns[0],
-                stats.columns[2],
-                fill="factor(" + stats.columns[1] + ")",
-            ),
+    ax.set_ylabel("Mean Price")
+    ax.set_title(None)
+    if legend_title:
+        ax.legend(title=legend_title)
+
+    ax.set_xlabel("")
+    sns.despine(ax=ax, left=True, bottom=True)
+    ax.tick_params(left=False)
+    ax.yaxis.labelpad = 10
+
+
+def plot_interactions(df, plot_config):
+    """
+    Plot for interactions between different variables.
+
+    Args:
+        df (pd.DataFrame): The input DataFrame containing the data.
+        plot_config (list of dict): List containing plot configurations. Each dict contains the necessary columns and plot settings.
+    """
+    fig, axes = plt.subplots(3, 2, figsize=(10, 15))
+
+    for idx, config in enumerate(plot_config):
+        row = idx // 2
+        col = idx % 2
+        plot_bar(
+            df,
+            x=config["x"],
+            y=config["y"],
+            hue=config["hue"],
+            ax=axes[row, col],
+            errorbar=config.get("errorbar", "se"),
+            legend_title=config.get("legend_title", ""),
         )
-        + geom_bar(stat="identity", position=position_dodge(width=0.9))
-        + geom_errorbar(
-            aes(ymin="Mean_l", ymax="Mean_u"),
-            position=position_dodge(width=0.9),
-            width=0.25,
-        )
-        + scale_color_manual(name=dummy_lab, values=(color[1], color[0]))
-        + scale_fill_manual(name=dummy_lab, values=(color[1], color[0]))
-        + ylab("Mean Price")
-        + xlab(factor_lab)
-        + theme_bw()
-        + theme(
-            panel_grid_major=element_blank(),
-            panel_grid_minor=element_blank(),
-            panel_border=element_blank(),
-            axis_line=element_line(),
-            legend_position="top",
-            legend_box="vertical",
-            legend_text=element_text(size=5),
-            legend_title=element_text(size=5, face="bold"),
-        )
-    )
+
+    plt.show()
 
 
 import statsmodels.formula.api as smf
