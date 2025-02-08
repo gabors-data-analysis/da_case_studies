@@ -540,16 +540,16 @@ dependencies:
       - lime==0.2.0.1
       - linearmodels==6.0
       - mizani==0.9.3
+      - narwhals==1.19.1
       - osqp==0.6.7.post1
       - palettable==3.3.3
       - pandas-market-calendars==4.4.1
-      - patchworklib==0.6.4
       - plotnine==0.12.4
       - pmdarima==2.0.4
       - polars==1.15.0
       - prophet==1.1.5
       - pydotplus==2.0.2
-      - pyfixest==0.26.2
+      - pyfixest==0.27.0
       - pyhdfe==0.2.0
       - pyluach==2.2.0
       - pypng==0.20220715.0
