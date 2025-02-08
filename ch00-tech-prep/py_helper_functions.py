@@ -1,13 +1,11 @@
 ####################################################
 # Import packages
 ####################################################
-import copy
 from typing import List
 
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
-from plotnine import *
 import matplotlib.pyplot as plt
 
 ####################################################
@@ -42,7 +40,7 @@ da_theme = {
 ####################################################
 def seq(start: float, stop: float, by: float, round_n=3) -> list:
     """
-    Custom function, used for setting the breaks of plotnine scales.
+    Custom function, used for setting the breaks of scales.
 
        Parameters
     ----------
