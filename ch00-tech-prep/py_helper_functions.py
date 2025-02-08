@@ -107,7 +107,7 @@ def plot_loess(data: pd.DataFrame, x: str, y: str, span: float, color: str = col
 
     from skmisc.loess import loess
 
-    data = data.copy(deep=True)
+    data = data.dropna(subset=[x]).copy(deep=True)
 
     loess_pred = loess(data[x], data[y], span=span)
     loess_pred.fit()
@@ -118,7 +118,6 @@ def plot_loess(data: pd.DataFrame, x: str, y: str, span: float, color: str = col
 
 def create_calibration_plot(
     data: pd.DataFrame,
-    file_name: str,
     prob_var: str,
     actual_var: str,
     y_lab="Actual event probability",
@@ -135,8 +134,6 @@ def create_calibration_plot(
         Your dataframe, containing the actual outcome and
         the predicted probabilities of that outcome
         by a model.
-    file_name : str
-        Filename to save. NOTE: this is note used for now.
     prob_var : str
         Name of the variable, containin predicted
         probabilities.
@@ -170,25 +167,23 @@ def create_calibration_plot(
         .reset_index()
     )
 
-    return (
-        ggplot(binned_data, aes("mean_prob", "mean_actual"))
-        + geom_line(color=color[0], size=1, show_legend=True)
-        + geom_point(color=color[0], size=1, alpha=0.7, show_legend=False, na_rm=True)
-        + geom_segment(
-            x=min(breaks),
-            xend=max(breaks),
-            y=min(breaks),
-            yend=max(breaks),
-            color=color[1],
-            size=0.5,
-        )
-        + theme_bw()
-        + labs(x="Predicted event probability", y=y_lab)
-        + coord_cartesian(xlim=(0, 1), ylim=(0, 1))
-        + expand_limits(x=0.01, y=0.01)
-        + scale_y_continuous(expand=(0.01, 0.01), breaks=(seq(0, 1.1, 0.1)))
-        + scale_x_continuous(expand=(0.01, 0.01), breaks=(seq(0, 1.1, 0.1)))
+    sns.lineplot(
+        data=binned_data, x="mean_prob", y="mean_actual", color=color[0], linewidth=1.5
     )
+
+    # Scatter plot with transparency
+    sns.scatterplot(data=binned_data, x="mean_prob", y="mean_actual", s=30, alpha=1)
+
+    # Adding a diagonal line
+    plt.plot([0, 1], [0, 1], color=color[1], linewidth=0.5)
+
+    plt.xlabel("Predicted event probability")
+    plt.ylabel(y_lab)
+    plt.xlim(0, 1.01)
+    plt.ylim(0, 1.01)
+    plt.xticks(np.arange(0, 1.1, 0.1))
+    plt.yticks(np.arange(0, 1.1, 0.1))
+    plt.show()
 
 
 def poly(x: npt.ArrayLike, degree=1) -> pd.DataFrame:
