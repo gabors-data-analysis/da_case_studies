@@ -63,6 +63,24 @@ def seq(start: float, stop: float, by: float, round_n=3) -> list:
 def skew(l: npt.ArrayLike, round_n=3) -> float:
     return round((np.mean(l) - np.median(l)) / np.std(l), round_n)
 
+def tabulate(series, drop_missing=False):
+    table = (
+        pd.concat(
+            [
+                series.value_counts(dropna=drop_missing)
+                .sort_index()
+                .round(2)
+                .rename("Freq."),
+                series.value_counts(normalize=True, dropna=drop_missing)
+                .sort_index()
+                .rename("Perc."),
+            ],
+            axis=1,
+        )
+        .assign(Cum=lambda x: x["Perc."].cumsum())
+        .round(3)
+    )
+    return table
 
 def lspline(series: pd.Series, knots: List[float]) -> np.array:
     """Generate a linear spline design matrix for the input series based on knots.
