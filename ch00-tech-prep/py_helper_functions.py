@@ -82,6 +82,27 @@ def tabulate(series, drop_missing=False):
     )
     return table
 
+import statsmodels.api as sm
+
+def bs_linreg(x, y, size=1, seed=200999):
+    """Perform pairs bootstrap for linear regression."""
+    # Set up array of indices to sample from
+    inds = np.arange(len(x))
+
+    # Initialize samples
+    bs_slope_reps = np.empty(size)
+    bs_intercept_reps = np.empty(size)
+    rng = np.random.default_rng(seed)
+    # Take samples
+    for i in range(size):
+        bs_inds = rng.choice(inds, len(inds), replace=True)
+        bs_x, bs_y = sm.add_constant(x[bs_inds]), y[bs_inds]
+        bs_slope_reps[i], bs_intercept_reps[i] = (
+            sm.regression.linear_model.OLS(bs_y, bs_x).fit().params
+        )
+
+    return bs_slope_reps, bs_intercept_reps
+
 def lspline(series: pd.Series, knots: List[float]) -> np.array:
     """Generate a linear spline design matrix for the input series based on knots.
 
