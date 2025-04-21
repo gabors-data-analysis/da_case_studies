@@ -529,7 +529,7 @@ dependencies:
       - cython==3.0.11
       - ecos==2.0.14
       - exchange-calendars==4.5.6
-      - formulaic==1.0.2
+      - formulaic==1.1.1
       - great-tables==0.14.0
       - holidays==0.56
       - htmltools==0.6.0
@@ -549,7 +549,7 @@ dependencies:
       - polars==1.15.0
       - prophet==1.1.5
       - pydotplus==2.0.2
-      - pyfixest==0.27.0
+      - pyfixest==0.29.0
       - pyhdfe==0.2.0
       - pyluach==2.2.0
       - pypng==0.20220715.0
