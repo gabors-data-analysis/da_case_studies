@@ -41,7 +41,6 @@ NOTEBOOKS = [
     "ch14-used-cars-log/ch14-used-cars-log.ipynb",
     "ch15-used-cars-cart/ch15-used-cars-cart.ipynb",
     "ch16-airbnb-random-forest/ch16-airbnb-prepare-london.ipynb",
-    # "ch16-airbnb-random-forest/ch16-airbnb-random-forest-shap.ipynb",
     # "ch16-airbnb-random-forest/ch16-airbnb-random-forest.ipynb",
     "ch17-predicting-firm-exit/ch17-firm-exit-data-prep.ipynb",
     # "ch17-predicting-firm-exit/ch17-predicting-firm-exit.ipynb",
