@@ -44,6 +44,101 @@ output <- paste0(use_case_dir,"output/")
 create_output_if_doesnt_exist(output)
 
 
+# CHAPTER 03
+
+# Import data
+data_in <- paste(data_dir,"wms-management-survey","clean/", sep = "/")
+df <- read_csv(paste0(data_in,"wms_da_textbook.csv"))
+
+# Sample selection and creation of employment bins
+df <- df %>%
+  filter(country == "Mexico", wave == 2013, emp_firm >= 100, emp_firm <= 5000) %>%
+  mutate(
+    emp3bins = case_when(
+      emp_firm < 200 ~ "Small",
+      emp_firm < 1000 ~ "Medium",
+      TRUE ~ "Large"
+    ),
+    emp3bins = factor(emp3bins, levels = c("Small", "Medium", "Large"))
+  )
+
+# Select relevant columns for small firms žonly
+df <- df %>%
+  select(emp3bins, management) %>%
+  filter(emp3bins == "Small")
+
+
+q1 <- quantile(df$management, 0.25)
+q3 <- quantile(df$management, 0.75)
+q2 <- quantile(df$management, 0.50)
+iqr <- q3 - q1
+ub <- max(df[df$management<q3+1.5*iqr, ]$management)
+lb <- min(df[df$management>=(q1-iqr*1.5), ]$management)
+out_lb <- min(df$management)
+min <- min(df$management)
+max <- max(df$management)
+
+
+ggplot(data = df, aes(x = emp3bins, y = management)) +
+  geom_boxplot(color = color[1], fill = color[5], size = 0.5, width = 0.1, alpha = 0.5, na.rm=T) +
+  stat_boxplot(geom = "errorbar", width = 0.05, color = color[1], size = 0.5, na.rm=T) +
+  scale_y_continuous(limits = c(min,max)) +
+  annotate("text", x = 1.1, y = ub, label = "<-- Upper adjacent value", hjust=0, size=2) +
+  annotate("text", x = 1.1, y = q3, label = "<-- 75th percentile (upper hinge)", hjust=0, size=2) +
+  annotate("text", x = 1.1, y = q2, label = "<-- Median", hjust=0, size=2) +
+  annotate("text", x = 1.1, y = q1, label = "<-- 25th percentile (upper hinge)", hjust=0, size=2) +
+  annotate("text", x = 1.1, y = lb, label = "<-- Lower adjacent value", hjust=0, size=2) +
+  annotate("text", x = 1.1, y = out_lb, label = "<-- Outside values", hjust=0, size=2) +
+  
+  annotate("text", x = 0.63, y = ub, label = "Adjacent line", hjust=0, size=2) +
+  annotate("text", x = 0.63, y = q3, label = "Whiskers", hjust=0, size=2) +
+  annotate("text", x = 0.63, y = q2, label = "Median", hjust=0, size=2) +
+  annotate("text", x = 0.63, y = q1, label = "Whiskers", hjust=0, size=2) +
+  annotate("text", x = 0.63, y = lb, label = "Adjacent line", hjust=0, size=2) +
+  
+  geom_segment(aes(x = 0.9, y = lb, xend = 0.9, yend = ub)) +
+  geom_segment(aes(x = 0.88, y = lb, xend = 0.9, yend = lb)) +
+  geom_segment(aes(x = 0.88, y = q1, xend = 0.9, yend = q1)) +
+  geom_segment(aes(x = 0.88, y = q2, xend = 0.9, yend = q2)) +
+  geom_segment(aes(x = 0.88, y = q3, xend = 0.9, yend = q3)) +
+  geom_segment(aes(x = 0.88, y = ub, xend = 0.9, yend = ub)) +
+  theme_bg()+
+  theme(      axis.title.x=element_blank(),
+              axis.line.x=element_blank(),
+              axis.ticks.x=element_blank(),
+              axis.text.x = element_blank(),
+              axis.title.y=element_blank(),
+              axis.line.y=element_blank(),
+              axis.ticks.y=element_blank(),
+              axis.text.y = element_blank(),
+              panel.grid = element_blank(), panel.border = element_blank())+
+  background_grid(major="none", minor="none")
+save_fig("ch03-figure-8a-boxplot", output, "small")
+
+
+#Violin
+ggplot(data = df, aes(x = emp3bins, y = management)) +
+  geom_violin(size=0.2,  width = 0.3, trim = F, show.legend=F, na.rm =TRUE, color = color[1], fill = color[1], alpha = 0.3) +
+  geom_boxplot(color = color[1], fill = color[5], size = 0.6, width = 0.1, alpha = 0.5, na.rm=T, outlier.shape = NA) +
+  annotate("text", x = 1.05, y = ub, label = "<-- 95% Confidence Interval", hjust=0, size=2) +
+  annotate("text", x = 1.05, y = lb, label = "<-- 95% Confidence Interval", hjust=0, size=2) +
+  annotate("text", x = 1.18, y = q3, label = "<-- Interquartile range", hjust=0, size=2) +
+  annotate("text", x = 1.18, y = q2, label = "<-- Median", hjust=0, size=2) +
+  theme_bg()+
+  theme(      axis.title.x=element_blank(),
+              axis.line.x=element_blank(),
+              axis.ticks.x=element_blank(),
+              axis.text.x = element_blank(),
+              axis.title.y=element_blank(),
+              axis.line.y=element_blank(),
+              axis.ticks.y=element_blank(),
+              axis.text.y = element_blank(),
+              panel.grid = element_blank(), panel.border = element_blank())+
+  background_grid(major="none", minor="none")
+save_fig("ch03-figure-8b-violinplot", output, "small")
+
+
+
 # CHAPTER 06
 
 # ch6-figure-2  ------------------------------------------------------
