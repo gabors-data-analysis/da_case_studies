@@ -16,7 +16,6 @@ NOTEBOOKS = [
     "ch03-hotels-europe-compare/ch03-hotels-europe-compare.ipynb",
     "ch03-hotels-vienna-explore/ch03-hotels-vienna-explore.ipynb",
     "ch03-simulations/ch03-distributions.ipynb",
-    "ch04-management-firm-size/ch04-wms-management-size-boxplot-violinplot.ipynb",
     "ch04-management-firm-size/ch04-wms-management-size.ipynb",
     "ch05-stock-market-loss-generalize/ch05-stock-market-loss-generalize.ipynb",
     "ch06-online-offline-price-test/ch06-online-offline-price-test.ipynb",
