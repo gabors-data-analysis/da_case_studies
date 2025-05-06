@@ -1,16 +1,17 @@
-numpy ==1.26.4
-arch ==7.0.0
-linearmodels ==6.0
-patchworklib ==0.6.4
-pandas-market-calendars ==4.4.1
-pmdarima ==2.0.4
-plotnine ==0.12.4
-prophet ==1.1.5
-pydotplus ==2.0.2
-scikit-misc ==0.5.1
-stargazer ==0.0.7
-syntheticcontrolmethods ==1.1.17
-ipykernel
-jupyter
-regex ==2024.9.11
-openpyxl ==3.1.5
+arch==7.0.0
+numpy==1.26.4
+pmdarima==2.0.4
+prophet==1.1.5
+openpyxl==3.1.5
+scikit-misc==0.5.1
+pysyncon==1.5.1
+pyfixest==0.29.0
+pandas-market-calendars==4.4.1
+lime==0.2.0.1
+shap==0.46.0
+nbconvert==7.10.0
+ipython==8.25.0
+pydotplus==2.0.2
+ipykernel==6.28.0
+regex==2023.10.3
+stargazer==0.0.7
