@@ -83,8 +83,16 @@ class TestNotebooks(unittest.TestCase):
 
                 # Execute the Python script
                 print(f"Executing {notebook}")
+                env = os.environ.copy()
+                env["MPLBACKEND"] = "Agg"
                 try:
-                    subprocess.run(["python", py_file], check=True)
+                    subprocess.run(
+                        ["python", py_file],
+                        check=True,
+                        env=env,
+                        capture_output=True,
+                        text=True,
+                    )
                     os.remove(py_file)
                 except Exception as e:
                     self.fail(f"Execution failed for {notebook}: {e}")
