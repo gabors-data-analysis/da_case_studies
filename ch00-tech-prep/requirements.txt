@@ -5,7 +5,7 @@ prophet==1.1.5
 openpyxl==3.1.5
 scikit-misc==0.5.1
 pysyncon==1.5.1
-pyfixest==0.29.0
+pyfixest==0.30.2
 pandas-market-calendars==4.4.1
 lime==0.2.0.1
 shap==0.46.0
