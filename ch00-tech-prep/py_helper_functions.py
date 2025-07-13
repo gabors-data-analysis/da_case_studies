@@ -1,13 +1,12 @@
 ####################################################
 # Import packages
 ####################################################
-import copy
 from typing import List
 
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
-from plotnine import *
+import matplotlib.pyplot as plt
 
 ####################################################
 # Define global vars
@@ -41,7 +40,7 @@ da_theme = {
 ####################################################
 def seq(start: float, stop: float, by: float, round_n=3) -> list:
     """
-    Custom function, used for setting the breaks of plotnine scales.
+    Custom function, used for setting the breaks of scales.
 
        Parameters
     ----------
@@ -64,6 +63,45 @@ def seq(start: float, stop: float, by: float, round_n=3) -> list:
 def skew(l: npt.ArrayLike, round_n=3) -> float:
     return round((np.mean(l) - np.median(l)) / np.std(l), round_n)
 
+def tabulate(series, drop_missing=False):
+    table = (
+        pd.concat(
+            [
+                series.value_counts(dropna=drop_missing)
+                .sort_index()
+                .round(2)
+                .rename("Freq."),
+                series.value_counts(normalize=True, dropna=drop_missing)
+                .sort_index()
+                .rename("Perc."),
+            ],
+            axis=1,
+        )
+        .assign(Cum=lambda x: x["Perc."].cumsum())
+        .round(3)
+    )
+    return table
+
+import statsmodels.api as sm
+
+def bs_linreg(x, y, size=1, seed=200999):
+    """Perform pairs bootstrap for linear regression."""
+    # Set up array of indices to sample from
+    inds = np.arange(len(x))
+
+    # Initialize samples
+    bs_slope_reps = np.empty(size)
+    bs_intercept_reps = np.empty(size)
+    rng = np.random.default_rng(seed)
+    # Take samples
+    for i in range(size):
+        bs_inds = rng.choice(inds, len(inds), replace=True)
+        bs_x, bs_y = sm.add_constant(x[bs_inds]), y[bs_inds]
+        bs_slope_reps[i], bs_intercept_reps[i] = (
+            sm.regression.linear_model.OLS(bs_y, bs_x).fit().params
+        )
+
+    return bs_slope_reps, bs_intercept_reps
 
 def lspline(series: pd.Series, knots: List[float]) -> np.array:
     """Generate a linear spline design matrix for the input series based on knots.
@@ -94,9 +132,29 @@ def lspline(series: pd.Series, knots: List[float]) -> np.array:
     return np.column_stack(columns)
 
 
+def plot_loess(data: pd.DataFrame, x: str, y: str, span: float, color: str = color[1]):
+    """
+    Plots a LOESS (Locally Estimated Scatterplot Smoothing) curve for the given data.
+    Parameters:
+    data (pd.DataFrame): The input data as a pandas DataFrame.
+    x (str): The column name of the independent variable in the DataFrame.
+    y (str): The column name of the dependent variable in the DataFrame.
+    span (float): The span parameter for the LOESS model, controlling the degree of smoothing.
+    """
+
+    from skmisc.loess import loess
+
+    data = data.dropna(subset=[x]).copy(deep=True)
+
+    loess_pred = loess(data[x], data[y], span=span)
+    loess_pred.fit()
+    x_plot = np.linspace(data[x].min(), data[x].max(), 1000)
+    y_plot = loess_pred.predict(x_plot, stderror=False).values
+    plt.plot(x_plot, y_plot, color=color, linewidth=2)
+
+
 def create_calibration_plot(
     data: pd.DataFrame,
-    file_name: str,
     prob_var: str,
     actual_var: str,
     y_lab="Actual event probability",
@@ -113,8 +171,6 @@ def create_calibration_plot(
         Your dataframe, containing the actual outcome and
         the predicted probabilities of that outcome
         by a model.
-    file_name : str
-        Filename to save. NOTE: this is note used for now.
     prob_var : str
         Name of the variable, containin predicted
         probabilities.
@@ -148,25 +204,23 @@ def create_calibration_plot(
         .reset_index()
     )
 
-    return (
-        ggplot(binned_data, aes("mean_prob", "mean_actual"))
-        + geom_line(color=color[0], size=1, show_legend=True)
-        + geom_point(color=color[0], size=1, alpha=0.7, show_legend=False, na_rm=True)
-        + geom_segment(
-            x=min(breaks),
-            xend=max(breaks),
-            y=min(breaks),
-            yend=max(breaks),
-            color=color[1],
-            size=0.5,
-        )
-        + theme_bw()
-        + labs(x="Predicted event probability", y=y_lab)
-        + coord_cartesian(xlim=(0, 1), ylim=(0, 1))
-        + expand_limits(x=0.01, y=0.01)
-        + scale_y_continuous(expand=(0.01, 0.01), breaks=(seq(0, 1.1, 0.1)))
-        + scale_x_continuous(expand=(0.01, 0.01), breaks=(seq(0, 1.1, 0.1)))
+    sns.lineplot(
+        data=binned_data, x="mean_prob", y="mean_actual", color=color[0], linewidth=1.5
     )
+
+    # Scatter plot with transparency
+    sns.scatterplot(data=binned_data, x="mean_prob", y="mean_actual", s=30, alpha=1)
+
+    # Adding a diagonal line
+    plt.plot([0, 1], [0, 1], color=color[1], linewidth=0.5)
+
+    plt.xlabel("Predicted event probability")
+    plt.ylabel(y_lab)
+    plt.xlim(0, 1.01)
+    plt.ylim(0, 1.01)
+    plt.xticks(np.arange(0, 1.1, 0.1))
+    plt.yticks(np.arange(0, 1.1, 0.1))
+    plt.show()
 
 
 def poly(x: npt.ArrayLike, degree=1) -> pd.DataFrame:
@@ -193,68 +247,64 @@ def poly(x: npt.ArrayLike, degree=1) -> pd.DataFrame:
     return pd.DataFrame(d)
 
 
-def price_diff_by_variables(
-    df: pd.DataFrame, factor_var: str, dummy_var: str, factor_lab: str, dummy_lab: str
-) -> ggplot:
+def plot_bar(
+    df: pd.DataFrame,
+    x: str,
+    y: str,
+    hue: str,
+    ax: plt.Axes,
+    errorbar: str = "se",
+    legend_title: str | None = None,
+):
     """
-    Price difference by selected factor and dummy variables.
-
-    This function creates a barplots looking for interactions.
-    Used in `ch14-airbnb-prediction.ipynb`.
-
-        Parameters
-    ----------
-    df : pd.DataFrame
-        Your dataframe.
-    factor_var : str
-        Your factor variable (like room_type).
-    dummy_var : str
-        The dummy variable you are interested in (like TV).
-    factor_lab : str
-        The label on the final plot for the `factor_var`.
-    dummy_lab : str
-        The label on the final plot for the `dummy_var`.
+    Plot interaction between two variables using a bar plot.
     """
-
-    stats = df.groupby([factor_var, dummy_var]).agg(
-        Mean=("price", np.mean), sd=("price", np.std), size=("price", "size")
+    sns.barplot(
+        x=x,
+        y=y,
+        hue=hue,
+        data=df,
+        ax=ax,
+        errorbar=errorbar,
+        capsize=0.1,
+        err_kws={"linewidth": 2},
     )
-    stats["se"] = stats["sd"] / stats["size"] ** (1 / 2)
-    stats["Mean_l"] = stats["Mean"] - (1.96 * stats["se"])
-    stats["Mean_u"] = stats["Mean"] + (1.96 * stats["se"])
-    stats = stats.drop(["sd", "size"], axis=1).reset_index()
 
-    return (
-        ggplot(
-            stats,
-            aes(
-                stats.columns[0],
-                stats.columns[2],
-                fill="factor(" + stats.columns[1] + ")",
-            ),
+    ax.set_ylabel("Mean Price")
+    ax.set_title(None)
+    if legend_title:
+        ax.legend(title=legend_title)
+
+    ax.set_xlabel("")
+    sns.despine(ax=ax, left=True, bottom=True)
+    ax.tick_params(left=False)
+    ax.yaxis.labelpad = 10
+
+
+def plot_interactions(df, plot_config):
+    """
+    Plot for interactions between different variables.
+
+    Args:
+        df (pd.DataFrame): The input DataFrame containing the data.
+        plot_config (list of dict): List containing plot configurations. Each dict contains the necessary columns and plot settings.
+    """
+    fig, axes = plt.subplots(3, 2, figsize=(10, 15))
+
+    for idx, config in enumerate(plot_config):
+        row = idx // 2
+        col = idx % 2
+        plot_bar(
+            df,
+            x=config["x"],
+            y=config["y"],
+            hue=config["hue"],
+            ax=axes[row, col],
+            errorbar=config.get("errorbar", "se"),
+            legend_title=config.get("legend_title", ""),
         )
-        + geom_bar(stat="identity", position=position_dodge(width=0.9))
-        + geom_errorbar(
-            aes(ymin="Mean_l", ymax="Mean_u"),
-            position=position_dodge(width=0.9),
-            width=0.25,
-        )
-        + scale_color_manual(name=dummy_lab, values=(color[1], color[0]))
-        + scale_fill_manual(name=dummy_lab, values=(color[1], color[0]))
-        + ylab("Mean Price")
-        + xlab(factor_lab)
-        + theme_bw()
-        + theme(
-            panel_grid_major=element_blank(),
-            panel_grid_minor=element_blank(),
-            panel_border=element_blank(),
-            axis_line=element_line(),
-            legend_position="top",
-            legend_box="vertical",
-            legend_text=element_text(size=5),
-            legend_title=element_text(size=5, face="bold"),
-        )
-    )
+
+    plt.show()
 
 
 import statsmodels.formula.api as smf
@@ -509,3 +559,163 @@ def pool_and_categorize_continuous_variable(
     }
 
     return categories_cut.map(categories_map)
+
+
+from io import StringIO
+from IPython.display import Image, display
+from sklearn.tree import export_graphviz, DecisionTreeRegressor
+import pydotplus
+
+
+def plot_decision_tree(model, **kwargs):
+    dot_data = StringIO()
+    export_graphviz(model, dot_data, **kwargs)
+    graph = pydotplus.graph_from_dot_data(dot_data.getvalue())
+    display(Image(graph.create_png()))
+
+
+def plot_model_predictions(
+    model, df, x_col: str, y_col: str, resolution=100, color=color[1]
+):
+    """
+    Plots a scatterplot of data and overlays model predictions.
+
+    - Uses horizontal stepwise predictions for DecisionTree-based models.
+    - Uses a smooth line for continuous models (e.g., OLS, Logit).
+
+    Parameters:
+    - model: A fitted model with `.predict()`.
+    - df: Pandas DataFrame containing the data.
+    - x_col: Name of the predictor variable (e.g., "Age").
+    - y_col: Name of the target variable (e.g., "Price").
+    - color: Color for the prediction line/steps.
+    - resolution: Number of points for smooth predictions.
+    """
+    # Scatter plot
+    plt.figure(figsize=(8, 6))
+    sns.scatterplot(data=df, x=x_col, y=y_col, alpha=0.6)
+
+    # Generate sorted unique x values
+    x_vals = np.linspace(df[x_col].min(), df[x_col].max(), resolution).reshape(-1, 1)
+    x_vals_df = pd.DataFrame(x_vals, columns=[x_col])
+    y_preds = model.predict(x_vals_df)
+
+    # Decision Tree: Draw only horizontal lines
+    if isinstance(model, DecisionTreeRegressor):
+        for i in range(len(x_vals) - 1):
+            plt.hlines(
+                y=y_preds[i],
+                xmin=x_vals[i],
+                xmax=x_vals[i + 1],
+                colors=color,
+                linewidth=2,
+            )
+        # Extend last step to the max x value
+        plt.hlines(
+            y=y_preds[-1],
+            xmin=x_vals[-1],
+            xmax=df[x_col].max(),
+            colors=color,
+            linewidth=2,
+        )
+
+    else:
+        plt.plot(x_vals, y_preds, color=color, linewidth=2)
+
+    plt.xlim(0, 26)
+    plt.xticks(range(0, 26, 5))
+    plt.ylim(0, 20000)
+    plt.yticks(range(0, 20001, 2500))
+    plt.xlabel("Age (years)")
+    plt.ylabel("Price (US dollars)")
+    plt.show()
+
+
+import sklearn
+import seaborn as sns
+import matplotlib.ticker as mticker
+import math
+import shap
+
+
+def plot_variable_importance(
+    data: pd.DataFrame,
+    x: str = "imp_percentage",
+    y: str = "varname",
+    title: str | None = None,
+):
+    data = data.sort_values(by=x, ascending=False)
+
+    sns.scatterplot(data=data, x=x, y=y, s=60)
+
+    # Add horizontal lines from 0 to imp_percentage
+    for _, row in data.iterrows():
+        plt.hlines(y=row[y], xmin=0, xmax=row[x], linewidth=2.5)
+    xtick_max = data[x].max()
+    if xtick_max > 0.2:
+        xtick_diff = 0.1
+    else:
+        xtick_diff = 0.05
+    plt.xticks(np.arange(0, xtick_max, xtick_diff))
+    plt.gca().xaxis.set_major_formatter(mticker.PercentFormatter(xmax=1, decimals=0))
+    plt.title(title)
+    plt.xlabel("Importance (Percent)")
+    plt.ylabel("Variable Name")
+    plt.show()
+
+
+def plot_partial_dependence(
+    model: sklearn.base.BaseEstimator, data: pd.DataFrame, variable: str, varlabel: str
+):
+
+    pdp_results = sklearn.inspection.partial_dependence(
+        model, data, [variable], kind="average"
+    )
+
+    pdp_results = pd.DataFrame(
+        [pdp_results["average"][0], pdp_results["values"][0]],
+        index=["average", "values"],
+    ).T
+
+    if pdp_results["values"].dtype == "object":
+        linestyle = "none"
+    else:
+        linestyle = "-"
+
+    sns.pointplot(
+        data=pdp_results, x="values", y="average", scale=0.8, linestyle=linestyle
+    )
+    ymax = math.ceil(pdp_results["average"].max() / 10) * 10
+    ymin = math.floor(pdp_results["average"].min() / 10) * 10
+    plt.ylim(ymin, ymax)
+    plt.yticks(np.arange(ymin, ymax + 1, 10))
+    plt.grid(axis="x", linestyle="-", alpha=0.7)
+    plt.xlabel(varlabel)
+    plt.ylabel("Predicted price")
+    plt.show()
+
+
+def plot_shap_interactions(features: tuple[str, str], shap_values: shap.Explanation):
+    fig, axes = plt.subplots(
+        1, len(features), figsize=(5 * len(features), 4), sharey=True
+    )
+    fig.suptitle(
+        f"SHAP values and best proposed interaction for {', '.join(label for _, label in features)}",
+        fontsize=15,
+    )
+
+    for ax, (feature, label) in zip(axes, features):
+        shap.plots.scatter(
+            shap_values[:, feature],
+            color=shap_values,
+            show=False,
+            cmap=plt.get_cmap("viridis_r"),
+            ax=ax,
+        )
+        ax.set_xlabel(label)
+        ax.set_xlim(-0.2, 1.2)
+        ax.set_xticks([0, 1], labels=[0, 1])
+        ax.set_ylabel(None)
+
+    axes[0].set_ylabel("SHAP values")
+    plt.show()
