@@ -1,62 +1,34 @@
-# Evolution of code by language since v0.8.3
+# Changelog: version 0.9.0. (2025-08-11)
+
+## Evolution of code by language since v0.8.3
 
 Changelog summary -- how the content of the repository evolved for each programming language (Python, R and Stata) between the previous release **v0.8.3** (25 Nov 2022) and the latest release **v0.9.0**. 
 
+Overall, the transition to `seaborn` and `pyfixest` drove most of the **Python**‑side evolution, while the **R** side adopted `fixest`/`marginaleffects`. **Stata** materials remained largely stable, reflecting a focus on modernizing the Python and R components for reproducibility and ease of use. No Julia yet. 
+
+
 ## Python
 
-Python notebooks underwent substantial updates:
+Python notebooks underwent substantial refactoring and feature additions:
 
-* **Plotting migration**: All visualizations moved from `plotnine` to `seaborn`.
-
-  * Introduced a new `da_theme` for consistent styling.
-  * Added helper functions such as `tsplots`.
-  * Set default figure sizes across notebooks.
-
-* **Regression engine change**: Migrated from `statsmodels` to `pyfixest` for Python regression examples.
-
-  * Updated formulas to match book conventions.
-  * Integrated `marginaleffects`-style outputs where possible.
-  * Applied several version updates (e.g., `pyfixest` 0.28.0 → 0.30.2).
-
-* **Environment and dependencies**:
-
-  * Added support for Python 3.12 in conda/macOS/Windows environments.
-  * Updated packages (`prophet`, `lime`, etc.).
-  * Removed `plotnine` and SHAP from environments.
-  * Added OSF file path handling.
-
-* **New features**:
-
-  * LIME explainer for model interpretability.
-  * Expanded table and figure outputs.
-
-* **Testing and reproducibility**:
-
-  * New scripts for automated environment creation.
-  * OSF integration for datasets.
-  * Broader automated notebook testing.
-
-* **Bug fixes and refactoring**:
-
-  * Fixed plotting issues (e.g., bar‑plot axes, density plots).
-  * Cleaned data handling and removed unused notebooks.
+- **Seaborn as the plotting backbone**: All chapters migrated from the old `plotnine` library to `seaborn`. This included developing a custom `da_theme`, adding functions for time‑series plots (`tsplots`), and standardizing default figure sizes. The change eliminated the dependency on `plotnine` and simplified the plotting pipeline.
+- **Regression engine upgrade**: Regression examples were moved from `statsmodels` to the `pyfixest` package. Code was refactored to accommodate the new API, and formulas were updated to match the textbook notation. Throughout the migration several minor bug fixes were applied, and later updates bumped `pyfixest` to version 0.30.2.
+- **New model‑interpretation tools**: A LIME explainer was introduced to help interpret machine‑learning models. Other helper functions were added to improve variable importance and spline calculations.
+- **Environment and dependency clean‑up**: The Python environment was modernized with new conda/macOS/Windows YAML files, support for Python 3.12, and removal of obsolete packages such as `plotnine` and `shap`. `prophet`, `lime` and other dependencies were updated.
+- **Testing and reproducibility**: Scripts were added to automate environment creation and test notebooks. OSF paths/links were integrated, and default data‑loading paths were standardized. Numerous notebooks were tidied up, including fixes to bar‑plot axes and cleaning of gender/earnings data.
 
 ## R
 
-* **Estimation updates**:
+Changes in R code were more targeted but still significant:
 
-  * Adopted `fixest` for regression models instead of base R’s `lm()`.
-  * Integrated `marginaleffects` for marginal effect calculations.
-
-* **Feature additions**:
-
-  *  SHAP integration in R notebooks. (May not be final)
-
-* **General**:
-
-  * Minor path and data‑handling improvements.
+- **Adoption of fixest and marginaleffects**: Examples previously using base R `lm()` were rewritten to use `feols()` from the `fixest` package. The `marginaleffects` package was added for computing marginal effects, and formulas were aligned with the notation in the textbook. Minor adjustments were made to ensure compatibility with `matchit` and `dplyr` syntax.
+- **SHAP support (experimental)**: An early experiment added SHAP value calculations for R models; although later the focus shifted back to Python, the code remains available for reference.
+- **General maintenance**: A few bug fixes and readability improvements were made across R scripts, but no major structural changes occurred.
 
 ## Stata
 
-* Mostly unchanged.
-* Minor updates to `.do` files for improved plot labels, standardized OSF links, and path handling.
+Stata materials saw minimal changes during this release cycle:
+
+- **Code stability**: Most `.do` files remained unchanged. A small number of scripts were updated to improve labels or path handling; for example, the football‑manager‑success chapter received a minor update to correct a plot option.
+- **Consistency with new data paths**: Where necessary, OSF links and standardized data paths were incorporated to ensure that Stata examples work seamlessly across operating systems.
+
