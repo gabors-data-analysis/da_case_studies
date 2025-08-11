@@ -673,17 +673,17 @@ def plot_partial_dependence(
     )
 
     pdp_results = pd.DataFrame(
-        [pdp_results["average"][0], pdp_results["values"][0]],
-        index=["average", "values"],
+        [pdp_results["average"][0], pdp_results["grid_values"][0]],
+        index=["average", "grid_values"],
     ).T
 
-    if pdp_results["values"].dtype == "object":
+    if pdp_results["grid_values"].dtype == "object":
         linestyle = "none"
     else:
         linestyle = "-"
 
     sns.pointplot(
-        data=pdp_results, x="values", y="average", scale=0.8, linestyle=linestyle
+        data=pdp_results, x="grid_values", y="average", scale=0.8, linestyle=linestyle
     )
     ymax = math.ceil(pdp_results["average"].max() / 10) * 10
     ymin = math.floor(pdp_results["average"].min() / 10) * 10
