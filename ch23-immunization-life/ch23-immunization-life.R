@@ -10,9 +10,8 @@
 # License: Free to share, modify and use for educational purposes. 
 # 	Not to be used for commercial purposes.
 
-# Chapter 16
-# CH16A Predicting apartment prices with random forest
-# using the airbnb dataset
+# Chapter 23
+# CH23B Immunization against measles and saving children using the worldbank-immunization dataset
 # version 0.95 2021-03-29
 #########################################################################################
 
