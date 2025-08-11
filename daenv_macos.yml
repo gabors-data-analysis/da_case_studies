@@ -95,7 +95,7 @@ dependencies:
       - ptyprocess==0.7.0
       - pure-eval==0.2.3
       - pydotplus==2.0.2
-      - pyfixest==0.29.0
+      - pyfixest==0.30.2
       - pygments==2.19.1
       - pyluach==2.2.0
       - pyparsing==3.2.3
