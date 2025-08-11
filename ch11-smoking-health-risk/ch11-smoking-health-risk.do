@@ -53,7 +53,7 @@ use "$data_in/share-health.dta", clear
 
 * Or download directly from OSF:
 /*
-copy "https://osf.io/download/kdva8/" "workfile.csv"
+copy "https://osf.io/download/kbjzp/" "workfile.csv"
 import delimited "workfile.csv"
 erase "workfile.csv"
 */ 

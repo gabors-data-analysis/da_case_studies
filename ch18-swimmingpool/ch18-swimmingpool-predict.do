@@ -207,8 +207,8 @@ graph export "$output/ch18-figure-5-heatmap-Stata.png", as(png) replace
 local M1 t i.month
 local M2 t i.month i.dayofweek
 local M3 t i.month i.dayofweek i.natholiday
-local M4 t i.month i.school_off##i.dayofweek
-local M5 t i.month i.school_off##i.dayofweek i.month##i.dayofweek
+local M4 t i.month i.dayofweek i.natholiday i.school_off##i.dayofweek
+local M5 t i.month i.dayofweek i.natholiday i.school_off##i.dayofweek i.month##i.dayofweek
 
 forvalue i=1/5 {
 	forvalue y=2010/2015 {
@@ -233,13 +233,14 @@ forvalue i=1/5 {
 	save "$work/swim-daily-forecasts.dta", replace
 }
 
-*** +1 MODEL (M6) WITH LN(QUANTITY) AS TARGET VARIABLE
-local M6 t i.month i.school_off##i.dayofweek
+*** +1 MODEL (M6)
+* LN(QUANTITY) AS TARGET VARIABLE
+* DEPENDENT VARIABLES ARE THE SAME AS IN M4
 forvalue y=2010/2015 {
 	use "$work/swim-daily-workfile.dta", replace
 	cap gen lnq = ln(quantity)
 	keep if year>=2010 & year<=2015
-	qui reg lnq `M6' if year!=`y'
+	qui reg lnq `M4' if year!=`y'
 	qui predict yhat 
 	local sig = e(rmse)
 	replace yhat = exp(yhat) * exp(`sig'^2/2)
@@ -260,12 +261,9 @@ tabstat cv_rmse_M*, col(s) format(%4.2f)
 **********************************************
 ** EVALUATION OF BEST MODEL
 **********************************************
-* work set =2010-2015
+* work set = 2010-2015
 * holdout = 2016
 * best model is M5
-
-local M5 t i.month i.school_off##i.dayofweek i.month##i.dayofweek
-
 * estimate model on entire work set
 use "$work/swim-daily-workfile.dta", replace
 regress quantity `M5' if year>=2010 & year<=2015

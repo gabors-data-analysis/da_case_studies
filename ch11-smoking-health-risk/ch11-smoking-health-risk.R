@@ -69,7 +69,7 @@ create_output_if_doesnt_exist(output)
 
 # load in clean and tidy data and create workfile
 share <- read.csv(paste(data_in,"share-health.csv", sep = "/"),stringsAsFactors = F)
-#share <- read.csv("https://osf.io/download/snfhe/",stringsAsFactors = F)
+#share <- read.csv("https://osf.io/download/kbjzp/",stringsAsFactors = F)
 
 
 share$healthy <- ifelse(share$sphus>0 & share$sphus<=5, 
