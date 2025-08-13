@@ -8,7 +8,7 @@ Published on 6 May 2021 by Cambridge University Press
 
 
 ## How to use
-On the [textbook's website]((https://gabors-data-analysis.com/)), we have detailed discussion of how to set up libraries, get data and code: [Overview of data and code](https://gabors-data-analysis.com/data-and-code/)
+On the [textbook's website](https://gabors-data-analysis.com/), we have detailed discussion of how to set up libraries, get data and code: [Overview of data and code](https://gabors-data-analysis.com/data-and-code/)
 
 To see options for various languages, check out:
 1. **R** --  [How to run code in R ](ch00-tech-prep/da-setup-r.md)
