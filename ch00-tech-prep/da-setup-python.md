@@ -1,8 +1,14 @@
-# How to set up your computer for Python
+# How to set up Python to do Data Analysis
 
-## 0. Intro
+So you decided to use Python for Data Analysis. Great choice. Python is the leading coding language for Data Science, and is emerging as a widely used language in analysis, in statistics and econometrics. 
 
-To work with the code in this textbook, you will need a few essential tools. These will not only help you reproduce the graphs and tables in the book, but also set you up for success in future data analysis and programming projects. The whole procedure might seem too long and tedious, but afterwards you will have a collection of softwares that you will find useful later on. If you do not want to go through the detailed installation process, go to the last (+1) step that shows a faster but less reliable way to acces the case studies in Python.
+As you'll see its not as easy as in Stata or even in R. It's not plug and play. You're gonna need to do some plumbing. So make sure you have about two hours to do this.  The whole procedure might seem too long and tedious, but afterwards you will have a collection of softwares that you will find useful later on. Indeed, using an editor like VScode, git and Github and will be essential skills. We'll be gentle: this user guide is written by people with a background in economics not computer science. 
+
+Once you set up these essential tools, they will not only help you reproduce the graphs and tables in the book, but also set you up for success in future data analysis and programming projects.
+
+Okay, if you just wanna have a quick look, or  do not want to go through the detailed installation process, go to the [quick version](https://github.com/gabors-data-analysis/da_case_studies/edit/master/ch00-tech-prep/da-setup-python.md#plan-b-a-minimum-requirements-option) (python + jupyter notebook) that shows a faster but less reliable way to acces the case studies in Python. 
+
+## Overview
 
 We use the following technologies for the Python version:
 
@@ -155,31 +161,31 @@ conda deactivate
 
 Now everything is set up, only the data is missing. There are two options you can choose from: 
 
-### Option A:
+### Option 1:
 You can either download all the datasets for all case studies from [OSF](https://osf.io/3u5em/files/osfstorage). If you choose this option, make sure to unzip the **da_data_repo** next to the **da_case_studies** folder.
 
 It should look like this:
 
 ![data1](pics/14.png)
 
-### Option B:
+### Option 2:
 Download data for specific case studies from [OSF](https://osf.io/7epdj/). If you choose this option, create a folder called **da_data_repo** next to the **da_case_studies** folder and download the data for the case studies there.
 
 Once you have the data installed, in VS Code open any of the **jupyter notebooks** (that contain the python codes), on the top of your screen select **daenv** as the environment to run the codes in, and run it.
 
 ![data2](pics/15.png)
 
-## +1 Minimum Requirements Option
+# Plan B: A minimum Requirements Option
 If you do not want to set up the environment, download VS Code and the data, there is a more simple version you can choose as well. 
 
-### 1. Install Python
+## 1. Install Python
 
 If you don't already have Python installed, download and install it from the official website:  
  [https://www.python.org/downloads](https://www.python.org/downloads)
 
 **Important:** During installation, make sure to check the box **“Add Python to PATH”**
 
-### 2. Install jupyter
+## 2. Install jupyter
 
 Type 
 
