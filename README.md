@@ -8,21 +8,21 @@ Published on 6 May 2021 by Cambridge University Press
 
 
 ## How to use
-On the [textbook's website](https://gabors-data-analysis.com/), we have detailed discussion of how to set up libraries, get data and code: [Overview of data and code](https://gabors-data-analysis.com/data-and-code/)
 
-To see options for various languages, check out:
+All code available for R, Stata and Python. To see options for various languages, check out:
+
 1. **R** --  [How to run code in R ](ch00-tech-prep/da-setup-r.md)
 2. **Stata** -- [How to run code in Stata ](ch00-tech-prep/da-setup-stata.md)
 3. **Python** -- [How to run code in Python ](ch00-tech-prep/da-setup-python.md)
 
+On the [textbook's website](https://gabors-data-analysis.com/), we have detailed discussion of how to set up libraries, get data: [Overview of data and code](https://gabors-data-analysis.com/data-and-code/)
 
 
+## Status
 
-## Status (11, August 2025)
-**Change This!!**
-The [Latest release, 0.9.0 "Ethics Gradient"](https://github.com/gabors-data-analysis/da_case_studies/releases/tag/v0.8.3) was released on 25 November. 
+The [Latest release, 0.9.0 "Ethics Gradient"](https://github.com/gabors-data-analysis/da_case_studies/releases/tag/v0.8.3) was released 14 August 2025. 
 
-In the latest release we did some refactoring re Python and R codes. We continuously monitor bugs and do regular, if mostly minor updates. 
+Overall, the transition to `seaborn` and `pyfixest` drove most of the **Python**‑side evolution, while the **R** side adopted `fixest`/`marginaleffects`. **Stata** materials remained largely stable, reflecting a focus on modernizing the Python and R components for reproducibility and ease of use. No Julia yet. See detailes in the changelog / release notes. 
 
 ## Organization
 1. Each case study has a separate folder.
@@ -38,8 +38,6 @@ In the latest release we did some refactoring re Python and R codes. We continuo
 Data is hosted on OSF.io
 
 [Get data by datasets](https://osf.io/7epdj/)  
-
-
 
 ## Found an error or have a suggestion?
 Awesome, we know there are errors and bugs. Or just much better ways to do a procedure.
