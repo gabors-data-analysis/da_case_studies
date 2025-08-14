@@ -1,4 +1,4 @@
-# How to set up Python to do Data Analysis
+# How to set up the Python environment to do Data Analysis
 
 So you decided to use Python for Data Analysis. Great choice. Python is the leading coding language for Data Science, and is emerging as a widely used language in analysis, in statistics and econometrics. 
 
@@ -7,6 +7,7 @@ As you'll see its not as easy as in Stata or even in R. It's not plug and play. 
 Once you set up these essential tools, they will not only help you reproduce the graphs and tables in the book, but also set you up for success in future data analysis and programming projects.
 
 Okay, if you just wanna have a quick look, or  do not want to go through the detailed installation process, go to the [quick version](https://github.com/gabors-data-analysis/da_case_studies/edit/master/ch00-tech-prep/da-setup-python.md#plan-b-a-minimum-requirements-option) (python + jupyter notebook) that shows a faster but less reliable way to acces the case studies in Python. 
+
 
 ## Overview
 
@@ -199,6 +200,11 @@ jupyter notebook
 ```
 
 into your Terminal. This opens a browser that can run jupyter notebooks. You can find more info on how jupyter works, see their official [website](https://jupyter.org/). 
+
+
+## Credits
+This note is based on the setup by [Péter Duronelly](https://github.com/peterduronelly/python-for-data-analysis/tree/main/class-00-setting-up-your-data-science-environment), edited by Daniel Barabás and Gábor Békés and Tanya Yakushina. All this is strongly related to teaching [Data Analysis](https://gabors-data-analysis.com/) at [CEU](https://economics.ceu.edu/program/master-science-business-analytics)
+
 
 
 
