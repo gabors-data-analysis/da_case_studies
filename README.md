@@ -20,7 +20,7 @@ On the [textbook's website](https://gabors-data-analysis.com/), we have detailed
 
 ## Status
 
-The [Latest release, 0.9.0 "Ethics Gradient"](https://github.com/gabors-data-analysis/da_case_studies/releases/tag/v0.8.3) was released 14 August 2025. 
+The [Latest release, 0.9.0 "Frank Exchange of Views"](https://github.com/gabors-data-analysis/da_case_studies/releases/tag/v0.9.0) was released 14 August 2025. 
 
 Overall, the transition to `seaborn` and `pyfixest` drove most of the **Python**‑side evolution, while the **R** side adopted `fixest`/`marginaleffects`. **Stata** materials remained largely stable, reflecting a focus on modernizing the Python and R components for reproducibility and ease of use. No Julia yet. See detailes in the changelog / release notes. 
 
