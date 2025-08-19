@@ -13,7 +13,7 @@
 
 
 * set folders
-*cd "D:\Dropbox (MTA KRTK)\bekes_kezdi_textbook"
+*cd "C:/Users/xy/Dropbox/gabors_data_analysis/da_case_studies"
 
 * define folders 
 global data_in			"da_data_repo\food-health\clean"
