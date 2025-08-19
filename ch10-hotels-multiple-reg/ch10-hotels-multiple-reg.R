@@ -31,12 +31,12 @@ library(lspline)
 # set working directory
 # option A: open material as project
 # option B: set working directory for da_case_studies
-#           example: setwd("C:/Users/bekes.gabor/Documents/github/da_case_studies/")
+#           example: setwd("C:/Users/xy/Dropbox/gabors_data_analysis/da_case_studies")
 
 # set data dir, data used
 source("set-data-directory.R")             # data_dir must be first defined 
 # alternative: give full path here, 
-#            example data_dir="C:/Users/bekes.gabor/Dropbox (MTA KRTK)/bekes_kezdi_textbook/da_data_repo"
+#            example data_dir="C:/Users/xy/Dropbox/gabors_data_analysis/da_data_repo"
 
 # load theme and functions
 source("ch00-tech-prep/theme_bg.R")
