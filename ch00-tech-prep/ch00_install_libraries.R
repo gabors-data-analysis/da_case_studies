@@ -45,8 +45,8 @@ pacman::p_load(viridis, grid, gridExtra, dyn, estimatr, huxtable, segmented, rms
 pacman::p_load(mfx, margins, psych) 
 
 # temp fix 
-install.packages(‘remotes’)
-remotes::install_github(‘lrberge/fixest’)
+install.packages("remotes")
+remotes::install_github("lrberge/fixest")
 
 #Part III
 pacman::p_load(lmtest, caret, glmnet, skimr, directlabels, 
