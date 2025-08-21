@@ -30,7 +30,7 @@ library(cowplot)
 #           example: setwd("C:/Users/bekes.gabor/Documents/github/da_case_studies/")
 
 # set data dir, data used
-source("set-data-directory.R")             # data_dir must be first defined 
+source("ch00-tech-prep/set-data-directory.R")             # data_dir must be first defined 
 # alternative: give full path here, 
 #            example data_dir="C:/Users/bekes.gabor/Dropbox (MTA KRTK)/bekes_kezdi_textbook/da_data_repo"
 

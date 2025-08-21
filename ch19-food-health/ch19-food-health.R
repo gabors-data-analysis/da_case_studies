@@ -31,7 +31,7 @@ library(modelsummary)
 
 
 # set data dir, data used
-source("set-data-directory.R")             # data_dir must be first defined 
+source("ch00-tech-prep/set-data-directory.R")             # data_dir must be first defined 
 
 # option A: open material as project
 # option B: set working directory for da_case_studies

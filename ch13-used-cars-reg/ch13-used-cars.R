@@ -45,7 +45,7 @@ source("ch00-tech-prep/theme_bg.R")
 source("ch00-tech-prep/da_helper_functions.R")
 
 # data used
-source("set-data-directory.R") #data_dir must be first defined #
+source("ch00-tech-prep/set-data-directory.R") #data_dir must be first defined #
 data_in <- paste(data_dir,"used-cars","clean/", sep = "/")
 
 use_case_dir <- "ch13-used-cars-reg/"

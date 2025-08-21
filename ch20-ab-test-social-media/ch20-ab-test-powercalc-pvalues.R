@@ -35,7 +35,7 @@ source("ch00-tech-prep/theme_bg.R")
 source("ch00-tech-prep/da_helper_functions.R")
 
 # data used
-source("set-data-directory.R") #data_dir must be first defined #
+source("ch00-tech-prep/set-data-directory.R") #data_dir must be first defined #
 data_in <- paste(data_dir,"ab-test-social-media","clean", sep = "/")
 
 use_case_dir <- "ch20-ab-test-social-media/"

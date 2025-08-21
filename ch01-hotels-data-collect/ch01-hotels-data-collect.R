@@ -38,7 +38,7 @@ source("ch00-tech-prep/da_helper_functions.R")
 # install.packages("stargazer")
 
 # data used
-source("set-data-directory.R") #data_dir must be first defined #
+source("ch00-tech-prep/set-data-directory.R") #data_dir must be first defined #
 data_in <- paste(data_dir,"hotels-vienna","clean/", sep = "/")
 
 use_case_dir <- "ch01-hotels-data-collect/"

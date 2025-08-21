@@ -30,7 +30,7 @@ source("ch00-tech-prep/theme_bg.R")
 source("ch00-tech-prep/da_helper_functions.R")
 
 # data used
-source("set-data-directory.R") #data_dir must be first defined #
+source("ch00-tech-prep/set-data-directory.R") #data_dir must be first defined #
 
 data_in_clean <- paste(data_dir,"worldbank-immunization","clean/", sep = "/")
 data_in_raw <- paste(data_dir,"worldbank-immunization","raw", sep = "/")
