@@ -85,20 +85,20 @@ color.background
     
     theme(panel.background=element_rect(fill=color.background, color=color.background)) +
     theme(plot.background=element_rect(fill=color.background, color=color.background)) +
-    theme(panel.border=element_rect(color=palette[2],size=.01)) +
+    theme(panel.border=element_rect(color=palette[2],linewidth =.01)) +
     # Axis
     
-    theme(axis.line=element_line(color=color.line,size=.2)) +
+    theme(axis.line=element_line(color=color.line,linewidth = .2)) +
     
     # Grids
     
-    theme(panel.grid.major=element_line(color=color.grid.major,size=.1)) +
-    theme(panel.grid.minor=element_line(color=color.grid.major,size=.1)) +
+    theme(panel.grid.major=element_line(color=color.grid.major,linewidth = .1)) +
+    theme(panel.grid.minor=element_line(color=color.grid.major,linewidth = .1)) +
     # theme(axis.ticks=element_blank()) +
 
         # Legend
 
-    theme(legend.position=c(0.8,0.2),
+    theme(legend.position.inside=c(0.8,0.2),
           panel.grid.minor =element_blank()) +
     theme(legend.background = element_rect(fill="transparent")) +
     theme(legend.text = element_text(size=4,color=color.axis.title )) +
@@ -131,8 +131,8 @@ geom_point_da <- function(color = theme_colors[1], size = 1,  shape = 16, alpha 
              show.legend = show.legend, na.rm = na.rm)
 }
 
-geom_smooth_da <- function(method="lm", color=theme_colors[2], se=F, size=0.7){
-  geom_smooth(method=method,color=color,se=se, size=size)
+geom_smooth_da <- function(formula = y ~ x,method="lm", color=theme_colors[2], se=F, size=0.7){
+  geom_smooth(formula = formula,method=method,color=color,se=se, size=size)
 }
 
 geom_segment_da <- function(color=theme_colors[2], size=0.7, na.rm=TRUE){
