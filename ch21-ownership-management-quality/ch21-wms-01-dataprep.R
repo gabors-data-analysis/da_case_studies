@@ -56,8 +56,8 @@ create_output_if_doesnt_exist(output)
 
 
 # Load in data -------------------------------------------------------
-#data <- read_csv("https://osf.io/zy9j8/download")
-data <- read_csv(paste(data_in,"wms_da_textbook-xsec.csv",sep=""))
+# data <- read_csv("https://osf.io/zy9j8/download")
+data <- read_csv(paste(data_in,"wms_da_textbook-xsec_p.csv",sep=""))
 
 # Ownership: define founder/family owned and drop ownership that's missing or not relevant
 # Ownership
@@ -201,6 +201,7 @@ data %>%
 
 data <- data %>%
   filter (!(emp_firm<50 | emp_firm>5000))
+
 
 
 # Save workfile ------------------------------------------------------
