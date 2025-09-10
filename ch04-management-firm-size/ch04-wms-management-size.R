@@ -66,13 +66,14 @@ df <- df %>%
   filter(country=="Mexico" & wave==2013 & emp_firm>=100  & emp_firm<=5000)
 
 # Summary in two steps
-datasummary_skim( df$emp_firm )
+df %>% select(emp_firm) %>% datasummary_skim()
 describe(df$emp_firm)
+summary(df$emp_firm)
 
 # Save workfile
-write.csv(data, paste0(data_out, "ch04-wms-work.csv"), row.names = F)
+write.csv(df,file = paste0(data_out, "ch04-wms-work.csv"), row.names = F)
 
-########################################################################
+ ########################################################################
 
 # Summary
 datasummary( management + emp_firm ~ mean + Median + SD + Min + Max + N , data = df )
@@ -271,7 +272,7 @@ g5b<-ggplot(data = df, aes(x = lnemp, y = management)) +
   labs(x = "Firm size (ln(employment))",y = "Management score")+
   theme_bg() 
 g5b
-save_fig("ch04-figure-5b-wms-mex-mgmt-lnemp-scatter",output , "small")
+  save_fig("ch04-figure-5b-wms-mex-mgmt-lnemp-scatter",output , "small")
 
 # Box plots by emp bins
 df$emp3bins <- as.factor(df$emp3bins)

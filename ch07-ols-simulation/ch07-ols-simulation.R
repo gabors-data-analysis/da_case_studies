@@ -89,9 +89,11 @@ F07_sim <- ggplot(data = ols, aes(x = xvar, y = yvar)) +
   theme_bg() +
   geom_vline(xintercept = mean(xvar), color=color[3], linetype="dashed", size=0.4) +
   geom_hline(yintercept = mean(yvar), color=color[3], linetype="dashed", size=0.4) +
-  geom_segment(aes(x = 0.5, y = 3.5, xend = 0.5, yend = 2.9), arrow = arrow(length = unit(0.01, "cm")))+
+  annotate("segment",x = 0.5, y = 3.5, xend = 0.5, yend = 2.9, arrow = arrow(length = unit(0.01, "cm")))+
+  # geom_segment(aes(x = 0.5, y = 3.5, xend = 0.5, yend = 2.9), arrow = arrow(length = unit(0.01, "cm")))+
   annotate("text", x = 0.3, y = 3.6, label = "Average y", size=2) +
-  geom_segment(aes(x = 1.2, y = 4, xend = 1.9, yend = 4), arrow = arrow(length = unit(0.01, "cm")))+
+  annotate("segment",x = 1.2, y = 4, xend = 1.9, yend = 4, arrow = arrow(length = unit(0.01, "cm")))+
+  # geom_segment(aes(x = 1.2, y = 4, xend = 1.9, yend = 4), arrow = arrow(length = unit(0.01, "cm")))+
   annotate("text", x = 0.9, y = 4, label = "Average x", size=2)
 F07_sim
 save_fig("ch07-figure-4-olsfit", output, "small")

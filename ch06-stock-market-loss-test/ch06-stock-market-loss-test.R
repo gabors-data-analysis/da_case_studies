@@ -27,7 +27,7 @@ library(arm)
 #install.packages("pastecs")
 library(pastecs)
 #install.packages("DataCombine")
-library(DataCombine)
+# library(DataCombine)
 library(janitor)
 
 

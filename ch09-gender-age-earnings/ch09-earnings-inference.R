@@ -196,17 +196,17 @@ data <- data %>% mutate(lnwpred_agel=predict(reg6, data))
 
 #graph with the fitted values from the three reg
 F09_3b<- ggplot(data=data,aes(x=age)) +
-  geom_line(aes(y = lnwpred_agel,  color = "Lowess", linetype = "Lowess"), size = 0.8)+
-  geom_line(aes(y = lnwpred_ageq,  color = "Quadratic", linetype = "Quadratic"), size = 0.8)+
-  geom_line(aes(y = lnwpred_agesp, color = "Piecewise linear spline", linetype = "Piecewise linear spline"), size = 0.8)+
+  geom_line(aes(y = lnwpred_agel,  color = "Lowess", linetype = "Lowess"), linewidth = 0.8)+
+  geom_line(aes(y = lnwpred_ageq,  color = "Quadratic", linetype = "Quadratic"), linewidth = 0.8)+
+  geom_line(aes(y = lnwpred_agesp, color = "Piecewise linear spline", linetype = "Piecewise linear spline"), linewidth = 0.8)+
   scale_color_manual(name = "", values=c(color[1], color[2], color[3])) +
   scale_linetype_manual(name = "", values=c("solid", "dashed", "dotted")) +
   scale_x_continuous(expand=c(0.01, 0.01), limits = c(20, 65),   breaks=seq(20, 65,   by=5)) +  
   scale_y_continuous(expand=c(0.01, 0.01), limits = c(2.4, 3.6), breaks=seq(2.4, 3.6, by=0.20)) +
   labs(x = "Age (years)",y = "ln(earnings per hour)")+
   theme_bg() +
-  theme(legend.position=c(0.55,0.1),
-        legend.direction = "horizontal",
+  theme(legend.position.inside=c(0.55,0.1),
+        legend.direction = "vertical",
         legend.text = element_text(size = 3),
         legend.key.width = unit(.8, "cm"),
         legend.key.height = unit(.2, "cm")) + 
@@ -219,9 +219,9 @@ F09_3b<- ggplot(data=data,aes(x=age)) +
   
   # same but in log scale
   F09_2b<- ggplot(data=data,aes(x=age)) +
-    geom_line(aes(y = lnwpred_agel,  color = "Lowess", linetype = "Lowess"), size = 0.8)+
-    geom_line(aes(y = lnwpred_ageq,  color = "Quadratic", linetype = "Quadratic"), size = 0.8)+
-    geom_line(aes(y = lnwpred_agesp, color = "Piecewise linear spline", linetype = "Piecewise linear spline"), size = 0.8)+
+    geom_line(aes(y = lnwpred_agel,  color = "Lowess", linetype = "Lowess"), linewidth = 0.8)+
+    geom_line(aes(y = lnwpred_ageq,  color = "Quadratic", linetype = "Quadratic"), linewidth = 0.8)+
+    geom_line(aes(y = lnwpred_agesp, color = "Piecewise linear spline", linetype = "Piecewise linear spline"), linewidth = 0.8)+
     scale_color_manual(name = "", values=c(color[1], color[2], color[3])) +
     scale_linetype_manual(name = "", values=c("solid", "dashed", "dotted")) +
     scale_x_continuous(limits = c(20, 65),   breaks=seq(20, 65,   by=5)) +  
@@ -230,8 +230,8 @@ F09_3b<- ggplot(data=data,aes(x=age)) +
                        labels=c(10, 15, 20, 25, 30, 35))+
     labs(x = "Age (years)",y = "Earnings per hour (ln scale)")+
     theme_bg()+
-    theme(legend.position=c(0.65,0.1),
-          legend.direction = "horizontal",
+    theme(legend.position.inside=c(0.65,0.1),
+          legend.direction = "vertical",
           legend.text = element_text(size = 4),
           legend.key.width = unit(.8, "cm"),
           legend.key.height = unit(.2, "cm")) + 
@@ -257,8 +257,8 @@ F09_3b<- ggplot(data=data,aes(x=age)) +
   scale_color_manual(name = "", values=c(color[1], color[2], color[3])) +
   scale_linetype_manual(name = "", values=c("solid", "dashed", "dotted")) +
   theme_bg() +
-  theme(legend.position=c(0.65,0.1),
-        legend.direction = "horizontal",
+  theme(legend.position.inside =c(0.65,0.1),
+        legend.direction = "vertical",
         legend.text = element_text(size = 4),
         legend.key.width = unit(.8, "cm"),
         legend.key.height = unit(.2, "cm")) + 
@@ -277,7 +277,7 @@ pred_confidence <- bind_cols(data,as_tibble(predict(reg7, data, interval="confid
 
 F09_2a_CI<- ggplot(data = pred_confidence %>% filter(data$lnw<4.4 & data$lnw>2), aes(x = age, y = lnw)) +
   geom_point(color = color[1], size = 1,  shape = 16, alpha = 0.8, show.legend=F, na.rm = TRUE) + 
-  geom_smooth(method="lm", colour=color[2], se=F, size = 0.8, linetype = 1)+
+  geom_smooth(formula = y ~ x, method="lm", colour=color[2], se=F, size = 0.8, linetype = 1)+
   geom_line(data = pred_confidence, aes(x = age, y = lwr), size = 0.5, linetype = 2, colour=color[2]) +
   geom_line(data = pred_confidence, aes(x = age, y = upr), size = 0.5, linetype = 2, colour=color[2]) +
   coord_cartesian(xlim = c(20, 65), ylim = c(1.5, 4.5)) +
@@ -296,7 +296,7 @@ pred_interval <- bind_cols(data,as_tibble(predict(reg7, data, interval="predicti
 
 F09_2b_PI<- ggplot(data=pred_interval %>% filter(lnw<4.4 & lnw>2),aes(x=age,y=lnw)) +  
   geom_point(color = color[1], size = 1,  shape = 16, alpha = 0.8, show.legend=F, na.rm = TRUE) +
-  geom_smooth(method="lm", colour=color[2], se=F, size = 0.8, linetype = 1)+
+  geom_smooth(formula = y ~ x, method="lm", colour=color[2], se=F, size = 0.8, linetype = 1)+
   geom_line(data = pred_interval, aes(y = lwr), size = 0.5, linetype = 2, colour=color[2]) +
   geom_line(data = pred_interval, aes(y = upr), size = 0.5, linetype = 2, colour=color[2]) +
   coord_cartesian(xlim = c(20, 65), ylim = c(1.5, 4.5)) +
@@ -335,9 +335,10 @@ F09_5<- ggplot(data=b_earnings_female, aes(`_b_female`)) +
 geom_histogram(aes(y = (..count..)/sum(..count..)), binwidth = 0.025,  center=0.0125, closed="left", 
                color = color.outline, fill = color[1],
                size = 0.2, alpha = 0.8,  show.legend=F, na.rm=TRUE) +
-  geom_segment(aes(x = -0.11, y = 0, xend = -0.11, yend = 0.2), colour = color[2], size = 1)+
+  annotate("segment",x = -0.11, y = 0, xend = -0.11, yend = 0.2, colour = color[2], size = 1)+
+  #geom_segment(aes(x = -0.11, y = 0, xend = -0.11, yend = 0.2), colour = color[2], size = 1)+
   annotate("text", x = -0.07, y = 0.18, label = "mean", size=2.5) +
-coord_cartesian(xlim = c(-0.3, 0.15), ylim = c(0, 0.2)) +
+  coord_cartesian(xlim = c(-0.3, 0.15), ylim = c(0, 0.2)) +
   labs(x = "Slope coefficients from bootstrap samples",y = "Percent")+
   scale_y_continuous(expand = c(0.0,0.0), limits = c(0,0.2), 
                      labels = scales::percent_format(accuracy = 1)) +

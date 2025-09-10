@@ -74,7 +74,7 @@ describe(df$home_goaladv)
 # Histogram
 p1<-ggplot(data = df, aes (x = home_goaladv, y = (..count..)/sum(..count..))) +
   geom_histogram(color = color.outline, fill = theme_colors[1],
-                 size = 0.2, alpha = 0.8,  show.legend=F, na.rm=TRUE,
+                 linewidth = 0.2, alpha = 0.8,  show.legend=F, na.rm=TRUE,
                 binwidth = 1) +
   geom_text(stat='count', aes(label=round((..count..)/sum(..count..)*100, 1)), hjust=0.5, vjust = -0.5, size = 2) +
   labs(x = "Goal difference", y = "Share of games (percent)") +

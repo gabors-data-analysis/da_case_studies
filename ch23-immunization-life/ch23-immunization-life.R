@@ -61,8 +61,8 @@ data <- read_csv(paste(data_in, "worldbank-immunization-continents.csv", sep = "
 # * info graph on measles vaccination continent aggregates
 
 p1 <- ggplot(data, aes(x = year, y = imm_SAS)) +
-  geom_line(color = color[1], size = 0.7) +
-  geom_line(aes(x = year, y = imm_SSF), color = color[2], size = 0.7) +
+  geom_line(color = color[1], linewidth = 0.7) +
+  geom_line(aes(x = year, y = imm_SSF), color = color[2], linewidth = 0.7) +
   geom_text(data = data[12,], aes(label = "South Asia"), hjust = 1.2, vjust = 1, size=2) +
   geom_text(data = data[16,], aes(y = imm_SSF, label = "Sub-Saharan Africa"), hjust = 0.4, vjust = 1.5, size=2) +
   labs(y = "Immunization rate (percent)", x="Date (year)") + 
@@ -71,7 +71,7 @@ p1 <- ggplot(data, aes(x = year, y = imm_SAS)) +
   theme_bg()
 
 for (name in names(data)[2:6]) {
-  p1 <- p1 + geom_line(aes_string(x = "year", y = name), color = "grey", size=0.5)
+  p1 <- p1 + geom_line(aes(x = year, y = !!sym(name)), color = "grey", size = 0.5)
 }
 p1
 save_fig("ch23-figure-2a-tsimmun", output, size = "small")
@@ -80,8 +80,8 @@ save_fig("ch23-figure-2a-tsimmun", output, size = "small")
 data[,9:15] <- data[,9:15] / 10
 
 p2 <- ggplot(data, aes(x = year, y = surv_SAS)) +
-  geom_line(color = color[1], size = 0.7) +
-  geom_line(aes(x = year, y = surv_SSF), color = color[2], size = 0.7) +
+  geom_line(color = color[1], linewidth = 0.7) +
+  geom_line(aes(x = year, y = surv_SSF), color = color[2], linewidth = 0.7) +
   geom_text(data = data[11,], aes(label = "South Asia"), hjust = 0, vjust = 1.5, size=2) +
   geom_text(data = data[15,], aes(y = surv_SSF, label = "Sub-Saharan Africa"), hjust = 0.2, vjust = 1.5, size=2) +
   labs(y = "Child survival rate (percent)", x="Date (year)") + 
@@ -90,7 +90,7 @@ p2 <- ggplot(data, aes(x = year, y = surv_SAS)) +
   theme_bg()
 
 for (name in names(data)[9:13]) {
-  p2 <- p2 + geom_line(aes_string(x = "year", y = name), color = "grey", size=0.5)
+  p2 <- p2 + geom_line(aes(x = year, y = !!sym(name)), color = "grey", size = 0.5)
 }
 p2
 save_fig("ch23-figure-2b-tssurvival", output, size = "small")

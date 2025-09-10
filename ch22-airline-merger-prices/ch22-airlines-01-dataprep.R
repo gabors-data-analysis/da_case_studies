@@ -178,32 +178,49 @@ data_agg <- data_agg %>%
 # **************************************************************************
 
 # describe yearly data
+
 data_agg %>%
   select(year, passengers) %>%
   group_by(year) %>%
-  summarise_each(funs(N = length, 
-                      q25 = quantile(., 0.25), 
-                      median = median, 
-                      q75 = quantile(., 0.75), 
-                      q90 = quantile(., 0.90),
-                      mean = mean, 
-                      sum = sum)
-                    )
+  summarise(
+    across(
+      passengers,
+      list(
+        N      = ~length(.x),
+        q25    = ~quantile(.x, 0.25, na.rm = TRUE),
+        median = ~median(.x, na.rm = TRUE),
+        q75    = ~quantile(.x, 0.75, na.rm = TRUE),
+        q90    = ~quantile(.x, 0.90, na.rm = TRUE),
+        mean   = ~mean(.x, na.rm = TRUE),
+        sum    = ~sum(.x, na.rm = TRUE)
+      )
+    ),
+    .groups = "drop"
+  )
 
 data_agg %>%
   filter(origin=="JFK" & finaldest=="LAX") %>%
   select(market, origin, finaldest, return, year, passengers)
 
+
 data_agg %>%
   filter(year == 2011) %>%
   select(smallmkt, passengers) %>%
   group_by(smallmkt) %>%
-  summarise_each(funs(N = length, 
-                      min = min, 
-                      max = max,
-                      median = median,
-                      mean = mean, 
-                      sum = sum))
+  summarise(
+    across(
+      passengers,
+      list(
+        N      = ~length(.x),
+        min    = ~min(.x, na.rm = TRUE),
+        max    = ~max(.x, na.rm = TRUE),
+        median = ~median(.x, na.rm = TRUE),
+        mean   = ~mean(.x, na.rm = TRUE),
+        sum    = ~sum(.x, na.rm = TRUE)
+      )
+    ),
+    .groups = "drop"
+  )
 
 # describe balanced
 data_agg %>%
@@ -219,19 +236,32 @@ data_agg %>%
 # describe outcome
 data_agg %>%
   filter(before == 1) %>%
-  select(avgprice) %>%
-  summarise_all(funs(N = length, 
-                      min = min, 
-                      max = max,
-                      median = median,
-                      mean = mean, 
-                      sum = sum))
+  summarise(
+    across(
+      avgprice,
+      list(
+        N      = ~length(.x),
+        min    = ~min(.x, na.rm = TRUE),
+        max    = ~max(.x, na.rm = TRUE),
+        median = ~median(.x, na.rm = TRUE),
+        mean   = ~mean(.x, na.rm = TRUE),
+        sum    = ~sum(.x, na.rm = TRUE)
+      )
+    )
+  )
+
 
 data_agg %>%
-  filter(avgprice==0) %>%
-  select(passengers) %>%
-  summarise_all(funs(N = length,
-                      mean = mean, 
-                      sum = sum))
+  filter(avgprice == 0) %>%
+  summarise(
+    across(
+      passengers,
+      list(
+        N    = ~length(.x),
+        mean = ~mean(.x, na.rm = TRUE),
+        sum  = ~sum(.x, na.rm = TRUE)
+      )
+    )
+  )
 
 write_rds(data_agg,paste0(data_out,"ch22-airline-workfile.rds"))

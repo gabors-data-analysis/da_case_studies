@@ -112,7 +112,7 @@ save_fig("ch08-figure-3b-gdppercap-hist-log", output, "small")
 reg3 <- lm(lifeexp ~ gdppc, data=xc)
 summary(reg3)
 
-ch08_lifeexp_linreg1 <- ggplot(data = xc, 
+  ch08_lifeexp_linreg1 <- ggplot(data = xc, 
                       aes(x = gdppc, y = lifeexp)) +
   geom_point_da() +
   geom_smooth_da(method="lm")+

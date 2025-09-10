@@ -31,7 +31,8 @@ pacman::p_load(scales, data.table, knitr )
 # pacman::p_load(devtools, remotes)
 
 #Part I
-pacman::p_load(lspline, cowplot, arm, pastecs, DataCombine, janitor)
+pacman::p_load(lspline, cowplot, arm, pastecs, janitor)
+# pacman::p_load(DataCombine)
 pacman::p_load(haven, Hmisc, xtable, binsreg, estimatr, modelsummary, pscl, fixest)
 # make sure it's estimatr 0.26.0
 

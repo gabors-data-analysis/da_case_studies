@@ -163,7 +163,7 @@ save_fig("ch07-figure-1b-scatter-nonpar2", output, "small")
 
 #Look at a bar chart (NOT in BOOK)
 F07_x2<- ggplot(data = hotels, aes(x = dist2, y = price)) +
-  stat_boxplot(aes(group = dist2), geom = "errorbar", width = 0.25, color = viridis(2, begin=0.3, end=0.7), size = 0.5, na.rm=T)+
+  stat_boxplot(aes(group = dist2), geom = "errorbar", width = 0.25, color = viridis(2, begin=0.3, end=0.7), linewidth = 0.5, na.rm=T)+
   geom_boxplot(aes(group = dist2),  color = viridis(2, begin=0.3, end=0.7), fill = viridis(2, begin=0.3, end=0.7), size = 0.5, width = 0.5, alpha = 0.3, na.rm=T, outlier.shape = NA) +
   geom_jitter(aes(color = dist2), position=position_jitter(0.1), size = 0.5, show.legend=F,  na.rm=T) +
   labs(x = "Distance to city center (categories)",y = "Price (US dollars)") +
@@ -313,6 +313,19 @@ F07_6b<-   ggplot(data = hotels, aes (x = e)) +
   scale_y_continuous(expand = c(0.0,0.0), limits = c(0, 0.3), breaks = seq(0, 0.3, by = 0.05), 
                      labels = scales::percent_format(accuracy = 1)) +
 theme_bg() 
+
+
+F07_6b<-   ggplot(data = hotels, aes (x = e)) +
+  #geom_histogram_da(binwidth = 20, type='percent')+
+  geom_histogram(aes(y = after_stat(count)/sum(after_stat(count))), binwidth = 20, color = color.outline, fill = theme_colors[1],
+                 size = 0.2, alpha = 0.8,  show.legend=F, na.rm=TRUE, boundary=1)+
+  labs(x = "Residuals", y = "Percent") +
+  scale_x_continuous(limits = c(-100, 300), breaks = seq(-100, 300, by = 100)) +
+  scale_y_continuous(expand = c(0.0,0.0), limits = c(0, 0.3), breaks = seq(0, 0.3, by = 0.05), 
+                     labels = scales::percent_format(accuracy = 1)) +
+  theme_bg() 
+
+
 F07_6b
 save_fig("ch07-figure-6b-resid-hist", output, "small")
 
@@ -361,7 +374,8 @@ Fig7<-   ggplot(data= hotels, aes(x = distance, y = price)) +
   scale_color_manual(name="",
                      values =c(color[1], color[1], color[1], color[1])) +
   scale_fill_manual(name="", values =c(color[4])) +
-  geom_segment(aes(x = 2, y = 25, xend = 1.15, yend = 50), arrow = arrow(length = unit(0.1, "cm")))+
+  # geom_segment(aes(x = 2, y = 25, xend = 1.15, yend = 50), arrow = arrow(length = unit(0.1, "cm")))+
+  annotate("segment",x = 2, y = 25, xend = 1.15, yend = 50, arrow = arrow(length = unit(0.1, "cm")))+
   annotate("text", x = 3, y = 25, label = "Most underpriced hotels", size=3)+
   theme_bg()+
   theme(axis.text.x=element_text(size=9)) +

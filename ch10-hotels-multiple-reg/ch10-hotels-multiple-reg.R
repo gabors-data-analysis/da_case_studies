@@ -132,12 +132,14 @@ hotels %>%
 y_yhat_hotels<- ggplot(data = hotels, aes(x = lnprice_hat, y = lnprice)) +
   geom_point(aes(color=bestdeals,shape=bestdeals), size = 1.2, fill=color[3], alpha = 0.8, show.legend=F, na.rm = TRUE) + 
   #geom_smooth_da(method="lm") +
-  geom_segment(aes(x = 3.8, y = 3.8, xend = 6, yend =6), size=0.8, color=color[2], linetype=2) +
-    labs(x = "ln(predicted price, US dollars) ",y = "ln(price, US dollars)")+
+  annotate("segment",x = 3.8, y = 3.8, xend = 6, yend =6, linewidth=0.8, color=color[2], linetype=2)+
+  # geom_segment(aes(x = 3.8, y = 3.8, xend = 6, yend =6), linewidth=0.8, color=color[2], linetype=2) +
+  labs(x = "ln(predicted price, US dollars) ",y = "ln(price, US dollars)")+
   coord_cartesian(xlim = c(3.8, 6), ylim = c(3.8, 6)) +
   scale_colour_manual(name='',values=c(color[1],'black')) +
   scale_shape_manual(name='',values=c(16,21)) +
-  geom_segment(aes(x = 4.8, y = 3.9, xend = 4.68, yend = 4.05), arrow = arrow(length = unit(0.1, "cm")))+
+  annotate("segment", x = 4.8, y = 3.9, xend = 4.68, yend = 4.05, arrow = arrow(length = unit(0.1, "cm")))+
+  #geom_segment(aes(x = 4.8, y = 3.9, xend = 4.68, yend = 4.05), arrow = arrow(length = unit(0.1, "cm")))+
   annotate("text", x = 4.93, y = 3.9, label = "Best deal", size=2.5)+
   theme_bg() +
   theme(axis.text.x=element_text(size=9)) +
@@ -151,11 +153,11 @@ save_fig("ch10-figure-3-hotels-yhat-y", output, "large")
 # residual - yhat graph (not in book)
 ggplot(data = hotels, aes(x = lnprice_hat, y = lnprice_resid)) +
   geom_point(color = color[1], size = 1,  shape = 16, alpha = 0.6, show.legend=F, na.rm = TRUE) + 
-  geom_smooth(method="lm", colour=color[4], se=F, size=1) +
+  geom_smooth(formula = y ~ x,method="lm", colour=color[4], se=F, size=1) +
   labs(x = "ln(Predicted hotel price, US dollars)",y = "Residuals")+
   coord_cartesian(xlim = c(4, 5.5)) +
-  theme_bg() +
-  background_grid(major = "xy", minor="xy", size.major = 0.2)    
+  theme_bg() 
+  #background_grid(major = "xy", minor="xy", size.major = 0.2)    
 
 
 

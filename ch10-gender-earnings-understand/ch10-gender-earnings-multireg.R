@@ -101,7 +101,7 @@ ht
 
 # not in book
 F10_earnings_hist<- ggplot(data = cps, aes (x = age, y = 2*(..count..)/sum(..count..))) +
-  geom_histogram(binwidth = 4, color = color.outline, fill = color[1], size = 0.25, alpha = 0.8,  
+  geom_histogram(binwidth = 4, color = color.outline, fill = color[1], linewidth = 0.25, alpha = 0.8,  
                  boundary=0, closed='left',  show.legend=F, na.rm =TRUE) +
   labs(x = "Age (years)", y = "Percent") +
   facet_wrap(~ifelse(female, "Female", "Male"))+
@@ -113,7 +113,7 @@ F10_earnings_hist
 
 
 
-F10_earnings_density<- ggplot(data = cps, aes(x=age, y = stat(density), color = female)) +
+F10_earnings_density <- ggplot(data = cps, aes(x=age, y = stat(density), color = female)) +
   geom_density(adjust=1.5, show.legend=F, na.rm =TRUE, size=0.7) +
   labs(x="Age (years)", y="Density", color = "") +
   scale_color_manual(name="", 
@@ -121,8 +121,10 @@ F10_earnings_density<- ggplot(data = cps, aes(x=age, y = stat(density), color = 
                      labels=c("Male","Female")) +
   scale_x_continuous(expand = c(0.01, 0.01), limits = c(24, 64), breaks = seq(25, 65, by = 5)) +
   scale_y_continuous(expand = c(0.0, 0.0), limits = c(0, 0.04), breaks = seq(0, 0.04, by = 0.01)) +
-  geom_text(aes(x = 55, y = 0.028, label = "Male"), color = color[2], size=2) +
-  geom_text(aes(x = 55, y = 0.020, label = "Female"), color = color[1], size=2) +
+  annotate("text", x = 55, y = 0.028, label = "Male", color = color[2], size=2) + 
+  annotate("text", x = 55, y = 0.020, label = "Female", color = color[1], size=2)+
+  #geom_text(aes(x = 55, y = 0.028, label = "Male"), color = color[2], size=2) +
+  #geom_text(aes(x = 55, y = 0.020, label = "Female"), color = color[1], size=2) +
   theme_bg() 
 F10_earnings_density
 save_fig("ch10-figure-1-earnings-density", output, "small")

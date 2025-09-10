@@ -111,7 +111,7 @@ share<-share %>%
 # Show graph with actual and predicted probabilities
 g1<-ggplot(data = share, label=smoking) +
   geom_point(aes(x = smoking, y = pred1), size = 1, color=color[1], shape = 16) +
-  geom_line(aes(x = smoking, y = pred1), colour=color[1],  size=0.7) +
+  geom_line(aes(x = smoking, y = pred1), colour=color[1],  linewidth=0.7) +
   geom_point(aes(x = smoking, y = stayshealthy, size=weight_2), fill = color[2], color=color[2], shape = 16, alpha=0.8, show.legend=F, na.rm=TRUE)  +
   labs(x = "Current smoker",y = "Staying healthy / Predicted probability of ")+
   coord_cartesian(xlim = c(0, 1), ylim=c(0,1)) +
@@ -176,7 +176,7 @@ g2c
 
 
 g2d<-ggplot(data = share, aes(x=bmi, y=stayshealthy)) +
-  geom_smooth(method="loess", se=F, color=color[1], size=1.5) +
+  geom_smooth(method="loess", se=F, color=color[1], linewidth=1.5) +
   scale_y_continuous(limits = c(0,1), breaks = seq(0,1,0.2)) +
   labs(x = "Body mass index",y = "Stays healthy") +
   scale_x_continuous(limits = c(10,50), breaks = seq(10,50, 10))+
@@ -296,6 +296,16 @@ share$pred_probit<- predict( probit , type = "response" )
 
 # probit marginal differences
 probit_marg <- probitmfx(  model_formula, data=share, atmean=FALSE, robust = T)
+
+probit_marg
+#library(marginaleffects)
+#probit_marg1 <- avg_slopes(probit)
+#logit_marg1 <- avg_slopes(logit)
+#probit_marg
+#probit_marg1
+
+# msummary(list(logit_marg1,probit_marg1),coef_omit = "country")
+
 print( probit_marg )
 
 # Comparing predictions from the two models
@@ -309,7 +319,8 @@ etable( lpm, logit, probit,
 # If you want to include the marginals:
 cm <- c('(Intercept)' = 'Constant')
 pmodels <- list(lpm, logit, logit_marg, probit, probit_marg)
-
+# pmodels <- list(lpm, logit, probit)
+# pmodels1 <- list(logit_marg, probit_marg)
 ##########################
 # Table 11.3 Marginal differences
 ##########################
@@ -319,6 +330,19 @@ msummary( pmodels ,
           stars=c('*' = .05, '**' = .01),
           coef_rename = cm,
           coef_omit = 'as.factor(country)*')
+
+# msummary(pmodels1)
+# msummary(pmodels)
+# msummary(logit_marg)
+
+# logit_marg
+
+msummary( pmodels ,
+          fmt="%.3f",
+          gof_omit = 'DF|Deviance|Log.Lik.|F|R2 Adj.|AIC|BIC|R2|PseudoR2',
+          stars=c('*' = .05, '**' = .01),
+          coef_rename = cm,
+          coef_omit = 'country')
 
 # could also save it by adding output...
 msummary( pmodels ,
@@ -380,8 +404,8 @@ g5<-ggplot(data = share) +
   scale_x_continuous(expand = c(0.00,0.0), limits = c(0,1), breaks = seq(0,1,0.1)) +
   scale_color_manual(name = "", values=c(color[3], color[1],color[2])) +
   theme_bg()+
-  theme(legend.position=c(0.55,0.08),
-        legend.direction = "horizontal",
+  theme(legend.position.inside=c(0.55,0.08),
+        legend.direction = "vertical",
         legend.text = element_text(size = 4))
 g5
 #save_fig("pred_scatter_3models_R", output, "small")

@@ -186,7 +186,7 @@ datasummary( age + odometer + LE + XLE + SE + cond_likenew + cond_excellent + co
 # Histograms not in textbook
 # price
 F13_h_price_R <- ggplot(data=data, aes(x=price)) +
-  geom_histogram(aes(y = (..count..)/sum(..count..)), binwidth = 1000, boundary=0,
+  geom_histogram(aes(y = (after_stat(count))/sum(after_stat(count))), binwidth = 1000, boundary=0,
                  color = color.outline, fill = color[1], size = 0.25, alpha = 0.8,  show.legend=F, na.rm=TRUE) +
   coord_cartesian(xlim = c(0, 20000)) +
   labs(x = "Price (US dollars)",y = "Percent")+
@@ -219,7 +219,7 @@ F13_h_lnprice_R
 # lowess
 Ch13_p_age_lowess_R <- ggplot(data = data, aes(x=age, y=price)) +
   geom_point( color = color[1], size = 1,  shape = 16, alpha = 0.8, show.legend=F, na.rm = TRUE) + 
-  geom_smooth(method="loess", se=F, colour=color[4], size=1, span=0.9) +
+  geom_smooth(formula = y ~ x, method="loess", se=F, colour=color[2], size=1, span=0.9) +
   labs(x = "Age (years)",y = "Price (US dollars)") +
   theme_bg() +
   expand_limits(x = 0.01, y = 0.01) +
@@ -290,15 +290,15 @@ for ( i in 1:length(models)){
 
 # Lowess vs. quadratic (reg1) regression
 Ch13_p_age_quad_vs_lowess_R <- ggplot(data = data, aes(x=age)) +
-  geom_smooth(aes(y=price, colour=color[1]), method="loess", se=F, size=1) +
+  geom_smooth(formula = y ~ x, aes(y=price, colour=color[1]), method="loess", se=F, size=1) +
   geom_line(aes(y=predict(reg1), colour=color[2]), size=1,lty=2) +
   labs(x = "Age (years)",y = "Price (US dollars)") +
   scale_color_manual(name="", values=c(color[1],color[2]),labels=c("Lowess in age","Quadratic in age")) +
   theme_bg() +
   scale_x_continuous(limits = c(0,30), breaks = seq(0,30, 5)) +
   scale_y_continuous(limits = c(0,20000), breaks = seq(0,20000, 5000)) +
-  theme(legend.position = c(0.7,0.7),
-        legend.direction = "horizontal",
+  theme(legend.position.inside = c(0.7,0.7),
+        legend.direction = "vertical",
         legend.background = element_blank(),
         legend.box.background = element_rect(color = "white"))
 

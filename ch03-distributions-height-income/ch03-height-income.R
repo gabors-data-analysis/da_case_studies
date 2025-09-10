@@ -127,6 +127,6 @@ ch03_lognormal_lnincome <- ggplot(filtered_women_income, aes(x = lnincome)) +
                                           labels = percent_format(accuracy = 0.1))) + 
   theme_bg() +
   ylab("Percent") +   xlab("ln(household income, thousand USD)") 
-  ch03_lognormal_lnincome
-  save_fig("ch03-figure-11b-hist-income-log", output, "small")
+ch03_lognormal_lnincome
+save_fig("ch03-figure-11b-hist-income-log", output, "small")
   

@@ -44,7 +44,7 @@ data_in <- paste(data_dir,"billion-prices","clean/", sep = "/")
 
 use_case_dir <- "ch06-online-offline-price-test/"
 data_out <- use_case_dir
-output <- paste0(use_case_dir,"output/")
+  output <- paste0(use_case_dir,"output/")
 create_output_if_doesnt_exist(output)
 
 
@@ -80,9 +80,11 @@ hist1<- ggplot(data=pd, aes(diff))+
   theme_bg()+
   scale_x_continuous(limits = c(-420, 420), breaks = seq(-400, 420, by = 100)) +
   scale_y_continuous(limits=c(0,6000), breaks = seq(0, 6000, by = 1000), expand = c(0.01,0.01))+
-  geom_segment(aes(x = 300, y = 500, xend = 415, yend = 20), arrow = arrow(length = unit(0.1, "cm")))+
+  annotate("segment",x = 300, y = 500, xend = 415, yend = 20, arrow = arrow(length = unit(0.1, "cm")))+
+  # geom_segment(aes(x = 300, y = 500, xend = 415, yend = 20), arrow = arrow(length = unit(0.1, "cm")))+
   annotate("text", x = 300, y = 700, label = "max value= 415", size=2.5) +
-  geom_segment(aes(x = -280, y = 500, xend = -380, yend = 20), arrow = arrow(length = unit(0.1, "cm")))+
+  annotate("segment",x = -280, y = 500, xend = -380, yend = 20, arrow = arrow(length = unit(0.1, "cm")))+
+  # geom_segment(aes(x = -280, y = 500, xend = -380, yend = 20), arrow = arrow(length = unit(0.1, "cm")))+
   annotate("text", x = -300, y = 700, label = "min value= -380", size=2.5)
 hist1
 #save_fig("R_F06_1", output, "small")

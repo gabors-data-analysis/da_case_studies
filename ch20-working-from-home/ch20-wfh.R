@@ -163,7 +163,7 @@ quitrates_barchart <-  ggplot(barchart_data,aes(fill = employees, y= pct, x=fact
   scale_x_discrete(labels = c ("Non-treatment group", "Treatment group")) +
   scale_fill_manual(labels=c("Quit", "Stayed"), name = "", values= c(color[2], color[1])) +
   theme(legend.position="right", 
-    legend.background = element_rect(size=0.1, linetype="solid", colour = color.background),
+    legend.background = element_rect(linewidth =0.1, linetype="solid", colour = color.background),
     plot.margin=unit(x=c(0.1,0.1,0.1,0.1),units="mm")  )+
     background_grid(major="y", minor="none")
 quitrates_barchart
@@ -177,15 +177,22 @@ save_fig("ch20-figure-1-wfh-quitrates-barchart", output, "small")
 # Outcomes by treatment
 
 # 1) Quit firm
+
 data %>%
   group_by(treatment) %>%
-  summarise_at(vars(quitjob),  funs(N=n(), Mean=mean(., na.rm=T), Sd=sd(., na.rm=T)))
+  summarise(
+    N = n(),
+    Mean = mean(quitjob, na.rm = TRUE),
+    Sd = sd(quitjob, na.rm = TRUE)
+  )
 
 # 2) Phonecalls (ordertakers only)
 data %>%
   group_by(treatment) %>%
   filter(ordertaker==1) %>%
-  summarise_at(vars(phonecalls1),  funs(N=n(), Mean=mean(., na.rm=T), Sd=sd(., na.rm=T)))
+  summarise(N=n(), 
+            Mean=mean(phonecalls1, na.rm=T),
+            Sd=sd(phonecalls1, na.rm=T))
 
 
 

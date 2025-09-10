@@ -365,7 +365,8 @@ discrete_roc_plot <- ggplot(
   aes(x = false_positive_rate, y = true_positive_rate, color = threshold)) +
   labs(x = "False positive rate (1 - Specificity)", y = "True positive rate (Sensitivity)") +
   geom_point(size=2, alpha=0.8) +
-  scale_color_viridis(option = "D", direction = -1) +
+  # scale_color_viridis(option = "D", direction = -1) +
+  scale_color_viridis_c()+
   scale_x_continuous(expand = c(0.01,0.01), limit=c(0,1), breaks = seq(0,1,0.1)) +
   scale_y_continuous(expand = c(0.01,0.01), limit=c(0,1), breaks = seq(0,1,0.1)) +
   theme_bg() +

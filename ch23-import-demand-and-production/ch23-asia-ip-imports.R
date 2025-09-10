@@ -141,7 +141,7 @@ work %>%
 
 # create TS graphs
 lnip_THA <- ggplot(data=work, aes(x=as.Date(date), y=ln_ip))+
-  geom_line(data=subset(work[work$country=='Thailand', ]), color=color[1], size=0.4) +
+  geom_line(data=subset(work[work$country=='Thailand', ]), color=color[1], linewidth=0.4) +
   theme_bg() +
   xlab("Date (month)") +
   ylab("ln(Thai industrial production, bn US dollars)") +
@@ -150,16 +150,16 @@ lnip_THA <- ggplot(data=work, aes(x=as.Date(date), y=ln_ip))+
                breaks = as.Date(c("1998-01-01 UTC","2002-01-01 UTC",
                                   "2006-01-01 UTC", "2010-01-01 UTC",
                                   "2014-01-01 UTC","2018-01-01 UTC"))) +
-  geom_vline(xintercept = as.Date('2008-11-01 UTC'), linetype="dashed",  color=color[3], size=0.5)+
+  geom_vline(xintercept = as.Date('2008-11-01 UTC'), linetype="dashed",  color=color[3], linewidth=0.5)+
   annotate('text', size=2, color=color[3], label='2008-09 crisis', y=22.7, x=as.Date('2008-07-01 UTC'), angle=90) +
-  geom_vline(xintercept = as.Date('2011-10-01 UTC'), linetype="dashed",  color=color[3], size=0.5)+
+  geom_vline(xintercept = as.Date('2011-10-01 UTC'), linetype="dashed",  color=color[3], linewidth=0.5)+
   annotate('text', size=2, color=color[3], label='2011-12 flood', y=22.68, x=as.Date('2011-06-01 UTC'), angle=90)
 lnip_THA
 #save_fig("ch23_lnip_THA", output, "small")
 save_fig("ch23-figure-1a-thai-lnip", output, "small")
 
 dlnip_THA <- ggplot(data=work, aes(x=as.Date(date), y=dln_ip))+
-  geom_line(data=subset(work[work$country=='Thailand', ]), color=color[1], size=0.4) +
+  geom_line(data=subset(work[work$country=='Thailand', ]), color=color[1], linewidth=0.4) +
   theme_bg() +
   xlab("Date (month)") +
   ylab('Change ln(Thai industrial prod., bn US dollars)') +
@@ -168,9 +168,9 @@ dlnip_THA <- ggplot(data=work, aes(x=as.Date(date), y=dln_ip))+
                breaks = as.Date(c("1998-01-01 UTC","2002-01-01 UTC",
                                   "2006-01-01 UTC", "2010-01-01 UTC",
                                   "2014-01-01 UTC","2018-01-01 UTC"))) +
-  geom_vline(xintercept = as.Date('2008-11-01 UTC'), linetype="dashed",  color=color[3], size=0.5)+
+  geom_vline(xintercept = as.Date('2008-11-01 UTC'), linetype="dashed",  color=color[3], linewidth=0.5)+
   annotate('text', size=2, color=color[3],  label='2008-09 crisis', y=-0.2, x=as.Date('2008-12-01 UTC'), angle=90) +
-  geom_vline(xintercept = as.Date('2011-10-01 UTC'), linetype="dashed",  color=color[3], size=0.5)+
+  geom_vline(xintercept = as.Date('2011-10-01 UTC'), linetype="dashed",  color=color[3], linewidth=0.5)+
   annotate('text', size=2, color=color[3],  label='2011-12 flood', y=-0.2, x=as.Date('2011-05-01 UTC'), angle=90)
 dlnip_THA
 save_fig("ch23_dlnip_THA", output, "small")
@@ -187,7 +187,7 @@ lnusaimp <- ggplot(data=work, aes(x=as.Date(date), y=ln_usa_imports))+
                breaks = as.Date(c("1998-01-01 UTC","2002-01-01 UTC",
                                   "2006-01-01 UTC", "2010-01-01 UTC",
                                   "2014-01-01 UTC","2018-01-01 UTC"))) +
-  geom_vline(xintercept = as.Date('2008-11-01 UTC'), linetype="dashed",  color=color[3], size=0.5)+
+  geom_vline(xintercept = as.Date('2008-11-01 UTC'), linetype="dashed",  color=color[3], linewidth=0.5)+
   annotate('text',size=2, color=color[3], label='2008-09 crisis', y=11.5, x=as.Date('2008-07-01 UTC'), angle=90)
 lnusaimp
 #save_fig("ch23_lnusaimp", output, "small")
@@ -205,7 +205,7 @@ dlnusaimp <- ggplot(data=work, aes(x=as.Date(date), y=dln_usa_imports))+
                breaks = as.Date(c("1998-01-01 UTC","2002-01-01 UTC",
                                   "2006-01-01 UTC", "2010-01-01 UTC",
                                   "2014-01-01 UTC","2018-01-01 UTC"))) +
-  geom_vline(xintercept = as.Date('2008-11-01 UTC'), linetype="dashed",  color=color[3], size=0.5)+
+  geom_vline(xintercept = as.Date('2008-11-01 UTC'), linetype="dashed",  color=color[3], linewidth=0.5)+
   annotate('text', size=2, color=color[3], label='2008-09 crisis', y=-0.10, x=as.Date('2008-06-01 UTC'), angle=90)
 dlnusaimp
 #save_fig("ch23_dlnusaimp", output, "small")

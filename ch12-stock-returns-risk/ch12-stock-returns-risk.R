@@ -23,7 +23,7 @@ library(tidyverse)
 library(lubridate)
 library(cowplot)
 library(scales)
-library(DataCombine)
+# library(DataCombine)
 library(stargazer)
 library(sandwich)
 library(dyn) 
@@ -112,7 +112,7 @@ data_daily<- data_daily %>% mutate(lnp_MSFT=log(p_MSFT),lnp_SP500=log(p_SP500))
 
   # daily graphs
 p1<-ggplot(data=data_daily,aes(x=date)) +
-  geom_line(aes(y = p_MSFT),color = color[1], size = 0.5)+
+  geom_line(aes(y = p_MSFT),color = color[1], linewidth = 0.5)+
   scale_y_continuous(expand = c(0.01,0.01),limits = c(0,120), breaks = seq(0,120,20)) +  
   scale_x_date(breaks = as.Date(c("1998-01-01","2002-01-01","2006-01-01","2010-01-01","2014-01-01","2018-01-01")),
                limits = as.Date(c("1998-01-01","2018-12-31")), labels = date_format("1%b%Y"),
@@ -124,7 +124,7 @@ save_fig("ch12-figure-2a-msft-day", output, "small", plot=p1)
 
 
 p2<-ggplot(data=data_daily,aes(x=date)) +
-  geom_line(aes(y = p_SP500),color = color[1], size = 0.5)+
+  geom_line(aes(y = p_SP500),color = color[1], linewidth = 0.5)+
   scale_y_continuous(limits = c(500,3000), breaks = seq(500,3000,500)) +  
   scale_x_date(breaks = as.Date(c("1998-01-01","2002-01-01","2006-01-01","2010-01-01","2014-01-01","2018-01-01")),
                limits = as.Date(c("1998-01-01","2018-12-31")), labels = date_format("1%b%Y"),
@@ -167,7 +167,7 @@ data_monthly<-data_monthly %>% mutate(d.lnp_MSFT=log(p_MSFT)-log(lag(p_MSFT)),
 
 
 p3<-ggplot(data=data_monthly,aes(x=date)) +
-  geom_line(aes(y = p_MSFT),color = color[1], size = 0.5)+
+  geom_line(aes(y = p_MSFT),color = color[1], linewidth = 0.5)+
   scale_y_continuous(expand = c(0.01,0.01),limits = c(0,120), breaks = seq(0,120,20)) +  
   scale_x_date(breaks = as.Date(c("1998-01-01","2002-01-01","2006-01-01","2010-01-01","2014-01-01","2018-01-01")),
                limits = as.Date(c("1998-01-01","2018-12-31")), labels = date_format("%b%Y"),
@@ -179,7 +179,7 @@ save_fig("ch12-figure-3a-msft-mo", output, "small", plot=p3)
 
 
 p4<-ggplot(data=data_monthly,aes(x=date)) +
-  geom_line(aes(y = p_SP500),color = color[1], size = 0.5)+
+  geom_line(aes(y = p_SP500),color = color[1], linewidth = 0.5)+
   scale_y_continuous(limits = c(500,3000), breaks = seq(500,3000,500)) +  
   scale_x_date(breaks = as.Date(c("1998-01-01","2002-01-01","2006-01-01","2010-01-01","2014-01-01","2018-01-01")),
                limits = as.Date(c("1998-01-01","2018-12-31")), labels = date_format("%b%Y"),
@@ -196,7 +196,7 @@ pp.test(data_monthly$p_SP500)
   
 
 p4a <- ggplot(data=data_monthly,aes(x=date)) +
-  geom_line(aes(y = PctRetMSFT),color = color[1], size = 0.4)+
+  geom_line(aes(y = PctRetMSFT),color = color[1], linewidth = 0.4)+
   geom_hline(yintercept = 1.13,color=color[3], size=0.8) +
   labs(y = "Microsoft monthly returns (percent)",x = "Date (month)")+
   scale_y_continuous(expand = c(0.01,0.01), limits=c(-45,45), breaks = seq(-40,40, by=20)) +
@@ -208,8 +208,8 @@ p4a
 save_fig("ch12-figure-4a-msft-moret",output, "small", plot=p4a)
 
 p4b<-ggplot(data=data_monthly,aes(x=date)) +
-  geom_line(aes(y = PctRetSP500),color = color[1], size = 0.4)+
-  geom_hline(yintercept = 0,47,color=color[3], size=0.8) +
+  geom_line(aes(y = PctRetSP500),color = color[1], linewidth = 0.4)+
+  geom_hline(yintercept = 0,47,color=color[3], linewidth=0.8) +
   labs(y = "S&P500 index monthly returns (percent)",x = "Date (month)")+
   scale_y_continuous(expand = c(0.01,0.01), limits=c(-45,45), breaks = seq(-40,40, by=20)) +
   scale_x_date(breaks = as.Date(c("1998-01-01","2002-01-01","2006-01-01","2010-01-01","2014-01-01","2018-01-01")),
@@ -245,31 +245,33 @@ p5<-ggplot(data=data_monthly,aes(x=PctRetSP500,y = PctRetMSFT)) +
   geom_smooth_da(method='lm')+
   labs(x="S&P500 index monthly returns (percent)",y="Microsoft stock monthly returns (percent)")  +
   theme_bg() +
-  geom_segment(aes(x = -20, y = -20, xend = 20, yend = 20), color=color[3], size=0.5, linetype="dashed")+
-  
-  geom_segment(aes(x = 10, y = 32, xend = 17, yend = 17), size=0.3, color=color[3], arrow = arrow(length = unit(0.1, "cm")))+
+  annotate("segment",x = -20, y = -20, xend = 20, yend = 20, color=color[3], linewidth=0.5, linetype="dashed")+
+  # geom_segment(aes(x = -20, y = -20, xend = 20, yend = 20), color=color[3], linewidth=0.5, linetype="dashed")+
+  annotate("segment", x = 10, y = 32, xend = 17, yend = 17, linewidth=0.3, color=color[3], arrow = arrow(length = unit(0.1, "cm")))+
+  #geom_segment(aes(x = 10, y = 32, xend = 17, yend = 17), linewidth=0.3, color=color[3], arrow = arrow(length = unit(0.1, "cm")))+
   annotate("text", x = 10, y = 35, size=2, color=color[3], label = "45 degree line for beta=1")+
-  
-  geom_segment(aes(x = -13, y = -23, xend = -16, yend = -20), size=0.3, color=color[2], arrow = arrow(length = unit(0.1, "cm")))+
+  annotate("segment",x = -13, y = -23, xend = -16, yend = -20, linewidth=0.3, color=color[2], arrow = arrow(length = unit(0.1, "cm")))+
+  #geom_segment(aes(x = -13, y = -23, xend = -16, yend = -20), linewidth=0.3, color=color[2], arrow = arrow(length = unit(0.1, "cm")))+
   annotate("text", x = -7, y = -23, size=2, color=color[2], label = "reg line, beta=1.26")
 p5
 save_fig("ch12-figure-5-stocks-scatter",output, "small", plot=p5)
 
 p5<-ggplot(data=data_monthly,aes(x=PctRetSP500,y = PctRetMSFT)) +
   geom_point_da(size=1.5)+
-  geom_smooth_da(method='lm', size=1.5)+
+  geom_smooth_da(method='lm', linewidth =1.5)+
   labs(x="S&P500 index monthly returns (percent)",y="Microsoft stock monthly returns (percent)")  +
   theme_bg() +
   theme(axis.text.x=element_text(size=9,)) +
   theme(axis.text.y=element_text(size=9)) +
   theme(axis.title.x=element_text(size=9)) +
   theme(axis.title.y=element_text(size=9)) +
-  
-  geom_segment(aes(x = -20, y = -20, xend = 20, yend = 20), color=color[3], size=0.8, linetype="dashed")+
-  
-  geom_segment(aes(x = 10, y = 34, xend = 17, yend = 17),size=0.6 , color=color[3], arrow = arrow(length = unit(0.15, "cm")))+
+  annotate("segment", x = -20, y = -20, xend = 20, yend = 20, color=color[3], size=0.8, linetype="dashed")+
+  # geom_segment(aes(x = -20, y = -20, xend = 20, yend = 20), color=color[3], size=0.8, linetype="dashed")+
+  annotate("segment", x = 10, y = 34, xend = 17, yend = 17,size=0.6 , color=color[3], arrow = arrow(length = unit(0.15, "cm")))+
+  # geom_segment(aes(x = 10, y = 34, xend = 17, yend = 17),size=0.6 , color=color[3], arrow = arrow(length = unit(0.15, "cm")))+
   annotate("text", x = 10, y = 35, size=2.5, color=color[3], label = "45 degree line for beta=1")+
-  geom_segment(aes(x = -13, y = -23, xend = -15, yend = -20),size=0.6 , color=color[2], arrow = arrow(length = unit(0.15, "cm")))+
+  annotate("segment", x = -13, y = -23, xend = -15, yend = -20, size=0.6 , color=color[2], arrow = arrow(length = unit(0.15, "cm")))+
+  # geom_segment(aes(x = -13, y = -23, xend = -15, yend = -20),size=0.6 , color=color[2], arrow = arrow(length = unit(0.15, "cm")))+
   annotate("text", x = -8, y = -23, size=2.5, color=color[2], label = "reg line, beta=1.26")
 p5
 save_fig("ch12-figure-5-stocks-scatter-large",output, "large", plot=p5)
@@ -287,8 +289,8 @@ p6a<-ggplot(data=data_monthly %>% select(date, PctRetMSFT, PctRetSP500) %>%
              limits = as.Date(c("1998-01-01","2018-12-31")), labels = date_format("%b.%Y"),
                minor_breaks = "1 year") +
   theme_bg() +
-  theme(legend.position=c(0.65,0.1),
-        legend.direction = "horizontal",
+  theme(legend.position.inside =c(0.65,0.1),
+        legend.direction = "vertical",
         legend.text = element_text(size = 4),
         legend.key.width = unit(.8, "cm"),
         legend.key.height = unit(.2, "cm")) + 
@@ -298,7 +300,7 @@ save_fig("ch12-figure-6a-stocks-together-1",output, "small", plot = p6a)
 
 p6b<-ggplot(data=data_monthly %>% select(date, PctRetMSFT, PctRetSP500) %>%  
          gather(key = "index", value = "pct_return", -date))+ 
-  geom_line(aes(x=date,y = pct_return,color=index),size = 0.5)+
+  geom_line(aes(x=date,y = pct_return,color=index),linewidth = 0.5)+
   scale_color_manual(name = "", values=c(color[1], color[2], color[3]), 
                      labels = c("MSFT", "S&P500")) +
   labs(x = 'Date (month)',y = "Monthly returns (percent)")+

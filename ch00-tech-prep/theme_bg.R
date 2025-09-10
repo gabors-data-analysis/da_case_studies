@@ -131,16 +131,16 @@ geom_point_da <- function(color = theme_colors[1], size = 1,  shape = 16, alpha 
              show.legend = show.legend, na.rm = na.rm)
 }
 
-geom_smooth_da <- function(formula = y ~ x,method="lm", color=theme_colors[2], se=F, size=0.7){
-  geom_smooth(formula = formula,method=method,color=color,se=se, size=size)
+geom_smooth_da <- function(formula = y ~ x,method="lm", color=theme_colors[2], se=F, linewidth=0.7){
+  geom_smooth(formula = formula,method=method,color=color,se=se, linewidth=linewidth)
 }
 
 geom_segment_da <- function(color=theme_colors[2], size=0.7, na.rm=TRUE){
   geom_segment(color=color,size=size,na.rm=na.rm)
 }
 
-geom_line_da <- function(color=theme_colors[1], size=0.4, na.rm=TRUE){
-  geom_line(color=color,size=size,na.rm=na.rm)
+geom_line_da <- function(color=theme_colors[1], linewidth=0.4, na.rm=TRUE){
+  geom_line(color=color,linewidth=linewidth,na.rm=na.rm)
 }
 
 

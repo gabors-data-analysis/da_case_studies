@@ -132,8 +132,8 @@ data <- data %>%
 # save workfile
 write.csv(data, paste0(data_out, "usedcars_work.csv"), row.names = F)
 
-datasummary_skim(data, 'numeric')
-datasummary_skim(data, 'categorical')
+datasummary_skim(data, type = 'numeric')
+datasummary_skim(data, type = 'categorical')
 
 
 summary(data$price)
@@ -194,7 +194,7 @@ pred_cart1t <- predict(cart1, data_train)
 
 g1<-ggplot(data = data_train, aes(x = age, y=price)) +
   geom_point_da() +
-  geom_segment(data = plot_helper_df,  aes(x = age, y=yend, xend=xend, yend=yend), color=color[2], size=1, na.rm=TRUE) +
+  geom_segment(data = plot_helper_df,  aes(x = age, y=yend, xend=xend, yend=yend), color=color[2], linewidth =1, na.rm=TRUE) +
   scale_y_continuous(expand=c(0.01,0.01), limits=c(0, 20000), breaks=seq(0, 20000, by=2500)) +
   scale_x_continuous(expand=c(0.01,0.01),limits=c(0, 25), breaks=seq(0, 25, by=5)) +
   labs(x = "Age (years)", y = "Price (US dollars)") +
@@ -443,7 +443,7 @@ rmse_cart7 <- sqrt(mean((pred_cart7 - data_test$price)^2))
 rmse_cart7
 
 printcp(pfit)
-plotcp(pfit) # doesnt work
+# plotcp(pfit) # doesnt work
 # TODO why? - most likely because it is trained with caret
 
 # Tree graph
@@ -471,7 +471,7 @@ tab_rmse <- data.frame(
   "Describe" = c("2 term. nodes", "4 term. nodes","5 term. nodes","cp = 0.01","cp = 0.002","cp = 0.0001","pruned", "multi-var", "w/ squared vars"),
   "RMSE" = c(rmse_cart1, rmse_cart2, rmse_cart3, rmse_cart4,rmse_cart5,rmse_cart6,rmse_cart7, rmse_linreg2, rmse_linreg3)
 )
-
+tab_rmse
 print(xtable(tab_rmse, type = "latex"), file = paste0(output, "ch15-table-5-rmse-ext.tex"),
       include.rownames=FALSE, booktabs=TRUE, floating = FALSE)
 
@@ -528,4 +528,4 @@ cart4 <- train(
     coord_flip() +
     scale_y_continuous(expand = c(0.01,0.01),labels = scales::percent_format(accuracy = 1)) +
     theme_bg()
-  cart4_var_imp_plot_rev
+  cart4_var_imp_plot

@@ -92,12 +92,12 @@ data_agg <- data_agg %>%
 
 
 ggplot(data_agg, aes(x = date, y = lnavgprice, color = factor(treated))) +
-  geom_line(data = filter(data_agg, treated==1), size = 1.3) +
-  geom_line(data = filter(data_agg, treated==0), size = 1.3) +
+  geom_line(data = filter(data_agg, treated==1), linewidth = 1.3) +
+  geom_line(data = filter(data_agg, treated==0), linewidth = 1.3) +
   annotate("text", x = as.yearqtr("2013-1"), y = 5.14, label = "Treated markets", size=3, color = color[2]) + 
   annotate("text", x = as.yearqtr("2013-1"), y = 5.46, label = "Unreated markets", size=3, color = color[1]) +
-  geom_vline(xintercept = as.yearqtr("2012-1"), color = color[3], size = 0.9, linetype="longdash")+
-  geom_vline(xintercept = as.yearqtr("2015-3"), color = color[3], size = 0.9, linetype="longdash") +
+  geom_vline(xintercept = as.yearqtr("2012-1"), color = color[3], linewidth = 0.9, linetype="longdash")+
+  geom_vline(xintercept = as.yearqtr("2015-3"), color = color[3], linewidth = 0.9, linetype="longdash") +
   annotate("text", x = as.yearqtr("2011-1"), y = 5.57, label = "Announcement", size=2.5, color = color[3]) + 
   annotate("text", x = as.yearqtr("2014-3"), y = 5.58, label = "Merger happens", size=2.5, color = color[3]) +
   scale_y_continuous(limits = c(5, 5.6), breaks = seq(5, 5.6, 0.1)) +
@@ -126,8 +126,8 @@ data_agg <- data_agg %>%
   )
 
 ggplot(data_agg, aes(x = date, y = lnavgprice, color = factor(treated))) +
-  geom_line(data = filter(data_agg, treated==1),  size = 0.7) +
-  geom_line(data = filter(data_agg, treated==0), size = 0.7) +
+  geom_line(data = filter(data_agg, treated==1),  linewidth = 0.7) +
+  geom_line(data = filter(data_agg, treated==0), linewidth = 0.7) +
   annotate("text", x = as.yearqtr("2013-1"), y = 5.59, label = "Unreated markets", size=2, color = color[1]) +
   annotate("text", x = as.yearqtr("2013-1"), y = 5.49, label = "Treated markets", size=2, color = color[2]) +
   geom_vline(xintercept = as.yearqtr("2012-1"), color = color[3], size = 0.6, linetype="longdash")+
@@ -154,8 +154,8 @@ data_agg <- data_agg %>%
   )
 
 ggplot(data_agg, aes(x = date, y = lnavgprice, color = factor(treated))) +
-  geom_line(data = filter(data_agg, treated==1),  size = 0.7) +
-  geom_line(data = filter(data_agg, treated==0), size = 0.7) +
+  geom_line(data = filter(data_agg, treated==1),  linewidth = 0.7) +
+  geom_line(data = filter(data_agg, treated==0), linewidth = 0.7) +
   annotate("text", x = as.yearqtr("2013-1"), y = 4.3, label = "Unreated markets", size=2, color = color[1]) +
   annotate("text", x = as.yearqtr("2013-1"), y = 4.9, label = "Treated markets", size=2, color = color[2]) +
   geom_vline(xintercept = as.yearqtr("2012-1"), color = color[3], size = 0.6, linetype="longdash")+
@@ -244,7 +244,7 @@ data_balanced %>%
   summarise(sum(passengers), mean(passengers), n())
 
 
-ggplot(data_balanced, aes(x=share_bef,  y = (..count..)/sum(..count..))) +
+ggplot(data_balanced, aes(x=share_bef,  y = (after_stat(count))/sum(after_stat(count)))) +
   geom_histogram(binwidth = 0.05, boundary=0, aes(weight = pass_bef),
                  color = color.outline, fill = color[1], alpha = 0.8,  show.legend=F, na.rm=TRUE) +
   labs(x = "Market share of AA and US combined, at baseline", y = "Percent") +

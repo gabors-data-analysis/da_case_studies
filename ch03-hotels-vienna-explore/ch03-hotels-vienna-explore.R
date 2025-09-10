@@ -194,7 +194,7 @@ histdist_Vienna_annot <- ggplot(data =  vienna_cut, aes (x = distance)) +
   expand_limits(x = 0.01, y = 0.01) +
   scale_x_continuous(expand = c(0.01,0.01), limits = c(0,14), breaks = seq(0, 14, by = 2)) +
   scale_y_continuous(expand = c(0.00,0.00), limits = c(0,61), breaks = seq(0, 60, by = 10)) +
-  geom_segment(aes(x = 8.2, y = 0, xend = 8.2, yend = 60), color = color[2], size=1) +
+  annotate("segment", x = 8.2, y = 0, xend = 8.2, yend = 60, color = color[2], size=1) +
   #geom_segment(aes(x = 10, y = 40, xend = 8.4, yend = 40), arrow = arrow(length = unit(0.2, "cm")))+
   annotate("text", x = 11, y = 29, label = "Too far out", size=2)+
   annotate("rect",xmin=8.2, xmax=14, ymin=0, ymax=60, fill=color[4], alpha=0.1)+

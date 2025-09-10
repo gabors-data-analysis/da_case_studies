@@ -162,13 +162,23 @@ data %>% group_by(hotel_id) %>% filter(n()>1) %>%
 
 data <- data %>% distinct()
 
+data <- data %>% mutate(distance = as.numeric(distance),
+                        distance_alter = as.numeric(distance_alter))
 
 #**********************************************
 #     Missing values in text
 #**********************************************
 
-datasummary_skim(data=data,histogram=F)
+datasummary_skim(data=data,fun_numeric = list(Unique = NUnique,
+                                              `Missing Pct.` = PercentMissing,
+                                              Mean = Mean, 
+                                              SD = SD, 
+                                              Min = Min, 
+                                              Median = Median,
+                                              Max = Max))
 
+
+glimpse(data)
 data <-  data %>% mutate(misrating = ifelse(is.na(rating),1,0))
 
 table(data$misrating)

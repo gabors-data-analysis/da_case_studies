@@ -429,11 +429,11 @@ rmse_train_var <- var_data %>%
 forecast_var <- var_data %>%
   forecast(h=12) %>%
   as_tsibble() %>%
-  dplyr::rename(dp_pred = .mean_dp) %>%
+  dplyr::rename(dp_pred = .mean) %>%
   select(.id, .model, date, dp_pred) %>%
   left_join(data[,c("date","p","p_lag")]) %>%
   group_by(.id, .model) %>%
-  mutate(p_pred = cumsum(dp_pred) + p_lag[1]) %>%
+  mutate(p_pred = cumsum(dp_pred[1]) + p_lag[1]) %>%
   mutate(e = p - p_pred) %>%
   ungroup()
 # Compute MSE for folds

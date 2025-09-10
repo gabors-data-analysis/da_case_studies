@@ -29,7 +29,7 @@ library(tidyverse)
 library(haven)
 library(data.table)
 library(rms)
-library(xtabs)
+# library(xtabs)
 library(lspline)
 library(huxtable)
 library(modelsummary)
@@ -289,6 +289,7 @@ datasummary( as.factor(stars)*(distance+price+lnprice)~mean+Min+Max+Median+N,dat
 reg4_rob<-ols(lnprice ~ lspline(distance, 2)  ,data[data$accommodation=="Hotel", ], x=TRUE)
 robcov(reg4_rob)
 
+reg5_rob<-ols(lnprice ~ lspline(distance, 2)  ,data[data$accommodation=="Apartment", ], x=TRUE)
 reg5_rob<-ols(lnprice ~ lspline(distance, 2)  ,data[data$accommodation=="Apartment", ], x=TRUE)
 robcov(reg5_rob)
 

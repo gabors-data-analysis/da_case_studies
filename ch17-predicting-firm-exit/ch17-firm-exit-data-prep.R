@@ -295,8 +295,8 @@ data <- data %>%
 
 ggplot(data = data, aes(x=sales_mil_log, y=as.numeric(default))) +
   geom_point(size=2,  shape=20, stroke=2, fill="blue", color="blue") +
-  geom_smooth(method = "lm", formula = y ~ poly(x,2), color=color[4], se = F, size=1)+
-  geom_smooth(method="loess", se=F, colour=color[5], size=1.5, span=0.9) +
+  geom_smooth(method = "lm", formula = y ~ poly(x,2), color=color[4], se = F, linewidth=1)+
+  geom_smooth(formula = y ~ x,method="loess", se=F, colour=color[5], linewidth=1.5, span=0.9) +
   labs(x = "sales_mil_log",y = "default") +
   theme_bg()
 
@@ -315,7 +315,7 @@ Hmisc::describe(data$d1_sales_mil_log) # no missing
 
 d1sale_1<-ggplot(data = data, aes(x=d1_sales_mil_log, y=as.numeric(default))) +
   geom_point(size=0.1,  shape=20, stroke=2, fill=color[2], color=color[2]) +
-  geom_smooth(method="loess", se=F, colour=color[1], size=1.5, span=0.9) +
+  geom_smooth(formula = y ~ x,method="loess", se=F, colour=color[1], linewidth=1.5, span=0.9) +
  labs(x = "Growth rate (Diff of ln sales)",y = "default") +
  theme_bg() +
  scale_x_continuous(limits = c(-6,10), breaks = seq(-5,10, 5))

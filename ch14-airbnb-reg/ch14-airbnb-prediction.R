@@ -413,7 +413,7 @@ colnames(t14_2) <- column_names
 print(xtable(t14_2, type = "latex", digits=c(0,0,0,2,0,2,2)), file = paste0(output, "ch14_table_fit_level.tex"),
       include.rownames=FALSE, booktabs=TRUE, floating = FALSE)
 
-# RMSE training vs test graph
+ # RMSE training vs test graph
 t1_levels <- t1 %>%
   dplyr::select("nvars", "rmse_train", "rmse_test") %>%
   gather(var,value, rmse_train:rmse_test) %>%
@@ -465,8 +465,9 @@ print(lasso_model$bestTune$lambda)
 lasso_coeffs <- coef(lasso_model$finalModel, lasso_model$bestTune$lambda) %>%
   as.matrix() %>%
   as.data.frame() %>%
-  rownames_to_column(var = "variable") %>%
-  rename(coefficient = `1`)  # the column has a name "1", to be renamed
+  rownames_to_column(var = "variable") 
+
+colnames(lasso_coeffs) <- c("variable","coefficient")
 
 print(lasso_coeffs)
 
@@ -534,7 +535,8 @@ level_vs_pred <- ggplot(data = d) +
   geom_point(aes(y=ylev, x=predlev), color = color[1], size = 1,
              shape = 16, alpha = 0.7, show.legend=FALSE, na.rm=TRUE) +
   #geom_smooth(aes(y=ylev, x=predlev), method="lm", color=color[2], se=F, size=0.8, na.rm=T)+
-  geom_segment(aes(x = 0, y = 0, xend = 350, yend =350), size=0.5, color=color[2], linetype=2) +
+  # geom_segment(aes(x = 0, y = 0, xend = 350, yend =350), size=0.5, color=color[2], linetype=2) +
+  annotate("segment",x = 0, y = 0, xend = 350, yend =350, size=0.5, color=color[2], linetype=2)+
   coord_cartesian(xlim = c(0, 350), ylim = c(0, 350)) +
   scale_x_continuous(expand = c(0.01,0.01),limits=c(0, 350), breaks=seq(0, 350, by=50)) +
   scale_y_continuous(expand = c(0.01,0.01),limits=c(0, 350), breaks=seq(0, 350, by=50)) +

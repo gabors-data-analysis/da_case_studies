@@ -78,7 +78,7 @@ rws <- rws %>%
   gather(var, value, V1:V5) 
 
 rws_plot <- ggplot(rws,aes(time, value, color=var)) + 
-  geom_line (show.legend = FALSE, size =0.8) +
+  geom_line (show.legend = FALSE, linewidth =0.8) +
   theme_bg() +
   scale_color_manual(values = c(color[1], color[2], color[3], color[4], color[5])) +
   labs(x = "Time period", 
@@ -106,7 +106,7 @@ uncorr <- uncorr %>%
 uncorr
 
 whitenoise <- ggplot(uncorr,aes(t, x)) + 
-  geom_line (show.legend = FALSE, size =0.6, color=color[1]) +
+  geom_line (show.legend = FALSE, linewidth =0.6, color=color[1]) +
   geom_hline(yintercept=0, 
              color = color[2], size=1)+
   labs(x = "Time period", 
@@ -132,9 +132,9 @@ corr08 <- E %>%
   mutate(t=as.numeric(rownames(.)))
 
 corr08_graph <- ggplot(corr08,aes(t, x)) + 
-  geom_line (show.legend = FALSE, size =0.6, color=color[1]) +
+  geom_line (show.legend = FALSE, linewidth =0.6, color=color[1]) +
   geom_hline(yintercept=0, 
-             color = color[2], size=1)+
+             color = color[2], linewidth=1)+
   labs(x = "Time period", 
        y = "Value of the simulated variable") +
     theme_bg() +

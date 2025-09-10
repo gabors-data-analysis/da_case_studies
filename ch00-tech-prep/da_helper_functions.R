@@ -28,6 +28,8 @@ library(urca)
 library(stargazer)
 library(sandwich)
 library(stringr)
+library(rlang)
+library(viridis)
 
 
 calculate_se <- function(lm_model, se = 'robust', max_lag) {
@@ -272,28 +274,33 @@ price_diff_by_variables2 <- function(df, factor_var, dummy_var, factor_lab, dumm
 
   stats[,2] <- lapply(stats[,2], factor)
 
-  ggplot(stats, aes_string(colnames(stats)[1], colnames(stats)[3], fill = colnames(stats)[2]))+
-    geom_bar(stat='identity', position = position_dodge(width=0.9), alpha=0.8)+
-    geom_errorbar(aes(ymin=Mean-(1.96*se),ymax=Mean+(1.96*se)),
-                  position=position_dodge(width = 0.9), width = 0.25)+
-    scale_color_manual(name=dummy_lab,
-                       values=c(color[2],color[1])) +
-    scale_fill_manual(name=dummy_lab,
-                      values=c(color[2],color[1])) +
-    ylab('Mean Price')+
+  ggplot(stats, aes(x = !!sym(colnames(stats)[1]),
+                    y = !!sym(colnames(stats)[3]),
+                    fill = !!sym(colnames(stats)[2]))) +
+    geom_bar(stat = "identity",
+             position = position_dodge(width = 0.9),
+             alpha = 0.8) +
+    geom_errorbar(aes(ymin = Mean - (1.96 * se),
+                      ymax = Mean + (1.96 * se)),
+                  position = position_dodge(width = 0.9),
+                  width = 0.25) +
+    scale_color_manual(name = dummy_lab,
+                       values = c(color[2], color[1])) +
+    scale_fill_manual(name = dummy_lab,
+                      values = c(color[2], color[1])) +
+    ylab("Mean Price") +
     xlab(factor_lab) +
-    theme_bg()+
-    theme(panel.grid.major=element_blank(),
-          panel.grid.minor=element_blank(),
-          panel.border=element_blank(),
-          axis.line=element_line(),
+    theme_bg() +
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.border = element_blank(),
+          axis.line = element_line(),
           legend.position = "top",
-          #legend.position = c(0.7, 0.9),
+          # legend.position = c(0.7, 0.9),
           legend.box = "vertical",
           legend.text = element_text(size = 5),
           legend.title = element_text(size = 5, face = "bold"),
-          legend.key.size = unit(x = 0.4, units = "cm")
-        )
+          legend.key.size = unit(x = 0.4, units = "cm"))
 }
 
 #ch15
@@ -324,13 +331,13 @@ save_tree_plot <- function(cart_model, filename, filepath, size, tweak = 1.2) {
   }
   png(filename =paste0(filepath, filename_png),
       width = width, height = height, units = "cm", res = 1200, pointsize = psize)
-  rpart.plot(cart_model, tweak=tweak, digits=2, extra=107, under = TRUE)
+  rpart.plot(cart_model, tweak=tweak, digits=2, extra=1, under = TRUE)
   dev.off()
 
   cairo_ps(filename = paste0(filepath, filename_eps),
            width = eps_width, height = eps_height, pointsize = psize,
            fallback_resolution = 1200)
-  rpart.plot(cart_model, tweak=tweak, digits=2, extra=107, under = TRUE)
+  rpart.plot(cart_model, tweak=tweak, digits=2, extra=1, under = TRUE)
   dev.off()
 }
 
@@ -424,7 +431,7 @@ createRocPlot <- function(r, file_name,  myheight_small = 5.625, mywidth_small =
   roc_plot <- ggplot(data = all_coords, aes(x = fpr, y = tpr)) +
     geom_line(color=color[1], size = 0.7) +
     geom_area(aes(fill = color[4], alpha=0.4), alpha = 0.3, position = 'identity', color = color[1]) +
-    scale_fill_viridis(discrete = TRUE, begin=0.6, alpha=0.5, guide = FALSE) +
+    scale_fill_viridis(discrete = TRUE, begin=0.6, alpha=0.5, guide = "none") +
     xlab("False Positive Rate (1-Specifity)") +
     ylab("True Positive Rate (Sensitivity)") +
     geom_abline(intercept = 0, slope = 1,  linetype = "dotted", col = "black") +

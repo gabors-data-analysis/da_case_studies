@@ -30,6 +30,7 @@ library(gridExtra)
 library(cowplot)
 library(scales)
 library(tidyverse)
+library(stargazer)
 
 # set working directory
 # option A: open material as project
@@ -148,4 +149,8 @@ F08_1a <- ggplot(data = hotels, aes(x = distance, y = price)) +
     theme_bg() 
   F08_1d
   save_fig("ch08-figure-2b-hotel-loglog", output, "small")
+  
+  # All four regressions
+  stargazer(reg1,reg3,reg2,reg4,type = 'text')
+  
   

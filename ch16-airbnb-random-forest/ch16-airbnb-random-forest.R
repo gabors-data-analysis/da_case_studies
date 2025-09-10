@@ -423,8 +423,6 @@ pdp_n_acc_plot
 #save_fig("rf_pdp_n_accom", output, "small")
 save_fig("ch16-figure-3a-rf-pdp-n-accom", output, "small")
 
-describe(data_holdout_w_prediction$n_accommodates)
-
 
 pdp_n_roomtype <- pdp::partial(rf_model_2, pred.var = "f_room_type", pred.grid = distinct_(data_holdout, "f_room_type"), train = data_train)
 pdp_n_roomtype_plot <- pdp_n_roomtype %>%
@@ -445,6 +443,7 @@ save_fig("ch16-figure-3b-rf-pdp-roomtype", output, "small")
 data_holdout_w_prediction <- data_holdout %>%
   mutate(predicted_price = predict(rf_model_2, newdata = data_holdout))
 
+describe(data_holdout_w_prediction$n_accommodates)
 
 
 ######### create nice summary table of heterogeneity
@@ -590,8 +589,9 @@ lasso_coeffs <- coef(
     lasso_model$bestTune$lambda) %>%
   as.matrix() %>%
   as.data.frame() %>%
-  rownames_to_column(var = "variable") %>%
-  rename(lasso_coefficient = `1`)  # the column has a name "1", to be renamed
+  rownames_to_column(var = "variable")
+
+colnames(lasso_coeffs) <- c("variable","lasso_coefficient") # the column has a name "1", to be renamed
 
 lasso_coeffs_non_null <- lasso_coeffs[!lasso_coeffs$lasso_coefficient == 0,]
 
@@ -705,5 +705,4 @@ kable(x = result_5, format = "latex", digits = 3, booktabs=TRUE, linesep = "") %
   cat(.,file= paste0(output,"horse_race_of_models_houldout_rmse.tex"))
 
 #ch16-table-1-rf-models-turning-choices
-#ch16-table-2-performance-across-subsamples
-#ch16-table-3-horse-race-of-models-cv-rmse
+#ch16-table-2-performance-across-subsamples 

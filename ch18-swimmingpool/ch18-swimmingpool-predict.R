@@ -175,7 +175,7 @@ swim_heatmap <-
   ggplot(daily_agg, aes(x = dow_abb, y = month_abb, fill = tickets)) +
   geom_tile(colour = "white") +
   labs(x = 'Day of the week', y = 'Month ') +
-  scale_fill_viridis(alpha = 0.7, begin = 1, end = 0.2, direction = 1, option = "D") +
+  scale_fill_viridis_c(alpha = 0.7, begin = 1, end = 0.2, direction = 1, option = "D") +
   theme_bg() +
   theme(legend.position = "right",
     legend.text = element_text(size=6),
@@ -189,7 +189,7 @@ swim_heatmap_log <-
   ggplot(daily_agg, aes(x = dow_abb, y = month_abb, fill = tickets_ln)) +
   geom_tile(colour = "white") +
   labs(x = 'Day of week', y = 'Month ') +
-  scale_fill_viridis(alpha = 0.7, begin = 1, end = 0.2, direction = 1, option = "D") +
+  scale_fill_viridis_c(alpha = 0.7, begin = 1, end = 0.2, direction = 1, option = "D") +
   theme_bg()  
 swim_heatmap_log
 

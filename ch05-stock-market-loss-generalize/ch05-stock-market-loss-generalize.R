@@ -24,7 +24,7 @@ rm(list=ls())
 library(tidyverse)
 library(arm)
 library(pastecs)
-library(DataCombine)
+# library(DataCombine)
 library(janitor)
 
 
@@ -79,7 +79,8 @@ returns_histogram <-ggplot(sp500,aes(pct_return))+
   labs(x = "Daily return (percent)", y = "Frequency") +
   coord_cartesian(xlim = c(-10, 10), ylim = c(0, 400)) +
   scale_y_continuous(expand = c(0, 0)) +
-  geom_segment(aes(x = -6, y = 220, xend = -5, yend = 220), arrow = arrow(length = unit(0.1, "cm")))+
+  # geom_segment(aes(x = -6, y = 220, xend = -5, yend = 220), arrow = arrow(length = unit(0.1, "cm")))+
+  annotate("segment",x = -6, y = 220, xend = -5, yend = 220, arrow = arrow(length = unit(0.1, "cm"))) +
   annotate("text", x = -8, y = 220, label = "5% loss", size=2.5)+
     theme_bg() 
 returns_histogram
@@ -137,7 +138,8 @@ resample1000<-ggplot(nobs_df,aes(nobs_1000)) +
       coord_cartesian(xlim = c(0, 1.5), ylim = c(0, 2500)) +
       scale_x_continuous(expand=c(0.01, 0.01), limits = c(0,1.5), breaks = seq(0, 1.5, by = 0.25)) +
       scale_y_continuous(expand=c(0.00, 0.00), limits = c(0,2500),breaks = seq(0, 2500, by = 500)) +
-      geom_segment(aes(x = 0.8, y = 2000, xend = 0.53, yend = 2000), arrow = arrow(length = unit(0.1, "cm")))+
+      # geom_segment(aes(x = 0.8, y = 2000, xend = 0.53, yend = 2000), arrow = arrow(length = unit(0.1, "cm")))+
+      annotate("segment", x = 0.8, y = 2000, xend = 0.53, yend = 2000, arrow = arrow(length = unit(0.1, "cm")))+
       annotate("text", x = 0.85, y = 2200, label = "Mean", size=2.5)+
       theme_bg()
 resample1000
@@ -150,9 +152,11 @@ ggplot(nobs_df,aes(nobs_1000))+
   stat_density(geom="line",aes(nobs_500, color = "n500"), bw=0.45,linetype="twodash", size = 1,kernel = "epanechnikov")+
   labs(x="Percent of days with losses over 5%", y="Density")+
   geom_vline(xintercept = 0.5,colour=color[3], size = 0.7, linetype="dashed")+
-  geom_segment(aes(x = 0.9, y = 0.72, xend = 0.65, yend = 0.72), size = 0.5, arrow = arrow(length = unit(0.1, "cm")))+
+  # geom_segment(aes(x = 0.9, y = 0.72, xend = 0.65, yend = 0.72), size = 0.5, arrow = arrow(length = unit(0.1, "cm")))+
+  annotate("segment",x = 0.9, y = 0.72, xend = 0.65, yend = 0.72, size = 0.5, arrow = arrow(length = unit(0.1, "cm")))+
   annotate("text", x = 1.1, y = 0.72, label = "Larger sample", size=2)+
-  geom_segment(aes(x = 0.9, y = 0.68, xend = 0.65, yend = 0.68), size = 0.5, arrow = arrow(length = unit(0.1, "cm")))+
+  # geom_segment(aes(x = 0.9, y = 0.68, xend = 0.65, yend = 0.68), size = 0.5, arrow = arrow(length = unit(0.1, "cm")))+
+  annotate("segment",x = 0.9, y = 0.68, xend = 0.65, yend = 0.68, size = 0.5, arrow = arrow(length = unit(0.1, "cm")))+
   annotate("text", x = 1.1, y = 0.68, label = "Smaller sample", size=2) +
   scale_x_continuous(expand=c(0.01, 0.01), limits = c(0,1.5), breaks = seq(0, 1.5, by = 0.25)) +
   scale_y_continuous(expand=c(0.00, 0.00), limits = c(0,0.8),breaks = seq(0, 0.8, by = 0.2)) +

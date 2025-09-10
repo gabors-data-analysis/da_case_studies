@@ -121,7 +121,7 @@ create_output_if_doesnt_exist(output)
 
 Ch14_p_age_lowess_R <- ggplot(data = data, aes(x = age, y = price)) +
   geom_point(color = color[1], size = 1,  shape = 16, alpha = 0.8, show.legend=FALSE, na.rm=TRUE) +
-  geom_smooth(method="loess", color=color[2], se=F, size=0.8, na.rm=T)+
+  geom_smooth(formula = y ~ x, method="loess", color=color[2], se=F, size=0.8, na.rm=T)+
    scale_y_continuous(expand = c(0.01,0.01), limits = c(0,20000), breaks = seq(0,20000, 2500)) +
    scale_x_continuous(expand = c(0.01,0.01), limits = c(0,30), breaks = seq(0,30, 5)) +
   labs(x = "Age (years)", y = "Price (US dollars)") +
@@ -134,7 +134,7 @@ save_fig("ch14-figure-2a-p-age-lowess", output, "small")
 
 Ch14_lnp_age_lowess_R <- ggplot(data = data, aes(x = age, y = lnprice)) +
   geom_point(color = color[1], size = 1,  shape = 16, alpha = 0.8, show.legend=FALSE, na.rm=TRUE) +
-  geom_smooth(method="loess", color=color[2], se=F, size=0.8, na.rm=T)+
+  geom_smooth(formula = y ~ x, method="loess", color=color[2], se=F, size=0.8, na.rm=T)+
   scale_x_continuous(expand = c(0.01,0.01), limits = c(0,30), breaks = seq(0,30, 5)) +
   scale_y_continuous(expand = c(0.01,0.01), limits = c(6, 10), breaks = seq(6,10, 1)) +
   labs(x = "Age (years)", y = "ln(price, US dollars)") +

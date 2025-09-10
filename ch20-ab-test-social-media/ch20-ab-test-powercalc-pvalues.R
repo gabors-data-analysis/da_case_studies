@@ -59,7 +59,7 @@ h = 2 * asin(sqrt(proportionA)) - 2 * asin(sqrt(proportionB))
 
 pwr.2p.test(h=h, sig.level=0.05, power = 0.8)
 
-
+pwr.2p.test(h=h, sig.level=0.05, power = 0.8)$n * 2
 
 clickthrough <- 0.0032
 conversion <- 0.0082
@@ -71,6 +71,8 @@ proportionB = proportionA * 1.2
 h = 2 * asin(sqrt(proportionA)) - 2 * asin(sqrt(proportionB))
 
 pwr.2p.test(h=h, sig.level=0.05, power = 0.8)
+
+pwr.2p.test(h=h, sig.level=0.05, power = 0.8)$n * 2
 
 
 # Part II

@@ -112,7 +112,7 @@ data <- data %>%
 numericals <- c("accommodates","bathrooms","review_scores_rating","number_of_reviews","guests_included",
                 "reviews_per_month","extra_people","minimum_nights","beds")
 data <- data %>%
-  mutate_at(vars(numericals), funs("n"=as.numeric))
+  mutate(across(all_of(numericals), as.numeric, .names = "{.col}_n"))
 
 
 # rename columns so they start with n_ as opposed to end with _n
@@ -131,7 +131,7 @@ data <- data %>%
 # create dummy vars
 dummies <- names(data)[seq(73,122)]
 data <- data %>%
-  mutate_at(vars(dummies), funs("d"= (.)))
+  mutate(across(all_of(dummies), ~ ., .names = "{.col}_d"))
 # rename columns
 dnames <- data %>%
   select(ends_with("_d")) %>%
@@ -247,8 +247,8 @@ data <- data %>%
   )
 
 # Look at data
-datasummary_skim(data$id)
-datasummary_skim(data, 'categorical' )
+datasummary_skim(data, type = 'numeric')
+datasummary_skim(data, type = 'categorical' )
 skimr::skim(data)
 
 # where do we have missing variables now?
