@@ -49,7 +49,7 @@ create_output_if_doesnt_exist(output)
 # load in clean and tidy data and create workfile
 data <- read_csv(paste0(data_in_clean,"/hotels-vienna.csv",sep=""))
 # Can load from website as well
-# data <- read_csv("https://osf.io/y6jvb/download")
+# data <- read_csv("https://osf.io/download/y6jvb/")
 data <- data %>% select(hotel_id, accommodation_type ,distance, stars,rating,rating_count,price)
 
 # look at accomodation types
@@ -90,7 +90,7 @@ data %>% select(hotel_id,price,distance) %>% slice(1:3)
 
 data <- read_csv(paste0(data_in_raw,"/hotelbookingdata-vienna.csv",sep=""))
 # Can load from website as well
-# data <- read_csv( "https://osf.io/g5dmw/download" )
+# data <- read_csv( "https://osf.io/download/g5dmw/" )
 
 # distance to center entered as string in miles with one decimal
 # generate numerical variable of rating variable from string variable

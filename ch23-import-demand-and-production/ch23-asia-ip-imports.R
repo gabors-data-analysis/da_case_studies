@@ -55,7 +55,7 @@ create_output_if_doesnt_exist(output)
 raw <- read_csv(paste(data_in, 'asia-industry_tidy.csv', sep = ""))
 
 # From OSF
-#raw <- read_dta("https://osf.io/3kd4c/download")
+#raw <- read_dta("https://osf.io/download/3kd4c/")
 
 data <- raw %>%
   filter(year >= 1998) %>%

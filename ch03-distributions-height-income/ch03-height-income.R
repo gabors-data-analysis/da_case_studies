@@ -52,7 +52,7 @@ create_output_if_doesnt_exist(output)
 # load in clean and tidy data and create workfile
 hrs <-  read.csv(paste(data_in,"hrs_height_income.csv", sep = "/"))
 # or load from the web
-# hrs <- read_csv("https://osf.io/rnuh2/download")
+# hrs <- read_csv("https://osf.io/download/rnuh2/")
 
 #------------------------------------------------------------------------------------------------------
 

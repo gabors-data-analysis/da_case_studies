@@ -69,7 +69,7 @@ create_output_if_doesnt_exist(data_work)
 share <- read_csv(paste0(data_work,'share-health-filtered.csv'))
 
 # load directly from OSF.io
-# share <- read_csv("https://osf.io/3ze58/download")
+# share <- read_csv("https://osf.io/download/3ze58/")
 share%>%nrow()
 
 # let us review the data
@@ -541,7 +541,7 @@ library(psych)
 
 # ILLUSTRATION LOGIT AND PROBIT CURVES
 
-share <- read_csv("https://osf.io/3ze58/download")
+share <- read_csv("https://osf.io/download/3ze58/")
 
 # Remove if any of important variable is missing
 share <- share[!is.na(share$bmi) & !is.na(share$eduyears) & !is.na(share$exerc), ]

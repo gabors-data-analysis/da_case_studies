@@ -59,7 +59,7 @@ create_output_if_doesnt_exist(output)
 # Import data
 df <- read_csv(paste0(data_in,"wms_da_textbook.csv"))
 # Can load from the web as well
-# df <- read_csv( "https://osf.io/uzpce/download" )
+# df <- read_csv( "https://osf.io/download/uzpce/" )
 
 # Sample selection
 df <- df %>%

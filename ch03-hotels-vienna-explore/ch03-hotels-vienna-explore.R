@@ -53,7 +53,7 @@ create_output_if_doesnt_exist(output)
 # load vienna
 vienna <- read_csv(paste0(data_in,"hotels-vienna.csv"))
 # or load from the web
-# vienna <- read_csv("https://osf.io/y6jvb/download" )
+# vienna <- read_csv("https://osf.io/download/y6jvb/" )
 
 
 ####################################################################################

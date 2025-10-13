@@ -64,7 +64,7 @@ create_output_if_doesnt_exist(output)
 
 data <- read_dta(file.path(data_in, "originfinal-panel.dta"))
 # from OSF
-#data <- read_dta("https://osf.io/zw2h9/download")
+#data <- read_dta("https://osf.io/download/zw2h9/")
 # ***************************************************************************
 # * market = origin X final destination 
 # * (note final destination is:

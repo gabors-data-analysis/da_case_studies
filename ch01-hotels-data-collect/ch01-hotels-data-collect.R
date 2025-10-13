@@ -51,7 +51,7 @@ create_output_if_doesnt_exist(output)
 # load in clean and tidy data and create workfile
 df <-  read.csv(paste0(data_in,"hotels-vienna.csv"))
 # or from the website
-# df <- read_csv("https://osf.io/y6jvb/download")
+# df <- read_csv("https://osf.io/download/y6jvb/")
 
 ############################################
 # First look

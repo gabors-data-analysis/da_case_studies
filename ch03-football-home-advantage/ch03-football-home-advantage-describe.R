@@ -57,7 +57,7 @@ create_output_if_doesnt_exist(output)
 df <- read.csv(paste0(data_in,"epl_games.csv"),
                 stringsAsFactors = F)
 # Or can load from web
-#! df <- read_csv( "https://osf.io/bdjt5/download" )
+#! df <- read_csv( "https://osf.io/download/bdjt5/" )
 
 # look at 2016/17 season only
 df <- subset(df, season==2016)
