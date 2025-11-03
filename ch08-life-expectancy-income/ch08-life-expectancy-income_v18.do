@@ -310,6 +310,7 @@ scatter lifeexp lngdppc, ///
 graph export "${output}/ch08-figure-7b-quad-Stata.png", replace
 
 * Examine quadratic residuals
+regress lifeexp lngdppc_sq
 predict resid_quad, residual
 list countryname population lifeexp resid_quad if resid_quad < -12
 list countryname population lifeexp resid_quad if resid_quad > 7.5

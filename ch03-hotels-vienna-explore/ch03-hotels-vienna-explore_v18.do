@@ -87,14 +87,13 @@ display as text "Sample size: " as result r(N) " hotels"
 
 * Figure 3.1a - Percentage distribution of star ratings
 colorpalette viridis, n(4) select(2) nograph
-local barcolor `r(p)'
 
 histogram stars, ///
 	discrete percent ///
 	xtitle("Star rating (number of stars)")  ///
 	xlabel(1(0.5)5, grid format(%3.1f)) ///
 	ylabel(0(10)50, grid)  ///
-	fcolor(`barcolor') ///
+	fcolor(`r(p)') ///
 	gap(5) ///
 	lcolor(white) ///
 	lwidth(vthin) ///
@@ -107,12 +106,11 @@ graph export "${output}/ch03-figure-1a-hist-stars-Stata.png", replace
  
 * Figure 3.1b - Frequency distribution
 colorpalette viridis, n(4) select(2) nograph
-local barcolor `r(p)'
 
 histogram stars, ///
 	discrete frequency ///
 	xtitle("Star rating (number of stars)")  ///
-	fcolor(`barcolor') ///
+	fcolor(`r(p)') ///
 	gap(5) ///
 	lcolor(white) ///
 	lwidth(vthin) ///
@@ -148,26 +146,22 @@ keep if price < 1000
 qui count
 display as text "Sample size after filters: " as result r(N)
 
-* Descriptive statistics using Stata 17+ table/collect commands
-* Stata 17+: Modern table syntax with potential export
-table (city stars), statistic(frequency) nototals
+* Descriptive statistics
+tab city
+tab stars 
 
 * To export table to Word/Excel/LaTeX (Stata 17+ only):
 * collect style cell, nformat(%9.0fc)
 * collect export "${output}/ch03-table-city-stars.docx", replace
 
-* For Stata 15 and below, use:
-* tab city stars
-
 
 * Figure 3.2a - Price histogram, binwidth=1
 colorpalette viridis, n(4) select(2) nograph
-local barcolor `r(p)'
 
 histogram price, ///
 	discrete frequency ///
 	xtitle("Price (US dollars)")  ///
-	color(`barcolor') ///
+	color(`r(p)') ///
 	xlabel(0(50)500, grid) ///
 	ylabel(0(2)8, grid)  ///
 	graphregion(fcolor(white) ifcolor(none)) ///
@@ -177,12 +171,11 @@ graph export "${output}/ch03-figure-2a-hist-price-Stata.png", replace
 
 * Figure 3.2b - Price histogram, binwidth=10
 colorpalette viridis, n(4) select(2) nograph
-local barcolor `r(p)'
 
 histogram price, ///
 	width(10) frequency ///
 	xtitle("Price (US dollars)")  ///
-	color(`barcolor') ///
+	color(`r(p)') ///
 	lcolor(white) ///
 	lwidth(vthin) ///
 	xlabel(0(50)500, grid) ///
@@ -194,12 +187,11 @@ graph export "${output}/ch03-figure-2b-hist-price-Stata.png", replace
 
 * Figure 3.3a - Price histogram, binwidth=40
 colorpalette viridis, n(4) select(2) nograph
-local barcolor `r(p)'
 
 histogram price, ///
 	width(40) start(40) frequency ///
 	xtitle("Price (US dollars)")  ///
-	color(`barcolor') ///
+	color(`r(p)') ///
 	lcolor(white) ///
 	lwidth(vthin) ///
 	xlabel(0(80)500, grid) ///
@@ -211,12 +203,11 @@ graph export "${output}/ch03-figure-3a-hist-price-Stata.png", replace
 
 * Figure 3.3b - Price histogram, binwidth=80
 colorpalette viridis, n(4) select(2) nograph
-local barcolor `r(p)'
 
 histogram price, ///
 	width(80) start(0) frequency ///
 	xtitle("Price (US dollars)")  ///
-	color(`barcolor') ///
+	color(`r(p)') ///
 	lcolor(white) ///
 	lwidth(vthin) ///
 	xlabel(0(80)500, grid) ///
@@ -232,12 +223,11 @@ graph export "${output}/ch03-figure-3b-hist-price-Stata.png", replace
 
 * Figure 3.4 - Distance histogram
 colorpalette viridis, n(4) select(2) nograph
-local barcolor `r(p)'
 
 histogram distance, ///
 	width(0.5) frequency ///
 	xtitle("Distance to city center (miles)")  ///
-	color(`barcolor') ///
+	color(`r(p)') ///
 	lcolor(white) ///
 	lwidth(vthin) ///
 	xlabel(0(2)14, grid) ///
@@ -254,14 +244,11 @@ display as text "Hotels more than 8 miles from center: " as result r(N)
 * Drop distant hotels and verify city location
 drop if distance > 8
 
-* Check city distribution (Stata 17+ table syntax)
-table city_actual, statistic(frequency) nototals
+* Check city distribution
+tab city_actual  
 
 * To export this table (Stata 17+ only):
 * collect export "${output}/ch03-table-city-actual.docx", replace
-
-* For Stata 15 and below, use:
-* tab city_actual
 
 keep if city_actual == "Vienna"
 count
