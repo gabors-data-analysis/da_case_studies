@@ -81,9 +81,7 @@ label var distance "Distance to city center, miles"
 drop if price > 600
 
 * Keep only hotels actually in Vienna
-* Stata 17+: Modern table syntax
-table city_actual, statistic(frequency) nototals
-* For Stata 15 and below, use: tab city_actual
+tab city_actual
 
 keep if city_actual == "Vienna"
 
