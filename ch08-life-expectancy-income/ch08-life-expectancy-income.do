@@ -77,7 +77,7 @@ compress
 sort countryname
 
 *** GDP total, log 
-gen gdptotal = gdppc*population
+gen gdptot = gdppc*population
  lab var gdptot "GDP total, billion USD (PPT constant 2011 prices)"
 gen lngdptot=ln(gdptot)
  lab var lngdptot "ln GDP total"
@@ -100,7 +100,7 @@ hist gdppc, percent start(0) width(3) fcol(navy*0.8) lcol(white) ///
  xtitle("GDP per capita (thousand US dollars)")
 graph export "$output/ch08-figure-3a-gdppercap-hist-Stata.png",replace
 
-lis countryname population gdpp if gdppc>80
+lis countryname population gdppc if gdppc>80
 tabstat gdppc, s(mean median sd n)
 
 * Figure 3b
@@ -109,7 +109,7 @@ hist lngdppc, percent width(0.2) fcol(navy*0.8) lc(white) ///
  xtitle("ln(GDP per capita, thousand US dollars)")
 graph export "$output/ch08-figure-3b-lngdppercap-hist-Stata.png",replace
 
-lis countryname population gdpp lngdppc if gdppc<1
+lis countryname population gdppc lngdppc if gdppc<1
 tabstat lngdppc, s(mean median sd n)
  
  
@@ -193,7 +193,7 @@ reg lifeexp lngdptot
  ylabel(50(5)85, grid) xlab(-2(2)10, grid) 
 graph export "$output/ch08-figure-6b-linreg-lntotalGDP-Stata.png",replace
 
-lis countryname population gdppc gdptotal if gdptotal>5000
+lis countryname population gdppc gdptot if gdptot>5000
  
 ******************************************************************************
 *PIECEWISE LINEAR REGRESSION
@@ -260,10 +260,10 @@ scatter lifeexp lngdppc, ///
 graph export "$output/ch08-figure-9a-linreg-unwgt-logscale-Stata.png",replace
  
  
-reg lifeexp lngdppc [w=pop]
-scatter lifeexp lngdppc [w=pop], ///
+reg lifeexp lngdppc [w=population]
+scatter lifeexp lngdppc [w=population], ///
  ms(O) mcolor(navy*0.6) ///
- || lfit lifeexp lngdppc [w=pop], lw(thick) lc(green) legend(off) ///
+ || lfit lifeexp lngdppc [w=population], lw(thick) lc(green) legend(off) ///
  ytitle("Life expectancy (years)") ///
  xtitle("GDP per capita, thousand US dollars, ln scale") ///
  ylabel(50(5)85, grid) ///
