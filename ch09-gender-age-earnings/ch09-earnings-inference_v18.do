@@ -105,15 +105,13 @@ label define sample_lbl 1 "Market research analysts" ///
 label values sample sample_lbl
 
 * Check sample distribution
-* Stata 17+: Modern table syntax
-table sample, statistic(frequency) nototals
-* For Stata 15 and below, use: tab sample
+tab sample
 
 * Select working sample (change to =2 for computer occupations)
 keep if sample == 1
 
 * Order and compress
-order hhid-stfips weight earnwke uhours w lnw female age ind occ
+order hhid-stfips weight earnwke uhours w lnw female age ind02 occ2012
 compress
 
 * Save working file
@@ -141,12 +139,9 @@ tabstat earnwke uhours w if w >= 1, ///
 ********************************************************************
 
 * Check distribution by gender
-* Stata 17+: table command
-table female, statistic(frequency) nototals
-* For Stata 15 and below, use: tab female
+tab female
 
-table occ female, statistic(frequency) nototals  
-* For Stata 15 and below, use: tab occ female
+tab occ2012 female
 
 * Simple regression: gender wage gap
 reg lnw female 
@@ -248,6 +243,7 @@ lowess lnw age if sample == 1, ///
     lineopts(lwidth(vthick) lcolor(dkgreen)) ///
     mcolor(navy) msize(small) ///
     xlabel(20(10)60, grid) ylabel(1.5(0.5)4.5, grid) ///
+	xtitle("Age (years)") ytitle("ln earnings per hour") ///
     graphregion(fcolor(white) ifcolor(none)) ///
     plotregion(fcolor(white) ifcolor(white))
 graph export "${output}/ch09-figure-3a-wage-lowess-Stata.png", replace
