@@ -132,7 +132,7 @@ list hotel_id price lnprice_resid distance stars rating if _n<=5
 * outputing the list in a LaTex format
 listtex hotel_id price lnprice_resid distance stars rating ///
  using "$output\ch10-table-6-hotels-good-deals-Stata.tex" if _n<=5, replace ///  
- headlines( "\begin{tabular}{l c c c c c})" ///
+ headlines( "\begin{tabular}{l c c c c c}" ///
  \hline "Hotel name & price & residual in ln(price) & distance & stars & rating \\" \hline) ///
  footlines(\hline \end{tabular}) rstyle(tabular) 
  /* the tabular style makes the table LaTex friendly */
