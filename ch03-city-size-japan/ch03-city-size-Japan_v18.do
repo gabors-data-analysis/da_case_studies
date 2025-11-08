@@ -76,13 +76,11 @@ gen rank = _n
 gen lnrank = ln(rank)
 
 * Set up viridis color scheme
-colorpalette viridis, n(2) nograph
-local colors `r(p)'
-local color1 `=word("`colors'", 1)'
-local color2 `=word("`colors'", 2)'
+colorpalette viridis, n(4) select(2) nograph
 
-scatter lnrank lnpop, mcolor("`color1'") || ///
-        lfit lnrank lnpop, lcolor("`color2'") ///
+
+scatter lnrank lnpop, mcolor(`r(p)') || ///
+        lfit lnrank lnpop, lcolor(`r(p)') ///
  legend(off) ///
  ytitle("ln(rank)") ///
  xtitle("ln(population in thousand)") ///
