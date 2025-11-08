@@ -29,7 +29,6 @@
 * for example:
 * cd "C:/Users/xy/Dropbox/gabors_data_analysis/da_case_studies"
   
-  
 * STEP 2: * Directory for data
 * Option 1: run directory-setting do file
 do set-data-directory.do 
@@ -71,12 +70,11 @@ sum height if age>=55 & age<60 & female==1 & height>1.3
 
 * Histogram with normal density overlayed
 * Figure 3.10
-colorpalette viridis, n(1) nograph
-local color1 `r(p)'
+colorpalette viridis, n(4) select(2) nograph
 
 hist height if age>=55 & age<60 & female==1 & height>1.3, ///
  percent width(0.025) ///
- color("`color1'") lcol(white) ///
+ color(`r(p)') lcol(white) ///
  normal ///
  ylabel(, grid) ///
  xlabel(1.4(0.1)1.9, grid) ///
@@ -97,12 +95,11 @@ count if age>=55 & age<60 & female==1 & hhincome>1000 & hhincome!=.
 count if age>=55 & age<60 & female==1 & hhincome==.
 count if age>=55 & age<60 & female==1 & hhincome>1 & hhincome<1000
 
-colorpalette viridis, n(1) nograph
-local color1 `r(p)'
+colorpalette viridis, n(4) select(2) nograph
 
 hist hhincome if age>=55 & age<60 & female==1 & hhincome>1 & hhincome<1000, ///
  percent width(20) ///
- color("`color1'") lcol(white) lw(vvthin) ///
+ color(`r(p)') lcol(white) lw(vvthin) ///
  ylabel(0(5)25, grid) ///
  xlabel(0(200)1000, grid) ///
  xtitle("Household income (thousand US dollars)") ///
@@ -115,12 +112,11 @@ graph export "$output/ch03-figure-11a-hist-inc-Stata.png", replace as(png)
 gen lnincome = ln(hhincome)
 lab var lnincome "ln(household income, thousand US dollars)"
 
-colorpalette viridis, n(1) nograph
-local color1 `r(p)'
+colorpalette viridis, n(4) select(2) nograph
 
 hist lnincome if age>=55 & age<60 & female==1 & lnincome>0 & hhincome<1000, ///
  percent width(0.25) start(0) ///
- color("`color1'") lcol(white) ///
+ color(`r(p)') lcol(white) ///
  ylabel(0(2.5)10, grid) ///
  xlabel(0(1)8, grid) ///
  normal ///
