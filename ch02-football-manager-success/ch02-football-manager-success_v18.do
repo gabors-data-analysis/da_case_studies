@@ -145,21 +145,18 @@ separate manager_win_ratio, by(manager_games < 18)
 * Focus on managers with win ratio >= 2 points per game
 
 * Set up viridis color scheme
-colorpalette viridis, n(2) nograph
-local colors `r(p)'
+colorpalette viridis, n(4) select(2) nograph
 
-graph hbar (mean) manager_win_ratio0 manager_win_ratio1 if manager_win_ratio >= 2, ///
- nofill ///
- over(manager_name, sort(manager_win_ratio) descending) ///
- bar(1, fcolor("`=word("`colors'", 1)'") lcolor("`=word("`colors'", 1)'")) ///
- bar(2, fcolor("`=word("`colors'", 2)'") lcolor("`=word("`colors'", 2)'")) ///
- legend(off) ///
- yscale(r(1.6(0.2)3)) ///
- exclude0 ///
- ylabel(1.6(0.2)3, grid) ///
- yline(1.6(0.2)3) ///
+graph hbar (mean) manager_win_ratio0 manager_win_ratio1 if manager_win_ratio>=2, ///
+ nofill over(manager_name, sort(manager_win_ratio) descending) ///
+ scheme(viridis) ///
+ legend(off) yscale(r(1.6(0.2)3)) exclude0  ylabel(1.6(0.2)3, grid)  ///
+  yline(1.6(0.2)3) ///
  graphregion(fcolor(white) ifcolor(none)) ///
  plotregion(fcolor(white) ifcolor(white))
+graph export "$output/ch02-figure1-top-managers-Stata.png", replace
+
+
 
 * Export using Stata 18 syntax
 graph export "$output/ch02-figure1-top-managers-Stata.png", replace as(png)
