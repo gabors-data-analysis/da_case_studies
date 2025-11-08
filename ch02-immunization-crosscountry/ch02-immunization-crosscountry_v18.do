@@ -28,7 +28,6 @@
 * for example:
 * cd "C:/Users/xy/Dropbox/gabors_data_analysis/da_case_studies"
 
-
 * STEP 2: * Directory for data
 * Option 1: run directory-setting do file
 do set-data-directory.do 
@@ -73,13 +72,12 @@ list
 *****************************
 
 * Export to LaTeX using Stata 18 collect
-preserve
-collect create table5
-collect get countryname year imm gdppc, ///
-        tag(var[countryname year imm gdppc])
-collect layout (var) ()
-collect export "$output/xt_immun_long.tex", replace as(tex)
-restore
+listtab countryname year imm gdppc ///
+ using "$output/xt_immun_long.tex", replace ///
+ rstyle(tabular) ///
+ head("\begin{tabular}{lrrr}" ///
+ `"Country & Year & imm & gdppc \\"') ///
+ foot("\end{tabular}")
 
 * Reshape from long to wide format
 * Creates separate variables for each year: imm2015, imm2016, imm2017, etc.
@@ -93,9 +91,10 @@ list
 *****************************
 
 * Export to LaTeX using Stata 18 collect
-collect create table4
-collect get countryname imm* gdppc*, ///
-        tag(var[countryname imm2015 imm2016 imm2017 gdppc2015 gdppc2016 gdppc2017])
-collect layout (var) ()
-collect export "$output/xt_immun_wide.tex", replace as(tex)
+listtab countryname imm* gdppc* ///
+ using "$output/xt_immun_wide.tex", replace ///
+ rstyle(tabular) ///
+ head("\begin{tabular}{lrrrrrr}" ///
+ `"Country & imm2015 & imm2016 & imm2017 & gdppc2015 & gdppc2016 & gdppc2017  \\"') ///
+ foot("\end{tabular}")
 
