@@ -29,7 +29,6 @@
 * STEP 1: set working directory for da_case_studies.
 * for example:
 * cd "C:/Users/xy/Dropbox/gabors_data_analysis/da_case_studies"
- 
 
 * STEP 2: * Directory for data
 * Option 1: run directory-setting do file
@@ -82,36 +81,31 @@ tab accommodation_type
 **********************************************
 
 sort hotel_id
-list hotel_id price accommodation_type distance stars rating rating_count if _n==2
+list hotel_id price accommodation_type distance stars rating rating_count if _n == 2
 
-* Export to LaTeX using Stata 18 collect
-preserve
-keep if _n==2
-collect create table2
-collect get hotel_id price accommodation_type distance stars rating rating_count, ///
-        tag(var[hotel_id price accommodation_type distance stars rating rating_count])
-collect layout (var) ()
-collect export "$output/ch02-table2-hotel-list-Stata.tex", replace as(tex)
-restore
+
+listtab hotel_id price accommodation_type distance stars rating rating_count if _n == 2 ///
+ using "$output/ch02-table2-hotel-list-Stata.tex", replace ///
+ rstyle(tabular) ///
+ head("\begin{tabular}{lrrrrrr}" ///
+ `"Hotel ID & Price & Accomodation &Distance & stars & rating & rating count \\"') ///
+ foot("\end{tabular}")
 
 
 **********************************************
 * Table 2.3: First three hotels after filtering
 **********************************************
 
-keep if accommodation_type=="Hotel"
+keep if accommodation_type == "Hotel"
 count
-list hotel_id price distance if _n<=3
+list hotel_id price distance if _n <= 3
 
-* Export to LaTeX using Stata 18 collect
-preserve
-keep if _n<=3
-collect create table3
-collect get hotel_id price distance, ///
-        tag(var[hotel_id price distance])
-collect layout (var) ()
-collect export "$output/ch02-table3-hotel-simpletidy-Stata.tex", replace as(tex)
-restore
+listtab hotel_id price distance if _n <= 3 ///
+ using "$output/ch02-table3-hotel-simpletidy-Stata.tex", replace ///
+ rstyle(tabular) ///
+ head("\begin{tabular}{lrr}" ///
+ `"Hotel ID & Price  & Distance  \\"') ///
+ foot("\end{tabular}")
 
 
 
@@ -188,18 +182,16 @@ list hotel_id if hotel_id==hotel_id[_n-1]
 *********************************
 * Table 2.10: Example duplicates
 *********************************
-list hotel_id accommodation_type price distance stars rating rating_count ///
- if hotel_id==22050 | hotel_id==22185
+list hotel_id accommodation_type price  distance stars rating rating_count ///
+ if hotel_id == 22050 | hotel_id == 22185
 
-* Export to LaTeX using Stata 18 collect 
-preserve
-keep if hotel_id==22050 | hotel_id==22185
-collect create table10
-collect get hotel_id accommodation_type price distance stars rating rating_count, ///
-        tag(var[hotel_id accommodation_type price distance stars rating rating_count])
-collect layout (var) ()
-collect export "$output/ch02-table10-hotel-duplicates-Stata.tex", replace as(tex)
-restore
+ 
+listtab hotel_id accommodation_type price  distance stars rating rating_count if hotel_id == 22050 | hotel_id == 22185 ///
+ using "$output/ch02-table10-hotel-duplicates-Stata.tex", replace ///
+ rstyle(tabular) ///
+ head("\begin{tabular}{lrrrrrr}" ///
+ `"Hotel ID & Price & Accomodation &Distance & stars & rating & rating count \\"') ///
+ foot("\end{tabular}")
 
  
 * These are perfect duplicates of the observation in the previous row
