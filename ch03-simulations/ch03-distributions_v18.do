@@ -30,7 +30,6 @@
 * For example:
 * cd "C:/Users/xy/Dropbox/gabors_data_analysis/da_case_studies"
 
-
 global work  	"ch03-simulations"
 
 cap mkdir 		"$work/output"
@@ -50,7 +49,7 @@ set obs $N
 
 
 * Set up viridis color for all distributions
-colorpalette viridis, n(1) nograph
+colorpalette viridis, n(4) select(2) nograph
 local color1 `r(p)'
 
 * Bernoulli
