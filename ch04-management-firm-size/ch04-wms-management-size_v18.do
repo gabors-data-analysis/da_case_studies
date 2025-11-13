@@ -81,7 +81,7 @@ sum management emp_firm, d
 tabstat management emp_firm, s(min max mean median sd n) col(s)
 
 * Figure 4.1
-colorpalette viridis, n(1) nograph
+colorpalette viridis, n(4) select(2) nograph
 local color1 `r(p)'
 
 hist management, ///
@@ -95,7 +95,7 @@ hist management, ///
 graph export "$output/ch04-figure-1-wms-mex-management-hist-Stata.png", replace as(png)
 
 * Figure 4.2a
-colorpalette viridis, n(1) nograph
+colorpalette viridis, n(4) select(2) nograph
 local color1 `r(p)'
 
 hist emp_firm, ///
@@ -111,7 +111,7 @@ graph export "$output/ch04-figure-2a-wms-mex-emp-hist-Stata.png", replace as(png
 
 * Figure 4.2b
 gen lnemp = ln(emp_firm)
-colorpalette viridis, n(1) nograph
+colorpalette viridis, n(4) select(2) nograph
 local color1 `r(p)'
 
 hist lnemp, ///
@@ -143,7 +143,7 @@ qui foreach v of varlist lean* perf* talent* {
 }
 
 * Set up viridis palette for stacked bars
-colorpalette viridis, n(5) nograph
+colorpalette "yellow*1.2" "green*0.6" "bluishgray*1.2" "navy*0.6" "navy", nograph
 local colors `r(p)'
 
 tab lean1 emp3bins, col nofre
@@ -157,7 +157,7 @@ graph bar lean1_*, stack over(emp3bins) percent ///
  title("Lean management. Score by three bins of firm emp") ///
  graphregion(fcolor(white) ifcolor(none)) ///
  plotregion(fcolor(white) ifcolor(white))
-
+ 
 graph export "$output/ch04-figure-3a-wms-mex-lean1-emp3bins-Stata.png", replace as(png)
 
 tab perf2 emp3bins, col nofre
@@ -186,7 +186,7 @@ tabstat emp_firm, s(min max median n) by(emp10bins)
 egen management_emp3bins  = mean(management), by(emp3bins)
 egen management_emp10bins = mean(management), by(emp10bins)
 
-colorpalette viridis, n(1) nograph
+colorpalette viridis, n(4) select(2) nograph
 local color1 `r(p)'
 
 scatter management_emp3bins emp3bins_num, ///
