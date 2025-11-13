@@ -75,7 +75,7 @@ replace home_goaldir = 1 if home_goaladv>0
 
 * Histogram
 * Figure 3.9
-colorpalette viridis, n(1) nograph
+colorpalette viridis, n(4) select(2) nograph
 local color1 `r(p)'
 
 histogram home_goaladv, ///
