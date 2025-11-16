@@ -68,10 +68,12 @@ local meanx = r(mean)
 * Average y and average x shown
 
 * Set up viridis colors
-colorpalette viridis, n(2) nograph
-local colors `r(p)'
-local color1 `=word("`colors'", 1)'
-local color2 `=word("`colors'", 2)'
+colorpalette viridis, n(4) select(2) nograph
+local color1 `r(p1)'
+
+colorpalette viridis, n(4) select(3) nograph
+local color2 `r(p1)'
+
 
 scatter y x, ///
  mc("`color1'") ms(O) msize(small) mlw(thick) ///
