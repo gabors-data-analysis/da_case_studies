@@ -28,7 +28,6 @@
 * for example:
 * cd "C:/Users/xy/Dropbox/gabors_data_analysis/da_case_studies"
 
-
 * STEP 2: * Directory for data
 * Option 1: run directory-setting do file
 do set-data-directory.do 
@@ -91,7 +90,7 @@ count if pd<0
 count if pd>=-1 & pd<=1
 
 * Set up viridis color
-colorpalette viridis, n(1) nograph
+colorpalette viridis, n(4) select(2) nograph
 local color1 `r(p)'
 
 * Figure 6.1 (a)
