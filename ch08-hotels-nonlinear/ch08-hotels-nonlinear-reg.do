@@ -23,7 +23,6 @@
 * for example:
 * cd "C:/Users/xy/Dropbox/gabors_data_analysis/da_case_studies"
 
-
 * STEP 2: * Directory for data
 * Option 1: run directory-setting do file
 do set-data-directory.do 
@@ -38,7 +37,7 @@ do set-data-directory.do
 
 
 global data_in  "$data_dir/hotels-vienna/clean"
-global work  	"ch07-hotels-nonlinear"
+global work  	"ch08-hotels-nonlinear"
 
 cap mkdir 		"$work/output"
 global output 	"$work/output"
