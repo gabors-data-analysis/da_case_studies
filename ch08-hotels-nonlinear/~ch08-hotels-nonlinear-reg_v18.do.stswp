@@ -11,9 +11,15 @@
 * 	Not to be used for commercial purposes.
 *
 * Chapter 08
-* CH0bA Finding a good deal among hotels with nonlinear function
+* CH08A Finding a good deal among hotels with nonlinear function
 * using the hotels-vienna dataset
-* version 0.9 2020-09-06
+*
+* REVISION HISTORY:
+* Version 0.9 2020-09-06 - original
+* Version 1.0 2025-11-03 - Stata 18 upgrade
+*   - Applied viridis colors instead of navy/green
+*   - Fixed typo in header (CH0bA → CH08A)
+*   - Already had as(png) in original
 ********************************************************************
 
 
@@ -22,6 +28,7 @@
 * STEP 1: set working directory for da_case_studies.
 * for example:
 * cd "C:/Users/xy/Dropbox/gabors_data_analysis/da_case_studies"
+cd "C:\Users\Kovacs_Borbala\Desktop\da_case_studies"
 
 * STEP 2: * Directory for data
 * Option 1: run directory-setting do file
@@ -46,7 +53,7 @@ global output 	"$work/output"
 
 
 
-* load in clean and tidy data and create workfile
+* Load in clean and tidy data and create workfile
 use "$data_in/hotels-vienna.dta", clear
 
 * Or download directly from OSF:
@@ -66,11 +73,11 @@ label var distance "Distance to city center, miles"
 drop if price>600 	/* likely error */
 
 
-*** drop hotels not really in Vienna
+*** Drop hotels not really in Vienna
 tab city_actual 
 keep if city_actual=="Vienna"
 
-* save work file
+* Save work file
 save "$work/hotels_work.dta", replace
 
 
@@ -80,64 +87,90 @@ save "$work/hotels_work.dta", replace
 *** SCATTERPLOT + REGRESSION LINE
 
 
-gen lnprice=ln(price)
-	lab var lnprice "ln(price)"
+gen lnprice = ln(price)
+lab var lnprice "ln(price)"
 count
 count if distance==0
-gen lndistance=ln(distance)
-	replace lndistance = ln(distance+0.05) if distance==0
-	lab var lndistance "ln(distance to city center)"
+gen lndistance = ln(distance)
+replace lndistance = ln(distance+0.05) if distance==0
+lab var lndistance "ln(distance to city center)"
 
-	
-* run and compare regressions	
+		
+* Run and compare regressions	
 reg price distance, r
-	outreg2 using "$output/T08_reg1.tex", label bdec(2) tex(frag) nose noaster replace
+outreg2 using "$output/T08_reg1.tex", label bdec(2) tex(frag) nose noaster replace
+
 reg lnprice distance, r
-	 outreg2 using "$output/T08_reg1.tex", label bdec(2) tex(frag) nose noaster  append
+outreg2 using "$output/T08_reg1.tex", label bdec(2) tex(frag) nose noaster append
+
 reg price lndistance, r
-	outreg2 using "$output/T08_reg1.tex", label bdec(2) tex(frag)  nose noaster  append
+outreg2 using "$output/T08_reg1.tex", label bdec(2) tex(frag) nose noaster append
+
 reg lnprice lndistance
-	outreg2 using "$output/T08_reg1.tex", label bdec(2) tex(frag) nose noaster   append
-	
-* create graphs	
-scatter price distance , ///
- ms(O) msize(small) mlw(thick) mcolor(navy*0.6) ///
- xlab(0(1)7, grid) ylab(000(50)400, grid) ///
+outreg2 using "$output/T08_reg1.tex", label bdec(2) tex(frag) nose noaster append
+
+* Set up viridis colors
+colorpalette viridis, n(4) select(2) nograph
+local color1 `r(p1)'
+colorpalette viridis, n(4) select(3) nograph
+local color2 `r(p1)'
+		
+* Create graphs	
+scatter price distance, ///
+ ms(O) msize(small) mlw(thick) mcolor("`color1'") ///
+ xlab(0(1)7, grid) ///
+ ylab(000(50)400, grid) ///
  xtitle("Distance to city center (miles)") ///
  ytitle("Hotel price(US dollars)") ///
- || lfit price distance, lw(thick) lc(green) legend(off)  ///
- graphregion(fcolor(white) ifcolor(none))  ///
+ || lfit price distance, ///
+ lw(thick) lc("`color2'") ///
+ legend(off) ///
+ graphregion(fcolor(white) ifcolor(none)) ///
  plotregion(fcolor(white) ifcolor(white))
+
 graph export "$output/ch08-figure-1a-hotel-levlev-Stata", as(png) replace
 
 
-scatter lnprice distance , ///
- ms(O) msize(small) mlw(thick) mcolor(navy*0.6) ///
- xlab(0(1)7, grid) ylab(3.5(0.50)6, grid) ///
+scatter lnprice distance, ///
+ ms(O) msize(small) mlw(thick) mcolor("`color1'") ///
+ xlab(0(1)7, grid) ///
+ ylab(3.5(0.50)6, grid) ///
  xtitle("Distance to city center (miles)") ///
  ytitle("ln(hotel price in US dollars)") ///
- || lfit lnprice distance, lw(thick) lc(dkgreen) legend(off)  ///
- graphregion(fcolor(white) ifcolor(none))  ///
+ || lfit lnprice distance, ///
+ lw(thick) lc("`color2'") ///
+ legend(off) ///
+ graphregion(fcolor(white) ifcolor(none)) ///
  plotregion(fcolor(white) ifcolor(white))
+
 graph export "$output/ch08-figure-1b-hotel-loglev-Stata", as(png) replace
 
-scatter price lndistance , ///
- ms(O) msize(small) mlw(thick) mcolor(navy*0.6) ///
- xlab(-2.5(0.5)2, grid) ylab(000(50)400, grid) ///
+scatter price lndistance, ///
+ ms(O) msize(small) mlw(thick) mcolor("`color1'") ///
+ xlab(-2.5(0.5)2, grid) ///
+ ylab(000(50)400, grid) ///
  xtitle("ln(distance to city center, miles)") ///
  ytitle("Hotel price (US dollars) ") ///
- || lfit price lndistance, lw(thick) lc(dkgreen) legend(off)  ///
- graphregion(fcolor(white) ifcolor(none))  ///
+ || lfit price lndistance, ///
+ lw(thick) lc("`color2'") ///
+ legend(off) ///
+ graphregion(fcolor(white) ifcolor(none)) ///
  plotregion(fcolor(white) ifcolor(white))
+
 graph export "$output/ch08-figure-1c-hotel-levlog-Stata", as(png) replace
 
 
-scatter lnprice lndistance , ///
- ms(O) msize(small) mlw(thick) mcolor(navy*0.6) ///
- xlab(-3(0.5)2, grid) ylab(3.5(0.50)6, grid) ///
+scatter lnprice lndistance, ///
+ ms(O) msize(small) mlw(thick) mcolor("`color1'") ///
+ xlab(-3(0.5)2, grid) ///
+ ylab(3.5(0.50)6, grid) ///
  xtitle("ln(distance to city center, miles)") ///
  ytitle("ln(hotel price in US dollars)") ///
- || lfit lnprice lndistance, lw(thick) lc(dkgreen) legend(off)  ///
- graphregion(fcolor(white) ifcolor(none))  ///
+ || lfit lnprice lndistance, ///
+ lw(thick) lc("`color2'") ///
+ legend(off) ///
+ graphregion(fcolor(white) ifcolor(none)) ///
  plotregion(fcolor(white) ifcolor(white))
+
 graph export "$output/ch08-figure-1d-hotel-loglog-Stata", as(png) replace
+

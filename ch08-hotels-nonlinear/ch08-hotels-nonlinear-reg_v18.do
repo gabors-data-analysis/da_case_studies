@@ -29,7 +29,6 @@
 * for example:
 * cd "C:/Users/xy/Dropbox/gabors_data_analysis/da_case_studies"
 
-
 * STEP 2: * Directory for data
 * Option 1: run directory-setting do file
 do set-data-directory.do 
@@ -44,7 +43,7 @@ do set-data-directory.do
 
 
 global data_in  "$data_dir/hotels-vienna/clean"
-global work  	"ch07-hotels-nonlinear"
+global work  	"ch08-hotels-nonlinear"
 
 cap mkdir 		"$work/output"
 global output 	"$work/output"
@@ -110,10 +109,10 @@ reg lnprice lndistance
 outreg2 using "$output/T08_reg1.tex", label bdec(2) tex(frag) nose noaster append
 
 * Set up viridis colors
-colorpalette viridis, n(2) nograph
-local colors `r(p)'
-local color1 `=word("`colors'", 1)'
-local color2 `=word("`colors'", 2)'
+colorpalette viridis, n(4) select(2) nograph
+local color1 `r(p1)'
+colorpalette viridis, n(4) select(3) nograph
+local color2 `r(p1)'
 		
 * Create graphs	
 scatter price distance, ///
