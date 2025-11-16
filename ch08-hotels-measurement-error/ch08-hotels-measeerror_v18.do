@@ -102,10 +102,10 @@ predict yhat3
 lab var yhat3 "less noisy x: # ratings >`k2'"
 
 * Set up viridis colors
-colorpalette viridis, n(2) nograph
-local colors `r(p)'
-local color1 `=word("`colors'", 1)'
-local color2 `=word("`colors'", 2)'
+colorpalette viridis, n(4) select(2) nograph
+local color1 `r(p1)'
+colorpalette viridis, n(4) select(3) nograph
+local color2 `r(p1)'
 
 line yhat1 yhat3 rating, ///
 	lw(vthick vthick) ///
