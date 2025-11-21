@@ -200,11 +200,3 @@ scatter lnprice lnprice_hat if _n > 5, ///
 graph export "${output}/ch10-figure-3-hotels-yhat-y-Stata.png", replace
 
 
-********************************************************************
-* END OF SCRIPT
-********************************************************************
-
-display as text _newline(2) "Analysis complete!"
-display as text "Output saved to: ${output}"
-display as text "Stata version: " as result c(stata_version)
-display as text "Date: " as result c(current_date)

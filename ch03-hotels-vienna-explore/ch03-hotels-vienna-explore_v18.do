@@ -253,14 +253,3 @@ tab city_actual
 keep if city_actual == "Vienna"
 count
 display as text "Final sample size: " as result r(N) " hotels"
-
-
-********************************************************************
-* END OF SCRIPT
-********************************************************************
-
-* Log results
-display as text _newline(2) "Analysis complete!"
-display as text "Output saved to: ${output}"
-display as text "Stata version: " as result c(stata_version)
-display as text "Date: " as result c(current_date)

@@ -11,47 +11,55 @@
 * 	Not to be used for commercial purposes.
 *
 * Chapter 10
-* CH10A Understanding the gender difference in earnings
+* CH10B Understanding gender differences in earnings
 * using the cps-earnings dataset
-* version 1.1 2025-11-04
+* version 1.0 2025-01-04
 *
-* REVISION NOTES:
-* v1.1 - Updated to Stata 18 syntax
-*      - Replaced navy/green with viridis colors
-*      - Fixed typos: niddle→middle, wirowed→widowed, ploynomial→polynomial
-*      - Modernized graph export commands
+* STATA VERSION: This code is optimized for Stata 18
+* Backward compatibility notes for Stata 15 and below are included
 ********************************************************************
 
+* Stata version check and setup
+version 18
+********************************************************************
+* LOAD DATA
+********************************************************************
 
+clear all
+set more off
+set varabbrev off
+
+
+********************************************************************
 * SETTING UP DIRECTORIES
+********************************************************************
 
-* STEP 1: set working directory for da_case_studies.
-* for example:
-* cd "C:/Users/xy/Dropbox/gabors_data_analysis/da_case_studies"
+* STEP 1: set working directory for da_case_studies
+* Example: cd "C:/Users/xy/Dropbox/gabors_data_analysis/da_case_studies"
 
-* STEP 2: * Directory for data
-* Option 1: run directory-setting do file
-do set-data-directory.do 
-							/* this is a one-line do file that should sit in 
-							the working directory you have just set up
-							this do file has a global definition of your working directory
-							more details: gabors-data-analysis.com/howto-stata/   */
+* STEP 2: Set data directory
+* Option 1: Run directory-setting do file (RECOMMENDED)
+capture do set-data-directory.do 
+	/* This one-line do file should sit in your working directory
+	   It contains: global data_dir "path/to/da_data_repo"
+	   More details: gabors-data-analysis.com/howto-stata/ */
 
-* Option 2: set directory directly here
-* for example:
-* global data_dir "C:/Users/xy/gabors_data_analysis/da_data_repo"
+* Option 2: Set directory directly here
+* Example: global data_dir "C:/Users/xy/gabors_data_analysis/da_data_repo"
 
+* Set up paths
+global data_in  "${data_dir}/cps-earnings/clean"
+global work     "ch10-gender-earnings-understand"
+global output   "${work}/output"
 
-global data_in  "$data_dir/cps-earnings/clean"
-global work  	"ch10-gender-earnings-understand"
-
-cap mkdir 		"$work/output"
-global output 	"$work/output"
+* Create directories
+capture mkdir "${work}"
+capture mkdir "${output}"
 
 
 
 clear
-use "$data_in/morg-2014-emp.dta"
+use "${data_in}/morg-2014-emp.dta"
 * Or download directly from OSF:
 /*
 copy "https://osf.io/download/rtmga/" "workfile.dta"
@@ -61,11 +69,21 @@ erase "workfile.dta"
 
 count
 
+
+********************************************************************
+* SAMPLE SELECTION
+********************************************************************
+
 * for this exercise - postgrad only
 keep if grade92>=44 /* MA or professional degree of doctorate */
 keep if age>=24
 keep if uhours>=20
 count
+
+
+********************************************************************
+* FEATURE ENGINEERING
+********************************************************************
 
 gen female=sex==2
 lab var earnwke "Earnings per week"
@@ -77,28 +95,39 @@ gen lnw=ln(w)
 lab var lnw "ln earnings per hour"
 
 compress
-save "$work/earnings_multireg.dta",replace
+
+********************************************************************
+* SAVE WORK FILE
+********************************************************************
+
+save "${work}/earnings_multireg.dta",replace
 
 
 
-*******************************************
-** DISTRIBUTION OF EARNINGS
-use "$work/earnings_multireg.dta",replace
+*****************************************
+
+********************************************************************
+* DISTRIBUTION OF EARNINGS
+********************************************************************
+use "${work}/earnings_multireg.dta",replace
 
 tabstat earnwke uhours w , s(mean min p5 p50 p95 max n) col(s)
 tabstat earnwke uhours w if  w>=1, s(mean min p5 p50 p95 max n) col(s)
 
-*******************************************
-** LN EARNINGS, GENDER, AGE
+*****************************************
+
+********************************************************************
+* BASIC REGRESSIONS: GENDER AND AGE
+********************************************************************
 *lpoly lnw age, nosca
 
 
 reg lnw female , robust
- outreg2 using "$output/ch10-table-1-reg-Stata.tex", 2aster tex(frag) nonotes bdec(3) replace 
+ outreg2 using "${output}/ch10-table-1-reg-Stata.tex", 2aster tex(frag) nonotes bdec(3) replace 
 reg lnw female age, robust
- outreg2 using "$output/ch10-table-1-reg-Stata.tex", 2aster tex(frag) nonotes bdec(3) append
+ outreg2 using "${output}/ch10-table-1-reg-Stata.tex", 2aster tex(frag) nonotes bdec(3) append
 reg age female , robust
- outreg2 using "$output/ch10-table-1-reg-Stata.tex", 2aster tex(frag) nonotes bdec(3) append
+ outreg2 using "${output}/ch10-table-1-reg-Stata.tex", 2aster tex(frag) nonotes bdec(3) append
 
 
 * age distribution by gender
@@ -118,53 +147,56 @@ line y1 y0 x0, lc("68 1 84" "253 231 37") lw(thick thick) ///
  xtitle("Age (years)") ytitle("Density") ///
  legend(off) ///
  text(0.02 55 "Women") text(0.029 55 "Men")
-graph export "$output/ch10-figure-1-density-age-gender.png", as(png) replace
+graph export "${output}/ch10-figure-1-density-age-gender.png", as(png) replace
  
 
 
-*******************************************
-** LN EARNINGS, GENDER, AGE,
+*****************************************
+
+********************************************************************
+* BASIC REGRESSIONS: GENDER AND AGE
+********************************************************************
 
 gen agesq = age^2
 gen agecu = age^3
 gen agequ = age^4
 
 reg lnw female , robust
- outreg2 using "$output/ch10-table-2-reg-Stata.tex", 2aster tex(frag) nonotes bdec(3) replace 
+ outreg2 using "${output}/ch10-table-2-reg-Stata.tex", 2aster tex(frag) nonotes bdec(3) replace 
 reg lnw female age , robust
- outreg2 using "$output/ch10-table-2-reg-Stata.tex", 2aster tex(frag) nonotes bdec(3) append
+ outreg2 using "${output}/ch10-table-2-reg-Stata.tex", 2aster tex(frag) nonotes bdec(3) append
 reg lnw female age agesq , robust
- outreg2 using "$output/ch10-table-2-reg-Stata.tex", 2aster tex(frag) nonotes bdec(3) append
+ outreg2 using "${output}/ch10-table-2-reg-Stata.tex", 2aster tex(frag) nonotes bdec(3) append
 reg lnw female age* , robust
- outreg2 using "$output/ch10-table-2-reg-Stata.tex", 2aster tex(frag) nonotes bdec(3) append
+ outreg2 using "${output}/ch10-table-2-reg-Stata.tex", 2aster tex(frag) nonotes bdec(3) append
 
-*******************************************
+*****************************************
 ** LN EARNINGS, EDU CATEG
-use "$work/earnings_multireg.dta",replace
+use "${work}/earnings_multireg.dta",replace
 
 gen ed_MA = grade==44
 gen ed_Profess = grade==45
 gen ed_PhD = grade==46
 
 reg lnw female , robust
- outreg2 using "$output/ch10-table-3-reg-Stata.tex", 2aster tex(frag) nonotes bdec(3) replace 
+ outreg2 using "${output}/ch10-table-3-reg-Stata.tex", 2aster tex(frag) nonotes bdec(3) replace 
 reg lnw female ed_Prof ed_PhD, robust
- outreg2 using "$output/ch10-table-3-reg-Stata.tex", 2aster tex(frag) nonotes bdec(3) append
+ outreg2 using "${output}/ch10-table-3-reg-Stata.tex", 2aster tex(frag) nonotes bdec(3) append
 reg lnw female ed_MA ed_Prof, robust
- outreg2 using "$output/ch10-table-3-reg2-Stata.tex", 2aster tex(frag) nonotes bdec(3) append
+ outreg2 using "${output}/ch10-table-3-reg2-Stata.tex", 2aster tex(frag) nonotes bdec(3) append
 
-*******************************************
+*****************************************
 ** SIMPLE INTERACTION: LINEAR AGE WITH GENDER
 
 gen fXage = female*age
 label var fXage "female X age"
 label var lnw "lnw"
 reg lnw age if female==1, robust
- outreg2 using "$output/ch10-table-4-reg-Stata.tex", label  ctitle("WOMEN", "lnw") 2aster tex(frag) nonotes bdec(3) replace
+ outreg2 using "${output}/ch10-table-4-reg-Stata.tex", label  ctitle("WOMEN", "lnw") 2aster tex(frag) nonotes bdec(3) replace
 reg lnw age if female==0, robust
- outreg2 using "$output/ch10-table-4-reg-Stata.tex", label ctitle("MEN", "lnw") 2aster tex(frag) nonotes bdec(3) append
+ outreg2 using "${output}/ch10-table-4-reg-Stata.tex", label ctitle("MEN", "lnw") 2aster tex(frag) nonotes bdec(3) append
 reg lnw age female fXage , robust
- outreg2 using "$output/ch10-table-4-reg-Stata.tex", label ctitle("ALL", "lnw") sortvar(female age fXage) 2aster tex(frag) nonotes bdec(3) append
+ outreg2 using "${output}/ch10-table-4-reg-Stata.tex", label ctitle("ALL", "lnw") sortvar(female age fXage) 2aster tex(frag) nonotes bdec(3) append
 
  
  
@@ -193,7 +225,7 @@ line lnwhat_f lnwhat_fCIup lnwhat_fCIlo lnwhat_m lnwhat_mCIup lnwhat_mCIlo age, 
 	text(3.24 42 "Women") text( 3.55 42 "Men") ///
 	graphregion(fcolor(white) ifcolor(none))  ///
 	plotregion(fcolor(white) ifcolor(white)) 
-graph export "$output/ch10-figure-2a-reg-age-gender-lin-Stata.png", as(png) replace
+graph export "${output}/ch10-figure-2a-reg-age-gender-lin-Stata.png", as(png) replace
 
 
 ** QUARTIC FUNCTIONAL FORM IN AGE INTERACTED WITH GENDER
@@ -233,12 +265,12 @@ line lnwhat_f lnwhat_fCIup lnwhat_fCIlo lnwhat_m lnwhat_mCIup lnwhat_mCIlo age, 
 	text(3.3 42 "Women") text(3.65 42 "Men") ///
 	graphregion(fcolor(white) ifcolor(none))  ///
 	plotregion(fcolor(white) ifcolor(white)) 
-graph export "$output/ch10-figure-2b-reg-age-gender-nonlin-Stata.png", as(png) replace
+graph export "${output}/ch10-figure-2b-reg-age-gender-nonlin-Stata.png", as(png) replace
 
 
 * CAUSAL ANALYSIS
 * focus on middle-aged
-use "$work/earnings_multireg.dta",replace
+use "${work}/earnings_multireg.dta",replace
 keep if age>=40 & age<=60
 
 **encoding class94 to numerical values:
@@ -321,14 +353,14 @@ gen hoursqu = hours^4
 * Table 10.5
 * simple way, edited afterwards
 reg lnw female , robust
-  outreg2 using "$output/ch10-table-5-earnings-causal-Stata.tex", 2aster tex(frag) ///
+  outreg2 using "${output}/ch10-table-5-earnings-causal-Stata.tex", 2aster tex(frag) ///
    keep(female) nonotes bdec(3) replace
 reg lnw female age edProf edPhd, robust
-  outreg2 using "$output/ch10-table-5-earnings-causal-Stata.tex", 2aster tex(frag) ///
+  outreg2 using "${output}/ch10-table-5-earnings-causal-Stata.tex", 2aster tex(frag) ///
    keep(female) nonotes bdec(3) append
 reg lnw female $DEMOG $FAMILY $WORK, robust
-  outreg2 using "$output/ch10-table-5-earnings-causal-Stata.tex", 2aster tex(frag) ///
+  outreg2 using "${output}/ch10-table-5-earnings-causal-Stata.tex", 2aster tex(frag) ///
    keep(female) nonotes bdec(3) append
 reg lnw female $DEMOG $FAMILY $WORK agesq-agequ hourssq-hoursqu, robust
-  outreg2 using "$output/ch10-table-5-earnings-causal-Stata.tex", 2aster tex(frag) ///
+  outreg2 using "${output}/ch10-table-5-earnings-causal-Stata.tex", 2aster tex(frag) ///
    keep(female) nonotes bdec(3) append

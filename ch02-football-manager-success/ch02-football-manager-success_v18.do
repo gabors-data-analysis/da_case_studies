@@ -13,99 +13,107 @@
 * Chapter 02
 * CH02B Identifying successful football managers
 * using the football dataset
+* version 1.0 2025-01-04
 *
-* REVISION HISTORY:
-* Version 0.9 2020-09-06 - original
-* Version 1.0 2025-11-03 - Stata 18 upgrade, efficiency improvements
-*   - Removed redundant sorts
-*   - Modernized graph export
-*   - Improved variable creation efficiency
-*   - Enhanced comments
-*   - Removed interactive browse commands
+* STATA VERSION: This code is optimized for Stata 18
+* Backward compatibility notes for Stata 15 and below are included
 ********************************************************************
 
+* Stata version check and setup
+version 18
+clear all
+set more off
+set varabbrev off
 
+
+********************************************************************
 * SETTING UP DIRECTORIES
+********************************************************************
 
-* STEP 1: set working directory for da_case_studies.
-* for example:
-* cd "C:/Users/xy/Dropbox/gabors_data_analysis/da_case_studies"
+* STEP 1: set working directory for da_case_studies
+* Example: cd "C:/Users/xy/Dropbox/gabors_data_analysis/da_case_studies"
 
-* STEP 2: * Directory for data
-* Option 1: run directory-setting do file
-do set-data-directory.do 
-							/* this is a one-line do file that should sit in 
-							the working directory you have just set up
-							this do file has a global definition of your working directory
-							more details: gabors-data-analysis.com/howto-stata/   */
+* STEP 2: Set data directory
+* Option 1: Run directory-setting do file (RECOMMENDED)
+capture do set-data-directory.do 
+	/* This one-line do file should sit in your working directory
+	   It contains: global data_dir "path/to/da_data_repo"
+	   More details: gabors-data-analysis.com/howto-stata/ */
 
-* Option 2: set directory directly here
-* for example:
-* global data_dir "C:/Users/xy/gabors_data_analysis/da_data_repo"
+* Option 2: Set directory directly here
+* Example: global data_dir "C:/Users/xy/gabors_data_analysis/da_data_repo"
 
-global data_in  "$data_dir/football/clean"
-global work  	"ch02-football-manager-success"
+* Set up paths
+global data_in  "${data_dir}/football/clean"
+global work     "ch02-football-manager-success"
+global output   "${work}/output"
 
-cap mkdir 		"$work/output"
-global output 	"$work/output"
+* Create directories
+capture mkdir "${work}"
+capture mkdir "${output}"
 
 
-*********************************************************************
+********************************************************************
 * PART 1: EXPLORE DATA STRUCTURE
-*********************************************************************
+********************************************************************
 
 * 1.1 Game-level data: each observation is a home-away game
-use "$data_in/epl_games.dta", clear
+* Option 1: Load from local repository
+use "${data_in}/epl_games.dta", clear
 
-* Or download directly from OSF:
+* Option 2: Download directly from OSF (uncomment to use)
 /*
-copy "https://osf.io/download/tyjp8/" "workfile.dta"
-use "workfile.dta", clear
-erase "workfile.dta"
-*/ 
+tempfile games_data
+copy "https://osf.io/download/tyjp8/" `games_data'
+use `games_data', clear
+*/
 
 * Focus on 2016 season
 keep if season == 2016
 sort season team_home
-* Note: use 'browse' interactively to inspect if needed
+
 
 * 1.2 Team-game level data: each observation is a team in a game
-use "$data_in/epl_teams_games.dta", clear
+* Option 1: Load from local repository
+use "${data_in}/epl_teams_games.dta", clear
 
-* Or download directly from OSF:
+* Option 2: Download directly from OSF (uncomment to use)
 /*
-copy "https://osf.io/download/qzvx7/" "workfile.dta"
-use "workfile.dta", clear
-erase "workfile.dta"
+tempfile teamgames_data
+copy "https://osf.io/download/qzvx7/" `teamgames_data'
+use `teamgames_data', clear
 */
 
 * Focus on 2016 season, sorted by date
 keep if season == 2016
 sort season team date
 
-* 1.3 Manager information: manager characteristics
-use "$data_in/football-managers.dta", clear
 
-* Or download directly from OSF:
+* 1.3 Manager information: manager characteristics
+* Option 1: Load from local repository
+use "${data_in}/football-managers.dta", clear
+
+* Option 2: Download directly from OSF (uncomment to use)
 /*
-copy "https://osf.io/download/w6uph/" "workfile.dta"
-use "workfile.dta", clear
-erase "workfile.dta"
+tempfile managers_data
+copy "https://osf.io/download/w6uph/" `managers_data'
+use `managers_data', clear
 */
 
 
-*********************************************************************
+********************************************************************
 * PART 2: ANALYZE MANAGER SUCCESS
-*********************************************************************
+********************************************************************
 
 * 2.1 Load merged workfile with manager-game level data
-use "$data_in/football-managers-workfile.dta", clear
+* Option 1: Load from local repository
+use "${data_in}/football-managers-workfile.dta", clear
 
-* Or download directly from OSF:
+* Option 2: Download directly from OSF (uncomment to use)
 /*
-copy "https://osf.io/download/hycmg/" "workfile.dta"
-use "workfile.dta", clear
-erase "workfile.dta"
+tempfile workfile
+copy "https://osf.io/download/hycmg/" `workfile'
+use `workfile', clear
 */
 
 sort season team
@@ -131,9 +139,9 @@ gsort -manager_win_ratio
 list if manager_win_ratio >= 2
 
 
-*********************************************************************
+********************************************************************
 * PART 3: VISUALIZE TOP MANAGERS
-*********************************************************************
+********************************************************************
 
 * 3.1 Identify caretaker managers (< 18 games)
 * Create separate variables for regular vs caretaker managers
@@ -143,8 +151,6 @@ separate manager_win_ratio, by(manager_games < 18)
 
 * 3.2 Create horizontal bar chart for top managers
 * Focus on managers with win ratio >= 2 points per game
-
-* Set up viridis color scheme
 colorpalette viridis, n(4) select(2) nograph
 
 graph hbar (mean) manager_win_ratio0 manager_win_ratio1 if manager_win_ratio>=2, ///
@@ -154,10 +160,4 @@ graph hbar (mean) manager_win_ratio0 manager_win_ratio1 if manager_win_ratio>=2,
   yline(1.6(0.2)3) ///
  graphregion(fcolor(white) ifcolor(none)) ///
  plotregion(fcolor(white) ifcolor(white))
-graph export "$output/ch02-figure1-top-managers-Stata.png", replace
-
-
-
-* Export using Stata 18 syntax
-graph export "$output/ch02-figure1-top-managers-Stata.png", replace as(png)
-
+graph export "${output}/ch02-figure1-top-managers-Stata.png", replace

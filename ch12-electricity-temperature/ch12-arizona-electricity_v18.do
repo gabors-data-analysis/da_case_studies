@@ -1,4 +1,7 @@
 ********************************************************************
+* LOAD AND PROCESS DATA - SOURCE 1: ELECTRICITY CONSUMPTION
+********************************************************************
+
 * Prepared for Gabor's Data Analysis
 *
 * Data Analysis for Business, Economics, and Policy
@@ -13,51 +16,48 @@
 * Chapter 12
 * CH12B Electricity consumption and temperature
 * using the arizona-electricity dataset
-* version 1.1 2025-11-04
+* version 1.0 2025-01-04
 *
-* REVISION NOTES:
-* v1.1 - Updated to Stata 18 syntax
-*      - Replaced navy with viridis color
-*      - Fixed typos: electrictiy→electricity, Mrach→March
-*      - Cross-platform paths (forward slashes)
-*      - Modernized graph export command
+* STATA VERSION: This code is optimized for Stata 18
+* Backward compatibility notes for Stata 15 and below are included
 ********************************************************************
 
+* Stata version check and setup
+version 18
+clear all
+set more off
+set varabbrev off
 
+
+********************************************************************
 * SETTING UP DIRECTORIES
+********************************************************************
 
-* STEP 1: set working directory for da_case_studies.
-* for example:
-* cd "C:/Users/xy/Dropbox/gabors_data_analysis/da_case_studies"
+* STEP 1: set working directory for da_case_studies
+* Example: cd "C:/Users/xy/Dropbox/gabors_data_analysis/da_case_studies"
 
-* STEP 2: * Directory for data
-* Option 1: run directory-setting do file
-do set-data-directory.do 
-							/* this is a one-line do file that should sit in 
-							the working directory you have just set up
-							this do file has a global definition of your working directory
-							more details: gabors-data-analysis.com/howto-stata/   */
+* STEP 2: Set data directory
+* Option 1: Run directory-setting do file (RECOMMENDED)
+capture do set-data-directory.do 
+	/* This one-line do file should sit in your working directory
+	   It contains: global data_dir "path/to/da_data_repo"
+	   More details: gabors-data-analysis.com/howto-stata/ */
 
-* Option 2: set directory directly here
-* for example:
-* global data_dir "C:/Users/xy/gabors_data_analysis/da_data_repo"
+* Option 2: Set directory directly here
+* Example: global data_dir "C:/Users/xy/gabors_data_analysis/da_data_repo"
 
+* Set up paths
+global data_in  "${data_dir}/arizona-electricity/clean"
+global work     "ch12-electricity-temperature"
+global output   "${work}/output"
 
-global data_in  "$data_dir/arizona-electricity/clean"
-global work  	"ch12-electricity-temperature"
+* Create directories
+capture mkdir "${work}"
+capture mkdir "${output}"
 
-cap mkdir 		"$work/output"
-global output 	"$work/output"
-
-
-
-
-*****************************************
-* TIDY DATA 
-* source 1: electricity consumption, by month
 
 clear
-insheet using "$data_in/electricity_resid_AZ.csv", comma
+insheet using "${data_in}/electricity_resid_AZ.csv", comma
 
 * Or download directly from OSF:
 /*
@@ -82,12 +82,17 @@ gen lnQ=ln(Q)
   lab var lnQ "Residential electricity consumption, GWh, in logs"
 
 compress
-save "$work/electricity_resid_AZ",replace
+
+********************************************************************
+* LOAD AND PROCESS DATA - SOURCE 2: TEMPERATURE
+********************************************************************
+
+save "${work}/electricity_resid_AZ",replace
 
 * source 2: temperature data (cooling degree days etc, by month)
 clear
 
-insheet using "$data_in/climate_Phoenix_AZ.csv" 
+insheet using "${data_in}/climate_Phoenix_AZ.csv" 
 * Or download directly from OSF:
 /*
 copy "https://osf.io/download/g3tj7/" "workfile.csv"
@@ -121,34 +126,39 @@ lab var dx90avg "Fraction days > 90F"
 summ cdavg hdavg dx70avg dx90avg
 
 compress
-save "$work/climate_Phoenix", replace
+save "${work}/climate_Phoenix", replace
+
+
+********************************************************************
+* MERGE DATA AND CREATE WORKFILE
+********************************************************************
 
 * create workfile
 
-merge 1:1 ym using "$work/electricity_resid_AZ", nogen
+merge 1:1 ym using "${work}/electricity_resid_AZ", nogen
 
 keep if year>=2001
 keep if year<=2017
 
 tsset ym
 
-save "$work/electricity_AZ_workfile", replace
+save "${work}/electricity_AZ_workfile", replace
 
 
-*** DATA EXPLORATION
-use "$work/electricity_AZ_workfile",replace
+* DATA EXPLORATION
+use "${work}/electricity_AZ_workfile",replace
 sum year if Q!=.
 sum year if cd!=.
 
 tabstat Q lnQ cdavg hdavg, s(n min max mean median sd) col(s)
 
-*** PLOT THE TIME SERIES
+* PLOT THE TIME SERIES
 foreach x in Q lnQ cdavg hdavg  {
 	tsline `x' , lw(thick) lc("68 1 84") ylab(, grid) xtitle("") ///
 	tmtick(##4, grid) ///
 graphregion(fcolor(white) ifcolor(none))  ///
  plotregion(fcolor(white) ifcolor(white)) 
-graph export "$output/ch12-figure-electricity_ts_`x'-Stata.png" , as(png) replace 
+graph export "${output}/ch12-figure-electricity_ts_`x'-Stata.png" , as(png) replace 
 }
 
 **** TIME-SERIES REGRESSIONS
@@ -175,11 +185,11 @@ lab var ddx90avg "Fraction of days >90F, first difference"
 
 * simple reg, Newey-West SE
 newey dlnQ dcd dhd, lag(12) 
- outreg2 using "$output/ch12-table-4-electricity_AZ_reg-Stata.tex", ///
+ outreg2 using "${output}/ch12-table-4-electricity_AZ_reg-Stata.tex", ///
   dec(3) label 2aster tex(frag) replace
 * + seasonality
 newey dlnQ dcd dhd i.month, lag(12) 
- outreg2 using "$output/ch12-table-4-electricity_AZ_reg-Stata.tex", ///
+ outreg2 using "${output}/ch12-table-4-electricity_AZ_reg-Stata.tex", ///
   dec(3) label 2aster tex(frag) append
 
  
@@ -188,17 +198,17 @@ newey dlnQ dcd dhd i.month, lag(12)
 * add 4 digits to see differences in SE
 * 1 simple SE 
 reg dlnQ dcd dhd i.month
- outreg2 using "$output/ch12-table-5-electricity_AZ_reg-Stata.tex", ///
+ outreg2 using "${output}/ch12-table-5-electricity_AZ_reg-Stata.tex", ///
   dec(3) keep(dcd dhd) label 2aster tex(frag) replace
 * 2 Newey-West SE 
 newey dlnQ dcd dhd i.month, lag(12) 
- outreg2 using "$output/ch12-table-5-electricity_AZ_reg-Stata.tex", ///
+ outreg2 using "${output}/ch12-table-5-electricity_AZ_reg-Stata.tex", ///
   dec(3) keep(dcd dhd) label 2aster tex(frag) append
 * 3 Lagged y, simple SE 
 gen dlnQlag = L.dlnQ
 lab var dlnQlag "Lag of $\Delta \ln Q$"
 reg dlnQ dcd dhd dlnQlag i.month
- outreg2 using "$output/ch12-table-5-electricity_AZ_reg-Stata.tex", ///
+ outreg2 using "${output}/ch12-table-5-electricity_AZ_reg-Stata.tex", ///
   dec(3) keep(dcd dhd dlnQlag) label 2aster tex(frag) append
 
 * serial corr in dlnQ
@@ -219,7 +229,7 @@ lab var ldhd "$\Delta HD$ 1st lag"
 lab var l2dhd "$\Delta HD$ 2nd lag"
 
 reg dlnQ dcd ldcd l2dcd dhd ldhd l2dhd i.month
- outreg2 using "$output/ch12-table-6-electricity_AZ_reg.tex", dec(3) nocon label ///
+ outreg2 using "${output}/ch12-table-6-electricity_AZ_reg.tex", dec(3) nocon label ///
  keep(dcd ldcd l2dcd dhd ldhd l2dhd) addtext("Month binary variables" , "Yes") ///
  2aster tex(frag) replace
 
@@ -235,7 +245,7 @@ lab var ddcd "$\Delta (\Delta CD)$ "
 lab var ddhd "$\Delta (\Delta HD)$ "
 
 reg dlnQ dcd_cumul dhd_cumul L(0/1).ddcd L(0/1).ddhd i.month
- outreg2 using "$output/ch12-table-6-electricity_AZ_reg.tex", dec(3) nocon label ///
+ outreg2 using "${output}/ch12-table-6-electricity_AZ_reg.tex", dec(3) nocon label ///
  keep(dcd_cumul dhd_cumul ) ///
  addtext("Month binary variables" , "Yes") 2aster tex(frag) append
 

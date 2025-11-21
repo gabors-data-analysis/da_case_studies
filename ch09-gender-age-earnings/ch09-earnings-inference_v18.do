@@ -330,11 +330,3 @@ line lnwpred_agel ///
 graph export "${output}/ch09-figure-4-wage-age-reg-ci-Stata.png", replace
 
 
-********************************************************************
-* END OF SCRIPT
-********************************************************************
-
-display as text _newline(2) "Analysis complete!"
-display as text "Output saved to: ${output}"
-display as text "Stata version: " as result c(stata_version)
-display as text "Date: " as result c(current_date)

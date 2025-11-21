@@ -13,72 +13,94 @@
 * Chapter 08
 * CH08C Measurement error in hotel ratings
 * using the hotels-vienna dataset
+* version 1.0 2025-01-04
 *
-* REVISION HISTORY:
-* Version 0.9 2020-09-06 - original
-* Version 1.0 2025-11-03 - Stata 18 upgrade
-*   - Applied viridis colors instead of green/navy
-*   - Already had as(png) in original
+* STATA VERSION: This code is optimized for Stata 18
+* Backward compatibility notes for Stata 15 and below are included
 ********************************************************************
 
+* Stata version check and setup
+version 18
+clear all
+set more off
+set varabbrev off
 
+
+********************************************************************
 * SETTING UP DIRECTORIES
+********************************************************************
 
-* STEP 1: set working directory for da_case_studies.
-* for example:
-* cd "C:/Users/xy/Dropbox/gabors_data_analysis/da_case_studies"
+* STEP 1: set working directory for da_case_studies
+* Example: cd "C:/Users/xy/Dropbox/gabors_data_analysis/da_case_studies"
 
-* STEP 2: * Directory for data
-* Option 1: run directory-setting do file
-do set-data-directory.do 
-							/* this is a one-line do file that should sit in 
-							the working directory you have just set up
-							this do file has a global definition of your working directory
-							more details: gabors-data-analysis.com/howto-stata/   */
+* STEP 2: Set data directory
+* Option 1: Run directory-setting do file (RECOMMENDED)
+capture do set-data-directory.do 
+	/* This one-line do file should sit in your working directory
+	   It contains: global data_dir "path/to/da_data_repo"
+	   More details: gabors-data-analysis.com/howto-stata/ */
 
-* Option 2: set directory directly here
-* for example:
-* global data_dir "C:/Users/xy/gabors_data_analysis/da_data_repo"
+* Option 2: Set directory directly here
+* Example: global data_dir "C:/Users/xy/gabors_data_analysis/da_data_repo"
 
+* Set up paths
+global data_in  "${data_dir}/hotels-vienna/clean"
+global work     "ch08-hotels-measurement-error"
+global output   "${work}/output"
 
-global data_in  "$data_dir/hotels-vienna/clean"
-global work  	"ch08-hotels-measurement-error"
-
-cap mkdir 		"$work/output"
-global output 	"$work/output"
-
-
+* Create directories
+capture mkdir "${work}"
+capture mkdir "${output}"
 
 
-* Load in clean and tidy data and create workfile
-use "$data_in/hotels-vienna.dta", clear
+********************************************************************
+* LOAD DATA
+********************************************************************
 
-* Or download directly from OSF:
+* Option 1: Load from local repository
+use "${data_in}/hotels-vienna.dta", clear
 
+* Option 2: Download directly from OSF (uncomment to use)
 /*
-copy "https://osf.io/download/dn8je/" "workfile.dta"
-use "workfile.dta", clear
-erase "workfile.dta"
-*/ 
+tempfile hotels_data
+copy "https://osf.io/download/dn8je/" `hotels_data'
+use `hotels_data', clear
+*/
 
-*** SAMPLE SELECTION
 
-*** 3 to 4-star hotels (incl 3.5 stars)
+********************************************************************
+* SAMPLE SELECTION
+********************************************************************
+
+* 3 to 4-star hotels (including 3.5 stars)
 keep if stars>=3 & stars<=4
 keep if accommodation_type=="Hotel"
 label var distance "Distance to city center, miles"
 drop if price>600 	/* likely error */
 
-
-*** Drop hotels not really in Vienna
+* Drop hotels not really in Vienna
 tab city_actual 
 keep if city_actual=="Vienna"
 
 
+********************************************************************
+* FEATURE ENGINEERING
+********************************************************************
+
 gen lnprice = ln(price)
 lab var lnprice "ln(Price)"
 
+
+********************************************************************
+* DESCRIPTIVE STATISTICS
+********************************************************************
+
 sum rating_count, d
+
+
+********************************************************************
+* DEFINE CUTOFFS FOR RATING COUNT
+********************************************************************
 
 * Define cutoffs
 local k1 100
@@ -88,18 +110,30 @@ sum rating_count rating if rating_count <`k1'
 sum rating_count rating if rating_count >=`k1' & rating_count <`k2' 
 sum rating_count rating if rating_count >=`k2'
  
-* FIGURE
+
+********************************************************************
+* REGRESSION ANALYSIS BY RATING COUNT GROUPS
+********************************************************************
+
+* Regression for low rating count group
 reg lnprice rating if rating_count <`k1'
 predict yhat1
 lab var yhat1 "more noisy x: # ratings <`k1'"
 
+* Regression for medium rating count group
 reg lnprice rating if rating_count >=`k1' & rating_count <`k2' 
 cap predict yhat2
 cap lab var yhat2 "`k1' <= # ratings <`k2' "
 
+* Regression for high rating count group
 reg lnprice rating if rating_count >=`k2' 
 predict yhat3
 lab var yhat3 "less noisy x: # ratings >`k2'"
+
+
+********************************************************************
+* FIGURE 8.8: MEASUREMENT ERROR IN RATINGS
+********************************************************************
 
 * Set up viridis colors
 colorpalette viridis, n(4) select(2) nograph
@@ -121,5 +155,4 @@ line yhat1 yhat3 rating, ///
 	graphregion(fcolor(white) ifcolor(none)) ///
 	plotregion(fcolor(white) ifcolor(white))
 
-graph export "$output/ch08-figure-8-hotels-measerror-Stata.png", as(png) replace
-
+graph export "${output}/ch08-figure-8-hotels-measerror-Stata.png", replace

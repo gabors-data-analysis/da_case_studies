@@ -11,50 +11,56 @@
 * 	Not to be used for commercial purposes.
 *
 * Chapter 09
-* CH09B How stable is the hotel price - distance to city center relationship?
+* CH09B External validity: Comparing hotel price models across cities
 * using the hotels-europe dataset
+* version 1.0 2025-01-04
 *
-* REVISION HISTORY:
-* Version 0.9 2020-09-06 - original
-* Version 1.0 2025-11-03 - Stata 18 upgrade
-*   - Fixed typo in header (relathionship → relationship)
-*   - Fixed variable name (accommodation → accommodation_type)
+* STATA VERSION: This code is optimized for Stata 18
+* Backward compatibility notes for Stata 15 and below are included
+********************************************************************
+
+* Stata version check and setup
+version 18
+clear all
+set more off
+set varabbrev off
+
+
+********************************************************************
+* SETTING UP DIRECTORIES
+********************************************************************
+
+* STEP 1: set working directory for da_case_studies
+* Example: cd "C:/Users/xy/Dropbox/gabors_data_analysis/da_case_studies"
+
+* STEP 2: Set data directory
+* Option 1: Run directory-setting do file (RECOMMENDED)
+capture do set-data-directory.do 
+	/* This one-line do file should sit in your working directory
+	   It contains: global data_dir "path/to/da_data_repo"
+	   More details: gabors-data-analysis.com/howto-stata/ */
+
+* Option 2: Set directory directly here
+* Example: global data_dir "C:/Users/xy/gabors_data_analysis/da_data_repo"
+
+* Set up paths
+global data_in  "${data_dir}/hotels-europe/clean"
+global work     "ch09-hotels-europe-stability"
+global output   "${work}/output"
+
+* Create directories
+capture mkdir "${work}"
+capture mkdir "${output}"
+
+
+********************************************************************
+* LOAD AND MERGE DATA
 ********************************************************************
 
 
-* SETTING UP DIRECTORIES
-
-* STEP 1: set working directory for da_case_studies.
-* for example:
-* cd "C:/Users/xy/Dropbox/gabors_data_analysis/da_case_studies"
-
-* STEP 2: * Directory for data
-* Option 1: run directory-setting do file
-do set-data-directory.do 
-							/* this is a one-line do file that should sit in 
-							the working directory you have just set up
-							this do file has a global definition of your working directory
-							more details: gabors-data-analysis.com/howto-stata/   */
-
-* Option 2: set directory directly here
-* for example:
-* global data_dir "C:/Users/xy/gabors_data_analysis/da_data_repo"
-
-
-global data_in  "$data_dir/hotels-europe/clean"
-global work  	"ch09-hotels-europe-stability"
-
-cap mkdir 		"$work/output"
-global output 	"$work/output"
-
-
-
- 
-* Vienna vs London
-
 * Load in clean and tidy data and create workfile
-use "$data_in/hotels-europe_price", clear
-merge m:m hotel_id using "$data_in/hotels-europe_features.dta"
+use "${data_in}/hotels-europe_price", clear
+merge m:m hotel_id using "${data_in}/hotels-europe_features.dta"
 
 * Or download directly from OSF:
 /*
@@ -74,6 +80,10 @@ merge m:m hotel_id using `hotels_features', nogen
 drop _m
 label var distance "Distance to city center, miles"
 
+********************************************************************
+* SAMPLE SELECTION
+********************************************************************
+
 * Filter a few cities
 * keep if city_actual==city
 keep if inlist(city_actual, "Vienna", "Amsterdam", "Barcelona")
@@ -87,6 +97,11 @@ drop if price>1000
 duplicates report
 duplicates drop
 
+
+
+********************************************************************
+* CREATE DATE VARIABLE
+********************************************************************
 
 gen date = ""
 replace date = "2017-NOV-weekday" if month==11 & weekend==0
@@ -102,18 +117,30 @@ tab accommodation_type city
 tab date 
 
 
+
+********************************************************************
+* FEATURE ENGINEERING
+********************************************************************
+
 gen lnprice = ln(price)
 lab var lnprice "ln(Price)"
 
 keep hotel_id date city accommodation_type stars rating distance price lnprice
 
+
+********************************************************************
+* SAVE WORK FILE
+********************************************************************
+
 * Save work file
-saveold "$work/hotels_work.dta", replace
+saveold "${work}/hotels_work.dta", replace
 
 
-**********************************************************
-* External validity by time
-use "$work/hotels_work.dta", replace
+********************************************************
+********************************************************************
+* EXTERNAL VALIDITY BY TIME
+********************************************************************
+use "${work}/hotels_work.dta", replace
 keep if stars>=3 & stars<=4
 keep if accommodation_type=="Hotel"
 keep if city=="Vienna"
@@ -126,15 +153,15 @@ tabstat lnprice, s(min max p50 mean n) by(city) format(%4.1f)
 mkspline dist_0_2 2 dist_2_7 = distance
 
 
-*** Regressions with three dates for textbook
+* Regressions with three dates for textbook
 * Original regression
 reg lnprice dist_0_2 dist_2_7 if date=="2017-NOV-weekday", robust
-outreg2 using "$output/hotels_extval_time1", se 2aster bdec(2) ctitle("2017-NOV-weekday") tex(frag) nonotes replace
+outreg2 using "${output}/hotels_extval_time1", se 2aster bdec(2) ctitle("2017-NOV-weekday") tex(frag) nonotes replace
 
 * Other dates 
 foreach d in "2017-NOV-weekend" "2017-DEC-holiday" "2018-JUNE-weekend" { 
 	reg lnprice dist_0_2 dist_2_7 if date=="`d'", robust
-	outreg2 using "$output/hotels_extval_time1", se 2aster bdec(2) ctitle("`d'") tex(frag) nonotes append
+	outreg2 using "${output}/hotels_extval_time1", se 2aster bdec(2) ctitle("`d'") tex(frag) nonotes append
 }
 
 
@@ -146,12 +173,12 @@ keep if hotelcount==4
 
 * Original regression
 reg lnprice dist_0_2 dist_2_7 if date=="2017-NOV-weekday", robust
-outreg2 using "$output/hotels_extval_time2", se 2aster bdec(2) ctitle("2017-NOV-weekday") tex(frag) nonotes replace
+outreg2 using "${output}/hotels_extval_time2", se 2aster bdec(2) ctitle("2017-NOV-weekday") tex(frag) nonotes replace
 
 * Other dates 
 foreach d in "2017-NOV-weekend" "2017-DEC-holiday" "2018-JUNE-weekend" { 
 	reg lnprice dist_0_2 dist_2_7 if date=="`d'", robust
-	outreg2 using "$output/hotels_extval_time2", se 2aster bdec(2) ctitle("`d'") tex(frag) nonotes append
+	outreg2 using "${output}/hotels_extval_time2", se 2aster bdec(2) ctitle("`d'") tex(frag) nonotes append
 }
 
 * Check interaction term p value
@@ -161,9 +188,9 @@ tab we
 reg lnprice we c.dist_0_2##we c.dist_2_7##we, robust
 
  
-**********************************************************
+********************************************************
 * External validity by city
-use "$work/hotels_work.dta", replace
+use "${work}/hotels_work.dta", replace
 keep if stars>=3 & stars<=4
 keep if accommodation_type=="Hotel"
 keep if date=="2017-NOV-weekday"
@@ -175,22 +202,22 @@ tabstat lnprice, s(min max p50 mean n) by(city) format(%4.1f)
 mkspline dist_0_2 2 dist_2_7 = distance
 
 
-*** Regressions for three cities
+* Regressions for three cities
 * Original regression: Vienna
 reg lnprice dist_0_2 dist_2_7 if city=="Vienna", r
-outreg2 using "$output/hotels_extval_city", se 2aster bdec(2) ctitle("Vienna") tex(frag) nonotes replace
+outreg2 using "${output}/hotels_extval_city", se 2aster bdec(2) ctitle("Vienna") tex(frag) nonotes replace
 
 * Two other cities
 foreach c in Amsterdam Barcelona {
 	reg lnprice dist_0_2 dist_2_7 if city=="`c'", r
-	outreg2 using "$output/hotels_extval_city", se 2aster bdec(2) ctitle("`c'") tex(frag) nonotes append
+	outreg2 using "${output}/hotels_extval_city", se 2aster bdec(2) ctitle("`c'") tex(frag) nonotes append
 }
 
 		
 		
-**********************************************************
+********************************************************
 * External validity by accommodation type: hotels vs apartments
-use "$work/hotels_work.dta", replace
+use "${work}/hotels_work.dta", replace
 keep if city=="Vienna"
 keep if date=="2017-NOV-weekday"
 keep if stars>=3 & stars<=4
@@ -206,8 +233,8 @@ mkspline dist_0_2 2 dist_2_7 = distance
 
 
 reg lnprice dist_0_2 dist_2_7 if accommodation_type=="Hotel"
-outreg2 using "$output/hotels_extval_type", se 2aster bdec(2) ctitle("Hotels") tex(frag) nonotes replace
+outreg2 using "${output}/hotels_extval_type", se 2aster bdec(2) ctitle("Hotels") tex(frag) nonotes replace
 
 reg lnprice dist_0_2 dist_2_7 if accommodation_type=="Apartment"
-outreg2 using "$output/hotels_extval_type", se 2aster bdec(2) ctitle("Apartments") tex(frag) nonotes append
+outreg2 using "${output}/hotels_extval_type", se 2aster bdec(2) ctitle("Apartments") tex(frag) nonotes append
 

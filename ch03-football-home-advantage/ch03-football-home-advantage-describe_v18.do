@@ -11,32 +11,48 @@
 * 	Not to be used for commercial purposes.
 *
 * Chapter 03
-* CH03C Measuring home team advantage in football
+* CH03D Describe the likelihood of loss / tie / win for home team
 * using the football dataset
+* version 1.0 2025-01-04
 *
-* REVISION HISTORY:
-* Version 0.9 2020-09-06 - original
-* Version 1.0 2025-11-03 - Stata 18 upgrade
-*   - Fixed path separator for cross-platform compatibility
-*   - Applied viridis colors properly
-*   - Updated graph export syntax
-*   - Fixed typo in header
+* STATA VERSION: This code is optimized for Stata 18
+* Backward compatibility notes for Stata 15 and below are included
 ********************************************************************
 
+* Stata version check and setup
+version 18
+clear all
+set more off
+set varabbrev off
 
+
+********************************************************************
 * SETTING UP DIRECTORIES
+********************************************************************
 
-* STEP 1: set working directory for da_case_studies.
-* for example:
-* cd "C:/Users/xy/Dropbox/gabors_data_analysis/da_case_studies"
+* STEP 1: set working directory for da_case_studies
+* Example: cd "C:/Users/xy/Dropbox/gabors_data_analysis/da_case_studies"
 
-* STEP 2: * Directory for data
-* Option 1: run directory-setting do file
-do set-data-directory.do 
-							/* this is a one-line do file that should sit in 
-							the working directory you have just set up
-							this do file has a global definition of your working directory
-							more details: gabors-data-analysis.com/howto-stata/   */
+* STEP 2: Set data directory
+* Option 1: Run directory-setting do file (RECOMMENDED)
+capture do set-data-directory.do 
+	/* This one-line do file should sit in your working directory
+	   It contains: global data_dir "path/to/da_data_repo"
+	   More details: gabors-data-analysis.com/howto-stata/ */
+
+* Option 2: Set directory directly here
+* Example: global data_dir "C:/Users/xy/gabors_data_analysis/da_data_repo"
+
+* Set up paths
+global data_in  "${data_dir}/football/clean"
+global work     "ch03-football-home-advantage"
+global output   "${work}/output"
+
+* Create directories
+capture mkdir "${work}"
+capture mkdir "${output}"
+
+
 
 * Option 2: set directory directly here
 * for example:
@@ -45,13 +61,13 @@ do set-data-directory.do
 global data_in  "$data_dir/football/clean"
 global work  	"ch03-football-home-advantage"
 
-cap mkdir 		"$work/output"
-global output 	"$work/output"
+cap mkdir 		"${work}/output"
+global output 	"${work}/output"
 
 
 
 * Use full 11 season data table on games
-use "$data_in/epl_games.dta", clear
+use "${data_in}/epl_games.dta", clear
 
 * Or download directly from OSF:
 /*
@@ -89,7 +105,7 @@ histogram home_goaladv, ///
 	graphregion(fcolor(white) ifcolor(none)) ///
 	plotregion(fcolor(white) ifcolor(white))
 
-graph export "$output/ch03-figure-9-hist-goaldiff-Stata.png", replace as(png)
+graph export "${output}/ch03-figure-9-hist-goaldiff-Stata.png", replace as(png)
 
 * Statistics
 * Table 3.7

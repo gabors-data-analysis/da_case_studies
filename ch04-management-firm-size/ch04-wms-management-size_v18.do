@@ -13,74 +13,102 @@
 * Chapter 04
 * CH04A Management quality and firm size: describing patterns of association
 * using the wms-management-survey dataset
+* version 1.0 2025-01-04
 *
-* REVISION HISTORY:
-* Version 0.9 2020-09-06 - original
-* Version 1.0 2025-11-03 - Stata 18 upgrade
-*   - Fixed path separator for cross-platform compatibility
-*   - Applied viridis colors properly
-*   - Updated graph export syntax
+* STATA VERSION: This code is optimized for Stata 18
+* Backward compatibility notes for Stata 15 and below are included
 ********************************************************************
 
+* Stata version check and setup
+version 18
+clear all
+set more off
+set varabbrev off
 
+
+********************************************************************
 * SETTING UP DIRECTORIES
+********************************************************************
 
-* STEP 1: set working directory for da_case_studies.
-* for example:
-* cd "C:/Users/xy/Dropbox/gabors_data_analysis/da_case_studies"
+* STEP 1: set working directory for da_case_studies
+* Example: cd "C:/Users/xy/Dropbox/gabors_data_analysis/da_case_studies"
 
-* STEP 2: * Directory for data
-* Option 1: run directory-setting do file
-do set-data-directory.do 
-							/* this is a one-line do file that should sit in 
-							the working directory you have just set up
-							this do file has a global definition of your working directory
-							more details: gabors-data-analysis.com/howto-stata/   */
+* STEP 2: Set data directory
+* Option 1: Run directory-setting do file (RECOMMENDED)
+capture do set-data-directory.do 
+	/* This one-line do file should sit in your working directory
+	   It contains: global data_dir "path/to/da_data_repo"
+	   More details: gabors-data-analysis.com/howto-stata/ */
 
-* Option 2: set directory directly here
-* for example:
-* global data_dir "C:/Users/xy/gabors_data_analysis/da_data_repo"
+* Option 2: Set directory directly here
+* Example: global data_dir "C:/Users/xy/gabors_data_analysis/da_data_repo"
 
-global data_in  "$data_dir/wms-management-survey/clean"
-global work  	"ch04-management-firm-size"
+* Set up paths
+global data_in  "${data_dir}/wms-management-survey/clean"
+global work     "ch04-management-firm-size"
+global output   "${work}/output"
 
-cap mkdir 		"$work/output"
-global output 	"$work/output"
+* Create directories
+capture mkdir "${work}"
+capture mkdir "${output}"
 
 
+********************************************************************
+* LOAD DATA
+********************************************************************
 
-clear
-use "$data_in/wms_da_textbook.dta"
+* Option 1: Load from local repository
+use "${data_in}/wms_da_textbook.dta", clear
 
-* Or download directly from OSF:
+* Option 2: Download directly from OSF (uncomment to use)
 /*
-copy "https://osf.io/download/gwfbk/" "workfile.dta"
-use "workfile.dta", clear
-erase "workfile.dta"
-*/ 
+tempfile wms_data
+copy "https://osf.io/download/gwfbk/" `wms_data'
+use `wms_data', clear
+*/
 
 
-* Sample selection
-cap drop lean1_1-talent6_5
-cap drop aa*
+********************************************************************
+* SAMPLE SELECTION
+********************************************************************
+
+* Drop detailed management practice variables (not used in this analysis)
+capture drop lean1_1-talent6_5
+capture drop aa*
+
+* Keep only Mexico, 2013 wave
 keep if country=="Mexico"
 keep if wave==2013
+
+* Keep firms with 100-5000 employees
 keep if emp_firm>=100 
 keep if emp_firm<=5000
+
 count
+display as text "Final sample size: " as result r(N) " firms"
+
+* Check firm size distribution
 sum emp_firm, d
 
-save "$work/ch04-wms-work.dta", replace
+* Save working file
+save "${work}/ch04-wms-work.dta", replace
 
 
-* Describe data
+********************************************************************
+* DESCRIPTIVE STATISTICS
+********************************************************************
+
+* Summary statistics for key variables
 sum management emp_firm, d
 
-
-* Distribution of y, distribution of x
+* Distribution of y (management quality) and x (firm size)
 tabstat management emp_firm, s(min max mean median sd n) col(s)
 
-* Figure 4.1
+
+********************************************************************
+* FIGURE 4.1: DISTRIBUTION OF MANAGEMENT QUALITY
+********************************************************************
+
 colorpalette viridis, n(4) select(2) nograph
 local color1 `r(p)'
 
@@ -92,9 +120,14 @@ hist management, ///
  graphregion(fcolor(white) ifcolor(none)) ///
  plotregion(fcolor(white) ifcolor(white))
 
-graph export "$output/ch04-figure-1-wms-mex-management-hist-Stata.png", replace as(png)
+graph export "${output}/ch04-figure-1-wms-mex-management-hist-Stata.png", replace
 
-* Figure 4.2a
+
+********************************************************************
+* FIGURE 4.2: DISTRIBUTION OF FIRM SIZE
+********************************************************************
+
+* Figure 4.2a - Firm size histogram (level)
 colorpalette viridis, n(4) select(2) nograph
 local color1 `r(p)'
 
@@ -107,9 +140,10 @@ hist emp_firm, ///
  graphregion(fcolor(white) ifcolor(none)) ///
  plotregion(fcolor(white) ifcolor(white))
 
-graph export "$output/ch04-figure-2a-wms-mex-emp-hist-Stata.png", replace as(png)
+graph export "${output}/ch04-figure-2a-wms-mex-emp-hist-Stata.png", replace
 
-* Figure 4.2b
+
+* Figure 4.2b - Log firm size histogram
 gen lnemp = ln(emp_firm)
 colorpalette viridis, n(4) select(2) nograph
 local color1 `r(p)'
@@ -123,18 +157,29 @@ hist lnemp, ///
  graphregion(fcolor(white) ifcolor(none)) ///
  plotregion(fcolor(white) ifcolor(white))
 
-graph export "$output/ch04-figure-2b-wms-mex-lnemp-hist-Stata.png", replace as(png)
+graph export "${output}/ch04-figure-2b-wms-mex-lnemp-hist-Stata.png", replace
 
 
-* Emp: 3 bins
+********************************************************************
+* CREATE FIRM SIZE BINS
+********************************************************************
+
+* Create 3 employment bins
 gen emp3bins = 1 if emp_firm<200
 replace emp3bins = 2 if emp_firm>=200 & emp_firm<1000
 replace emp3bins = 3 if emp_firm>=1000
 lab def emp3bins 1 "small" 2 "medium" 3 "large"
 lab val emp3bins emp3bins
+
+* Check bin distribution
 tabstat emp_firm, by(emp3bins) s(min max n)
 
-* Stacked bar charts some management items by emp bins
+
+********************************************************************
+* FIGURE 4.3: MANAGEMENT PRACTICES BY FIRM SIZE
+********************************************************************
+
+* Create binary indicators for each management practice score (1-5)
 qui foreach v of varlist lean* perf* talent* {
 	forvalue i=1/5 {
 		gen `v'_`i' = `v'==`i'
@@ -146,7 +191,10 @@ qui foreach v of varlist lean* perf* talent* {
 colorpalette "yellow*1.2" "green*0.6" "bluishgray*1.2" "navy*0.6" "navy", nograph
 local colors `r(p)'
 
+
+* Figure 4.3a - Lean management practices by firm size
 tab lean1 emp3bins, col nofre
+
 graph bar lean1_*, stack over(emp3bins) percent ///
  bar(1, col("`=word("`colors'", 1)'")) ///
  bar(2, col("`=word("`colors'", 2)'")) ///
@@ -158,9 +206,12 @@ graph bar lean1_*, stack over(emp3bins) percent ///
  graphregion(fcolor(white) ifcolor(none)) ///
  plotregion(fcolor(white) ifcolor(white))
  
-graph export "$output/ch04-figure-3a-wms-mex-lean1-emp3bins-Stata.png", replace as(png)
+graph export "${output}/ch04-figure-3a-wms-mex-lean1-emp3bins-Stata.png", replace
 
+
+* Figure 4.3b - Performance tracking by firm size
 tab perf2 emp3bins, col nofre
+
 graph bar perf2_*, stack over(emp3bins) percent ///
  bar(1, col("`=word("`colors'", 1)'")) ///
  bar(2, col("`=word("`colors'", 2)'")) ///
@@ -172,23 +223,35 @@ graph bar perf2_*, stack over(emp3bins) percent ///
  graphregion(fcolor(white) ifcolor(none)) ///
  plotregion(fcolor(white) ifcolor(white))
 
-graph export "$output/ch04-figure-3b-wms-mex-perf2-emp3bins-Stata.png", replace as(png)
+graph export "${output}/ch04-figure-3b-wms-mex-perf2-emp3bins-Stata.png", replace
 
 
-* Bin scatters avg score by employment bins
+********************************************************************
+* FIGURE 4.4: BIN SCATTER PLOTS
+********************************************************************
+
+* Create numeric values for 3-bin categories (for plotting)
 tabstat emp_firm, s(min max median n) by(emp3bins)
 gen emp3bins_num = (emp3bins==1)*150 + (emp3bins==2)*600 + (emp3bins==3)*3000
 tabstat emp_firm, s(min max median n) by(emp3bins_num)
+
+* Create 10 employment bins
 egen emp10bins = cut(emp_firm), group(10)
 tabstat emp_firm, s(min max median n) by(emp10bins)
+
+* Assign representative values to 10-bin categories
 recode emp10bins 0=120 1=135 2=165 3=255 4=315 5=375 6=585 7=860 8=1600 9=3500
 tabstat emp_firm, s(min max median n) by(emp10bins)
+
+* Calculate mean management quality by bins
 egen management_emp3bins  = mean(management), by(emp3bins)
 egen management_emp10bins = mean(management), by(emp10bins)
 
 colorpalette viridis, n(4) select(2) nograph
 local color1 `r(p)'
 
+
+* Figure 4.4a - Bin scatter with 3 bins
 scatter management_emp3bins emp3bins_num, ///
  msize(vlarge) mcolor("`color1'") ///
  ylab(2.4(0.2)3.4, grid) ///
@@ -198,8 +261,10 @@ scatter management_emp3bins emp3bins_num, ///
  graphregion(fcolor(white) ifcolor(none)) ///
  plotregion(fcolor(white) ifcolor(white))
 
-graph export "$output/ch04-figure-4a-wms-mex-mgmt-emp3bins-Stata.png", replace as(png)
+graph export "${output}/ch04-figure-4a-wms-mex-mgmt-emp3bins-Stata.png", replace
 
+
+* Figure 4.4b - Bin scatter with 10 bins
 scatter management_emp10bins emp10bins, ///
  msize(vlarge) mcolor("`color1'") ///
  ylab(2.5(0.25)3.5, grid) ///
@@ -209,10 +274,14 @@ scatter management_emp10bins emp10bins, ///
  graphregion(fcolor(white) ifcolor(none)) ///
  plotregion(fcolor(white) ifcolor(white))
 
-graph export "$output/ch04-figure-4b-wms-mex-mgmt-emp10bins-Stata.png", replace as(png)
+graph export "${output}/ch04-figure-4b-wms-mex-mgmt-emp10bins-Stata.png", replace
 
 
-* Scatterplot avg score by employment
+********************************************************************
+* FIGURE 4.5: SCATTERPLOTS
+********************************************************************
+
+* Figure 4.5a - Scatterplot: management vs firm size (level)
 scatter management emp_firm, ///
  ylab(, grid) ///
  xlab(, grid) ///
@@ -222,9 +291,11 @@ scatter management emp_firm, ///
  graphregion(fcolor(white) ifcolor(none)) ///
  plotregion(fcolor(white) ifcolor(white))
 
-graph export "$output/ch04-figure-5a-wms-mex-mgmt-emp-scatter-Stata.png", replace as(png)
+graph export "${output}/ch04-figure-5a-wms-mex-mgmt-emp-scatter-Stata.png", replace
 
-cap gen lnemp = ln(emp_firm)
+
+* Figure 4.5b - Scatterplot: management vs log firm size
+capture gen lnemp = ln(emp_firm)
 
 scatter management lnemp, ///
  ylab(, grid) ///
@@ -235,36 +306,44 @@ scatter management lnemp, ///
  graphregion(fcolor(white) ifcolor(none)) ///
  plotregion(fcolor(white) ifcolor(white))
 
-graph export "$output/ch04-figure-5b-wms-mex-mgmt-lnemp-scatter-Stata.png", replace as(png)
+graph export "${output}/ch04-figure-5b-wms-mex-mgmt-lnemp-scatter-Stata.png", replace
 
 
-* Box plots by emp bins
+********************************************************************
+* FIGURE 4.6: BOX PLOTS AND VIOLIN PLOTS
+********************************************************************
+
+* Figure 4.6a - Box plots by employment bins
 graph box management, ///
  over(emp3bins) ///
  ytitle("Management score") ///
  graphregion(fcolor(white) ifcolor(none)) ///
  plotregion(fcolor(white) ifcolor(white))
 
-graph export "$output/ch04-figure-6a-wms-mex-mgmt-emp3bins-box-Stata.png", replace as(png)
+graph export "${output}/ch04-figure-6a-wms-mex-mgmt-emp3bins-box-Stata.png", replace
 
-* Violin plots by emp bins
-* Need to install vioplot ado file
-* (type search vioplot, click on link and follow the instructions)
+
+* Figure 4.6b - Violin plots by employment bins
+* Note: Requires vioplot package
+* To install: search vioplot, click link and follow instructions
 vioplot management, ///
  over(emp3bins) ///
  ylab(, grid) ///
  graphregion(fcolor(white) ifcolor(none)) ///
  plotregion(fcolor(white) ifcolor(white))
 
-graph export "$output/ch04-figure-6b-wms-mex-mgmt-emp3bins-violin-Stata.png", replace as(png)
+graph export "${output}/ch04-figure-6b-wms-mex-mgmt-emp3bins-violin-Stata.png", replace
 
 
-******************************************
-* Correlation
+********************************************************************
+* CORRELATION ANALYSIS
+********************************************************************
+
+* Overall correlation
 corr management emp_firm
 
-* By industry
-cap drop industry_broad
+* Create broad industry categories
+capture drop industry_broad
 gen industry_broad = ""
 replace industry_broad = "food_drinks_tobacco" if sic<=21
 replace industry_broad = "textile_apparel_leather_etc" if sic==22 | sic==23 | sic==31
@@ -274,11 +353,14 @@ replace industry_broad = "materials_metals" if sic>=32 & sic<35
 replace industry_broad = "electronics, equipment, machinery" if sic>=35 & sic<37
 replace industry_broad = "auto" if sic==37
 replace industry_broad = "other" if sic>=38
+
+* Check industry classification
 tab industry_broad, mis
 tab sic industry_broad, mis
 
-
+* Correlation by industry
 sort industry_broad
 by industry_broad: corr management emp_firm
-tab industry, mis sum(management)
 
+* Management quality by detailed industry
+tab industry, mis sum(management)

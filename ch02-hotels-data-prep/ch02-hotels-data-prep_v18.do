@@ -13,54 +13,57 @@
 * Chapter 02
 * CH02A Finding a good deal among hotels: data preparation
 * using the hotels-vienna dataset
+* version 1.0 2025-01-04
 *
-* REVISION HISTORY:
-* Version 0.9 2020-09-06 - original
-* Version 1.0 2025-11-03 - Stata 18 upgrade, efficiency improvements
-*   - Modernized table output using collect
-*   - Fixed variable label quotes
-*   - Fixed variable abbreviation
-*   - Enhanced comments
+* STATA VERSION: This code is optimized for Stata 18
+* Backward compatibility notes for Stata 15 and below are included
 ********************************************************************
 
+* Stata version check and setup
+version 18
+clear all
+set more off
+set varabbrev off
 
+
+********************************************************************
 * SETTING UP DIRECTORIES
+********************************************************************
 
-* STEP 1: set working directory for da_case_studies.
-* for example:
-* cd "C:/Users/xy/Dropbox/gabors_data_analysis/da_case_studies"
+* STEP 1: set working directory for da_case_studies
+* Example: cd "C:/Users/xy/Dropbox/gabors_data_analysis/da_case_studies"
 
-* STEP 2: * Directory for data
-* Option 1: run directory-setting do file
-do set-data-directory.do 
-							/* this is a one-line do file that should sit in 
-							the working directory you have just set up
-							this do file has a global definition of your working directory
-							more details: gabors-data-analysis.com/howto-stata/   */
+* STEP 2: Set data directory
+* Option 1: Run directory-setting do file (RECOMMENDED)
+capture do set-data-directory.do 
+	/* This one-line do file should sit in your working directory
+	   It contains: global data_dir "path/to/da_data_repo"
+	   More details: gabors-data-analysis.com/howto-stata/ */
 
-* Option 2: set directory directly here
-* for example:
-* global data_dir "C:/Users/xy/gabors_data_analysis/da_data_repo"
+* Option 2: Set directory directly here
+* Example: global data_dir "C:/Users/xy/gabors_data_analysis/da_data_repo"
 
-
-global data_in  "$data_dir/hotels-vienna"
-global work  	"ch02-hotels-data-prep"
-
-cap mkdir 		"$work/output"
-global output 	"$work/output"
-
+* Set up paths
+global data_in  "${data_dir}/hotels-vienna"
+global work     "ch02-hotels-data-prep"
+global output   "${work}/output"
 
 * We'll use both clean and raw files in this case study
 * Separate data_in directories for these two
-global data_in_clean "$data_in/clean"
-global data_in_raw "$data_in/raw"
+global data_in_clean "${data_in}/clean"
+global data_in_raw "${data_in}/raw"
+
+* Create directories
+capture mkdir "${work}"
+capture mkdir "${output}"
+
 
 
 *********************************************************************
 * PART A: Load clean data and create workfile
 *********************************************************************
 
-use "$data_in_clean/hotels-vienna.dta", clear
+use "${data_in_clean}/hotels-vienna.dta", clear
 
 * Or download directly from OSF:
 
@@ -85,7 +88,7 @@ list hotel_id price accommodation_type distance stars rating rating_count if _n 
 
 
 listtab hotel_id price accommodation_type distance stars rating rating_count if _n == 2 ///
- using "$output/ch02-table2-hotel-list-Stata.tex", replace ///
+ using "${output}/ch02-table2-hotel-list-Stata.tex", replace ///
  rstyle(tabular) ///
  head("\begin{tabular}{lrrrrrr}" ///
  `"Hotel ID & Price & Accomodation &Distance & stars & rating & rating count \\"') ///
@@ -101,7 +104,7 @@ count
 list hotel_id price distance if _n <= 3
 
 listtab hotel_id price distance if _n <= 3 ///
- using "$output/ch02-table3-hotel-simpletidy-Stata.tex", replace ///
+ using "${output}/ch02-table3-hotel-simpletidy-Stata.tex", replace ///
  rstyle(tabular) ///
  head("\begin{tabular}{lrr}" ///
  `"Hotel ID & Price  & Distance  \\"') ///
@@ -117,7 +120,7 @@ listtab hotel_id price distance if _n <= 3 ///
 * Variables downloaded as string, often in form that is not helpful
 * Need to transform them to numbers that we can use
 
-import delimited using "$data_in_raw/hotelbookingdata-vienna.csv", clear
+import delimited using "${data_in_raw}/hotelbookingdata-vienna.csv", clear
 
 * Or download directly from OSF:
 
@@ -187,7 +190,7 @@ list hotel_id accommodation_type price  distance stars rating rating_count ///
 
  
 listtab hotel_id accommodation_type price  distance stars rating rating_count if hotel_id == 22050 | hotel_id == 22185 ///
- using "$output/ch02-table10-hotel-duplicates-Stata.tex", replace ///
+ using "${output}/ch02-table10-hotel-duplicates-Stata.tex", replace ///
  rstyle(tabular) ///
  head("\begin{tabular}{lrrrrrr}" ///
  `"Hotel ID & Price & Accomodation &Distance & stars & rating & rating count \\"') ///

@@ -11,70 +11,106 @@
 * 	Not to be used for commercial purposes.
 *
 * Chapter 07
-* Simulated simple linear regression estimated by OLS
-* No actual dataset used
+* Simulating simple linear regression estimated by OLS
+* No actual data used - simulations only
+* version 1.0 2025-01-04
 *
-* REVISION HISTORY:
-* Version 0.9 2020-09-06 - original
-* Version 1.0 2025-11-03 - Stata 18 upgrade
-*   - Applied viridis colors instead of navy/green
-*   - Fixed path separator for cross-platform compatibility
-*   - Updated graph export syntax
+* STATA VERSION: This code is optimized for Stata 18
+* Backward compatibility notes for Stata 15 and below are included
 ********************************************************************
 
+* Stata version check and setup
+version 18
+clear all
+set more off
+set varabbrev off
 
+
+********************************************************************
 * SETTING UP DIRECTORIES
+********************************************************************
 
-* STEP 1: set working directory for da_case_studies.
-* for example:
-* cd "C:/Users/xy/Dropbox/gabors_data_analysis/da_case_studies"
+* STEP 1: set working directory for da_case_studies
+* Example: cd "C:/Users/xy/Dropbox/gabors_data_analysis/da_case_studies"
 
-global work  	"ch07-ols-simulation"
+* Set up paths
+global work     "ch07-ols-simulation"
+global output   "${work}/output"
 
-cap mkdir 		"$work/output"
-global output 	"$work/output"
-
-
-
-* No real data is used 
+* Create directories
+capture mkdir "${work}"
+capture mkdir "${output}"
 
 
-* Clear environment
-clear
+********************************************************************
+* SIMULATION SETUP
+********************************************************************
 
-* Set the seed
+* Set random seed for reproducibility
 set seed 1458
 
-* Sample size
+* Define sample size
 global N = 100
-set obs $N
+set obs ${N}
 
-* Uniformly distributed x, [0,4]
+
+
+********************************************************************
+* GENERATE SIMULATED DATA
+********************************************************************
+
+* Generate independent variable: uniformly distributed x on [0,4]
 gen x = runiform(0, 4)
+lab var x "Simulated x variable (uniform [0,4])"
 
-* y = a + bx + u (u normally distributed)
-local a = 2
-local b = 0.5
-local sigmau = 0.7
+* Define population parameters for y = a + b*x + u
+local a = 2        // Intercept
+local b = 0.5      // Slope
+local sigmau = 0.7 // Standard deviation of error term
 
+
+* Generate dependent variable with normal errors
 gen y = `a' + `b'*x + rnormal(0, `sigmau')
+lab var y "Simulated y variable (y = a + b*x + u)"
 
+
+********************************************************************
+* DESCRIPTIVE STATISTICS
+********************************************************************
+
+* Calculate means for reference lines in plot
 summarize y
 local meany = r(mean)
+
 summarize x
 local meanx = r(mean)
 
-* Scatterplot and OLS regression line
-* Average y and average x shown
+* Display summary statistics
+sum x y
 
-* Set up viridis colors
+
+********************************************************************
+* OLS ESTIMATION
+********************************************************************
+
+* Estimate OLS regression
+regress y x
+
+
+
+********************************************************************
+* FIGURE 7.4: SCATTERPLOT WITH OLS REGRESSION LINE
+********************************************************************
+
+* Set up viridis colors for scatter and line
 colorpalette viridis, n(4) select(2) nograph
 local color1 `r(p1)'
 
 colorpalette viridis, n(4) select(3) nograph
 local color2 `r(p1)'
 
-
+* Create scatterplot with OLS fit
+* Show average x and average y with dashed lines
 scatter y x, ///
  mc("`color1'") ms(O) msize(small) mlw(thick) ///
  || lfit y x, ///
@@ -91,5 +127,4 @@ scatter y x, ///
  graphregion(fcolor(white) ifcolor(none)) ///
  plotregion(fcolor(white) ifcolor(white))
 
-graph export "$output/ch07-figure-4-olsfit-Stata.png", replace as(png)
-
+graph export "${output}/ch07-figure-4-olsfit-Stata.png", replace
