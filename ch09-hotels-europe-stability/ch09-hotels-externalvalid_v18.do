@@ -77,7 +77,7 @@ restore
 merge m:m hotel_id using `hotels_features', nogen
 */
 
-drop _m
+drop _merge
 label var distance "Distance to city center, miles"
 
 ********************************************************************

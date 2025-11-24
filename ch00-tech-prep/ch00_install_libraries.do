@@ -18,6 +18,7 @@ ssc install texsave, replace
 ssc install outreg2, replace
 ssc install listtex, replace
 ssc install listtab, replace
+ssc install tabout, replace
 
 ssc install elasticregress, replace
 ssc install lassopack, replace

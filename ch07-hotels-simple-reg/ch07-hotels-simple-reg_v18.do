@@ -201,7 +201,7 @@ graph export "${output}/ch07-figure-2a-stepfn4cat-Stata.png", as(png) replace
 
 * Create 7 distance bins
 egen dist7groups = cut(distance), at(0(1)7)
-tabstat distance, by(dist7g) s(min max n)
+tabstat distance, by(dist7groups) s(min max n)
 
 * Create step function for 7 bins
 egen price7steps = mean(price), by(dist7groups)

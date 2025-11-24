@@ -134,7 +134,7 @@ reg age female , robust
 * histogram, not in textbook 
 lab def female 0 male 1 female
 lab value female female 
-hist age, by(female) start(20) width(5) fcol("254 204 92") lcol(white) percent ///
+hist age, by(female) start(20) width(5) fcol(navy*0.8) lcol(white) percent ///
  xla(20(10)60, grid) yla(, grid) ///
  graphregion(fcolor(white) ifcolor(none))  ///
  plotregion(fcolor(white) ifcolor(white))
@@ -142,7 +142,7 @@ hist age, by(female) start(20) width(5) fcol("254 204 92") lcol(white) percent /
 * density plots
 kdensity age if female==0, gen(x0 y0) nogra
 kdensity age if female==1, gen(x1 y1) nogra
-line y1 y0 x0, lc("68 1 84" "253 231 37") lw(thick thick) ///
+line y1 y0 x0, lc(navy*0.8 green*0.5) lw(thick thick) ///
  xla(20(10)60, grid) yla(, grid) ///
  xtitle("Age (years)") ytitle("Density") ///
  legend(off) ///
@@ -174,15 +174,15 @@ reg lnw female age* , robust
 ** LN EARNINGS, EDU CATEG
 use "${work}/earnings_multireg.dta",replace
 
-gen ed_MA = grade==44
-gen ed_Profess = grade==45
-gen ed_PhD = grade==46
+gen ed_MA = grade92==44
+gen ed_Profess = grade92==45
+gen ed_PhD = grade92==46
 
 reg lnw female , robust
  outreg2 using "${output}/ch10-table-3-reg-Stata.tex", 2aster tex(frag) nonotes bdec(3) replace 
-reg lnw female ed_Prof ed_PhD, robust
+reg lnw female ed_Profess ed_PhD, robust
  outreg2 using "${output}/ch10-table-3-reg-Stata.tex", 2aster tex(frag) nonotes bdec(3) append
-reg lnw female ed_MA ed_Prof, robust
+reg lnw female ed_MA ed_Profess, robust
  outreg2 using "${output}/ch10-table-3-reg2-Stata.tex", 2aster tex(frag) nonotes bdec(3) append
 
 *****************************************
@@ -214,10 +214,10 @@ gen lnwhat_mCIlo = lnwhat_m - 2*lnwhatse_m
 gen lnwhat_fCIup = lnwhat_f + 2*lnwhatse_f 
 gen lnwhat_fCIlo = lnwhat_f - 2*lnwhatse_f 
 
-* Figure 2a - Linear age model with viridis colors
+* Figure 2a - Linear age model
 line lnwhat_f lnwhat_fCIup lnwhat_fCIlo lnwhat_m lnwhat_mCIup lnwhat_mCIlo age, ///
 	sort lw(thick medium medium thick medium medium) ///
-	lcolor("68 1 84" "68 1 84" "68 1 84" "253 231 37" "253 231 37" "253 231 37") ///
+	lcolor(green*0.5 green*0.5  green*0.5 navy*0.8 navy*0.8 navy*0.8) ///
 	lp(solid dash dash solid dash dash) ///
 	ylab(2.8(0.1)3.8, grid) xlab(25(5)65, grid) ///
 	ytitle("ln(hourly earnings, US dollars)") xtitle(Age (years)) ///
@@ -254,10 +254,10 @@ gen lnwhat_mCIlo = lnwhat_m - 2*lnwhatse_m
 gen lnwhat_fCIup = lnwhat_f + 2*lnwhatse_f 
 gen lnwhat_fCIlo = lnwhat_f - 2*lnwhatse_f 
 
-* Figure 2b - Quartic age model with viridis colors
+* Figure 2b - Quartic age model
 line lnwhat_f lnwhat_fCIup lnwhat_fCIlo lnwhat_m lnwhat_mCIup lnwhat_mCIlo age, ///
 	sort lw(thick medium medium thick medium medium) ///
-	lcolor("68 1 84" "68 1 84" "68 1 84" "253 231 37" "253 231 37" "253 231 37") ///
+	lcolor(green*0.5 green*0.5  green*0.5 navy*0.8 navy*0.8 navy*0.8) ///
 	lp(solid dash dash solid dash dash) ///
 	ylab(2.8(0.1)3.8, grid) xlab(25(5)65, grid) ///
 	ytitle("ln(hourly earnings, US dollars)") xtitle(Age (years)) ///
@@ -284,7 +284,7 @@ drop if class>=6 /* self-employed or without pay */
 gen white = race==1
 gen afram = race==2
 gen asian = race==4
-gen hisp  = ethn>=1 & ethn<=8
+gen hisp  = ethnic>=1 & ethnic<=8
 gen othernonw = white==0 & afram==0 & asian==0 & hisp==0
 sum white-othernonw
 **encoding class94 to numerical values:
@@ -293,9 +293,9 @@ drop prcitshp
 rename a prcitshp
 gen nonUSborn = prcitshp==4 | prcitshp==5
 **
-gen edMA = grade==44
-gen edProf = grade==45
-gen edPhd = grade==46
+gen edMA = grade92==44
+gen edProf = grade92==45
+gen edPhd = grade92==46
 
 global DEMOG age afram hisp asian othernonw nonUSborn edProf edPhd 
 
@@ -321,7 +321,7 @@ encode stfips, gen(b)
 drop stfips
 rename b stfips
 **
-global FAMILY married divorced widowed child1-child4  i.stfips 
+global FAMILY married divorced widowed child1-child4pl  i.stfips 
 
 * Work-related variables
 gen hours = uhours

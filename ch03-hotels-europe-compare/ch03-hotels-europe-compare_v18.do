@@ -104,12 +104,11 @@ tab city
 
 * Set up viridis color
 colorpalette viridis, n(4) select(2) nograph
-local color1 `r(p)'
 
 histogram price if city=="Vienna", ///
 	width(20) percent ///
 	xtitle("Price (US dollars)") ///
-	color(`color1') lcol(white) lw(vthin) ///
+	color(`r(p)') lcol(white) lw(vthin) ///
 	xlabel(0(50)500, grid) ylabel(0(10)30, grid) ///
 	graphregion(fcolor(white) ifcolor(none)) ///
 	plotregion(fcolor(white) ifcolor(white))
@@ -122,12 +121,11 @@ graph export "${output}/ch03-figure-6a-hist-price-Vienna-Stata.png", replace
 ********************************************************************
 
 colorpalette viridis, n(4) select(2) nograph
-local color1 `r(p)'
 
 histogram price if city=="London", ///
 	width(20) percent ///
 	xtitle("Price (US dollars)") ///
-	color(`color1') lcol(white) lw(vthin) ///
+	color(`r(p)') lcol(white) lw(vthin) ///
 	xlabel(0(50)500, grid) ylabel(0(10)30, grid) ///
 	graphregion(fcolor(white) ifcolor(none)) ///
 	plotregion(fcolor(white) ifcolor(white))
@@ -145,11 +143,10 @@ kdensity price if city=="London", gen(xL yL) nograph
 
 * Set up viridis color
 colorpalette viridis, n(4) select(2) nograph
-local color1 `r(p)'
 
 * Create overlayed density plot
 line yV yL xL, ///
-	lc(`color1' `color1') lw(thick thick) ///
+	lc(`r(p)') lw(thick thick) ///
 	xtitle("Price (US dollars)") ///
 	xlabel(0(100)500, grid) ylabel(, grid) ///
 	legend(off) ///

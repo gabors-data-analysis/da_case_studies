@@ -92,17 +92,11 @@ tabstat rain_prob_fc, by(bin) s(min max n)
 format bin %3.1f
 collapse rain rain_prob_fc, by(bin)
 
-* Set up viridis colors
-colorpalette viridis, n(2) nograph
-local colors `r(p)'
-local color1 `=word("`colors'", 1)'
-local color2 `=word("`colors'", 2)'
-
 scatter rain bin bin, ///
  connect(l l) ///
  lw(thick medium) ///
- lc("`color1'" "`color2'") ///
- mcolor("`color1'") ///
+ lc(navy*0.8 green*0.6) ///
+ mcolor(navy*0.8) ///
  msize(medium) ///
  msymbol(O none) ///
  xla(0(0.1)1, grid) ///

@@ -87,7 +87,7 @@ generate gap = date - date[_n-1] - 1
 
 * Label variables
 label variable value "Value of the S&P500"
-label variable datestr "Date, in string format (YMD)"
+label variable datestring "Date, in string format (YMD)"
 label variable date "Date"
 label variable gap "Gap between observations, in days"
 
@@ -96,7 +96,7 @@ generate year = year(date)
 generate month = month(date)
 
 * Order variables
-order date datestr year month gap
+order date datestring year month gap
 
 * Save work file
 save "${work}/work.dta", replace
@@ -141,12 +141,11 @@ label variable pct_return "Percent daily return"
 
 * Set up viridis color
 colorpalette viridis, n(4) select(2) nograph
-local color1 `r(p)'
 
 * Create histogram
 histogram pct_return, ///
 	freq start(-10) width(0.25) bstyle(background) ///
-	fcol(`color1') ///
+	fcol(`r(p)') ///
 	xlab(-10 -5 -2 0 2 5 10, grid) ylab(, grid) ///
 	xline(-${loss}, lc(green) lstyle(foreground) lw(thick)) ///
 	text(220 -7 "5% loss -->") ///
@@ -264,24 +263,24 @@ generate loss_${loss} = .
 save "${temp}/sp500_bootstrap.dta", replace
 
 * Run bootstrap iterations
-quietly forvalues i = 1/${M} {
-	use "${temp}/sp500_pctreturns.dta", replace
-	bsample
-	generate loss_${loss} = 100 * (pct_return < -${loss})
-	collapse loss
-	append using "${temp}/sp500_bootstrap.dta"
-	save "${temp}/sp500_bootstrap.dta", replace
+quietly forvalues i = 1/$M {
+    use "${temp}/sp500_pctreturns.dta", replace
+    bsample 
+    generate loss_${loss} = 100 * (pct_return < -${loss})
+    collapse (mean) loss_${loss}
+    append using "${temp}/sp500_bootstrap.dta"
+    save "${temp}/sp500_bootstrap.dta", replace
 }
 
-label variable loss "Percent of days with losses of ${loss}% or more"
-tabstat loss, s(mean sd median min max n)
+label variable loss_${loss} "Percent of days with losses of ${loss}% or more"
+tabstat loss_${loss}, s(mean sd median min max n)
 
 
 ********************************************************************
 * FIGURE 5.5: BOOTSTRAP DISTRIBUTION
 ********************************************************************
 
-histogram loss, ///
+histogram loss_${loss}, ///
 	freq width(0.04) ///
 	fcol(navy*0.8) lcol(white) ///
 	xlab(0(0.1)1.2, grid) ylab(0(200)1200, grid) ///
@@ -299,7 +298,7 @@ use "${temp}/sp500_pctreturns.dta", replace
 
 * Calculate loss indicator
 generate loss_${loss} = 100 * (pct_return < -${loss})
-summarize loss
+summarize loss_${loss}
 
 * Extract statistics
 local sd = r(sd)

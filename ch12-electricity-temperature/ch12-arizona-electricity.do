@@ -37,7 +37,7 @@ do set-data-directory.do
 
 
 global data_in  "$data_dir/arizona-electricity/clean"
-global work  	"ch12-electrictiy-temperature"
+global work  	"ch12-electricity-temperature"
 
 cap mkdir 		"$work/output"
 global output 	"$work/output"
@@ -75,7 +75,7 @@ gen lnQ=ln(Q)
   lab var lnQ "Residential electricity consumption, GWh, in logs"
 
 compress
-save "$work\electricity_resid_AZ",replace
+save "${work}\electricity_resid_AZ.dta",replace
 
 * source 2: temperature data (cooling degree days etc, by month)
 clear

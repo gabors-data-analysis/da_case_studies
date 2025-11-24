@@ -250,16 +250,41 @@ histogram p_lpm, width(0.02) start(0) percent lc(white) lw(vthin) fc("68 1 84") 
  graphregion(fcolor(white) ifcolor(none))  ///
  plotregion(fcolor(white) ifcolor(white))
 graph export "${output}/ch11-figure-3-hist-predprob-lpm-Stata.png", as(png) replace
+more
 
 
-* Logit and Probit models
- 
-* logit coefficients
+********************************************************************
+* EXAMINE TOP AND BOTTOM PERCENTILES
+********************************************************************
+
+* List top 1% and bottom 1%
+drop if p_lpm==.  /* Check if missing */
+
+xtile q100_lpm = p_lpm, nquantiles(100)
+summarize smoking ever_smoked female age eduyears income10 bmi exerc if q100_lpm==100
+summarize smoking ever_smoked female age eduyears income10 bmi exerc if q100_lpm==1
+
+
+********************************************************************
+* TABLE 11.3: LPM VERSUS LOGIT AND PROBIT
+********************************************************************
+
+* LPM (repeating the previous regression)
+regress stayshealthy smoking ever_smoked female age eduy_08 eduy_818 eduy_18p ///
+	income10 bmi_1635 bmi_3545 exerc i.country, robust
+outreg2 using "${output}/ch11-table-3-reg-Stata.tex", label tex(frag) dec(3) ///
+	keep(stayshealthy smoking ever_smoked female age eduy_08 eduy_818 eduy_18p ///
+	income10 bmi_1635 bmi_3545 exerc) addtext("Country indicators", "YES") ///
+	2aster nor2 nocon replace
+
+* Logit coefficients
 logit stayshealthy smoking ever_smoked female age eduy_08 eduy_818 eduy_18p ///
- income10 bmi_1635 bmi_3545 exerc i.country
- outreg2 using "${output}/ch11-table-3-reg-Stata", label ctitle("logit coeffs") tex(frag)  dec(3) ///
- keep(stayshealthy smoking ever_smoked female age eduy_08 eduy_818 eduy_18p ///
- income10 bmi_1635 bmi_3545 exerc) addtext("Country indicators", "YES") 2aster nor2 nocon replace
+	income10 bmi_1635 bmi_3545 exerc i.country
+outreg2 using "${output}/ch11-table-3-reg-Stata", label ctitle("logit coeffs") ///
+	tex(frag) dec(3) ///
+	keep(stayshealthy smoking ever_smoked female age eduy_08 eduy_818 eduy_18p ///
+	income10 bmi_1635 bmi_3545 exerc) addtext("Country indicators", "YES") ///
+	2aster nor2 nocon append
 
 * predicted probabilities 
 predict p_logit
