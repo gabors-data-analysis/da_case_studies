@@ -23,7 +23,6 @@
 * for example:
 * cd "C:/Users/xy/Dropbox/gabors_data_analysis/da_case_studies"
 
-
 * STEP 2: * Directory for data
 * Option 1: run directory-setting do file
 do set-data-directory.do 
@@ -49,7 +48,7 @@ global output 	"$work/output"
 ********************************************************************
 
 ** IMPORT AND SELECT DATA
-use "$data_in/share-health.dta", clear
+import delimited "$data_in/share-health.csv", clear
 
 * Or download directly from OSF:
 /*
