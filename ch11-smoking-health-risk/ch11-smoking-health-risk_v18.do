@@ -58,7 +58,7 @@ capture mkdir "${output}"
 * LOAD DATA
 ********************************************************************
 
-use "${data_in}/share-health.dta", clear
+import delimited "$data_in/share-health.csv", clear
 
 * Or download directly from OSF:
 /*
@@ -122,7 +122,7 @@ cap rename eduyears_mod eduyears
 gen exerc = br015==1 if br015>0
 replace bmi=. if bmi<0
 summ bmi
-rename income_pct income10
+rename income_pct_w4 income10
 gen married = mar_stat==1 | mar_stat==2 
 replace eduyears=. if eduyears<0
 summ eduyears
@@ -159,8 +159,8 @@ qui reg stayshealthy smoking
 predict ypred
  lab var ypred "Predicted probability of staying healthy"
 egen obs_by_cell = count(ypred), by(stayshealthy smoking)
-scatter stayshealthy smoking [w=obs_by_cell], ms(O) mc("253 231 37") ///
- || scatter ypred smoking, ms(O) mc("68 1 84") c(l) lw(thick) lc("68 1 84") ///
+scatter stayshealthy smoking [w=obs_by_cell], ms(O) mc(green*0.6) ///
+ || scatter ypred smoking, ms(O) mc(navy*0.8) c(l) lw(thick) lc(navy*0.8) ///
   ylab(0(0.1)1, grid) xlab(0 1) ///
   ytitle("Staying healthy / predicted probability of staying healthy") ///
   legend(off)  
@@ -177,7 +177,7 @@ regress stayshealthy smoking ever_smoked, robust
 
 * age, not in textbook
 lowess stayshealthy age, ms(i) ///
- lineopts(lw(thick) lcolor("68 1 84")) ///
+ lineopts(lw(thick) lcolor(navy*0.8)) ///
  ylab(0(0.1)1, grid) xlab(, grid) ///
  ytitle("Probability of staying healthy") xtitle("Age (years)") ///
  title("") note("") ///
@@ -187,7 +187,7 @@ lowess stayshealthy age, ms(i) ///
 * education
 * Figure 11.2a
 lowess stayshealthy eduyears, ms(i) ///
- lineopts(lw(thick) lcolor("68 1 84")) ///
+ lineopts(lw(thick) lcolor(navy*0.8)) ///
  ylab(0(0.1)1, grid) xlab(0(4)24, grid) ///
  ytitle("Probability of staying healthy") xtitle("Years of education") ///
  title("") note("") ///
@@ -198,7 +198,7 @@ graph export "${output}/ch11-figure-2a-edu-lowess-Stata.png", as(png) replace
 * income group
 * Figure 11.2b
 lowess stayshealthy income10, ms(i) ///
- lineopts(lw(thick) lcolor("68 1 84")) ///
+ lineopts(lw(thick) lcolor(navy*0.8)) ///
  ylab(0(0.1)1, grid) xlab(1(1)10, grid) ///
  ytitle("Probability of staying healthy") xtitle("Income group") ///
  title("") note("") ///
@@ -208,7 +208,7 @@ graph export "${output}/ch11-figure-2b-inc-lowess-Stata.png", as(png) replace
 
 * BMI, not in textbook
 lowess stayshealthy bmi, ms(i) ///
- lineopts(lw(thick) lcolor("68 1 84")) ///
+ lineopts(lw(thick) lcolor(navy*0.8)) ///
  ylab(0(0.1)1, grid) xlab(, grid) ///
  ytitle("Probability of staying healthy") xtitle("BMI") ///
  title("") note("") ///
@@ -245,7 +245,7 @@ sum p_lpm,d
 
 * Distribution of predicted probabilities
 * Figure 11.3
-histogram p_lpm, width(0.02) start(0) percent lc(white) lw(vthin) fc("68 1 84") ///
+histogram p_lpm, width(0.02) start(0) percent lc(white) lw(vthin) fc(navy*0.8) ///
  ylabel(0(1)7, grid) xlab(, grid) ///
  graphregion(fcolor(white) ifcolor(none))  ///
  plotregion(fcolor(white) ifcolor(white))
@@ -324,7 +324,7 @@ keep(stayshealthy smoking ever_smoked female age eduy_08 eduy_818 eduy_18p ///
 * lpm, logit and probit predicted probabilities
 * Figure 11.5 - using viridis colors
 scatter p_logit p_probit p_lpm , ///
-xlab(, grid) ylab(, grid) ms(o o) mc("68 1 84" "253 231 37") msize(small small) ///
+xlab(, grid) ylab(, grid) ms(o o) mc(navy*0.8 green*0.6) msize(small small) ///
  || line p_lpm p_lpm, ytitle("Predicted probability") lwidth(medthick) lcolor(black) ///
  legend(rows(1) lab(1 "logit") lab(2 "probit") lab(3 "45 degree line")) ///
  graphregion(fcolor(white) ifcolor(none))  ///
@@ -342,9 +342,9 @@ cap drop x* y*
 * LPM simple model
 * Figure 11.7a - using viridis colors
 twoway histogram p_lpmbase if stayshealthy==1, percent width(0.05) disc ///
- fcolor("68 1 84") lcolor("68 1 84") ///
+ fcolor(navy*0.8) lcolor(navy*0.8) ///
  || histogram p_lpmbase if stayshealthy==0, percent width(0.05) disc ///
- fcolor(none) lcolor("253 231 37") ///
+ fcolor(none) lcolor(green*0.6) ///
  legend(order(2 "Did not stay healthy" 1 "Stayed healthy" )) ///
  xlab(0(0.2)1, grid) ylab(0(20)80, grid) ytitle("Relative frequency")  ///
  graphregion(fcolor(white) ifcolor(none))  ///
@@ -354,9 +354,9 @@ graph export "${output}/ch11-figure-7a-predprob-by-y-lpmsimple-Stata.png", as(pn
 * LPM rich model
 * Figure 11.7b - using viridis colors
 twoway histogram p_lpm if stayshealthy==1, percent width(0.05) start(0) ///
- fcolor("68 1 84") lcolor("68 1 84") ///
+ fcolor(navy*0.8) lcolor(navy*0.8) ///
  || histogram p_lpm if stayshealthy==0, percent width(0.05) start(0) ///
- fcolor(none) lcolor("253 231 37") ///
+ fcolor(none) lcolor(green*0.6) ///
  legend(order(2 "Did not stay healthy" 1 "Stayed healthy" )) ///
  xlab(0(0.2)1, grid) ylab(0(5)20, grid) ytitle("Relative frequency")  ///
  graphregion(fcolor(white) ifcolor(none))  ///
@@ -396,8 +396,8 @@ tabstat p_lpm, by(p_lpm_bins) s(min max mean n)
 preserve
  collapse stayshealthy, by(p_lpm_bins)
  * Figure 11.8a - using viridis colors
- twoway scatter stayshealthy p_lpm_bins, ms(o) mc("68 1 84") c(l) lw(thick) lc("68 1 84") ///
- || line p_lpm_bins p_lpm_bins,  lw(medium ) lc("253 231 37") ///
+ twoway scatter stayshealthy p_lpm_bins, ms(o) mc(navy*0.8) c(l) lw(thick) lc(navy*0.8) ///
+ || line p_lpm_bins p_lpm_bins,  lw(medium ) lc(green*0.6) ///
  xla(0(0.1)1, grid) yla(0(0.1)1, grid) ///
  xtitle("Bins of predicted probabilities") ///
  ytitle("Proportion staying healthy") ///
@@ -419,8 +419,8 @@ tabstat p_logit, by(p_logit_bins) s(min max mean n)
 preserve
  collapse stayshealthy, by(p_logit_bins)
  * Figure 11.8b - using viridis colors
- twoway scatter stayshealthy p_logit_bins, ms(o) mc("68 1 84") c(l) lw(thick) lc("68 1 84") ///
- || line p_logit_bins p_logit_bins,  lw(medium ) lc("253 231 37") ///
+ twoway scatter stayshealthy p_logit_bins, ms(o) mc(navy*0.8) c(l) lw(thick) lc(navy*0.8) ///
+ || line p_logit_bins p_logit_bins,  lw(medium ) lc(green*0.6) ///
  xla(0(0.1)1, grid) yla(0(0.1)1, grid) ///
  xtitle("Bins of predicted probabilities") ///
  ytitle("Proportion staying healthy") ///
@@ -516,7 +516,7 @@ gen illustr_probit=normal(bx_probit)
 
 * Figure 11.4 - using viridis colors
 line illustr_logit illustr_probit bx_logit, sort ///
-  lw(thick thick) lc("68 1 84" "253 231 37") ///
+  lw(thick thick) lc(navy*0.8 green*0.6) ///
   ylab(, grid) xlab(, grid) ///
   ytitle("Probability") xtitle("z values") ///
   legend(rows(1) lab(1 "logit") lab(2 "probit") ) ///
