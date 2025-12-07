@@ -51,9 +51,7 @@ global output   "${work}/output"
 * Create directories
 capture mkdir "${work}"
 capture mkdir "${output}"
-
-
-							more details: gabors-data-analysis.com/howto-stata/   */
+		* more details: gabors-data-analysis.com/howto-stata/   */
 
 * Option 2: set directory directly here
 * for example:
@@ -78,18 +76,18 @@ erase "workfile.csv"
 */
 
 
-sum
+summarize
 
 * Convert population to thousands
-gen pop = pop_2015/1000
-gen lnpop = ln(pop)
+generate pop = pop_2015/1000
+generate lnpop = ln(pop)
 gsort -pop	
-gen rank = _n
+generate rank = _n
 
 *******************************
 * Figure 3.12: ln(rank) vs ln(x)
 *******************************
-gen lnrank = ln(rank)
+generate lnrank = ln(rank)
 
 * Set up viridis color scheme
 colorpalette viridis, n(4) select(2) nograph
@@ -117,7 +115,7 @@ local x1 = 200
 local x2 = 300
 local bound = 0.2
 
-dis `x1' "    " `x2'
+display `x1' "    " `x2'
 count if pop >= `x1'*(1-`bound') & pop <= `x1'*(1+`bound')
 count if pop >= `x2'*(1-`bound') & pop <= `x2'*(1+`bound')
 
@@ -125,7 +123,7 @@ local shift = 3
 local x3 = `x1'*`shift'
 local x4 = `x2'*`shift'
 
-dis `x3' "    " `x4'
+display `x3' "    " `x4'
 count if pop >= `x3'*(1-`bound') & pop <= `x3'*(1+`bound')
 count if pop >= `x4'*(1-`bound') & pop <= `x4'*(1+`bound')
 

@@ -61,7 +61,7 @@ capture mkdir "${output}"
 global data_in  "$data_dir/football/clean"
 global work  	"ch03-football-home-advantage"
 
-cap mkdir 		"${work}/output"
+capture mkdir 		"${work}/output"
 global output 	"${work}/output"
 
 
@@ -80,10 +80,10 @@ erase "workfile.dta"
 keep if season == 2016
 
 * Generate home goal advantage
-gen home_goaladv = goals_home - goals_away
+generate home_goaladv = goals_home - goals_away
 
 * Generate direction of home goal advantage (negative - zero - positive)
-gen home_goaldir = -1 if home_goaladv<0
+generate home_goaldir = -1 if home_goaladv<0
 replace home_goaldir = 0 if home_goaladv==0
 replace home_goaldir = 1 if home_goaladv>0
 
@@ -111,5 +111,5 @@ graph export "${output}/ch03-figure-9-hist-goaldiff-Stata.png", replace as(png)
 * Table 3.7
 * Same as Table 3.9
 tabstat home_goaladv, s(mean sd n) format(%4.1f)
-tab home_goaldir
+tabulate home_goaldir
 

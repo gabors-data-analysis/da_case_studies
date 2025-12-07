@@ -73,25 +73,25 @@ erase "workfile.csv"
 ********************************************************************
 
 * create outcome
-gen healthy = sphus==1 | sphus==2 if sphus>0 & sphus<=5
-tab healthy,mis
+generate healthy = sphus==1 | sphus==2 if sphus>0 & sphus<=5
+tabulate healthy,mis
 drop if healthy==.
 
 * baseline: wave 4; endline: wave 6
-gen baseline = wave==4
-gen endline  = wave==6
-tab baseline 
-tab endline
+generate baseline = wave==4
+generate endline  = wave==6
+tabulate baseline 
+tabulate endline
 
 * define staying healthy at endline
-gen temp = healthy==1 if endline==1
+generate temp = healthy==1 if endline==1
 egen stayshealthy = max(temp), by(mergeid)
-tab stayshealthy
+tabulate stayshealthy
 drop temp
 
 * keep if endline health outcome non-missing
 keep if stayshealthy==1 | stayshealthy==0
-lab var stayshealthy "Stays healthy"
+label variable stayshealthy "Stays healthy"
 
 * keep baseline observations (endline outcome already defined for them)
 keep if baseline==1
@@ -108,8 +108,8 @@ recode smoking 5=0
 keep if smoking==1 | smoking==0
 recode ever_smoked 5=0
 keep if ever_smoked ==1 | ever_smoked ==0
-lab var smoking "Current smoker"
-lab var ever_smoked "Ever smoked"
+label variable smoking "Current smoker"
+label variable ever_smoked "Ever smoked"
 
 
 
@@ -118,14 +118,14 @@ lab var ever_smoked "Ever smoked"
 ********************************************************************
 
 * other variables
-cap rename eduyears_mod eduyears
-gen exerc = br015==1 if br015>0
+capture rename eduyears_mod eduyears
+generate exerc = br015==1 if br015>0
 replace bmi=. if bmi<0
-summ bmi
+summarize bmi
 rename income_pct_w4 income10
-gen married = mar_stat==1 | mar_stat==2 
+generate married = mar_stat==1 | mar_stat==2 
 replace eduyears=. if eduyears<0
-summ eduyears
+summarize eduyears
 
 compress
 
@@ -138,13 +138,13 @@ save "${work}/ch11_share.dta", replace
 
 * Summary stats
 use "${work}/ch11_share.dta", clear
-sum stayshealthy smoking ever_smoked female age income10 eduyears bmi exerc 
-tab country stayshealthy,mis
+summarize stayshealthy smoking ever_smoked female age income10 eduyears bmi exerc 
+tabulate country stayshealthy,mis
 drop if bmi==.
 drop if eduyears==.
 drop if exerc==.
-sum stayshealthy smoking ever_smoked female age income10 eduyears bmi exerc 
-tab country stayshealthy,mis
+summarize stayshealthy smoking ever_smoked female age income10 eduyears bmi exerc 
+tabulate country stayshealthy,mis
 
 
 * Linear probability models of good health at endline and smoking
@@ -155,9 +155,9 @@ regress stayshealthy smoking, robust
 
 * visualize this regression
 * Figure 11.1 - using viridis colors
-qui reg stayshealthy smoking
+quietly reg stayshealthy smoking
 predict ypred
- lab var ypred "Predicted probability of staying healthy"
+ label variable ypred "Predicted probability of staying healthy"
 egen obs_by_cell = count(ypred), by(stayshealthy smoking)
 scatter stayshealthy smoking [w=obs_by_cell], ms(O) mc(green*0.6) ///
  || scatter ypred smoking, ms(O) mc(navy*0.8) c(l) lw(thick) lc(navy*0.8) ///
@@ -221,17 +221,18 @@ mkspline eduy_08 8 eduy_818 18 eduy_18p = eduyears
 mkspline bmi_1635 35 bmi_3545 = bmi
 
 * regressions with other variables (age, gender, education, income bmi, exercising, country)
-label var female "Female"
-label var age "Age"
+label variable female "Female"
+label variable age "Age"
 
-label var stayshealthy "Staying healthy"
-label var eduy_08 "Years of education (if $<8$)"
-label var eduy_818 "Years of education (if $>=8$ and $<18$)"
-label var eduy_18p "Years of education (if $>=18) $"
-label var income10 "Income group"
-label var bmi_1635 "BMI (if $<35$)"
-label var bmi_3545 "BMI (if $>=35$)"
-label var exerc "Exercises regularly"
+label variable stayshealthy "Staying healthy"
+label variable eduy_08 "Years of education (if $<8$)"
+label variable eduy_818 "Years of education (if $>=8$ and $<18$)"
+label variable eduy_18p "Years of education (if $>=18) $"
+label variable income10 "Income group"
+label variable bmi_1635 "BMI (if $<35$)"
+label variable bmi_3545 "BMI (if $>=35$)"
+label variable exerc "Exercises regularly"
+
 regress stayshealthy smoking ever_smoked female age eduy_08 eduy_818 eduy_18p ///
  income10 bmi_1635 bmi_3545 exerc i.country, robust
  outreg2 using "${output}/ch11-table-2-reg-Stata.tex", label tex(frag)  dec(3) ///
@@ -240,8 +241,8 @@ regress stayshealthy smoking ever_smoked female age eduy_08 eduy_818 eduy_18p //
 
 * predicted probabilities 
 predict p_lpm
- lab var p_lpm "Predicted probability of staying healthy (LPM)"
-sum p_lpm,d
+label variable p_lpm "Predicted probability of staying healthy (LPM)"
+summarize p_lpm,d
 
 * Distribution of predicted probabilities
 * Figure 11.3
@@ -288,8 +289,8 @@ outreg2 using "${output}/ch11-table-3-reg-Stata", label ctitle("logit coeffs") /
 
 * predicted probabilities 
 predict p_logit
- lab var p_logit "Predicted probability of staying healthy (logit)"
-sum p_logit,d
+label variable p_logit "Predicted probability of staying healthy (logit)"
+summarize p_logit,d
  
 * logit marginal differences
 logit stayshealthy smoking ever_smoked female age eduy_08 eduy_818 eduy_18p ///
@@ -309,8 +310,8 @@ keep(stayshealthy smoking ever_smoked female age eduy_08 eduy_818 eduy_18p ///
 
  * predicted probabilities 
 predict p_probit
- lab var p_probit "Predicted probability of staying healthy (probit)"
-sum p_probit,d
+label variable p_probit "Predicted probability of staying healthy (probit)"
+summarize p_probit,d
 
 * probit marginal differences
 probit stayshealthy smoking ever_smoked female age eduy_08 eduy_818 eduy_18p ///
@@ -334,10 +335,10 @@ graph export "${output}/ch11-figure-5-predprob-3models-Stata.png", as(png) repla
  
 * DISTRIBUTION OF PREDICTED PROBABILITIES BY OUTCOME
 * re-estimate the simplest lpm for benchmark
-reg stayshealthy smoking
+regress stayshealthy smoking
 predict p_lpmbase
 
-cap drop x* y*
+capture drop x* y*
 
 * LPM simple model
 * Figure 11.7a - using viridis colors
@@ -364,10 +365,10 @@ twoway histogram p_lpm if stayshealthy==1, percent width(0.05) start(0) ///
 graph export "${output}/ch11-figure-7b-predprob-by-y-lpm-Stata.png", as(png) replace
 
 * SUMMARY STATS OF PREDICTED PROBABILITIES BY OUTCOME
-label var p_lpmbase "Simple LPM"
-label var p_lpm "LPM"
-label var p_logit "Logit"
-label var p_probit "Probit"
+label variable p_lpmbase "Simple LPM"
+label variable p_lpm "LPM"
+label variable p_logit "Logit"
+label variable p_probit "Probit"
 estpost tabstat p_lpmbase p_lpm p_logit p_probit, by(stayshealthy) s(mean)
 esttab using "${output}/ch11-table-4-pred-mean-Stata.tex", replace noobs label  tex  ///
  cells(" p_lpmbase(fmt(3)) p_lpm(fmt(3)) p_logit(fmt(3)) p_probit(fmt(3))")  nonumbers
@@ -411,7 +412,7 @@ restore
 * logit rich model
 egen p_logit_bins = cut(p_logit), at(0 0.2(0.05)0.85 1.05)
 tabstat p_logit, by(p_logit_bins) s(min max mean n)
-cap drop temp
+capture drop temp
 egen temp=mean(p_logit), by(p_logit_bins)
 replace p_logit_bins = temp /* attach value to bin: avg pred value */
 tabstat p_logit, by(p_logit_bins) s(min max mean n)
@@ -434,51 +435,51 @@ restore
 * GOODNESS OF FIT STATISTICS
 
 * LPM
-qui reg stayshealthy smoking ever_smoked female age eduy_08 eduy_818 eduy_18p ///
+quietly reg stayshealthy smoking ever_smoked female age eduy_08 eduy_818 eduy_18p ///
  income10 bmi_1635 bmi_3545 exerc i.country
 * R-squared 
 local R2_lpm = e(r2)
 * Brier
-gen sqd_lpm = (stayshealthy - p_lpm)^2
+generate sqd_lpm = (stayshealthy - p_lpm)^2
 * log-loss
-gen logl_lpm = stayshealthy*ln(p_lpm) + (1-stayshealthy)*ln(1-p_lpm)
+generate logl_lpm = stayshealthy*ln(p_lpm) + (1-stayshealthy)*ln(1-p_lpm)
 
 * logit
 * R-squared & Brier
-qui sum stayshealthy
-gen var_stayshealthy=r(sd)^2
-gen sqd_logit = (stayshealthy - p_logit)^2
-qui sum sqd_logit
-gen r2_logit = 1 - (r(mean) / var_stayshealthy)
+quietly summarize stayshealthy
+generate var_stayshealthy=r(sd)^2
+generate sqd_logit = (stayshealthy - p_logit)^2
+quietly summarize sqd_logit
+generate r2_logit = 1 - (r(mean) / var_stayshealthy)
 * Pseudo R-squared
-qui logit stayshealthy smoking ever_smoked female age eduy_08 eduy_818 eduy_18p ///
+quietly logit stayshealthy smoking ever_smoked female age eduy_08 eduy_818 eduy_18p ///
  income10 bmi_1635 bmi_3545 exerc i.country
 local pseudo_R2_logit = e(r2_p)
 * log-loss
-gen logl_logit = stayshealthy*ln(p_logit) + (1-stayshealthy)*ln(1-p_logit)
+generate logl_logit = stayshealthy*ln(p_logit) + (1-stayshealthy)*ln(1-p_logit)
 
 
 * probit
 * R-squared and Brier
-gen sqd_probit = (stayshealthy - p_probit)^2
-qui sum sqd_probit
-gen r2_probit = 1 - (r(mean) / var_stayshealthy)
-sum r2_probit
+generate sqd_probit = (stayshealthy - p_probit)^2
+quietly summarize sqd_probit
+generate r2_probit = 1 - (r(mean) / var_stayshealthy)
+summarize r2_probit
 
 * Pseudo R-squared
-qui probit stayshealthy smoking ever_smoked female age eduy_08 eduy_818 eduy_18p ///
+quietly probit stayshealthy smoking ever_smoked female age eduy_08 eduy_818 eduy_18p ///
  income10 bmi_1635 bmi_3545 exerc i.country
 local pseudo_R2_probit = e(r2_p)
 * log-loss
-gen logl_probit = stayshealthy*ln(p_probit) + (1-stayshealthy)*ln(1-p_probit)
+generate logl_probit = stayshealthy*ln(p_probit) + (1-stayshealthy)*ln(1-p_probit)
 
 * R-squares
-dis "R2_lpm = `R2_lpm'"
+display "R2_lpm = `R2_lpm'"
 tabstat r2_*
 * Brier scores
 tabstat sqd_*
 * Pseudo-R-squares
-dis "pseudo_R2_logit = `pseudo_R2_logit'    " "pseudo_R2_probit = `pseudo_R2_probit'"
+display "pseudo_R2_logit = `pseudo_R2_logit'    " "pseudo_R2_probit = `pseudo_R2_probit'"
 * log-loss
 tabstat logl_*
  
@@ -502,17 +503,17 @@ mkspline bmi_1635 35 bmi_3545 = bmi
 logit stayshealthy smoking ever_smoked female age eduy_08 eduy_818 eduy_18p ///
  income10 bmi_1635 bmi_3545 exerc i.country
 predict bx_logit, xb
- lab var bx_logit "z for logit"
-gen illustr_logit=logistic(bx_logit)
- lab var illustr_logit "logit"
+label variable bx_logit "z for logit"
+generate illustr_logit=logistic(bx_logit)
+ label variable illustr_logit "logit"
 
 * estimate probit, predict bx instead of p
 probit stayshealthy smoking ever_smoked female age eduy_08 eduy_818 eduy_18p ///
  income10 bmi_1635 bmi_3545 exerc i.country
 predict bx_probit, xb
- lab var bx_probit "z for probit"
-gen illustr_probit=normal(bx_probit)
- lab var illustr_probit "probit"
+ label variable bx_probit "z for probit"
+generate illustr_probit=normal(bx_probit)
+ label variable illustr_probit "probit"
 
 * Figure 11.4 - using viridis colors
 line illustr_logit illustr_probit bx_logit, sort ///

@@ -83,7 +83,7 @@ label variable distance "Distance to city center, miles"
 drop if price>600
 
 * Keep only hotels actually in Vienna
-tab city_actual
+tabulate city_actual
 keep if city_actual=="Vienna"
 
 * Save work file

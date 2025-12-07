@@ -72,7 +72,7 @@ keep countryname year imm gdppc
 keep if imm!=.
 keep if year>=2015
 keep if countryname=="Pakistan" | countryname=="India" 
-sum
+summarize
 
 sort countryname year
 list

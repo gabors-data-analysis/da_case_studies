@@ -95,7 +95,7 @@ keep if price<1000
 save "${temp}/hotels-vienna-london.dta", replace
 
 * Check city distribution
-tab city
+tabulate city
 
 
 ********************************************************************

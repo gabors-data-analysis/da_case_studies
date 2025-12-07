@@ -60,7 +60,7 @@ capture mkdir "${output}"
 global data_in  "$data_dir/height-income-distributions/clean"
 global work  	"ch03-distributions-height-income"
 
-cap mkdir 		"${work}/output"
+capture mkdir 		"${work}/output"
 global output 	"${work}/output"
 
 

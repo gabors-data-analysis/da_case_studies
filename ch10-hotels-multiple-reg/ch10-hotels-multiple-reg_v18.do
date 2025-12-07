@@ -75,13 +75,13 @@ use `hotels_data', clear
 * Keep 3 to 4-star hotels (including 3.5 stars)
 keep if stars >= 3 & stars <= 4
 keep if accommodation_type == "Hotel"
-label var distance "Distance to city center, miles"
+label variable distance "Distance to city center, miles"
 
 * Drop likely error (price > $600)
 drop if price > 600
 
 * Keep only hotels actually in Vienna
-tab city_actual
+tabulate city_actual
 
 keep if city_actual == "Vienna"
 
@@ -94,8 +94,8 @@ display as text "Final sample size: " as result r(N) " hotels"
 ********************************************************************
 
 * Log price
-gen lnprice = ln(price)
-label var lnprice "ln(Price)"
+generate lnprice = ln(price)
+label variable lnprice "ln(Price)"
 
 * Piecewise linear spline for distance (knots at 1 and 4 miles)
 mkspline distsp1 1 distsp2 4 distsp3 = distance
@@ -104,8 +104,8 @@ mkspline distsp1 1 distsp2 4 distsp3 = distance
 mkspline ratingsp1 3.5 ratingsp2 = rating
 
 * Star rating: binary indicators
-gen star35 = (stars == 3.5)
-gen star4 = (stars == 4)
+generate star35 = (stars == 3.5)
+generate star4 = (stars == 4)
 
 * Summary statistics
 tabstat price distance lnprice, ///
@@ -117,22 +117,22 @@ tabstat price distance lnprice, ///
 ********************************************************************
 
 * Distance only
-reg lnprice distance, robust
+regress lnprice distance, robust
 outreg2 using "${output}/ch10-table-1-hotels-basic-Stata.tex", ///
     tex(fragment) excel bdec(3) replace
 
 * Rating only  
-reg lnprice rating, robust
+regress lnprice rating, robust
 outreg2 using "${output}/ch10-table-1-hotels-basic-Stata.tex", ///
     tex(fragment) excel bdec(3) append
 
 * Distance and rating
-reg lnprice distance rating, robust
+regress lnprice distance rating, robust
 outreg2 using "${output}/ch10-table-1-hotels-basic-Stata.tex", ///
     tex(fragment) excel bdec(2) append
 
 * Auxiliary regression: distance on rating
-reg distance rating, robust
+regress distance rating, robust
 outreg2 using "${output}/ch10-table-1-hotels-basic-Stata.tex", ///
     tex(fragment) excel bdec(2) append
 
@@ -142,12 +142,12 @@ outreg2 using "${output}/ch10-table-1-hotels-basic-Stata.tex", ///
 ********************************************************************
 
 * Full model with splines and star indicators
-reg lnprice distsp1 distsp2 distsp3 star35 star4 ratingsp1 ratingsp2, robust
+regress lnprice distsp1 distsp2 distsp3 star35 star4 ratingsp1 ratingsp2, robust
 predict lnprice_hat
 predict lnprice_resid, residual
 
 * Compare R-squared: distance splines only vs. full model
-reg lnprice distsp1 distsp2 distsp3, robust
+regress lnprice distsp1 distsp2 distsp3, robust
 
 
 ********************************************************************

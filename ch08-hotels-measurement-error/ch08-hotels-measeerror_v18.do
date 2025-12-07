@@ -75,11 +75,11 @@ use `hotels_data', clear
 * 3 to 4-star hotels (including 3.5 stars)
 keep if stars>=3 & stars<=4
 keep if accommodation_type=="Hotel"
-label var distance "Distance to city center, miles"
+label variable distance "Distance to city center, miles"
 drop if price>600 	/* likely error */
 
 * Drop hotels not really in Vienna
-tab city_actual 
+tabulate city_actual 
 keep if city_actual=="Vienna"
 
 
@@ -87,15 +87,15 @@ keep if city_actual=="Vienna"
 * FEATURE ENGINEERING
 ********************************************************************
 
-gen lnprice = ln(price)
-lab var lnprice "ln(Price)"
+generate lnprice = ln(price)
+label variable lnprice "ln(Price)"
 
 
 ********************************************************************
 * DESCRIPTIVE STATISTICS
 ********************************************************************
 
-sum rating_count, d
+summarize rating_count, d
 
 
 ********************************************************************
@@ -106,9 +106,9 @@ sum rating_count, d
 local k1 100
 local k2 200
 
-sum rating_count rating if rating_count <`k1'
-sum rating_count rating if rating_count >=`k1' & rating_count <`k2' 
-sum rating_count rating if rating_count >=`k2'
+summarize rating_count rating if rating_count <`k1'
+summarize rating_count rating if rating_count >=`k1' & rating_count <`k2' 
+summarize rating_count rating if rating_count >=`k2'
  
 
 ********************************************************************
@@ -116,19 +116,19 @@ sum rating_count rating if rating_count >=`k2'
 ********************************************************************
 
 * Regression for low rating count group
-reg lnprice rating if rating_count <`k1'
+regress lnprice rating if rating_count <`k1'
 predict yhat1
-lab var yhat1 "more noisy x: # ratings <`k1'"
+label variable yhat1 "more noisy x: # ratings <`k1'"
 
 * Regression for medium rating count group
-reg lnprice rating if rating_count >=`k1' & rating_count <`k2' 
-cap predict yhat2
-cap lab var yhat2 "`k1' <= # ratings <`k2' "
+regress lnprice rating if rating_count >=`k1' & rating_count <`k2' 
+capture predict yhat2
+capture label variable yhat2 "`k1' <= # ratings <`k2' "
 
 * Regression for high rating count group
-reg lnprice rating if rating_count >=`k2' 
+regress lnprice rating if rating_count >=`k2' 
 predict yhat3
-lab var yhat3 "less noisy x: # ratings >`k2'"
+label variable yhat3 "less noisy x: # ratings >`k2'"
 
 
 ********************************************************************

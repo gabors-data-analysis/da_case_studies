@@ -77,12 +77,12 @@ use `hotels_data', clear
 * 3 to 4-star hotels (incl 3.5 stars)
 keep if stars>=3 & stars<=4
 keep if accommodation_type=="Hotel"
-label var distance "Distance to city center, miles"
+label variable distance "Distance to city center, miles"
 drop if price>600 	/* likely error */
 
 
 * Drop hotels not really in Vienna
-tab city_actual 
+tabulate city_actual 
 keep if city_actual=="Vienna"
 
 
@@ -104,13 +104,13 @@ save "${work}/hotels_work.dta", replace
 * SCATTERPLOT + REGRESSION LINE
 
 
-gen lnprice = ln(price)
-lab var lnprice "ln(price)"
+generate lnprice = ln(price)
+label variable lnprice "ln(price)"
 count
 count if distance==0
-gen lndistance = ln(distance)
+generate lndistance = ln(distance)
 replace lndistance = ln(distance+0.05) if distance==0
-lab var lndistance "ln(distance to city center)"
+label variable lndistance "ln(distance to city center)"
 
 		
 
@@ -119,16 +119,16 @@ lab var lndistance "ln(distance to city center)"
 ********************************************************************
 
 * Run and compare regressions	
-reg price distance, r
+regress price distance, r
 outreg2 using "${output}/T08_reg1.tex", label bdec(2) tex(frag) nose noaster replace
 
-reg lnprice distance, r
+regress lnprice distance, r
 outreg2 using "${output}/T08_reg1.tex", label bdec(2) tex(frag) nose noaster append
 
 reg price lndistance, r
 outreg2 using "${output}/T08_reg1.tex", label bdec(2) tex(frag) nose noaster append
 
-reg lnprice lndistance
+regress lnprice lndistance
 outreg2 using "${output}/T08_reg1.tex", label bdec(2) tex(frag) nose noaster append
 
 

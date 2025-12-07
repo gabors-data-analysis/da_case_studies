@@ -103,7 +103,7 @@ graph export "${output}/ch12-figure-2b-sp500-daily-ts-Stata.png", as(png) replac
 
 * EXPLORING MONTHLY TIME SERIES: PRICE LEVELS
 keep if month!=month[_n+1]  /* Keep last day of month */
-tab year
+tabulate year
 tsset ym
 
 

@@ -78,7 +78,7 @@ merge m:m hotel_id using `hotels_features', nogen
 */
 
 drop _merge
-label var distance "Distance to city center, miles"
+label variable distance "Distance to city center, miles"
 
 ********************************************************************
 * SAMPLE SELECTION
@@ -103,7 +103,7 @@ duplicates drop
 * CREATE DATE VARIABLE
 ********************************************************************
 
-gen date = ""
+generate date = ""
 replace date = "2017-NOV-weekday" if month==11 & weekend==0
 replace date = "2017-NOV-weekend" if month==11 & weekend==1
 replace date = "2017-DEC-holiday" if month==12 & holiday==1
@@ -112,9 +112,9 @@ drop if date==""
 
 count
 
-tab city
-tab accommodation_type city
-tab date 
+tabulate city
+tabulate accommodation_type city
+tabulate date 
 
 
 
@@ -122,8 +122,8 @@ tab date
 * FEATURE ENGINEERING
 ********************************************************************
 
-gen lnprice = ln(price)
-lab var lnprice "ln(Price)"
+generate lnprice = ln(price)
+label variable lnprice "ln(Price)"
 
 keep hotel_id date city accommodation_type stars rating distance price lnprice
 
@@ -144,7 +144,7 @@ use "${work}/hotels_work.dta", replace
 keep if stars>=3 & stars<=4
 keep if accommodation_type=="Hotel"
 keep if city=="Vienna"
-tab date
+tabulate date
 
 tabstat distance, s(min max p50 mean n) by(date)
 tabstat price, s(min max p50 mean n) by(date) format(%4.1f)
@@ -155,7 +155,7 @@ mkspline dist_0_2 2 dist_2_7 = distance
 
 * Regressions with three dates for textbook
 * Original regression
-reg lnprice dist_0_2 dist_2_7 if date=="2017-NOV-weekday", robust
+regress lnprice dist_0_2 dist_2_7 if date=="2017-NOV-weekday", robust
 outreg2 using "${output}/hotels_extval_time1", se 2aster bdec(2) ctitle("2017-NOV-weekday") tex(frag) nonotes replace
 
 * Other dates 
@@ -168,24 +168,24 @@ foreach d in "2017-NOV-weekend" "2017-DEC-holiday" "2018-JUNE-weekend" {
 ** Same with hotels restricted to be the same
 * First create variable that counts the number of times a hotel is in the data
 egen hotelcount = count(price), by(hotel_id)
-tab hotelcount
+tabulate hotelcount
 keep if hotelcount==4
 
 * Original regression
-reg lnprice dist_0_2 dist_2_7 if date=="2017-NOV-weekday", robust
+regress lnprice dist_0_2 dist_2_7 if date=="2017-NOV-weekday", robust
 outreg2 using "${output}/hotels_extval_time2", se 2aster bdec(2) ctitle("2017-NOV-weekday") tex(frag) nonotes replace
 
 * Other dates 
 foreach d in "2017-NOV-weekend" "2017-DEC-holiday" "2018-JUNE-weekend" { 
-	reg lnprice dist_0_2 dist_2_7 if date=="`d'", robust
+	regress lnprice dist_0_2 dist_2_7 if date=="`d'", robust
 	outreg2 using "${output}/hotels_extval_time2", se 2aster bdec(2) ctitle("`d'") tex(frag) nonotes append
 }
 
 * Check interaction term p value
 keep if date=="2017-NOV-weekday" | date=="2017-NOV-weekend"
-gen we = date=="2017-NOV-weekend"
-tab we
-reg lnprice we c.dist_0_2##we c.dist_2_7##we, robust
+generate we = date=="2017-NOV-weekend"
+tabulate we
+regress lnprice we c.dist_0_2##we c.dist_2_7##we, robust
 
  
 ********************************************************
@@ -204,12 +204,12 @@ mkspline dist_0_2 2 dist_2_7 = distance
 
 * Regressions for three cities
 * Original regression: Vienna
-reg lnprice dist_0_2 dist_2_7 if city=="Vienna", r
+regress lnprice dist_0_2 dist_2_7 if city=="Vienna", r
 outreg2 using "${output}/hotels_extval_city", se 2aster bdec(2) ctitle("Vienna") tex(frag) nonotes replace
 
 * Two other cities
 foreach c in Amsterdam Barcelona {
-	reg lnprice dist_0_2 dist_2_7 if city=="`c'", r
+	regress lnprice dist_0_2 dist_2_7 if city=="`c'", r
 	outreg2 using "${output}/hotels_extval_city", se 2aster bdec(2) ctitle("`c'") tex(frag) nonotes append
 }
 
@@ -221,7 +221,7 @@ use "${work}/hotels_work.dta", replace
 keep if city=="Vienna"
 keep if date=="2017-NOV-weekday"
 keep if stars>=3 & stars<=4
-tab accommodation_type stars
+tabulate accommodation_type stars
 
 
 
@@ -232,9 +232,9 @@ tabstat lnprice, s(min max p50 mean n) by(stars) format(%4.1f)
 mkspline dist_0_2 2 dist_2_7 = distance
 
 
-reg lnprice dist_0_2 dist_2_7 if accommodation_type=="Hotel"
+regress lnprice dist_0_2 dist_2_7 if accommodation_type=="Hotel"
 outreg2 using "${output}/hotels_extval_type", se 2aster bdec(2) ctitle("Hotels") tex(frag) nonotes replace
 
-reg lnprice dist_0_2 dist_2_7 if accommodation_type=="Apartment"
+regress lnprice dist_0_2 dist_2_7 if accommodation_type=="Apartment"
 outreg2 using "${output}/hotels_extval_type", se 2aster bdec(2) ctitle("Apartments") tex(frag) nonotes append
 

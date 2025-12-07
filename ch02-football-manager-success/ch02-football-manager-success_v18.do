@@ -124,9 +124,9 @@ sort season team
 * - Total points earned
 * - Win ratio (points per game)
 
-bys team manager_id: egen manager_games = count(_n)
-bys team manager_id: egen manager_points = sum(points)
-gen manager_win_ratio = manager_points / manager_games
+bysort team manager_id: egen manager_games = count(_n)
+bysort team manager_id: egen manager_points = sum(points)
+generate manager_win_ratio = manager_points / manager_games
 
 * 2.3 Collapse to manager-team level (one row per manager-team)
 collapse (mean) manager_games manager_points manager_win_ratio, ///

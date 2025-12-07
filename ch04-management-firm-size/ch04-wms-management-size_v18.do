@@ -88,7 +88,7 @@ count
 display as text "Final sample size: " as result r(N) " firms"
 
 * Check firm size distribution
-sum emp_firm, d
+summarize emp_firm, d
 
 * Save working file
 save "${work}/ch04-wms-work.dta", replace
@@ -99,7 +99,7 @@ save "${work}/ch04-wms-work.dta", replace
 ********************************************************************
 
 * Summary statistics for key variables
-sum management emp_firm, d
+summarize management emp_firm, d
 
 * Distribution of y (management quality) and x (firm size)
 tabstat management emp_firm, s(min max mean median sd n) col(s)
@@ -112,7 +112,7 @@ tabstat management emp_firm, s(min max mean median sd n) col(s)
 colorpalette viridis, n(4) select(2) nograph
 local color1 `r(p)'
 
-hist management, ///
+histogram management, ///
  percent width(0.25) ///
  color("`color1'") lcol(white) ///
  ylabel(, grid) ///
@@ -131,7 +131,7 @@ graph export "${output}/ch04-figure-1-wms-mex-management-hist-Stata.png", replac
 colorpalette viridis, n(4) select(2) nograph
 local color1 `r(p)'
 
-hist emp_firm, ///
+histogram emp_firm, ///
  percent start(0) width(200) ///
  xlabel(0(500)5000, grid) ///
  ylabel(0(5)30, grid) ///
@@ -144,11 +144,11 @@ graph export "${output}/ch04-figure-2a-wms-mex-emp-hist-Stata.png", replace
 
 
 * Figure 4.2b - Log firm size histogram
-gen lnemp = ln(emp_firm)
+generate lnemp = ln(emp_firm)
 colorpalette viridis, n(4) select(2) nograph
 local color1 `r(p)'
 
-hist lnemp, ///
+histogram lnemp, ///
  percent width(0.25) start(4) ///
  xlabel(4(1)9, grid) ///
  ylabel(, grid) ///
@@ -165,11 +165,11 @@ graph export "${output}/ch04-figure-2b-wms-mex-lnemp-hist-Stata.png", replace
 ********************************************************************
 
 * Create 3 employment bins
-gen emp3bins = 1 if emp_firm<200
+generate emp3bins = 1 if emp_firm<200
 replace emp3bins = 2 if emp_firm>=200 & emp_firm<1000
 replace emp3bins = 3 if emp_firm>=1000
-lab def emp3bins 1 "small" 2 "medium" 3 "large"
-lab val emp3bins emp3bins
+label define emp3bins 1 "small" 2 "medium" 3 "large"
+label values emp3bins emp3bins
 
 * Check bin distribution
 tabstat emp_firm, by(emp3bins) s(min max n)
@@ -180,10 +180,10 @@ tabstat emp_firm, by(emp3bins) s(min max n)
 ********************************************************************
 
 * Create binary indicators for each management practice score (1-5)
-qui foreach v of varlist lean* perf* talent* {
+quietly foreach v of varlist lean* perf* talent* {
 	forvalue i=1/5 {
-		gen `v'_`i' = `v'==`i'
-		lab var `v'_`i' "score=`i'"
+		generate `v'_`i' = `v'==`i'
+		label variable `v'_`i' "score=`i'"
 	}
 }
 
@@ -193,7 +193,7 @@ local colors `r(p)'
 
 
 * Figure 4.3a - Lean management practices by firm size
-tab lean1 emp3bins, col nofre
+tabulate lean1 emp3bins, col nofre
 
 graph bar lean1_*, stack over(emp3bins) percent ///
  bar(1, col("`=word("`colors'", 1)'")) ///
@@ -210,7 +210,7 @@ graph export "${output}/ch04-figure-3a-wms-mex-lean1-emp3bins-Stata.png", replac
 
 
 * Figure 4.3b - Performance tracking by firm size
-tab perf2 emp3bins, col nofre
+tabulate perf2 emp3bins, col nofre
 
 graph bar perf2_*, stack over(emp3bins) percent ///
  bar(1, col("`=word("`colors'", 1)'")) ///
@@ -232,7 +232,7 @@ graph export "${output}/ch04-figure-3b-wms-mex-perf2-emp3bins-Stata.png", replac
 
 * Create numeric values for 3-bin categories (for plotting)
 tabstat emp_firm, s(min max median n) by(emp3bins)
-gen emp3bins_num = (emp3bins==1)*150 + (emp3bins==2)*600 + (emp3bins==3)*3000
+generate emp3bins_num = (emp3bins==1)*150 + (emp3bins==2)*600 + (emp3bins==3)*3000
 tabstat emp_firm, s(min max median n) by(emp3bins_num)
 
 * Create 10 employment bins
@@ -295,7 +295,7 @@ graph export "${output}/ch04-figure-5a-wms-mex-mgmt-emp-scatter-Stata.png", repl
 
 
 * Figure 4.5b - Scatterplot: management vs log firm size
-capture gen lnemp = ln(emp_firm)
+capture generate lnemp = ln(emp_firm)
 
 scatter management lnemp, ///
  ylab(, grid) ///
@@ -344,7 +344,7 @@ corr management emp_firm
 
 * Create broad industry categories
 capture drop industry_broad
-gen industry_broad = ""
+generate industry_broad = ""
 replace industry_broad = "food_drinks_tobacco" if sic<=21
 replace industry_broad = "textile_apparel_leather_etc" if sic==22 | sic==23 | sic==31
 replace industry_broad = "wood_furniture_paper" if sic>=24 & sic<=27
@@ -355,12 +355,12 @@ replace industry_broad = "auto" if sic==37
 replace industry_broad = "other" if sic>=38
 
 * Check industry classification
-tab industry_broad, mis
-tab sic industry_broad, mis
+tabulate industry_broad, mis
+tabulate sic industry_broad, mis
 
 * Correlation by industry
 sort industry_broad
 by industry_broad: corr management emp_firm
 
 * Management quality by detailed industry
-tab industry, mis sum(management)
+tabulate industry_broad, mis sum(management)

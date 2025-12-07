@@ -73,10 +73,10 @@ use `prices_data', clear
 ********************************************************************
 
 * Check country distribution
-tab country
+tabulate COUNTRY
 
 * Keep only USA
-keep if country == "USA"
+keep if COUNTRY == "USA"
 
 * Keep only regular prices (not promotional)
 keep if PRICETYPE == "Regular Price"
@@ -89,13 +89,13 @@ drop if price==.
 drop if price_online==.
 
 * Check price distribution
-sum price*, d
+summarize price*, d
 
 * Drop obvious errors (3 observations with price > $1000)
 drop if price>1000
 
 * Final price summary
-sum price*
+summarize price*
 
 count
 display as text "Final sample size: " as result r(N) " items"
@@ -106,8 +106,8 @@ display as text "Final sample size: " as result r(N) " items"
 ********************************************************************
 
 * Calculate price difference (online - offline)
-gen pd = price_online - price
-lab var pd "Online - offline price difference (USD)"
+generate pd = price_online - price
+label variable pd "Online - offline price difference (USD)"
 
 * Summary statistics for price difference
 tabstat pd, s(mean sd min median max n)

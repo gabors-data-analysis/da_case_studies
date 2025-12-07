@@ -60,8 +60,8 @@ set obs ${N}
 ********************************************************************
 
 * Generate independent variable: uniformly distributed x on [0,4]
-gen x = runiform(0, 4)
-lab var x "Simulated x variable (uniform [0,4])"
+generate x = runiform(0, 4)
+label variable x "Simulated x variable (uniform [0,4])"
 
 * Define population parameters for y = a + b*x + u
 local a = 2        // Intercept
@@ -70,8 +70,8 @@ local sigmau = 0.7 // Standard deviation of error term
 
 
 * Generate dependent variable with normal errors
-gen y = `a' + `b'*x + rnormal(0, `sigmau')
-lab var y "Simulated y variable (y = a + b*x + u)"
+generate y = `a' + `b'*x + rnormal(0, `sigmau')
+label variable y "Simulated y variable (y = a + b*x + u)"
 
 
 ********************************************************************
@@ -86,7 +86,7 @@ summarize x
 local meanx = r(mean)
 
 * Display summary statistics
-sum x y
+summarize x y
 
 
 ********************************************************************

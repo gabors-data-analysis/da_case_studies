@@ -74,14 +74,14 @@ erase "workfile.csv"
 keep if station_name=="DARWIN AIRPORT"
 compress
 
-tab bd_fc_before_start
+tabulate bd_fc_before_start
 keep if bd_fc_before_start == 39
-gen pred_time = "2-day forecast"
+generate pred_time = "2-day forecast"
 
 * Darwin well calibrated overall
 su prob daily_sum 
-gen rain_prob_fc = prob/100
-gen rain = daily_sum
+generate rain_prob_fc = prob/100
+generate rain = daily_sum
 
 egen bin = cut(rain_prob_fc), at(0(0.1)1)
 replace bin = bin + 0.05

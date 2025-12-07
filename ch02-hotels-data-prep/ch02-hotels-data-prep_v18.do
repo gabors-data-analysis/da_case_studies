@@ -76,7 +76,7 @@ erase "workfile.dta"
 keep hotel_id price accommodation_type distance stars rating rating_count
 
 * Look at accommodation types
-tab accommodation_type
+tabulate accommodation_type
 
 
 **********************************************
@@ -132,9 +132,9 @@ erase "workfile.csv"
 
 * Distance to center entered as string in miles with one decimal
 destring center1distance, generate(distance) ignore(" miles")
-lab var distance "Distance to city center (miles)"
+label variable distance "Distance to city center (miles)"
 destring center2distance, generate(distance_alter) ignore(" miles")
-lab var distance_alter "Distance to second center (miles)"
+label variable distance_alter "Distance to second center (miles)"
 
 * Parse accommodation type (format: "something@Hotel")
 split accommodationtype, p("@")
@@ -142,19 +142,19 @@ drop accommodationtype1 accommodationtype
 rename accommodationtype2 accommodation_type
 
 * Number of nights
-gen nnights = 1
+generate nnights = 1
 replace nnights = 4 if price_night=="price for 4 nights"
-lab var nnights "Number of nights"
+label variable nnights "Number of nights"
 
  
 * Generate numerical variable of rating from string variable
-gen rating = substr(guestreviewsrating, 1, strpos(guestreviewsrating, " ") - 1)
+generate rating = substr(guestreviewsrating, 1, strpos(guestreviewsrating, " ") - 1)
 destring rating, replace
 
 * Check: frequency table of all values including missing values
-tab rating, missing
+tabulate rating, missing
  
-tab rating_reviewcount, miss
+tabulate rating_reviewcount, miss
 destring rating_reviewcount, gen(rating_count) force
 su rating_count
 
@@ -166,11 +166,11 @@ rename s_city city
 
 * Clean star ratings
 rename starrating stars
-tab stars
+tabulate stars
 replace stars = . if stars==0
 
 * Check and clean hotel IDs
-tab rating
+tabulate rating
 codebook hotel_id
 drop if hotel_id==.
 
@@ -208,13 +208,13 @@ order hotel_id
 **********************************************
 * Missing values analysis
 ***********************************************
-sum
+summarize
 count if rating_count ==.
-gen misrating = rating_count ==.
-tab misrating
+generate misrating = rating_count ==.
+tabulate misrating
 
-tab accommodation_type misrating
-tab accommodation_type misrating, sum(price) mean
+tabulate accommodation_type misrating
+tabulate accommodation_type misrating, sum(price) mean
 list hotel_id accommodation_type price distance stars rating rating_count ///
      if misrating==1 & accommodation_type =="Hotel"
 

@@ -76,19 +76,19 @@ display as text "Total observations loaded: " as result r(N)
 ********************************************************************
 
 * Create binary female indicator
-gen female = (sex == 2)
+generate female = (sex == 2)
 
 * Label variables
-label var earnwke "Earnings per week"
-label var uhours "Usual hours per week"
+label variable earnwke "Earnings per week"
+label variable uhours "Usual hours per week"
 
 * Calculate hourly wage
-gen w = earnwke / uhours
-label var w "Earnings per hour"
+generate w = earnwke / uhours
+label variable w "Earnings per hour"
 
 * Log hourly wage
-gen lnw = ln(w)
-label var lnw "ln earnings per hour"
+generate lnw = ln(w)
+label variable lnw "ln earnings per hour"
 
 
 ********************************************************************
@@ -96,7 +96,7 @@ label var lnw "ln earnings per hour"
 ********************************************************************
 
 * Create sample indicator
-gen sample = 0
+generate sample = 0
 replace sample = 1 if occ2012 == 0735  /* Market research analysts */
 replace sample = 2 if occ2012 >= 1005 & occ2012 <= 1240  /* Computer/Math */
 
@@ -105,7 +105,7 @@ label define sample_lbl 1 "Market research analysts" ///
 label values sample sample_lbl
 
 * Check sample distribution
-tab sample
+tabulate sample
 
 * Select working sample (change to =2 for computer occupations)
 keep if sample == 1
@@ -139,17 +139,17 @@ tabstat earnwke uhours w if w >= 1, ///
 ********************************************************************
 
 * Check distribution by gender
-tab female
+tabulate female
 
-tab occ2012 female
+tabulate occ2012 female
 
 * Simple regression: gender wage gap
-reg lnw female 
+regress lnw female 
 outreg2 using "${output}/ch09-table-1-gender-reg-Stata.tex", ///
     2aster tex(fragment) nonotes bdec(2) replace
 
 * With robust standard errors
-reg lnw female, robust
+regress lnw female, robust
 outreg2 using "${output}/ch09-table-1-gender-reg-Stata.tex", ///
     2aster tex(fragment) nonotes bdec(2) append
 
@@ -184,18 +184,18 @@ graph export "${output}/ch09-figure-1-bootstrap-hist-Stata.png", replace
 use "${work}/earnings_inference.dta", clear
 
 * Create age squared
-gen agesq = age^2
+generate agesq = age^2
 
 * Create age splines (knots at 30 and 40)
 mkspline agesp1 30 agesp2 40 agesp3 = age
 
 * Label variables for regression output
-label var age "Age"
-label var agesq "Age squared"
-label var lnw "ln wage"
-label var agesp1 "Age spline <30"
-label var agesp2 "Age spline 30-40"
-label var agesp3 "Age spline 40<"
+label variable age "Age"
+label variable agesq "Age squared"
+label variable lnw "ln wage"
+label variable agesp1 "Age spline <30"
+label variable agesp2 "Age spline 30-40"
+label variable agesp3 "Age spline 40<"
 
 
 ********************************************************************
@@ -203,7 +203,7 @@ label var agesp3 "Age spline 40<"
 ********************************************************************
 
 * Figure 2a - Confidence interval for linear model
-reg lnw age if sample == 1, robust
+regress lnw age if sample == 1, robust
 capture drop SE
 predict SE, stdp
 
@@ -219,7 +219,7 @@ graph export "${output}/ch09-figure-2a-wage-age-ci-Stata.png", replace
 
 
 * Figure 2b - Prediction interval for linear model
-reg lnw age if sample == 1
+regress lnw age if sample == 1
 capture drop SE
 predict SE, stdf
 
@@ -254,15 +254,15 @@ graph export "${output}/ch09-figure-3a-wage-lowess-Stata.png", replace
 ********************************************************************
 
 * Run different age specifications
-reg lnw age, robust
+regress lnw age, robust
 outreg2 using "${output}/ch09-table-2-age-models-Stata.tex", ///
     label 2aster bdec(3) tex(fragment) nonotes replace
 
-reg lnw age agesq, robust
+regress lnw age agesq, robust
 outreg2 using "${output}/ch09-table-2-age-models-Stata.tex", ///
     label 2aster tex(fragment) nonotes bdec(3) append
 
-reg lnw agesp*, robust
+regress lnw agesp*, robust
 outreg2 using "${output}/ch09-table-2-age-models-Stata.tex", ///
     label 2aster sortvar(age agesq agesp*) ///
     tex(fragment) nonotes bdec(3) append
@@ -273,26 +273,26 @@ outreg2 using "${output}/ch09-table-2-age-models-Stata.tex", ///
 ********************************************************************
 
 * Quadratic model predictions
-reg lnw age agesq, robust
+regress lnw age agesq, robust
 predict lnwpred_ageq
-label var lnwpred_ageq "Quadratic"
+label variable lnwpred_ageq "Quadratic"
 
 predict lnwpred_ageqSE, stdp
-capture gen lnwpred_ageqCIUP = lnwpred_ageq + 2 * lnwpred_ageqSE
-capture gen lnwpred_ageqCILO = lnwpred_ageq - 2 * lnwpred_ageqSE
+capture generate lnwpred_ageqCIUP = lnwpred_ageq + 2 * lnwpred_ageqSE
+capture generate lnwpred_ageqCILO = lnwpred_ageq - 2 * lnwpred_ageqSE
 
 * Spline model predictions
-reg lnw agesp*, robust
+regress lnw agesp*, robust
 predict lnwpred_agesp
-label var lnwpred_agesp "Piecewise linear spline"
+label variable lnwpred_agesp "Piecewise linear spline"
 
 predict lnwpred_agespSE, stdp
-capture gen lnwpred_agespCIUP = lnwpred_agesp + 2 * lnwpred_agespSE
-capture gen lnwpred_agespCILO = lnwpred_agesp - 2 * lnwpred_agespSE
+capture generate lnwpred_agespCIUP = lnwpred_agesp + 2 * lnwpred_agespSE
+capture generate lnwpred_agespCILO = lnwpred_agesp - 2 * lnwpred_agespSE
 
 * Lowess predictions
 lowess lnw age, nograph generate(lnwpred_agel)
-label var lnwpred_agel "Lowess"
+label variable lnwpred_agel "Lowess"
 
 
 ********************************************************************

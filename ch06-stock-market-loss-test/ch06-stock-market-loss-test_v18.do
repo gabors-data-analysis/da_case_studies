@@ -85,22 +85,22 @@ use `sp500_data', clear
 ********************************************************************
 
 * Create gap variable (days between observations)
-gen gap = date - date[_n-1] - 1
+generate gap = date - date[_n-1] - 1
 
 * Label variables
-lab var value "Value of the S&P500"
-lab var datestr "Date, in string format (YMD)"
-lab var date "Date"
-lab var gap "Gap between observations, in days"
+label variable value "Value of the S&P500"
+label variable datestring "Date, in string format (YMD)"
+label variable date "Date"
+label variable gap "Gap between observations, in days"
 
 * Create year and month variables (for later use)
-gen year = year(date)
-gen month = month(date)
-lab var year "Year"
-lab var month "Month"
+generate year = year(date)
+generate month = month(date)
+label variable year "Year"
+label variable month "Month"
 
 * Check for gaps in data
-sum gap, d
+summarize gap, d
 count if gap > 3
 display as text "Trading days with gaps > 3 days: " as result r(N)
 
@@ -111,11 +111,11 @@ display as text "Trading days with gaps > 3 days: " as result r(N)
 
 * Create percent daily returns
 sort date
-gen pct_return = (value - value[_n-1])/value[_n-1]*100
-lab var pct_return "Percent daily return"
+generate pct_return = (value - value[_n-1])/value[_n-1]*100
+label variable pct_return "Percent daily return"
 
 * Summary statistics for returns
-sum pct_return, d
+summarize pct_return, d
 display as text _newline "Daily Return Statistics:"
 display as text "Mean: " as result %6.3f r(mean) "%"
 display as text "Std Dev: " as result %6.3f r(sd) "%"
@@ -128,11 +128,11 @@ display as text "Max: " as result %6.3f r(max) "%"
 ********************************************************************
 
 * Create binary indicator for loss exceeding threshold
-gen loss_${loss} = 100*(pct_return < -${loss})
-lab var loss_${loss} "Loss indicator (>5% daily loss)"
+generate loss_${loss} = 100*(pct_return < -${loss})
+label variable loss_${loss} "Loss indicator (>5% daily loss)"
 
 * Summary of losses
-sum loss_${loss}
+summarize loss_${loss}
 count if loss_${loss} == 100
 display as text "Days with loss > ${loss}%: " as result r(N)
 

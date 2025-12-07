@@ -70,8 +70,8 @@ colorpalette viridis, n(4) select(2) nograph
 local color1 `r(p)'
 
 * Bernoulli
-gen bernoulli = rbinomial(1, 0.7) 
-hist bernoulli, ///
+generate bernoulli = rbinomial(1, 0.7) 
+histogram bernoulli, ///
  xtitle("") ///
  ytitle("Percent") ///
  xlab(0 1) ///
@@ -85,8 +85,8 @@ graph export "${output}/dist-Bernoulli-Stata.png", replace as(png)
 * Binomial
 * With smaller sample 
 global Nbinom = 20
-gen rbinomial = rbinomial($Nbinom, .4)
-hist rbinomial, ///
+generate rbinomial = rbinomial($Nbinom, .4)
+histogram rbinomial, ///
  disc width(0.5) ///
  xtitle("") ///
  ytitle("Percent") ///
@@ -99,8 +99,8 @@ hist rbinomial, ///
 graph export "${output}/dist-binomial-Stata.png", replace as(png)
 
 * Uniform [0,1]
-gen runif = runiform(0, 1)
-hist runif, ///
+generate runif = runiform(0, 1)
+histogram runif, ///
  xtitle("") ///
  ytitle("Percent") ///
  fcolor("`color1'") ///
@@ -112,8 +112,8 @@ hist runif, ///
 graph export "${output}/dist-uniform-Stata.png", replace as(png)
  
 * Normal
-gen rnormal = rnormal(0, 1)
-hist rnormal, ///
+generate rnormal = rnormal(0, 1)
+histogram rnormal, ///
  xtitle("") ///
  ytitle("Percent") ///
  xlab("") ///
@@ -128,7 +128,7 @@ graph export "${output}/dist-normal-Stata.png", replace as(png)
 * Lognormal
 * Take the exponential of the randomly generated normal above 
 generate lognormal = exp(rnormal)
-hist lognormal if lognormal <10, ///
+histogram lognormal if lognormal <10, ///
  xtitle("") ///
  ytitle("Percent") ///
  xlab("") ///
@@ -144,14 +144,14 @@ graph export "${output}/dist-lognormal-Stata.png", replace as(png)
 * Power-law
 global alpha = 6
 global xmin = 1
-cap gen x = _n
-cap drop powerlaw
+capture generate x = _n
+capture drop powerlaw
 generate powerlaw = $xmin*x^(-$alpha)
-sum powerlaw, d
+summarize powerlaw, d
 replace powerlaw = powerlaw/r(sum)
 local histrange = r(p75)
 
-hist powerlaw if powerlaw < `histrange', ///
+histogram powerlaw if powerlaw < `histrange', ///
  xtitle("") ///
  ytitle("Percent") ///
  xlab("") ///
@@ -163,5 +163,5 @@ hist powerlaw if powerlaw < `histrange', ///
 
 graph export "${output}/dist-powerlaw-Stata.png", replace as(png)
  
-sum powerlaw, d
+summarize powerlaw, d
 

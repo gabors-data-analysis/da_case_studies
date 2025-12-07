@@ -143,12 +143,12 @@ keep if stars >= 3 & stars <= 4
 keep if price < 1000
 
 * Check sample size after filters
-qui count
+quietly count
 display as text "Sample size after filters: " as result r(N)
 
 * Descriptive statistics
-tab city
-tab stars 
+tabulate city
+tabulate stars 
 
 * To export table to Word/Excel/LaTeX (Stata 17+ only):
 * collect style cell, nformat(%9.0fc)
@@ -245,7 +245,7 @@ display as text "Hotels more than 8 miles from center: " as result r(N)
 drop if distance > 8
 
 * Check city distribution
-tab city_actual  
+tabulate city_actual  
 
 * To export this table (Stata 17+ only):
 * collect export "${output}/ch03-table-city-actual.docx", replace

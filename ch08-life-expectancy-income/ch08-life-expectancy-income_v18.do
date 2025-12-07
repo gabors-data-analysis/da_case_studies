@@ -79,10 +79,10 @@ display as text "Observations in 2017: " as result r(N)
 
 * Check data availability
 count if gdppc != . & lifeexp != .
-sum population if gdppc != . & lifeexp != .
+summarize population if gdppc != . & lifeexp != .
 
 count if gdppc == . | lifeexp == .
-sum population if gdppc == . | lifeexp == .
+summarize population if gdppc == . | lifeexp == .
 
 * List countries with missing data and large populations
 list countryname population gdppc lifeexp ///
@@ -99,15 +99,15 @@ sort countryname
 ********************************************************************
 
 * GDP total (billion USD, PPP constant 2011 prices)
-gen gdptotal = gdppc * population
-label var gdptotal "GDP total, billion USD (PPP constant 2011 prices)"
+generate gdptotal = gdppc * population
+label variable gdptotal "GDP total, billion USD (PPP constant 2011 prices)"
 
 * Log transformations
-gen lngdptot = ln(gdptotal)
-label var lngdptot "ln GDP total"
+generate lngdptot = ln(gdptotal)
+label variable lngdptot "ln GDP total"
 
-gen lngdppc = ln(gdppc)
-label var lngdppc "ln GDP per capita"
+generate lngdppc = ln(gdppc)
+label variable lngdppc "ln GDP per capita"
 
 * Summary statistics
 tabstat lifeexp gdppc gdptotal lngdptot lngdppc, ///
@@ -155,7 +155,7 @@ tabstat lngdppc, statistics(mean median sd n)
 ********************************************************************
 
 * Figure 4 - Level-level regression
-reg lifeexp gdppc
+regress lifeexp gdppc
 scatter lifeexp gdppc, ///
     msize(medium) mcolor(navy*0.6) ///
     || lfit lifeexp gdppc, lwidth(thick) lcolor(green*0.8) ///
@@ -169,7 +169,7 @@ graph export "${output}/ch08-figure-4-linreg-levlev-Stata.png", replace
 
 
 * Figure 5a - Level-log regression (log scale on x-axis)
-reg lifeexp lngdppc
+regress lifeexp lngdppc
 scatter lifeexp lngdppc, ///
     msize(medium) mcolor(navy*0.6) ///
     || lfit lifeexp lngdppc, lwidth(thick) lcolor(green) ///
@@ -204,7 +204,7 @@ graph export "${output}/ch08-figure-5b-linreg-levlog-logscale-Stata.png", replac
 
 
 * Examine residuals from level-log model
-reg lifeexp lngdppc
+regress lifeexp lngdppc
 capture drop resid
 predict resid, residual
 
@@ -222,7 +222,7 @@ list countryname population lifeexp gdppc resid if gdppc > 65
 ********************************************************************
 
 * Figure 6a - Level-level regression with total GDP
-reg lifeexp gdptotal
+regress lifeexp gdptotal
 scatter lifeexp gdptotal, ///
     msize(medium) mcolor(navy*0.6) ///
     || lfit lifeexp gdptotal, lwidth(thick) lcolor(green) ///
@@ -236,7 +236,7 @@ graph export "${output}/ch08-figure-6a-linreg-totalGDP-Stata.png", replace
 
 
 * Figure 6b - Level-log regression with total GDP
-reg lifeexp lngdptot
+regress lifeexp lngdptot
 scatter lifeexp lngdptot, ///
     msize(medium) mcolor(navy*0.6) ///
     || lfit lifeexp lngdptot, lwidth(thick) lcolor(green) ///
@@ -289,7 +289,7 @@ list countryname population lifeexp resid_spline if resid_spline > 6.5
 ********************************************************************
 
 * Create quadratic term
-capture gen lngdppc_sq = lngdppc^2
+capture generate lngdppc_sq = lngdppc^2
 
 * Quadratic regression
 regress lifeexp lngdppc lngdppc_sq
@@ -335,7 +335,7 @@ graph export "${output}/ch08-figure-9a-linreg-unwgt-logscale-Stata.png", replace
 
 
 * Figure 9b - Weighted regression (by population)
-reg lifeexp lngdppc [weight=population]
+regress lifeexp lngdppc [weight=population]
 scatter lifeexp lngdppc [weight=population], ///
     msize(medium) mcolor(navy*0.6) ///
     || lfit lifeexp lngdppc [weight=population], lwidth(thick) lcolor(green) ///
