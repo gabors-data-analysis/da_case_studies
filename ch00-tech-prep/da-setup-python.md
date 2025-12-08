@@ -140,7 +140,7 @@ which lists all the files and directories inside the current directory (where yo
 Next, type:
 
 ```bash
-conda env create -f daenv_{SYSTEM}
+conda env create -f daenv_{SYSTEM}.yml
 ```
 
 Replace {SYSTEM} with windows, macos or linux, depending on which one you use. Type “a” when this message comes up:
