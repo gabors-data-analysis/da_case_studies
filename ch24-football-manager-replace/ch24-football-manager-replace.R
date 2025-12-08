@@ -61,7 +61,7 @@ data <- read_csv(paste0(data_in,"football_managers_workfile.csv")) %>%
   mutate(date = as.Date(date, format = "%d%m%Y"))
 
 # From OSF
-#data <- read_csv("https://osf.io/t6dgh/download")
+#data <- read_csv("https://osf.io/download/t6dgh/")
 
 # describe data
 data %>%

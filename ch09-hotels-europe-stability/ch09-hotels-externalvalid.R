@@ -63,8 +63,8 @@ create_output_if_doesnt_exist(output)
 hotels_europe_price <- read_csv(paste0(data_in,"hotels-europe_price.csv"))
 hotels_europe_features <- read_csv(paste0(data_in,"hotels-europe_features.csv"))
 # From web
-# hotels_europe_price <- read_csv("https://osf.io/p6tyr/download")
-# hotels_europe_features <- read_csv("https://osf.io/utwjs/download")
+# hotels_europe_price <- read_csv("https://osf.io/download/p6tyr/")
+# hotels_europe_features <- read_csv("https://osf.io/download/utwjs/")
 
 
 data <- left_join(hotels_europe_price, hotels_europe_features, by = "hotel_id")

@@ -67,7 +67,7 @@ gen gap=date-date[_n-1]-1
 
 * label variables
 lab var value "Value of the S&P500"
-lab var datestr "Date, in string format (YMD)"
+lab var datestring "Date, in string format (YMD)"
 lab var date "Date"
 lab var gap "Gap between observations, in days"
 
@@ -77,7 +77,7 @@ gen year =year(date)
 gen month=month(date)
 
 * order variables
-order date datestr year month gap
+order date datestring year month gap
 
 save "$work/work.dta", replace
 
@@ -199,7 +199,6 @@ graph export "$output/ch05-figure-3-resample-hist-Stata.png",replace
 * WARNING!!!!!! 
 * IF using DROPBOX/BOX - need to switch off sync!!!!
 
-
 clear
 set seed 573164
 global M=10000 /* # bootstrap draws*/
@@ -212,17 +211,17 @@ qui forvalues i=1/$M {
 	use "$temp/sp500_pctreturns.dta",replace
 	bsample 
 	gen loss_$loss=100*(pct_return<-$loss)
-	collapse loss
+	collapse (mean) loss_$loss
 	append using "$temp/sp500_bootstrap.dta"
 	save "$temp/sp500_bootstrap.dta",replace
 }
 
-lab var loss "Percent of days with losses of $loss% or more"
-tabstat loss, s(mean sd median min max n)
+lab var loss_$loss "Percent of days with losses of $loss% or more"
+tabstat loss_$loss, s(mean sd median min max n)
 
 
 * Figure 5
-histogram loss, freq width(0.04) ///
+histogram loss_$loss, freq width(0.04) ///
 	fcol(navy*0.8) lcol(white) ///
 	xlab(0(0.1)1.2, grid) ylab(0(200)1200, grid) 
 graph export "$output/ch05-figure-5-bootstrap-Stata.png",replace
@@ -235,7 +234,7 @@ graph export "$output/ch05-figure-5-bootstrap-Stata.png",replace
 use "$temp/sp500_pctreturns.dta", replace
 
 gen loss_$loss=100*(pct_return<-$loss)
-sum loss
+sum loss_$loss
 
 local sd=r(sd)
 local n=r(N)

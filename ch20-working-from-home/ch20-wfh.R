@@ -51,7 +51,7 @@ create_output_if_doesnt_exist(output)
 
 
 # Load in data -------------------------------------------------------
-#data <- read_csv('https://osf.io/5c3rf/download')
+#data <- read_csv('https://osf.io/download/5c3rf/')
 data <- read_csv(paste0(data_in, "wfh_tidy_person.csv"))
 
 

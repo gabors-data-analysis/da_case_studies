@@ -22,7 +22,6 @@
 * STEP 1: set working directory for da_case_studies.
 * for example:
 * cd "C:/Users/xy/Dropbox/gabors_data_analysis/da_case_studies"
- 
 
 
 * STEP 2: * Directory for data
@@ -46,7 +45,7 @@ global output 	"$work/output"
 
 
 
-* loead data
+* load data
 clear
 use "$data_in/morg-2014-emp.dta"
 * Or download directly from OSF:
@@ -77,7 +76,7 @@ label value sample sa
 
 tab sample
 
-order hhid-stfips weight earnwke uhours w lnw female age ind occ
+order hhid-stfips weight earnwke uhours w lnw female age ind02 occ2012
 compress
 
 * set sample here
@@ -97,7 +96,7 @@ tabstat earnwke uhours w if w>=1, s(mean min p5 p50 p95 max n) col(s)
 ** LN EARNINGS AND GENDER
 
 tab female 
-tab occ female 
+tab occ2012 female 
 
 reg lnw female 
 reg lnw female , robust

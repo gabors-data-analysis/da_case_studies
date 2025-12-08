@@ -118,7 +118,7 @@ separate manager_win_ratio, by(manager_games<18)
 colorpalette viridis, n(4) select(2) nograph
 graph hbar (mean) manager_win_ratio0 manager_win_ratio1 if manager_win_ratio>=2, ///
  nofill over(manager_name, sort(manager_win_ratio) descending) ///
- scheme(virdis) ///
+ scheme(viridis) ///
  legend(off) yscale(r(1.6(0.2)3)) exclude0  ylabel(1.6(0.2)3, grid)  ///
   yline(1.6(0.2)3) ///
  graphregion(fcolor(white) ifcolor(none)) ///

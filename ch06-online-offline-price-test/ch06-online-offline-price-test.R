@@ -53,7 +53,7 @@ create_output_if_doesnt_exist(output)
 # load data
 pd <- read.csv(paste0(data_in,"online_offline_ALL_clean.csv"))
 # Load from the web
-# pd <- read_csv( "https://osf.io/yhbr5/download" )
+# pd <- read_csv( "https://osf.io/download/yhbr5/" )
 
 
 # FILTER DATA

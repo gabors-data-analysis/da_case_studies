@@ -71,7 +71,7 @@ data_work <- read_rds(paste0(data_out,"ch22-airline-workfile.rds")) %>%
 # *	(keep matched ones; no unmatched from "using")
 data <- read_dta(paste(data_in, "originfinal-panel.dta", sep="/"))
 # from OSF
-#data <- read_dta("https://osf.io/zw2h9/download")
+#data <- read_dta("https://osf.io/download/zw2h9/")
 
 data <- merge(data, data_work, by = c("origin", "finaldest", "return"))
 
