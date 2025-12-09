@@ -1,0 +1,366 @@
+********************************************************************
+* Prepared for Gabor's Data Analysis
+*
+* Data Analysis for Business, Economics, and Policy
+* by Gabor Bekes and  Gabor Kezdi
+* Cambridge University Press 2021
+*
+* gabors-data-analysis.com 
+*
+* License: Free to share, modify and use for educational purposes. 
+* 	Not to be used for commercial purposes.
+*
+* Chapter 04
+* CH04A Management quality and firm size: describing patterns of association
+* using the wms-management-survey dataset
+* version 1.0 2025-01-04
+*
+* STATA VERSION: This code is optimized for Stata 18
+* Backward compatibility notes for Stata 15 and below are included
+********************************************************************
+
+* Stata version check and setup
+version 18
+clear all
+set more off
+set varabbrev off
+
+
+********************************************************************
+* SETTING UP DIRECTORIES
+********************************************************************
+
+* STEP 1: set working directory for da_case_studies
+* Example: cd "C:/Users/xy/Dropbox/gabors_data_analysis/da_case_studies"
+
+* STEP 2: Set data directory
+* Option 1: Run directory-setting do file (RECOMMENDED)
+capture do set-data-directory.do 
+	/* This one-line do file should sit in your working directory
+	   It contains: global data_dir "path/to/da_data_repo"
+	   More details: gabors-data-analysis.com/howto-stata/ */
+
+* Option 2: Set directory directly here
+* Example: global data_dir "C:/Users/xy/gabors_data_analysis/da_data_repo"
+
+* Set up paths
+global data_in  "${data_dir}/wms-management-survey/clean"
+global work     "ch04-management-firm-size"
+global output   "${work}/output"
+
+* Create directories
+capture mkdir "${work}"
+capture mkdir "${output}"
+
+
+********************************************************************
+* LOAD DATA
+********************************************************************
+
+* Option 1: Load from local repository
+use "${data_in}/wms_da_textbook.dta", clear
+
+* Option 2: Download directly from OSF (uncomment to use)
+/*
+tempfile wms_data
+copy "https://osf.io/download/gwfbk/" `wms_data'
+use `wms_data', clear
+*/
+
+
+********************************************************************
+* SAMPLE SELECTION
+********************************************************************
+
+* Drop detailed management practice variables (not used in this analysis)
+capture drop lean1_1-talent6_5
+capture drop aa*
+
+* Keep only Mexico, 2013 wave
+keep if country=="Mexico"
+keep if wave==2013
+
+* Keep firms with 100-5000 employees
+keep if emp_firm>=100 
+keep if emp_firm<=5000
+
+count
+display as text "Final sample size: " as result r(N) " firms"
+
+* Check firm size distribution
+summarize emp_firm, d
+
+* Save working file
+save "${work}/ch04-wms-work.dta", replace
+
+
+********************************************************************
+* DESCRIPTIVE STATISTICS
+********************************************************************
+
+* Summary statistics for key variables
+summarize management emp_firm, d
+
+* Distribution of y (management quality) and x (firm size)
+tabstat management emp_firm, s(min max mean median sd n) col(s)
+
+
+********************************************************************
+* FIGURE 4.1: DISTRIBUTION OF MANAGEMENT QUALITY
+********************************************************************
+
+colorpalette viridis, n(4) select(2) nograph
+local color1 `r(p)'
+
+histogram management, ///
+ percent width(0.25) ///
+ color("`color1'") lcol(white) ///
+ ylabel(, grid) ///
+ xtitle("Quality of management, average score") ///
+ graphregion(fcolor(white) ifcolor(none)) ///
+ plotregion(fcolor(white) ifcolor(white))
+
+graph export "${output}/ch04-figure-1-wms-mex-management-hist-Stata.png", replace
+
+
+********************************************************************
+* FIGURE 4.2: DISTRIBUTION OF FIRM SIZE
+********************************************************************
+
+* Figure 4.2a - Firm size histogram (level)
+colorpalette viridis, n(4) select(2) nograph
+local color1 `r(p)'
+
+histogram emp_firm, ///
+ percent start(0) width(200) ///
+ xlabel(0(500)5000, grid) ///
+ ylabel(0(5)30, grid) ///
+ xtitle("Number of employees") ///
+ color("`color1'") lcol(white) ///
+ graphregion(fcolor(white) ifcolor(none)) ///
+ plotregion(fcolor(white) ifcolor(white))
+
+graph export "${output}/ch04-figure-2a-wms-mex-emp-hist-Stata.png", replace
+
+
+* Figure 4.2b - Log firm size histogram
+generate lnemp = ln(emp_firm)
+colorpalette viridis, n(4) select(2) nograph
+local color1 `r(p)'
+
+histogram lnemp, ///
+ percent width(0.25) start(4) ///
+ xlabel(4(1)9, grid) ///
+ ylabel(, grid) ///
+ xtitle("Ln number of employees") ///
+ color("`color1'") lcol(white) ///
+ graphregion(fcolor(white) ifcolor(none)) ///
+ plotregion(fcolor(white) ifcolor(white))
+
+graph export "${output}/ch04-figure-2b-wms-mex-lnemp-hist-Stata.png", replace
+
+
+********************************************************************
+* CREATE FIRM SIZE BINS
+********************************************************************
+
+* Create 3 employment bins
+generate emp3bins = 1 if emp_firm<200
+replace emp3bins = 2 if emp_firm>=200 & emp_firm<1000
+replace emp3bins = 3 if emp_firm>=1000
+label define emp3bins 1 "small" 2 "medium" 3 "large"
+label values emp3bins emp3bins
+
+* Check bin distribution
+tabstat emp_firm, by(emp3bins) s(min max n)
+
+
+********************************************************************
+* FIGURE 4.3: MANAGEMENT PRACTICES BY FIRM SIZE
+********************************************************************
+
+* Create binary indicators for each management practice score (1-5)
+quietly foreach v of varlist lean* perf* talent* {
+	forvalue i=1/5 {
+		generate `v'_`i' = `v'==`i'
+		label variable `v'_`i' "score=`i'"
+	}
+}
+
+* Set up viridis palette for stacked bars
+colorpalette "yellow*1.2" "green*0.6" "bluishgray*1.2" "navy*0.6" "navy", nograph
+local colors `r(p)'
+
+
+* Figure 4.3a - Lean management practices by firm size
+tabulate lean1 emp3bins, col nofre
+
+graph bar lean1_*, stack over(emp3bins) percent ///
+ bar(1, col("`=word("`colors'", 1)'")) ///
+ bar(2, col("`=word("`colors'", 2)'")) ///
+ bar(3, col("`=word("`colors'", 3)'")) ///
+ bar(4, col("`=word("`colors'", 4)'")) ///
+ bar(5, col("`=word("`colors'", 5)'")) ///
+ legend(label(1 "1") label(2 "2") label(3 "3") label(4 "4") label(5 "5") row(1)) ///
+ title("Lean management. Score by three bins of firm emp") ///
+ graphregion(fcolor(white) ifcolor(none)) ///
+ plotregion(fcolor(white) ifcolor(white))
+ 
+graph export "${output}/ch04-figure-3a-wms-mex-lean1-emp3bins-Stata.png", replace
+
+
+* Figure 4.3b - Performance tracking by firm size
+tabulate perf2 emp3bins, col nofre
+
+graph bar perf2_*, stack over(emp3bins) percent ///
+ bar(1, col("`=word("`colors'", 1)'")) ///
+ bar(2, col("`=word("`colors'", 2)'")) ///
+ bar(3, col("`=word("`colors'", 3)'")) ///
+ bar(4, col("`=word("`colors'", 4)'")) ///
+ bar(5, col("`=word("`colors'", 5)'")) ///
+ legend(label(1 "1") label(2 "2") label(3 "3") label(4 "4") label(5 "5") row(1)) ///
+ title("Performance tracking. Score by three bins of firm emp") ///
+ graphregion(fcolor(white) ifcolor(none)) ///
+ plotregion(fcolor(white) ifcolor(white))
+
+graph export "${output}/ch04-figure-3b-wms-mex-perf2-emp3bins-Stata.png", replace
+
+
+********************************************************************
+* FIGURE 4.4: BIN SCATTER PLOTS
+********************************************************************
+
+* Create numeric values for 3-bin categories (for plotting)
+tabstat emp_firm, s(min max median n) by(emp3bins)
+generate emp3bins_num = (emp3bins==1)*150 + (emp3bins==2)*600 + (emp3bins==3)*3000
+tabstat emp_firm, s(min max median n) by(emp3bins_num)
+
+* Create 10 employment bins
+egen emp10bins = cut(emp_firm), group(10)
+tabstat emp_firm, s(min max median n) by(emp10bins)
+
+* Assign representative values to 10-bin categories
+recode emp10bins 0=120 1=135 2=165 3=255 4=315 5=375 6=585 7=860 8=1600 9=3500
+tabstat emp_firm, s(min max median n) by(emp10bins)
+
+* Calculate mean management quality by bins
+egen management_emp3bins  = mean(management), by(emp3bins)
+egen management_emp10bins = mean(management), by(emp10bins)
+
+colorpalette viridis, n(4) select(2) nograph
+local color1 `r(p)'
+
+
+* Figure 4.4a - Bin scatter with 3 bins
+scatter management_emp3bins emp3bins_num, ///
+ msize(vlarge) mcolor("`color1'") ///
+ ylab(2.4(0.2)3.4, grid) ///
+ xlab(0(500)3500, grid) ///
+ ytitle("Average management quality score") ///
+ xtitle("Firm size (# employees), 3 bins") ///
+ graphregion(fcolor(white) ifcolor(none)) ///
+ plotregion(fcolor(white) ifcolor(white))
+
+graph export "${output}/ch04-figure-4a-wms-mex-mgmt-emp3bins-Stata.png", replace
+
+
+* Figure 4.4b - Bin scatter with 10 bins
+scatter management_emp10bins emp10bins, ///
+ msize(vlarge) mcolor("`color1'") ///
+ ylab(2.5(0.25)3.5, grid) ///
+ xlab(0(500)3500, grid) ///
+ ytitle("Average management quality score") ///
+ xtitle("Firm size (# employees), 10 bins") ///
+ graphregion(fcolor(white) ifcolor(none)) ///
+ plotregion(fcolor(white) ifcolor(white))
+
+graph export "${output}/ch04-figure-4b-wms-mex-mgmt-emp10bins-Stata.png", replace
+
+
+********************************************************************
+* FIGURE 4.5: SCATTERPLOTS
+********************************************************************
+
+* Figure 4.5a - Scatterplot: management vs firm size (level)
+scatter management emp_firm, ///
+ ylab(, grid) ///
+ xlab(, grid) ///
+ mcolor("`color1'") ///
+ xtitle("Number of employees") ///
+ ytitle("Quality of management: average score") ///
+ graphregion(fcolor(white) ifcolor(none)) ///
+ plotregion(fcolor(white) ifcolor(white))
+
+graph export "${output}/ch04-figure-5a-wms-mex-mgmt-emp-scatter-Stata.png", replace
+
+
+* Figure 4.5b - Scatterplot: management vs log firm size
+capture generate lnemp = ln(emp_firm)
+
+scatter management lnemp, ///
+ ylab(, grid) ///
+ xlab(, grid) ///
+ mcolor("`color1'") ///
+ xtitle("Log of number of employees") ///
+ ytitle("Quality of management: average score") ///
+ graphregion(fcolor(white) ifcolor(none)) ///
+ plotregion(fcolor(white) ifcolor(white))
+
+graph export "${output}/ch04-figure-5b-wms-mex-mgmt-lnemp-scatter-Stata.png", replace
+
+
+********************************************************************
+* FIGURE 4.6: BOX PLOTS AND VIOLIN PLOTS
+********************************************************************
+
+* Figure 4.6a - Box plots by employment bins
+graph box management, ///
+ over(emp3bins) ///
+ ytitle("Management score") ///
+ graphregion(fcolor(white) ifcolor(none)) ///
+ plotregion(fcolor(white) ifcolor(white))
+
+graph export "${output}/ch04-figure-6a-wms-mex-mgmt-emp3bins-box-Stata.png", replace
+
+
+* Figure 4.6b - Violin plots by employment bins
+* Note: Requires vioplot package
+* To install: search vioplot, click link and follow instructions
+vioplot management, ///
+ over(emp3bins) ///
+ ylab(, grid) ///
+ graphregion(fcolor(white) ifcolor(none)) ///
+ plotregion(fcolor(white) ifcolor(white))
+
+graph export "${output}/ch04-figure-6b-wms-mex-mgmt-emp3bins-violin-Stata.png", replace
+
+
+********************************************************************
+* CORRELATION ANALYSIS
+********************************************************************
+
+* Overall correlation
+corr management emp_firm
+
+* Create broad industry categories
+capture drop industry_broad
+generate industry_broad = ""
+replace industry_broad = "food_drinks_tobacco" if sic<=21
+replace industry_broad = "textile_apparel_leather_etc" if sic==22 | sic==23 | sic==31
+replace industry_broad = "wood_furniture_paper" if sic>=24 & sic<=27
+replace industry_broad = "chemicals_etc" if sic>=28 & sic<=30
+replace industry_broad = "materials_metals" if sic>=32 & sic<35 
+replace industry_broad = "electronics, equipment, machinery" if sic>=35 & sic<37
+replace industry_broad = "auto" if sic==37
+replace industry_broad = "other" if sic>=38
+
+* Check industry classification
+tabulate industry_broad, mis
+tabulate sic industry_broad, mis
+
+* Correlation by industry
+sort industry_broad
+by industry_broad: corr management emp_firm
+
+* Management quality by detailed industry
+tabulate industry_broad, mis sum(management)
