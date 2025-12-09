@@ -13,134 +13,168 @@
 * Chapter 03
 * CH03B Comparing hotel prices in Europe: Vienna vs. London
 * using the hotels-europe dataset
-* version 0.9 2020-09-06
+* version 1.1 2025-12-09
+*
+* STATA VERSION: This code is optimized for Stata 18
+* Backward compatibility notes for Stata 15 and below are included
 ********************************************************************
 
+* Stata version check and setup
+version 18
+clear all
+set more off
+set varabbrev off
 
+
+********************************************************************
 * SETTING UP DIRECTORIES
+********************************************************************
 
-* STEP 1: set working directory for da_case_studies.
-* for example:
-* cd "C:/Users/xy/Dropbox/gabors_data_analysis/da_case_studies"
+* STEP 1: set working directory for da_case_studies
+* Example: cd "C:/Users/xy/Dropbox/gabors_data_analysis/da_case_studies"
 
-* STEP 2: * Directory for data
-* Option 1: run directory-setting do file
-do set-data-directory.do 
-							/* this is a one-line do file that should sit in 
-							the working directory you have just set up
-							this do file has a global definition of your working directory
-							more details: gabors-data-analysis.com/howto-stata/   */
+* STEP 2: Set data directory
+* Option 1: Run directory-setting do file (RECOMMENDED)
+capture do set-data-directory.do 
+	/* This one-line do file should sit in your working directory
+	   It contains: global data_dir "path/to/da_data_repo"
+	   More details: gabors-data-analysis.com/howto-stata/ */
 
-* Option 2: set directory directly here
-* for example:
-* global data_dir "C:/Users/xy/gabors_data_analysis/da_data_repo"
+* Option 2: Set directory directly here
+* Example: global data_dir "C:/Users/xy/gabors_data_analysis/da_data_repo"
 
-global data_in  "$data_dir/hotels-europe/clean"
-global work  	"ch03-hotels-europe-compare"
+* Set up paths
+global data_in  "${data_dir}/hotels-europe/clean"
+global work     "ch03-hotels-europe-compare"
+global output   "${work}/output"
+global temp     "${work}/temp"
 
-cap mkdir 		"$work/output"
-global output 	"$work/output"
-
-cap mkdir 		"$work/temp"
-global temp 	"$work/temp"
-
+* Create directories
+capture mkdir "${work}"
+capture mkdir "${output}"
+capture mkdir "${temp}"
 
 
-* Vienna vs London
+********************************************************************
+* LOAD DATA
+********************************************************************
 
-* load in clean and tidy data and create workfile
-use "$data_in/hotels-europe_price", clear
+* Option 1: Load from local repository
+use "${data_in}/hotels-europe_price", clear
+merge m:m hotel_id using "${data_in}/hotels-europe_features.dta", nogen
 
-merge m:m hotel_id using "$data_in/hotels-europe_features.dta", nogen
-
-* Or download directly from OSF:
+* Option 2: Download directly from OSF (uncomment to use)
 /*
-copy "https://osf.io/download/hz4gw/" "workfile.dta"
-use "workfile.dta", clear
-erase "workfile.dta"
-preserve
-	copy "https://osf.io/download/j9mkf/" "workfile.dta"
-	use "workfile.dta", clear
-	erase "workfile.dta"
-	tempfile hotels_features
-	save `hotels_features'
-restore
-merge m:m hotel_id using `hotels_features', nogen
+tempfile prices_data
+copy "https://osf.io/download/hz4gw/" `prices_data'
+use `prices_data', clear
+
+tempfile features_data
+copy "https://osf.io/download/j9mkf/" `features_data'
+merge m:m hotel_id using `features_data', nogen
 */
 
 
+********************************************************************
+* SAMPLE SELECTION
+********************************************************************
 
-
-* sample design
-* KEEP NOV 2017 weekend, 3-4 star hotels
+* Keep November 2017 weekend data, 3-4 star hotels
 keep if year==2017 & month==11 & weekend==0
 keep if city== "Vienna" | city=="London"
 keep if accommodation_type== "Hotel"
 keep if stars>=3 & stars<=4
 
-* in actual city (takes care of extreme distances, too)
+* Keep only hotels in actual city (removes extreme distances)
 keep if city_actual== "Vienna" | city_actual=="London"
-* drop Vienna hotel with erroneous price 
+
+* Drop erroneous price observations
 keep if price<1000
 
-save "$temp/hotels-vienna-london.dta", replace
-tab city
+* Save working file
+save "${temp}/hotels-vienna-london.dta", replace
 
-* distribution of price
+* Check city distribution
+tabulate city
 
-* Figure 3.6a Vienna
+
+********************************************************************
+* FIGURE 3.6a: PRICE DISTRIBUTION - VIENNA
+********************************************************************
+
+* Set up viridis color
 colorpalette viridis, n(4) select(2) nograph
-return list
-hist price if city=="Vienna", ///
+
+histogram price if city=="Vienna", ///
 	width(20) percent ///
-	xtitle(Price (US dollars))  ///
+	xtitle("Price (US dollars)") ///
 	color(`r(p)') lcol(white) lw(vthin) ///
-	xlabel(0(50)500 , grid) ylabel(0(10)30, grid )  ///
+	xlabel(0(50)500, grid) ylabel(0(10)30, grid) ///
 	graphregion(fcolor(white) ifcolor(none)) ///
 	plotregion(fcolor(white) ifcolor(white))
- graph export "$output/ch03-figure-6a-hist-price-Vienna-Stata.png", replace
 
-* Figure 3.6b London
+graph export "${output}/ch03-figure-6a-hist-price-Vienna-Stata.png", replace
+
+
+********************************************************************
+* FIGURE 3.6b: PRICE DISTRIBUTION - LONDON
+********************************************************************
+
 colorpalette viridis, n(4) select(2) nograph
-return list
-hist price if city=="London", ///
+
+histogram price if city=="London", ///
 	width(20) percent ///
-	xtitle(Price (US dollars))  ///
+	xtitle("Price (US dollars)") ///
 	color(`r(p)') lcol(white) lw(vthin) ///
-	xlabel(0(50)500 , grid) ylabel(0(10)30, grid )  ///
+	xlabel(0(50)500, grid) ylabel(0(10)30, grid) ///
 	graphregion(fcolor(white) ifcolor(none)) ///
 	plotregion(fcolor(white) ifcolor(white))
- graph export "$output/ch03-figure-6b-hist-price-London-Stata.png", replace
 
-* two density plots overlayed
-* Figure 3.7
-kdensity price if city=="Vienna",  gen (xV yV) nograph
-kdensity price if city=="London",  gen (xL yL) nograph
+graph export "${output}/ch03-figure-6b-hist-price-London-Stata.png", replace
+
+
+********************************************************************
+* FIGURE 3.7: OVERLAYED DENSITY PLOTS
+********************************************************************
+
+* Generate kernel density estimates
+kdensity price if city=="Vienna", gen(xV yV) nograph
+kdensity price if city=="London", gen(xL yL) nograph
+
+* Set up viridis color
 colorpalette viridis, n(4) select(2) nograph
-return list
-line yV yL xL, lc(`r(p)') lw(thick thick) ///
-	xtitle(Price (US dollars))  ///
-	xlabel(0(100)500 , grid) ylabel(, grid )  ///
+
+* Create overlayed density plot
+line yV yL xL, ///
+	lc(`r(p)') lw(thick thick) ///
+	xtitle("Price (US dollars)") ///
+	xlabel(0(100)500, grid) ylabel(, grid) ///
 	legend(off) ///
-	text(0.007 180 "Vienna" 0.0025 340 "London")  ///
+	text(0.007 180 "Vienna" 0.0025 340 "London") ///
 	graphregion(fcolor(white) ifcolor(none)) ///
 	plotregion(fcolor(white) ifcolor(white))
- graph export "$output/ch03-figure-7-densities-price-ViennaLondon-Stata.png", replace
+
+graph export "${output}/ch03-figure-7-densities-price-ViennaLondon-Stata.png", replace
 
 
- 
-* Table 3.6
-tabstat price, s(n mean median min max sd ) by(city) format(%4.2f) save
-* calculate mean-median skewness statistic
+********************************************************************
+* TABLE 3.6: SUMMARY STATISTICS BY CITY
+********************************************************************
+
+* Summary statistics by city
+tabstat price, s(n mean median min max sd) by(city) format(%4.2f) save
+
+* Calculate mean-median skewness statistic
 * London
-qui sum price if city=="London",d
-dis (r(mean) - r(p50)) / r(sd)
-* Vienna
-qui sum price if city=="Vienna",d
-dis (r(mean) - r(p50)) / r(sd)
+quietly summarize price if city=="London", detail
+display (r(mean) - r(p50)) / r(sd)
 
-* into .tex format
-* replace the built-in skewness measure with our measure computed above: (mean-median)/sd
-tabout city using "$output/ch03-table-6-summary-ViennaLondon-Stata.tex" ///
- , replace style(tex) sum ///
- c(count price mean price median price min price max price sd price skewness price)
+* Vienna
+quietly summarize price if city=="Vienna", detail
+display (r(mean) - r(p50)) / r(sd)
+
+* Export to LaTeX format
+* Replace built-in skewness with (mean-median)/sd measure
+tabout city using "${output}/ch03-table-6-summary-ViennaLondon-Stata.tex", ///
+	replace style(tex) sum ///
+	c(count price mean price median price min price max price sd price skewness price)

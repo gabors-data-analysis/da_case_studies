@@ -13,168 +13,243 @@
 * Chapter 03
 * CH03A Finding a good deal among hotels: data exploration
 * using the hotels-vienna dataset
-* version 0.9 2020-09-06
+* version 1.1 2025-12-09
+*
+* STATA VERSION: This code is optimized for Stata 18
+* Backward compatibility notes for Stata 15 and below are included
 ********************************************************************
 
+* Stata version check and setup
+version 18
+clear all
+set more off
+set varabbrev off  // Require full variable names for clarity
 
+
+********************************************************************
 * SETTING UP DIRECTORIES
+********************************************************************
 
-* STEP 1: set working directory for da_case_studies.
-* for example:
-* cd "C:/Users/xy/Dropbox/gabors_data_analysis/da_case_studies"
+* STEP 1: set working directory for da_case_studies
+* Example: cd "C:/Users/xy/Dropbox/gabors_data_analysis/da_case_studies"
 
-* STEP 2: * Directory for data
-* Option 1: run directory-setting do file
-do set-data-directory.do 
-							/* this is a one-line do file that should sit in 
-							the working directory you have just set up
-							this do file has a global definition of your working directory
-							more details: gabors-data-analysis.com/howto-stata/   */
+* STEP 2: Set data directory
+* Option 1: Run directory-setting do file (RECOMMENDED)
+capture do set-data-directory.do 
+	/* This one-line do file should sit in your working directory
+	   It contains: global data_dir "path/to/da_data_repo"
+	   More details: gabors-data-analysis.com/howto-stata/ */
 
-* Option 2: set directory directly here
-* for example:
-* global data_dir "C:/Users/xy/gabors_data_analysis/da_data_repo"
+* Option 2: Set directory directly here
+* Example: global data_dir "C:/Users/xy/gabors_data_analysis/da_data_repo"
 
-global data_in  "$data_dir/hotels-vienna/clean"
-global work  	"ch03-hotels-vienna-explore"
+* Set up paths
+global data_in  "${data_dir}/hotels-vienna/clean"
+global work     "ch03-hotels-vienna-explore"
+global output   "${work}/output"
 
-cap mkdir 		"$work/output"
-global output 	"$work/output"
+* Create output directory if it doesn't exist
+capture mkdir "${work}"
+capture mkdir "${output}"
 
 
+********************************************************************
+* LOAD DATA
+********************************************************************
 
-* load in clean and tidy data and create workfile
-use "$data_in/hotels-vienna.dta", clear
-* Or download directly from OSF:
+* Option 1: Load from local repository
+use "${data_in}/hotels-vienna.dta", clear
 
+* Option 2: Download directly from OSF (uncomment to use)
 /*
-copy "https://osf.io/download/dn8je/" "workfile.dta"
-use "workfile.dta", clear
-erase "workfile.dta"
-*/ 
-
-* DISTRIBUTIONS
-
-* sample design
-* KEEP hotels in Vienna 
-keep if city== "Vienna" 
-keep if accommodation_type== "Hotel"
+tempfile hotels_data
+copy "https://osf.io/download/dn8je/" `hotels_data'
+use `hotels_data', clear
+*/
 
 
-* Stars
+********************************************************************
+* SAMPLE SELECTION
+********************************************************************
 
-* Figure 3.1a
+* Keep only hotels in Vienna
+keep if city == "Vienna" 
+keep if accommodation_type == "Hotel"
+
+* Check sample size
+count
+display as text "Sample size: " as result r(N) " hotels"
+
+
+********************************************************************
+* FIGURE 3.1: DISTRIBUTION OF STAR RATINGS
+********************************************************************
+
+* Figure 3.1a - Percentage distribution of star ratings
 colorpalette viridis, n(4) select(2) nograph
-return list
+
 histogram stars, ///
 	discrete percent ///
-	xtitle(Star rating (number of stars))  ///
-	xlabel(1(0.5)5, grid format(%3.1f)) ylabel(0(10)50, grid)  ///
-	fcolor(`r(p)') gap(5) lcolor(white) lwidth(vthin) ///
-	addlabel addlabopts(mlabsize(medium) yvarformat(%3.1f))  ///
+	xtitle("Star rating (number of stars)")  ///
+	xlabel(1(0.5)5, grid format(%3.1f)) ///
+	ylabel(0(10)50, grid)  ///
+	fcolor(`r(p)') ///
+	gap(5) ///
+	lcolor(white) ///
+	lwidth(vthin) ///
+	addlabel ///
+	addlabopts(mlabsize(medium) yvarformat(%3.1f))  ///
 	graphregion(fcolor(white) ifcolor(none))  ///
 	plotregion(fcolor(white) ifcolor(white))
- graph export "$output/ch03-figure-1a-hist-stars-Stata.png", replace
+graph export "${output}/ch03-figure-1a-hist-stars-Stata.png", replace
+
  
-* Figure 3.1b
+* Figure 3.1b - Frequency distribution
 colorpalette viridis, n(4) select(2) nograph
-hist stars , ///
+
+histogram stars, ///
 	discrete frequency ///
-	xtitle(Star rating (number of stars))  ///
-	fcolor(`r(p)') gap(5) lcolor(white) lwidth(vthin) ///
-	xlabel(1(0.5)5 , grid) ylabel(0(20)140, grid )  ///
-	addlabel addlabopts(mlabsize(medium) yvarformat(%3.0f))  ///
+	xtitle("Star rating (number of stars)")  ///
+	fcolor(`r(p)') ///
+	gap(5) ///
+	lcolor(white) ///
+	lwidth(vthin) ///
+	xlabel(1(0.5)5, grid) ///
+	ylabel(0(20)140, grid)  ///
+	addlabel ///
+	addlabopts(mlabsize(medium) yvarformat(%3.0f))  ///
 	graphregion(fcolor(white) ifcolor(none)) ///
 	plotregion(fcolor(white) ifcolor(white))
- graph export "$output/ch03-figure-1b-hist-stars-Stata.png", replace
+graph export "${output}/ch03-figure-1b-hist-stars-Stata.png", replace
 
 
-* Price
+********************************************************************
+* FIGURE 3.2 & 3.3: PRICE DISTRIBUTIONS
+********************************************************************
 
- use "$data_in/hotels-vienna.dta", clear
- * Or download directly from OSF:
+* Reload data for price analysis
+use "${data_in}/hotels-vienna.dta", clear
 
+* Alternative: Download from OSF (uncomment if needed)
 /*
-copy "https://osf.io/download/dn8je/" "workfile.dta"
-use "workfile.dta", clear
-erase "workfile.dta"
-*/ 
+tempfile hotels_data
+copy "https://osf.io/download/dn8je/" `hotels_data'
+use `hotels_data', clear
+*/
 
-* sample design
-* KEEP hotels in Vienna, stars 3 to 4
-* DROP observation with erroneous price variable (price>1000)
-keep if accommodation_type== "Hotel"
-keep if stars>=3 & stars<=4
-keep if price<1000
+* Sample selection: 3-4 star hotels, exclude extreme prices
+keep if accommodation_type == "Hotel"
+keep if stars >= 3 & stars <= 4
+keep if price < 1000
 
-* brief look at data
-tab city
-tab stars
+* Check sample size after filters
+quietly count
+display as text "Sample size after filters: " as result r(N)
 
-* Figure 3.2a
+* Descriptive statistics
+tabulate city
+tabulate stars 
+
+* To export table to Word/Excel/LaTeX (Stata 17+ only):
+* collect style cell, nformat(%9.0fc)
+* collect export "${output}/ch03-table-city-stars.docx", replace
+
+
+* Figure 3.2a - Price histogram, binwidth=1
 colorpalette viridis, n(4) select(2) nograph
-hist price , ///
-	discrete  frequency ///
-	xtitle(Price (US dollars))  ///
+
+histogram price, ///
+	discrete frequency ///
+	xtitle("Price (US dollars)")  ///
 	color(`r(p)') ///
-	xlabel(0(50)500 , grid) ylabel(0(2)8, grid )  ///
+	xlabel(0(50)500, grid) ///
+	ylabel(0(2)8, grid)  ///
 	graphregion(fcolor(white) ifcolor(none)) ///
 	plotregion(fcolor(white) ifcolor(white))
- graph export "$output/ch03-figure-2a-hist-price-Stata.png", replace
+graph export "${output}/ch03-figure-2a-hist-price-Stata.png", replace
 
-* Figure 3.2b
+
+* Figure 3.2b - Price histogram, binwidth=10
 colorpalette viridis, n(4) select(2) nograph
-hist price , ///
+
+histogram price, ///
 	width(10) frequency ///
-	xtitle(Price (US dollars))  ///
-	color(`r(p)') lcol(white) lw(vthin) ///
-	xlabel(0(50)500 , grid) ylabel(0(5)40, grid )  ///
+	xtitle("Price (US dollars)")  ///
+	color(`r(p)') ///
+	lcolor(white) ///
+	lwidth(vthin) ///
+	xlabel(0(50)500, grid) ///
+	ylabel(0(5)40, grid)  ///
 	graphregion(fcolor(white) ifcolor(none)) ///
 	plotregion(fcolor(white) ifcolor(white))
- graph export "$output/ch03-figure-2b-hist-price-Stata.png", replace
+graph export "${output}/ch03-figure-2b-hist-price-Stata.png", replace
 
 
-* Figure 3.3a
+* Figure 3.3a - Price histogram, binwidth=40
 colorpalette viridis, n(4) select(2) nograph
-hist price , ///
+
+histogram price, ///
 	width(40) start(40) frequency ///
-	xtitle(Price (US dollars))  ///
-	color(`r(p)') lcol(white) lw(vthin) ///
-	xlabel(0(80)500 , grid) ylabel(0(20)120, grid )  ///
+	xtitle("Price (US dollars)")  ///
+	color(`r(p)') ///
+	lcolor(white) ///
+	lwidth(vthin) ///
+	xlabel(0(80)500, grid) ///
+	ylabel(0(20)120, grid)  ///
 	graphregion(fcolor(white) ifcolor(none)) ///
 	plotregion(fcolor(white) ifcolor(white))
- graph export "$output/ch03-figure-3a-hist-price-Stata.png", replace
+graph export "${output}/ch03-figure-3a-hist-price-Stata.png", replace
 
-* Figure 3.3b
+
+* Figure 3.3b - Price histogram, binwidth=80
 colorpalette viridis, n(4) select(2) nograph
-hist price , ///
+
+histogram price, ///
 	width(80) start(0) frequency ///
-	xtitle(Price (US dollars))  ///
-	color(`r(p)') lcol(white) lw(vthin) ///
-	xlabel(0(80)500 , grid) ylabel(0(50)150, grid )  ///
+	xtitle("Price (US dollars)")  ///
+	color(`r(p)') ///
+	lcolor(white) ///
+	lwidth(vthin) ///
+	xlabel(0(80)500, grid) ///
+	ylabel(0(50)150, grid)  ///
 	graphregion(fcolor(white) ifcolor(none)) ///
 	plotregion(fcolor(white) ifcolor(white))
- graph export "$output/ch03-figure-3b-hist-price-Stata.png", replace
+graph export "${output}/ch03-figure-3b-hist-price-Stata.png", replace
 
 
-* Distance to city center
- 
-* Figure 3.4
-* also Figure 3.5 (it's the same with some annotation)
+********************************************************************
+* FIGURE 3.4 & 3.5: DISTANCE TO CITY CENTER
+********************************************************************
+
+* Figure 3.4 - Distance histogram
 colorpalette viridis, n(4) select(2) nograph
-hist distance, ///
-	width(0.5)  frequency ///
-	xtitle(Distance to city center (miles))  ///
-	color(`r(p)') lcol(white) lw(vthin) ///
-	xlabel(0(2)14 , grid) ylabel(0(10)60, grid )  ///
+
+histogram distance, ///
+	width(0.5) frequency ///
+	xtitle("Distance to city center (miles)")  ///
+	color(`r(p)') ///
+	lcolor(white) ///
+	lwidth(vthin) ///
+	xlabel(0(2)14, grid) ///
+	ylabel(0(10)60, grid)  ///
 	graphregion(fcolor(white) ifcolor(none)) ///
 	plotregion(fcolor(white) ifcolor(white))
- graph export "$output/ch03-figure-4-hist-dist-Stata.png", replace
+graph export "${output}/ch03-figure-4-hist-dist-Stata.png", replace
 
-count if distance>8
-drop if distance>8
 
-tab city_actual
-keep if city_actual=="Vienna"
+* Identify hotels too far from center
+count if distance > 8
+display as text "Hotels more than 8 miles from center: " as result r(N)
+
+* Drop distant hotels and verify city location
+drop if distance > 8
+
+* Check city distribution
+tabulate city_actual  
+
+* To export this table (Stata 17+ only):
+* collect export "${output}/ch03-table-city-actual.docx", replace
+
+keep if city_actual == "Vienna"
 count
-
+display as text "Final sample size: " as result r(N) " hotels"
