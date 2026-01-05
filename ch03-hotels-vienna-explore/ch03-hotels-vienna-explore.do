@@ -146,12 +146,13 @@ keep if price < 1000
 quietly count
 display as text "Sample size after filters: " as result r(N)
 
-* Descriptive statistics
-tabulate city
-tabulate stars 
+* Descriptive statistics (collect command with only Stata 17+)
+collect clear
+table city stars, statistic(frequency) nototals
 
 * To export table to Word/Excel/LaTeX (Stata 17+ only):
-collect style cell, nformat(%9.0fc)
+collect style header stars, title(label)
+collect style cell result[frequency], nformat(%9.0fc)
 collect export "${output}/ch03-table-city-stars.docx", replace
 
 

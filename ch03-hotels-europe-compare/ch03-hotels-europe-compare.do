@@ -173,8 +173,23 @@ display (r(mean) - r(p50)) / r(sd)
 quietly summarize price if city=="Vienna", detail
 display (r(mean) - r(p50)) / r(sd)
 
-* Export to LaTeX format
+* Export to LaTeX format (collect command with on Stata 17+)
 * Replace built-in skewness with (mean-median)/sd measure
-tabout city using "${output}/ch03-table-6-summary-ViennaLondon-Stata.tex", ///
-	replace style(tex) sum ///
-	c(count price mean price median price min price max price sd price skewness price)
+* Clear any existing collection
+collect clear
+
+* Create table with summary statistics
+table city, statistic(count price) ///
+            statistic(mean price) ///
+            statistic(median price) ///
+            statistic(min price) ///
+            statistic(max price) ///
+            statistic(sd price) ///
+            statistic(skewness price)
+
+* Format the cells (adjust decimal places as needed)
+collect style cell result[count], nformat(%9.0fc)
+collect style cell result[mean median min max sd skewness], nformat(%9.2f)
+
+* Export to LaTeX
+collect export "${output}/ch03-table-6-summary-ViennaLondon-Stata.tex", as(tex) replace

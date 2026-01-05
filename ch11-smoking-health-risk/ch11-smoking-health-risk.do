@@ -370,13 +370,20 @@ label variable p_lpm "LPM"
 label variable p_logit "Logit"
 label variable p_probit "Probit"
 estpost tabstat p_lpmbase p_lpm p_logit p_probit, by(stayshealthy) s(mean)
-esttab using "${output}/ch11-table-4-pred-mean-Stata.tex", replace noobs label  tex  ///
- cells(" p_lpmbase(fmt(3)) p_lpm(fmt(3)) p_logit(fmt(3)) p_probit(fmt(3))")  nonumbers
 
-estpost tabstat p_lpmbase p_lpm p_logit p_probit, by(stayshealthy) s(median) 
-esttab using "${output}/ch11-table-4-pred-median-Stata.tex", replace noobs label  tex ///
- cells(" p_lpmbase(fmt(3)) p_lpm(fmt(3)) p_logit(fmt(3)) p_probit(fmt(3))")  nonumbers 
+* MEAN table (using collect, only compatible with Stata 17+)
+collect clear
+table stayshealthy, statistic(mean p_lpmbase p_lpm p_logit p_probit)
+collect style cell result[mean], nformat(%9.3f)
+collect style header result, level(hide)
+collect export "${output}/ch11-table-4-pred-mean-Stata.tex", as(tex) replace tableonly
 
+* MEDIAN table (using collect, only compatible with Stata 17+)
+collect clear
+table stayshealthy, statistic(median p_lpmbase p_lpm p_logit p_probit)
+collect style cell result[median], nformat(%9.3f)
+collect style header result, level(hide)
+collect export "${output}/ch11-table-4-pred-median-Stata.tex", as(tex) replace tableonly
 count if p_lpm!=.
 
  
