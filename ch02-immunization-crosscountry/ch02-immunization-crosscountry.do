@@ -100,7 +100,7 @@ list
 * Table 2.4: Wide format (one row per country)
 *****************************
 
-* Export to LaTeX using Stata 18 collect
+* Export to LaTeX
 listtab countryname imm* gdppc* ///
  using "${output}/xt_immun_wide.tex", replace ///
  rstyle(tabular) ///

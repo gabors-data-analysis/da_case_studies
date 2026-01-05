@@ -151,8 +151,8 @@ tabulate city
 tabulate stars 
 
 * To export table to Word/Excel/LaTeX (Stata 17+ only):
-* collect style cell, nformat(%9.0fc)
-* collect export "${output}/ch03-table-city-stars.docx", replace
+collect style cell, nformat(%9.0fc)
+collect export "${output}/ch03-table-city-stars.docx", replace
 
 
 * Figure 3.2a - Price histogram, binwidth=1
