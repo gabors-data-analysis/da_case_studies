@@ -41,13 +41,13 @@ Your Codespace will be created and set up automatically. The initial setup takes
 
 The code requires data files that are hosted separately on OSF.io:
 
-**Option 1 - All datasets:**
-- Download all datasets from [OSF](https://osf.io/3u5em/files/osfstorage)
+**Option 1 - All datasets (recommended for offline work):**
+- Download all datasets at once from [OSF](https://osf.io/3u5em/files/osfstorage)
 - Create a `da_data_repo` folder in your workspace
 - Extract all data files there
 
-**Option 2 - Specific datasets:**
-- Download specific case study data from [OSF](https://osf.io/7epdj/)
+**Option 2 - Specific datasets (lighter download):**
+- Download only the datasets you need from [OSF](https://osf.io/7epdj/)
 - Create a `da_data_repo` folder in your workspace
 - Place the downloaded datasets there
 

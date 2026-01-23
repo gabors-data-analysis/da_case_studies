@@ -11,7 +11,7 @@ conda update -n base -c defaults conda -y
 
 # Create Python environment from the Linux conda environment file
 echo "Creating Python environment 'daenv'..."
-cd /workspaces/da_case_studies/ch00-tech-prep
+cd "${CODESPACE_VSCODE_FOLDER:-$(pwd)}/ch00-tech-prep"
 conda env create -f daenv_linux.yml
 
 # Initialize conda for bash
@@ -23,7 +23,7 @@ echo "Activate it with: conda activate daenv"
 
 # Install R packages using renv
 echo "Installing R packages using renv..."
-cd /workspaces/da_case_studies
+cd "${CODESPACE_VSCODE_FOLDER:-$(pwd)}"
 
 # Install renv if not already installed
 Rscript -e "if (!requireNamespace('renv', quietly = TRUE)) install.packages('renv', repos='https://cran.rstudio.com')"
