@@ -25,9 +25,6 @@ echo "Activate it with: conda activate daenv"
 echo "Installing R packages using renv..."
 cd "${CODESPACE_VSCODE_FOLDER:-$(pwd)}"
 
-# Install renv if not already installed
-Rscript -e "if (!requireNamespace('renv', quietly = TRUE)) install.packages('renv', repos='https://cran.rstudio.com')"
-
 # Restore R environment
 echo "Restoring R packages from renv.lock..."
 Rscript -e "renv::restore(prompt = FALSE)"
