@@ -25,9 +25,15 @@ echo "Activate it with: conda activate daenv"
 echo "Installing R packages using renv..."
 cd "${CODESPACE_VSCODE_FOLDER:-$(pwd)}"
 
-# Restore R environment
+# Restore R environment using Posit Package Manager for better binary availability
 echo "Restoring R packages from renv.lock..."
-Rscript -e "renv::restore(prompt = FALSE)"
+Rscript -e "
+  # Configure to use Posit Public Package Manager for better historical package availability
+  options(repos = c(CRAN = 'https://packagemanager.posit.co/cran/latest'))
+  
+  # Restore packages
+  renv::restore(prompt = FALSE)
+"
 
 echo "========================================="
 echo "Setup complete!"
