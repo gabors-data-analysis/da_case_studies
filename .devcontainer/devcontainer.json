@@ -1,6 +1,6 @@
 {
   "name": "Data Analysis Case Studies (R & Python)",
-  "image": "mcr.microsoft.com/devcontainers/anaconda:3-2025-01",
+  "image": "mcr.microsoft.com/devcontainers/anaconda:3",
   
   "features": {
     "ghcr.io/rocker-org/devcontainer-features/r-apt:latest": {
