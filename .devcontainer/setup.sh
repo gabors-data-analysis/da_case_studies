@@ -28,11 +28,11 @@ cd "${CODESPACE_VSCODE_FOLDER:-$(pwd)}"
 # Restore R environment using Posit Package Manager for better binary availability
 echo "Restoring R packages from renv.lock..."
 Rscript -e "
-  # Configure to use Posit Public Package Manager for better historical package availability
-  options(repos = c(CRAN = 'https://packagemanager.posit.co/cran/latest'))
-  
-  # Restore packages
-  renv::restore(prompt = FALSE)
+  # Use Posit Public Package Manager for better historical package availability
+  renv::restore(
+    prompt = FALSE, 
+    repos = c(CRAN = 'https://packagemanager.posit.co/cran/latest')
+  )
 "
 
 echo "========================================="
