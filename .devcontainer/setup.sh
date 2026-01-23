@@ -25,6 +25,10 @@ echo "Activate it with: conda activate daenv"
 echo "Installing R packages using renv..."
 cd "${CODESPACE_VSCODE_FOLDER:-$(pwd)}"
 
+# Clean renv cache to avoid stale package metadata
+echo "Cleaning renv cache..."
+Rscript -e "renv::purge()"
+
 # Restore R environment using Posit Package Manager for better binary availability
 echo "Restoring R packages from renv.lock..."
 Rscript -e "
