@@ -39,5 +39,7 @@
     }
   },
   
-  "forwardPorts": []
+  "forwardPorts": [],
+
+  "workspaceFolder": "/workspaces"
 }
