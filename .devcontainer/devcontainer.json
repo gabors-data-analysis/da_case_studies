@@ -1,6 +1,6 @@
 {
   "name": "Data Analysis Case Studies (R & Python)",
-  "image": "ghcr.io/rocker-org/devcontainer/r-ver:4.5.1",
+  "image": "ghcr.io/rocker-org/devcontainer/r-ver:4.5",
   
   "features": {
     "ghcr.io/devcontainers/features/anaconda:1": {},
