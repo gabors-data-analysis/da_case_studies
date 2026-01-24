@@ -5,13 +5,16 @@ echo "========================================="
 echo "Setting up Data Analysis environment..."
 echo "========================================="
 
+# Store the workspace folder path
+WORKSPACE_FOLDER="${CODESPACE_VSCODE_FOLDER:-$(pwd)}"
+
 # Update conda
 echo "Updating conda..."
 conda update -n base -c defaults conda -y
 
 # Create Python environment from the Linux conda environment file
 echo "Creating Python environment 'daenv'..."
-cd "${CODESPACE_VSCODE_FOLDER:-$(pwd)}/ch00-tech-prep"
+cd "${WORKSPACE_FOLDER}/ch00-tech-prep"
 conda env create -f daenv_linux.yml
 
 # Initialize conda for bash
@@ -23,7 +26,7 @@ echo "Activate it with: conda activate daenv"
 
 # Install R packages using renv
 echo "Installing R packages using renv..."
-cd "${CODESPACE_VSCODE_FOLDER:-$(pwd)}"
+cd "${WORKSPACE_FOLDER}"
 
 # Restore R environment using Posit Package Manager for better binary availability
 echo "Restoring R packages from renv.lock..."
