@@ -38,6 +38,12 @@ Rscript -e "
   )
 "
 
+cd "${WORKSPACE_FOLDER}"
+echo "Downloading data files..."
+curl -J -L -O https://osf.io/download/9gw4a
+echo "Unzipping data files..."
+unzip da_data_repo.zip
+
 echo "========================================="
 echo "Setup complete!"
 echo "========================================="
