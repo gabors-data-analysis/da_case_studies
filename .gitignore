@@ -20,3 +20,6 @@ set-data-directory.do
 set-data-directory.R
 renv/
 .DS_Store
+tests/*.log
+tinytable_assets/
+Rplots.pdf
