@@ -30,6 +30,9 @@ library(modelsummary)
 # option A: open material as project
 # option B: set working directory for da_case_studies
 #           example: setwd("C:/Users/xy/Dropbox/gabors_data_analysis/da_case_studies")
+if (basename(getwd()) != "da_case_studies") {
+  setwd("da_case_studies")
+}
 
 # set data dir, data used
 source("ch00-tech-prep/set-data-directory.R")             # data_dir must be first defined 

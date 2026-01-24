@@ -31,6 +31,9 @@ source("ch00-tech-prep/set-data-directory.R")             # data_dir must be fir
 # option A: open material as project
 # option B: set working directory for da_case_studies
 #           example: setwd("C:/Users/xy/Dropbox/gabors_data_analysis/da_case_studies")
+if (basename(getwd()) != "da_case_studies") {
+  setwd("da_case_studies")
+}
 
 # load theme and functions
 source("ch00-tech-prep/theme_bg.R")

@@ -28,12 +28,11 @@ library(tidyverse)
 # option A: open material as project
 # option B: set working directory for da_case_studies
 #           example: setwd("C:/Users/xy/Dropbox/gabors_data_analysis/da_case_studies")
-
-# set data dir, load theme and functions
-
 if (basename(getwd()) != "da_case_studies") {
   setwd("da_case_studies")
 }
+
+# set data dir, load theme and functions
 source("ch00-tech-prep/theme_bg.R")
 source("ch00-tech-prep/da_helper_functions.R")
 # If source code does not run, install the following packages:
