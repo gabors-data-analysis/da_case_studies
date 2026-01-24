@@ -25,14 +25,6 @@ echo "Activate it with: conda activate daenv"
 echo "Installing R packages using renv..."
 cd "${CODESPACE_VSCODE_FOLDER:-$(pwd)}"
 
-# Remove old renv.lock file from ch00-tech-prep if it exists (has outdated package versions)
-echo "Removing outdated renv.lock from ch00-tech-prep..."
-rm -f ch00-tech-prep/renv.lock
-
-# Remove existing renv library to ensure clean restore
-echo "Cleaning renv library..."
-rm -rf renv/library
-
 # Restore R environment using Posit Package Manager for better binary availability
 echo "Restoring R packages from renv.lock..."
 Rscript -e "
