@@ -6,7 +6,7 @@ This directory contains the configuration for GitHub Codespaces, enabling you to
 
 GitHub Codespaces provides a complete, ready-to-use development environment in the cloud. It includes:
 - Python 3.12 with all required packages
-- R 4.5 with all required packages
+- R 4.5.1 with all required packages
 - VS Code editor in your browser
 - All tools and extensions pre-configured
 
@@ -74,7 +74,7 @@ install.packages("package-name")
 - Key libraries: pandas, numpy, scikit-learn, matplotlib, seaborn, statsmodels, prophet, and more
 
 ### R Environment  
-- R 4.5
+- R 4.5.1
 - All packages from `renv.lock`
 - Key libraries: tidyverse, fixest, modelsummary, ggplot2, caret, and more
 
