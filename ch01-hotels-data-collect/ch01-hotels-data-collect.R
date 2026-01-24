@@ -31,6 +31,9 @@ library(tidyverse)
 
 # set data dir, load theme and functions
 
+if (basename(getwd()) != "da_case_studies") {
+  setwd("da_case_studies")
+}
 source("ch00-tech-prep/theme_bg.R")
 source("ch00-tech-prep/da_helper_functions.R")
 # If source code does not run, install the following packages:

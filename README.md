@@ -9,6 +9,16 @@ Published on 6 May 2021 by Cambridge University Press
 
 ## How to use
 
+### Quick Start with GitHub Codespaces ⚡
+
+**New!** The fastest way to get started - no installation required!
+
+Click the "Code" button above and select "Create codespace" to launch a fully configured environment with R, Python, and all dependencies pre-installed. Perfect for students, professors, and anyone who wants to start analyzing data immediately.
+
+[Learn more about using Codespaces](.devcontainer/README.md)
+
+### Traditional Setup
+
 All code available for R, Stata and Python. To see options for various languages, check out:
 
 1. **R** --  [How to run code in R ](ch00-tech-prep/da-setup-r.md)

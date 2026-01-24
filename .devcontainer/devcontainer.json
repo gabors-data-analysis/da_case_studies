@@ -1,0 +1,45 @@
+{
+  "name": "Data Analysis Case Studies (R & Python)",
+  "image": "ghcr.io/rocker-org/devcontainer/r-ver:4.5",
+  
+  "features": {
+    "ghcr.io/devcontainers/features/anaconda:1": {},
+    "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/devcontainers/features/common-utils:2": {
+      "installOhMyZsh": false,
+      "installZsh": false
+    }
+  },
+
+  "containerEnv": {
+    "DEBIAN_FRONTEND": "noninteractive"
+  },
+
+  "postCreateCommand": "sudo apt-get update && sudo apt-get install -y cmake && bash da_case_studies/.devcontainer/setup.sh",
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-toolsai.jupyter",
+        "ms-toolsai.jupyter-keymap",
+        "ms-toolsai.jupyter-renderers",
+        "REditorSupport.r",
+        "RDebugger.r-debugger",
+        "Ikuyadeu.r-pack"
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "/opt/conda/envs/daenv/bin/python",
+        "r.rterm.linux": "/usr/local/bin/R",
+        "r.bracketedPaste": true,
+        "r.plot.useHttpgd": true
+      }
+    }
+  },
+  
+  "forwardPorts": [],
+
+  "workspaceFolder": "/workspaces"
+}
