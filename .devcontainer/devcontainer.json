@@ -5,8 +5,18 @@
   "features": {
     "ghcr.io/devcontainers/features/anaconda:1": {},
     "ghcr.io/devcontainers/features/git:1": {},
-    "ghcr.io/devcontainers/features/github-cli:1": {}
+    "ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/devcontainers/features/common-utils:2": {
+      "installOhMyZsh": false,
+      "installZsh": false
+    }
   },
+
+  "containerEnv": {
+    "DEBIAN_FRONTEND": "noninteractive"
+  },
+
+  "postCreateCommand": "sudo apt-get update && sudo apt-get install -y cmake && bash .devcontainer/setup.sh",
 
   "customizations": {
     "vscode": {
@@ -28,8 +38,6 @@
       }
     }
   },
-
-  "postCreateCommand": "bash .devcontainer/setup.sh",
   
   "forwardPorts": []
 }
