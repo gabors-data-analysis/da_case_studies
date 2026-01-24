@@ -665,30 +665,76 @@ def plot_variable_importance(
 
 
 def plot_partial_dependence(
-    model: sklearn.base.BaseEstimator, data: pd.DataFrame, variable: str, varlabel: str
+    model: sklearn.base.BaseEstimator,
+    data: pd.DataFrame,
+    variable: str,
+    varlabel: str,
+    kind: str = "average",  # "average", "individual", or "both"
 ):
+    if kind not in {"average", "individual", "both"}:
+        raise ValueError("kind must be one of {'average', 'individual', 'both'}")
 
-    pdp_results = sklearn.inspection.partial_dependence(
-        model, data, [variable], kind="average"
+    pd_results = sklearn.inspection.partial_dependence(
+        model,
+        data,
+        [variable],
+        kind=kind,
     )
 
-    pdp_results = pd.DataFrame(
-        [pdp_results["average"][0], pdp_results["grid_values"][0]],
-        index=["average", "grid_values"],
-    ).T
- 
-    if pdp_results["grid_values"].dtype == "object":
-        linestyle = "none"
+    grid_values = pd_results["grid_values"][0]
+
+    linestyle = "none" if grid_values.dtype == "object" else "-"
+
+    if kind in {"individual", "both"}:
+        ice = pd_results["individual"][0]
+
+        for i in range(ice.shape[0]):
+            if i % 100 == 0:
+                ice_df = pd.DataFrame(
+                {
+                    "grid_values": grid_values,
+                    "ice": ice[i, :],
+                }
+                )
+
+                sns.pointplot(
+                    data=ice_df,
+                    x="grid_values",
+                    y="ice",
+                    alpha=0.25,
+                    linestyle=linestyle,
+                    scale=0.3 if linestyle == "-" else 0.5,
+                    color=color[1]
+                )
+
+    if kind in {"average", "both"}:
+        avg = pd_results["average"][0]
+
+        pdp_df = pd.DataFrame(
+            {
+                "grid_values": grid_values,
+                "average": avg,
+            }
+        )
+
+        sns.pointplot(
+            data=pdp_df,
+            x="grid_values",
+            y="average",
+            scale=0.8,
+            linestyle=linestyle,
+        )
+
+    if kind in {'both', 'individual'}:
+        ymax = math.ceil(pd_results['individual'][0][list(range(0, pd_results['individual'][0].shape[0], 100))].max() / 10) * 10
+        ymin = math.floor(pd_results['individual'][0][list(range(0, pd_results['individual'][0].shape[0], 100))].min() / 10) * 10
     else:
-        linestyle = "-"
+        ymax = math.ceil(avg.max() / 10) * 10
+        ymin = math.floor(avg.min() / 10) * 10
 
-    sns.pointplot(
-        data=pdp_results, x="grid_values", y="average", scale=0.8, linestyle=linestyle
-    )
-    ymax = math.ceil(pdp_results["average"].max() / 10) * 10
-    ymin = math.floor(pdp_results["average"].min() / 10) * 10
     plt.ylim(ymin, ymax)
-    plt.yticks(np.arange(ymin, ymax + 1, 10))
+    plt.yticks(np.arange(ymin, ymax + 1, 10 if kind == 'average' else 30))
+
     plt.grid(axis="x", linestyle="-", alpha=0.7)
     plt.xlabel(varlabel)
     plt.ylabel("Predicted price")
