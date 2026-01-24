@@ -15,6 +15,9 @@ conda update -n base -c defaults conda -y
 # Create Python environment from the Linux conda environment file
 echo "Creating Python environment 'daenv'..."
 cd "${WORKSPACE_FOLDER}/da_case_studies/ch00-tech-prep"
+# rename set-data-directory-example.R to set-data-directory.R
+cp set-data-directory-example.R set-data-directory.R
+
 conda env create -f daenv_linux.yml
 
 # Initialize conda for bash
