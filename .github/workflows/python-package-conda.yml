@@ -16,72 +16,71 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Download data from OSF.io
+      - name: Setup Clean Workspace
+        id: setup_workspace
         run: |
-          # DEBUG: Print current location and structure
-          echo "Current directory: $(pwd)"
-          echo "Workspace root: $GITHUB_WORKSPACE"
+          # Create a clean workspace structure to avoid path duplication issues
+          # Notebooks rely on split("da_case_studies") which fails when path is .../da_case_studies/da_case_studies
           
-          # Target directory expected by notebooks: /home/runner/work/da_data_repo
-          # We'll construct this absolute path to be safe
-          TARGET_DATA_DIR="/home/runner/work/da_data_repo"
+          # New structure will be:
+          # /home/runner/work/workspace/
+          # ├── da_case_studies/ (The repo)
+          # └── da_data_repo/    (The data)
           
-          # Go to parent directory (workspace root)
-          cd .. 
+          WORKSPACE_ROOT="/home/runner/work/custom_workspace"
+          mkdir -p "$WORKSPACE_ROOT"
+          echo "WORKSPACE_ROOT=$WORKSPACE_ROOT" >> $GITHUB_ENV
           
-          # Create a specific directory for the download to avoid conflicts
-          mkdir -p raw_data_download
-          cd raw_data_download
+          # Move repo to new location
+          mv $GITHUB_WORKSPACE "$WORKSPACE_ROOT/da_case_studies"
           
-          # Download the dataset
-          echo "Downloading datasets from OSF.io..."
-          curl -L "https://files.osf.io/v1/resources/3u5em/providers/osfstorage/?zip=" -o project_3u5em.zip
+          echo "Workspace setup at $WORKSPACE_ROOT"
+
+      - name: Download and Setup Data
+        run: |
+          cd "$WORKSPACE_ROOT"
+          
+          # Target data directory
+          TARGET_DATA_DIR="$WORKSPACE_ROOT/da_data_repo"
+          
+          # Download
+          echo "Downloading datasets..."
+          curl -L "https://files.osf.io/v1/resources/3u5em/providers/osfstorage/?zip=" -o data.zip
           
           # Extract
-          echo "Extracting data..."
-          unzip -q project_3u5em.zip
-          rm project_3u5em.zip
+          unzip -q data.zip
+          rm data.zip
           
-          # Move data to the absolute target directory
-          echo "Moving data to $TARGET_DATA_DIR ..."
-          
-          # Check for nested zip (common OSF pattern)
+          # Handle nested zip if present
           if [ -f "da_data_repo.zip" ]; then
-             echo "Found nested zip: da_data_repo.zip - extracting..."
              unzip -q da_data_repo.zip
              rm da_data_repo.zip
           fi
           
-          # Count items in the download dir
-          dir_count=$(find . -maxdepth 1 -mindepth 1 -type d | wc -l)
-          file_count=$(find . -maxdepth 1 -mindepth 1 -type f | wc -l)
-          
-          if [ "$dir_count" -eq 1 ] && [ "$file_count" -eq 0 ]; then
-            # Case: Zip contained a single folder wrapping the data
-            single_dir=$(find . -maxdepth 1 -mindepth 1 -type d)
-            echo "Found single wrapper folder: $single_dir"
-            mv "$single_dir" "$TARGET_DATA_DIR"
-          else
-            # Case: Zip contained loose files/folders
-            echo "Found loose files/folders, moving current dir content"
-            # Move the content of the current dir to the target
-            mkdir -p "$TARGET_DATA_DIR"
-            mv * "$TARGET_DATA_DIR/"
+          # Normalize folder structure
+          # If extracted to a single folder, move content to target
+          dir_count=$(find . -maxdepth 1 -mindepth 1 -type d -not -name "da_case_studies" | wc -l)
+          if [ "$dir_count" -eq 1 ]; then
+             extracted_dir=$(find . -maxdepth 1 -mindepth 1 -type d -not -name "da_case_studies")
+             if [ "$extracted_dir" != "./da_data_repo" ]; then
+               mv "$extracted_dir" da_data_repo
+             fi
           fi
           
-          # FLATTEN nested da_data_repo if it exists (e.g. da_data_repo/da_data_repo)
-          if [ -d "$TARGET_DATA_DIR/da_data_repo" ]; then
-            echo "Found nested da_data_repo folder - flattening..."
-            # Move contents up one level
-            rsync -a "$TARGET_DATA_DIR/da_data_repo/" "$TARGET_DATA_DIR/"
-            rm -rf "$TARGET_DATA_DIR/da_data_repo"
+          # Verify structure
+          echo "Structure of $WORKSPACE_ROOT:"
+          ls -la "$WORKSPACE_ROOT"
+          
+          if [ -d "da_data_repo/da_data_repo" ]; then
+             echo "Flattening nested da_data_repo..."
+             rsync -a da_data_repo/da_data_repo/ da_data_repo/
+             rm -rf da_data_repo/da_data_repo
           fi
-          
-          echo "Data directory contents:"
-          ls -la "$TARGET_DATA_DIR"
-          
-          echo "DEBUG: Listing full structure of /home/runner/work/"
-          find /home/runner/work -maxdepth 3 -type d
+
+      - name: Install System Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y graphviz
 
       - name: Set up Miniconda
         uses: conda-incubator/setup-miniconda@v3
@@ -89,7 +88,7 @@ jobs:
           miniforge-variant: Miniforge3
           miniforge-version: latest
           activate-environment: daenv
-          environment-file: ch00-tech-prep/daenv_linux.yml
+          environment-file: ${{ env.WORKSPACE_ROOT }}/da_case_studies/ch00-tech-prep/daenv_linux.yml
           python-version: "3.12"
           auto-activate-base: false
 
@@ -99,15 +98,16 @@ jobs:
           conda info
           python --version
 
-      #- name: Install CmdStan (required for Prophet)
-      #  shell: bash -el {0}
-      #  run: |
-      #    python -c "import cmdstanpy; cmdstanpy.install_cmdstan()"
+      - name: Install CmdStan (required for Prophet)
+        shell: bash -el {0}
+        run: |
+          python -c "import cmdstanpy; cmdstanpy.install_cmdstan()"
 
       - name: Run notebook tests
         shell: bash -el {0}
         env:
           MPLBACKEND: Agg
+        working-directory: ${{ env.WORKSPACE_ROOT }}/da_case_studies
         run: |
           python ch00-tech-prep/test_env.py
 
@@ -117,6 +117,6 @@ jobs:
         with:
           name: failed-test-outputs
           path: |
-            **/*.py
-            !ch00-tech-prep/test_env.py
+            ${{ env.WORKSPACE_ROOT }}/da_case_studies/**/*.py
+            !${{ env.WORKSPACE_ROOT }}/da_case_studies/ch00-tech-prep/test_env.py
           retention-days: 7
