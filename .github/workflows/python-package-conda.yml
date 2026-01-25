@@ -92,8 +92,6 @@ jobs:
         shell: bash -el {0}
         env:
           MPLBACKEND: Agg
-        # Run tests inside the simulated repo structure
-        working-directory: ${{ env.WORKSPACE_ROOT }}/da_case_studies
         run: |
           python ch00-tech-prep/test_env.py
 
@@ -103,6 +101,6 @@ jobs:
         with:
           name: failed-test-outputs
           path: |
-            ${{ env.WORKSPACE_ROOT }}/da_case_studies/**/*.log
-            !${{ env.WORKSPACE_ROOT }}/da_case_studies/ch00-tech-prep/test_env.py
+            **/*.log
+            !ch00-tech-prep/test_env.py
           retention-days: 7
