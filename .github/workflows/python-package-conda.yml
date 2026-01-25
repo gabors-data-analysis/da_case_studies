@@ -34,10 +34,17 @@ jobs:
           unzip -q project_3u5em.zip
           rm project_3u5em.zip
           
-          # Determine structure and move to ../da_data_repo
-          # Check if it extracted to a single top-level directory (common in some zips)
-          # or if it dumped everything into the current dir
-          cd ..
+          # Determine structure and move to ../../da_data_repo (grand-parent)
+          # The notebooks expect data at split("da_case_studies")[0] + "da_data_repo"
+          # On GH Actions, path is .../work/da_case_studies/da_case_studies
+          # So split gives .../work/, so we need data at .../work/da_data_repo
+          
+          # Move to download dir parent check
+          cd .. 
+          # Now at .../work/da_case_studies
+          
+          # We need to move the data folder to .../work/ (one level up)
+          DEST_DIR="../da_data_repo"
           
           # Count items in the download dir
           dir_count=$(find raw_data_download -maxdepth 1 -mindepth 1 -type d | wc -l)
@@ -47,16 +54,16 @@ jobs:
             # Case: Zip contained a single folder wrapping the data
             single_dir=$(find raw_data_download -maxdepth 1 -mindepth 1 -type d)
             echo "Found single wrapper folder: $single_dir"
-            mv "$single_dir" da_data_repo
+            mv "$single_dir" "$DEST_DIR"
             rmdir raw_data_download
           else
             # Case: Zip contained loose files/folders, so raw_data_download IS the data folder
             echo "Found loose files/folders, using download dir as data repo"
-            mv raw_data_download da_data_repo
+            mv raw_data_download "$DEST_DIR"
           fi
           
-          echo "Data repository setup complete at $(pwd)/da_data_repo"
-          ls -la da_data_repo/
+          echo "Data repository setup complete at $(readlink -f $DEST_DIR)"
+          ls -la "$DEST_DIR"
 
       - name: Set up Miniconda
         uses: conda-incubator/setup-miniconda@v3
