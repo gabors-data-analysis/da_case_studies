@@ -44,7 +44,7 @@ jobs:
           # Now at .../work/da_case_studies
           
           # We need to move the data folder to .../work/ (one level up)
-          DEST_DIR="../da_data_repo"
+          DEST_DIR="../../da_data_repo"
           
           # Count items in the download dir
           dir_count=$(find raw_data_download -maxdepth 1 -mindepth 1 -type d | wc -l)
