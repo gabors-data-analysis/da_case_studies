@@ -111,6 +111,18 @@ class TestNotebooks(unittest.TestCase):
                     if e.stderr:
                         print(f"STDERR:\n{e.stderr}")
                     print(f"{'='*60}\n")
+                    
+                    # Save error log to file for artifact upload
+                    log_file = py_file.replace(".py", ".log")
+                    with open(log_file, "w") as f:
+                        f.write(f"FAILED: {notebook}\n")
+                        f.write(f"{'='*60}\n")
+                        f.write("STDOUT:\n")
+                        f.write(e.stdout or "")
+                        f.write(f"\n{'='*60}\n")
+                        f.write("STDERR:\n")
+                        f.write(e.stderr or "")
+                    
                     self.fail(f"Execution failed for {notebook}: {e.stderr[:500] if e.stderr else str(e)}")
                 except Exception as e:
                     self.fail(f"Execution failed for {notebook}: {e}")
