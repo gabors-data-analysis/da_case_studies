@@ -45,6 +45,13 @@ jobs:
           # Move data to the absolute target directory
           echo "Moving data to $TARGET_DATA_DIR ..."
           
+          # Check for nested zip (common OSF pattern)
+          if [ -f "da_data_repo.zip" ]; then
+             echo "Found nested zip: da_data_repo.zip - extracting..."
+             unzip -q da_data_repo.zip
+             rm da_data_repo.zip
+          fi
+          
           # Count items in the download dir
           dir_count=$(find . -maxdepth 1 -mindepth 1 -type d | wc -l)
           file_count=$(find . -maxdepth 1 -mindepth 1 -type f | wc -l)
