@@ -10,11 +10,44 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    timeout-minutes: 120  # Extended timeout for notebook execution
+    timeout-minutes: 180  # Extended timeout for notebook execution + data download
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Download data from OSF.io
+        run: |
+          # Create the data directory at the same level as da_case_studies
+          cd ..
+          
+          # Download the complete dataset zip from OSF.io
+          echo "Downloading datasets from OSF.io..."
+          curl -L -o data.zip "https://osf.io/3u5em/download"
+          
+          # Extract the data
+          echo "Extracting data..."
+          unzip -q data.zip
+          
+          # List what was extracted to verify structure
+          echo "Data directory contents:"
+          ls -la
+          
+          # If the zip extracts to a differently named folder, rename it
+          # Adjust this based on actual zip contents
+          if [ -d "da_data_repo" ]; then
+            echo "da_data_repo folder found"
+          else
+            # Find and rename the extracted folder if needed
+            extracted_dir=$(find . -maxdepth 1 -type d -name "*data*" | head -1)
+            if [ -n "$extracted_dir" ] && [ "$extracted_dir" != "./da_data_repo" ]; then
+              mv "$extracted_dir" da_data_repo
+              echo "Renamed $extracted_dir to da_data_repo"
+            fi
+          fi
+          
+          echo "Final structure:"
+          ls -la da_data_repo/ || echo "Warning: da_data_repo not found"
 
       - name: Set up Miniconda
         uses: conda-incubator/setup-miniconda@v3
@@ -30,7 +63,6 @@ jobs:
         shell: bash -el {0}
         run: |
           conda info
-          conda list
           python --version
 
       - name: Install CmdStan (required for Prophet)
