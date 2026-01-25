@@ -19,73 +19,53 @@ jobs:
       - name: Setup Data and Paths
         run: |
           # 1. Download and set up data
-          # Go to workspace root (parent of repo)
-          cd ..
-          WORKSPACE_ROOT=$(pwd)
-          echo "Workspace root: $WORKSPACE_ROOT"
-          
-          # Ensure da_data_repo exists at the level expected by notebooks
-          # Notebooks expect: dirname + "da_data_repo"
-          # dirname = .../work/ from split logic
-          # So we need .../work/da_data_repo
-          # Current dir is .../work/da_case_studies
-          # So we need ../da_data_repo
-          
-          # BUT split logic is fragile.
-          # Path: /home/runner/work/da_case_studies/da_case_studies
-          # split("da_case_studies") -> /home/runner/work/
-          
-          # So notebooks look for: /home/runner/work/da_data_repo
-          # Use absolute path to be safe
+          # Create data directory at absolute path expected by notebooks
           TARGET_DATA_DIR="/home/runner/work/da_data_repo"
+          echo "Setting up data at $TARGET_DATA_DIR"
           
-          echo "Downloading datasets..."
-          curl -L "https://files.osf.io/v1/resources/3u5em/providers/osfstorage/?zip=" -o data.zip
+          # Go to workspace root to handle download
+          cd ..
+          
+          # Download
+          curl -sL "https://files.osf.io/v1/resources/3u5em/providers/osfstorage/?zip=" -o data.zip
           unzip -q data.zip
           rm data.zip
           
+          # Handle nested zip if present (common OSF pattern)
           if [ -f "da_data_repo.zip" ]; then
              unzip -q da_data_repo.zip
              rm da_data_repo.zip
           fi
           
-          # Handle extracted folder scenarios
+          # Normalize folder structure
+          # If extracted to a single folder named da_data_repo, move it to target
           if [ -d "da_data_repo" ]; then
-             # Flatten nested da_data_repo if it exists
+             # Flatten nested da_data_repo if it exists inside (da_data_repo/da_data_repo)
              if [ -d "da_data_repo/da_data_repo" ]; then
                 rsync -a da_data_repo/da_data_repo/ da_data_repo/
                 rm -rf da_data_repo/da_data_repo
              fi
              mv da_data_repo "$TARGET_DATA_DIR"
           else
-             # Assuming loose files or single wrapper
-             dir_count=$(find . -maxdepth 1 -mindepth 1 -type d | wc -l)
+             # Handle loose files or other wrapper folders
+             dir_count=$(find . -maxdepth 1 -mindepth 1 -type d -not -name "da_case_studies" | wc -l)
              if [ "$dir_count" -eq 1 ]; then
-                single_dir=$(find . -maxdepth 1 -mindepth 1 -type d)
+                single_dir=$(find . -maxdepth 1 -mindepth 1 -type d -not -name "da_case_studies")
                 mv "$single_dir" "$TARGET_DATA_DIR"
              else
-                # Move everything else
+                # Move everything else if loose
                 mkdir -p "$TARGET_DATA_DIR"
                 mv * "$TARGET_DATA_DIR/" 2>/dev/null || true
              fi
           fi
           
           # 2. Fix 'data_out' paths using Symlinks
-          # Notebooks write to: dirname + "da_case_studies/chXX..."
-          # This resolves to: /home/runner/work/da_case_studies/chXX...
-          # But the repo is at: /home/runner/work/da_case_studies/da_case_studies/chXX...
-          # So we need to symlink chXX folders into /home/runner/work/da_case_studies/
-          
+          # Notebooks expect to write to peer directories of the repo root.
+          # We symlink repo sub-folders to the parent directory to allow this.
           echo "Symlinking chapter folders..."
-          # We are in .../work/da_case_studies/da_case_studies/.. (i.e. .../work/da_case_studies)
-          # Link children of da_case_studies (the repo) to here
-          
           ln -s da_case_studies/ch* .
           ln -s da_case_studies/da* .
           ln -s da_case_studies/pre* . || true
-          
-          echo "Symlink verification:"
-          ls -la ch04-management-firm-size || echo "Symlink failed"
 
       - name: Install System Dependencies
         run: |
@@ -108,24 +88,12 @@ jobs:
           conda info
           python --version
 
-      - name: Install CmdStan (required for Prophet)
-        shell: bash -el {0}
-        run: |
-          python -c "import cmdstanpy; cmdstanpy.install_cmdstan()"
-
-      - name: Verify Data and Symlinks
-        run: |
-          echo "Verifying data structure at /home/runner/work/da_data_repo..."
-          ls -R /home/runner/work/da_data_repo | head -n 50
-          echo "..."
-          
-          echo "Verifying local symlinks..."
-          ls -la
-
       - name: Run notebook tests
         shell: bash -el {0}
         env:
           MPLBACKEND: Agg
+        # Run tests inside the simulated repo structure
+        working-directory: ${{ env.WORKSPACE_ROOT }}/da_case_studies
         run: |
           python ch00-tech-prep/test_env.py
 
@@ -135,6 +103,6 @@ jobs:
         with:
           name: failed-test-outputs
           path: |
-            **/*.py
-            !ch00-tech-prep/test_env.py
+            ${{ env.WORKSPACE_ROOT }}/da_case_studies/**/*.log
+            !${{ env.WORKSPACE_ROOT }}/da_case_studies/ch00-tech-prep/test_env.py
           retention-days: 7
