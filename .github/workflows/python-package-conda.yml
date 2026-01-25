@@ -36,9 +36,8 @@ jobs:
           # split("da_case_studies") -> /home/runner/work/
           
           # So notebooks look for: /home/runner/work/da_data_repo
-          # This is ../../da_data_repo from here
-          
-          TARGET_DATA_DIR="../../da_data_repo"
+          # Use absolute path to be safe
+          TARGET_DATA_DIR="/home/runner/work/da_data_repo"
           
           echo "Downloading datasets..."
           curl -L "https://files.osf.io/v1/resources/3u5em/providers/osfstorage/?zip=" -o data.zip
@@ -113,6 +112,15 @@ jobs:
         shell: bash -el {0}
         run: |
           python -c "import cmdstanpy; cmdstanpy.install_cmdstan()"
+
+      - name: Verify Data and Symlinks
+        run: |
+          echo "Verifying data structure at /home/runner/work/da_data_repo..."
+          ls -R /home/runner/work/da_data_repo | head -n 50
+          echo "..."
+          
+          echo "Verifying local symlinks..."
+          ls -la
 
       - name: Run notebook tests
         shell: bash -el {0}
