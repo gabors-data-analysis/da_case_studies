@@ -69,6 +69,14 @@ jobs:
             mv * "$TARGET_DATA_DIR/"
           fi
           
+          # FLATTEN nested da_data_repo if it exists (e.g. da_data_repo/da_data_repo)
+          if [ -d "$TARGET_DATA_DIR/da_data_repo" ]; then
+            echo "Found nested da_data_repo folder - flattening..."
+            # Move contents up one level
+            rsync -a "$TARGET_DATA_DIR/da_data_repo/" "$TARGET_DATA_DIR/"
+            rm -rf "$TARGET_DATA_DIR/da_data_repo"
+          fi
+          
           echo "Data directory contents:"
           ls -la "$TARGET_DATA_DIR"
           
