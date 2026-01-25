@@ -16,6 +16,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Download data from OSF.io
+        run: |
           # Go to parent directory (workspace root)
           cd ..
           
