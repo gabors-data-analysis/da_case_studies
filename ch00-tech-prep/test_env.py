@@ -85,6 +85,14 @@ class TestNotebooks(unittest.TestCase):
                 print(f"Executing {notebook}")
                 env = os.environ.copy()
                 env["MPLBACKEND"] = "Agg"
+                
+                # Add ch00-tech-prep to PYTHONPATH so notebooks can find py_helper_functions
+                repo_root = os.getcwd()
+                tech_prep_path = os.path.join(repo_root, "ch00-tech-prep")
+                if "PYTHONPATH" in env:
+                    env["PYTHONPATH"] = f"{tech_prep_path}{os.pathsep}{env['PYTHONPATH']}"
+                else:
+                    env["PYTHONPATH"] = tech_prep_path
                 try:
                     result = subprocess.run(
                         ["python", py_file],
