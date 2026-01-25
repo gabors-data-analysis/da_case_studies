@@ -16,57 +16,45 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Download data from OSF.io
-        run: |
-          # Create the data directory at the same level as da_case_studies
+          # Go to parent directory (workspace root)
           cd ..
           
-          # Download the complete dataset zip from OSF.io using correct URL format
+          # Create a specific directory for the download to avoid conflicts
+          mkdir -p raw_data_download
+          cd raw_data_download
+          
+          # Download the dataset
           echo "Downloading datasets from OSF.io..."
           curl -L "https://files.osf.io/v1/resources/3u5em/providers/osfstorage/?zip=" -o project_3u5em.zip
           
-          # Check if download succeeded
-          file project_3u5em.zip
-          ls -la project_3u5em.zip
-          
-          # Extract the data
+          # Extract
           echo "Extracting data..."
           unzip -q project_3u5em.zip
-          
-          # Clean up zip file
           rm project_3u5em.zip
           
-          # List what was extracted to verify structure
-          echo "Extracted contents:"
-          ls -la
+          # Determine structure and move to ../da_data_repo
+          # Check if it extracted to a single top-level directory (common in some zips)
+          # or if it dumped everything into the current dir
+          cd ..
           
-          # Find and ensure the data folder is named da_data_repo
-          # Check common patterns that might be used
-          if [ -d "da_data_repo" ]; then
-            echo "da_data_repo folder found"
-          elif [ -d "clean" ]; then
-            # If extracted directly as 'clean' folder, wrap it
-            mkdir -p da_data_repo
-            mv clean/* da_data_repo/
-            echo "Moved clean/ contents to da_data_repo/"
+          # Count items in the download dir
+          dir_count=$(find raw_data_download -maxdepth 1 -mindepth 1 -type d | wc -l)
+          file_count=$(find raw_data_download -maxdepth 1 -mindepth 1 -type f | wc -l)
+          
+          if [ "$dir_count" -eq 1 ] && [ "$file_count" -eq 0 ]; then
+            # Case: Zip contained a single folder wrapping the data
+            single_dir=$(find raw_data_download -maxdepth 1 -mindepth 1 -type d)
+            echo "Found single wrapper folder: $single_dir"
+            mv "$single_dir" da_data_repo
+            rmdir raw_data_download
           else
-            # List all directories and try to find the data
-            echo "Looking for data directories..."
-            find . -maxdepth 2 -type d -name "clean" 2>/dev/null || true
-            # If there's a single top-level directory (common zip pattern), use it
-            dir_count=$(find . -maxdepth 1 -mindepth 1 -type d | wc -l)
-            if [ "$dir_count" -eq 1 ]; then
-              extracted_dir=$(find . -maxdepth 1 -mindepth 1 -type d)
-              if [ "$extracted_dir" != "./da_data_repo" ]; then
-                mv "$extracted_dir" da_data_repo
-                echo "Renamed $extracted_dir to da_data_repo"
-              fi
-            fi
+            # Case: Zip contained loose files/folders, so raw_data_download IS the data folder
+            echo "Found loose files/folders, using download dir as data repo"
+            mv raw_data_download da_data_repo
           fi
           
-          echo "Final da_data_repo structure:"
-          ls -la da_data_repo/ 2>/dev/null || echo "Warning: da_data_repo not found - listing all:"
-          ls -la
+          echo "Data repository setup complete at $(pwd)/da_data_repo"
+          ls -la da_data_repo/
 
       - name: Set up Miniconda
         uses: conda-incubator/setup-miniconda@v3
