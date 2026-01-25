@@ -16,66 +16,77 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Clean Workspace
-        id: setup_workspace
+      - name: Setup Data and Paths
         run: |
-          # Create a clean workspace structure to avoid path duplication issues
-          # Notebooks rely on split("da_case_studies") which fails when path is .../da_case_studies/da_case_studies
+          # 1. Download and set up data
+          # Go to workspace root (parent of repo)
+          cd ..
+          WORKSPACE_ROOT=$(pwd)
+          echo "Workspace root: $WORKSPACE_ROOT"
           
-          # New structure will be:
-          # /home/runner/work/workspace/
-          # ├── da_case_studies/ (The repo)
-          # └── da_data_repo/    (The data)
+          # Ensure da_data_repo exists at the level expected by notebooks
+          # Notebooks expect: dirname + "da_data_repo"
+          # dirname = .../work/ from split logic
+          # So we need .../work/da_data_repo
+          # Current dir is .../work/da_case_studies
+          # So we need ../da_data_repo
           
-          WORKSPACE_ROOT="/home/runner/work/custom_workspace"
-          mkdir -p "$WORKSPACE_ROOT"
-          echo "WORKSPACE_ROOT=$WORKSPACE_ROOT" >> $GITHUB_ENV
+          # BUT split logic is fragile.
+          # Path: /home/runner/work/da_case_studies/da_case_studies
+          # split("da_case_studies") -> /home/runner/work/
           
-          # Move repo to new location
-          mv $GITHUB_WORKSPACE "$WORKSPACE_ROOT/da_case_studies"
+          # So notebooks look for: /home/runner/work/da_data_repo
+          # This is ../../da_data_repo from here
           
-          echo "Workspace setup at $WORKSPACE_ROOT"
-
-      - name: Download and Setup Data
-        run: |
-          cd "$WORKSPACE_ROOT"
+          TARGET_DATA_DIR="../../da_data_repo"
           
-          # Target data directory
-          TARGET_DATA_DIR="$WORKSPACE_ROOT/da_data_repo"
-          
-          # Download
           echo "Downloading datasets..."
           curl -L "https://files.osf.io/v1/resources/3u5em/providers/osfstorage/?zip=" -o data.zip
-          
-          # Extract
           unzip -q data.zip
           rm data.zip
           
-          # Handle nested zip if present
           if [ -f "da_data_repo.zip" ]; then
              unzip -q da_data_repo.zip
              rm da_data_repo.zip
           fi
           
-          # Normalize folder structure
-          # If extracted to a single folder, move content to target
-          dir_count=$(find . -maxdepth 1 -mindepth 1 -type d -not -name "da_case_studies" | wc -l)
-          if [ "$dir_count" -eq 1 ]; then
-             extracted_dir=$(find . -maxdepth 1 -mindepth 1 -type d -not -name "da_case_studies")
-             if [ "$extracted_dir" != "./da_data_repo" ]; then
-               mv "$extracted_dir" da_data_repo
+          # Handle extracted folder scenarios
+          if [ -d "da_data_repo" ]; then
+             # Flatten nested da_data_repo if it exists
+             if [ -d "da_data_repo/da_data_repo" ]; then
+                rsync -a da_data_repo/da_data_repo/ da_data_repo/
+                rm -rf da_data_repo/da_data_repo
+             fi
+             mv da_data_repo "$TARGET_DATA_DIR"
+          else
+             # Assuming loose files or single wrapper
+             dir_count=$(find . -maxdepth 1 -mindepth 1 -type d | wc -l)
+             if [ "$dir_count" -eq 1 ]; then
+                single_dir=$(find . -maxdepth 1 -mindepth 1 -type d)
+                mv "$single_dir" "$TARGET_DATA_DIR"
+             else
+                # Move everything else
+                mkdir -p "$TARGET_DATA_DIR"
+                mv * "$TARGET_DATA_DIR/" 2>/dev/null || true
              fi
           fi
           
-          # Verify structure
-          echo "Structure of $WORKSPACE_ROOT:"
-          ls -la "$WORKSPACE_ROOT"
+          # 2. Fix 'data_out' paths using Symlinks
+          # Notebooks write to: dirname + "da_case_studies/chXX..."
+          # This resolves to: /home/runner/work/da_case_studies/chXX...
+          # But the repo is at: /home/runner/work/da_case_studies/da_case_studies/chXX...
+          # So we need to symlink chXX folders into /home/runner/work/da_case_studies/
           
-          if [ -d "da_data_repo/da_data_repo" ]; then
-             echo "Flattening nested da_data_repo..."
-             rsync -a da_data_repo/da_data_repo/ da_data_repo/
-             rm -rf da_data_repo/da_data_repo
-          fi
+          echo "Symlinking chapter folders..."
+          # We are in .../work/da_case_studies/da_case_studies/.. (i.e. .../work/da_case_studies)
+          # Link children of da_case_studies (the repo) to here
+          
+          ln -s da_case_studies/ch* .
+          ln -s da_case_studies/da* .
+          ln -s da_case_studies/pre* . || true
+          
+          echo "Symlink verification:"
+          ls -la ch04-management-firm-size || echo "Symlink failed"
 
       - name: Install System Dependencies
         run: |
@@ -88,7 +99,7 @@ jobs:
           miniforge-variant: Miniforge3
           miniforge-version: latest
           activate-environment: daenv
-          environment-file: ${{ env.WORKSPACE_ROOT }}/da_case_studies/ch00-tech-prep/daenv_linux.yml
+          environment-file: ch00-tech-prep/daenv_linux.yml
           python-version: "3.12"
           auto-activate-base: false
 
@@ -107,7 +118,6 @@ jobs:
         shell: bash -el {0}
         env:
           MPLBACKEND: Agg
-        working-directory: ${{ env.WORKSPACE_ROOT }}/da_case_studies
         run: |
           python ch00-tech-prep/test_env.py
 
@@ -117,6 +127,6 @@ jobs:
         with:
           name: failed-test-outputs
           path: |
-            ${{ env.WORKSPACE_ROOT }}/da_case_studies/**/*.py
-            !${{ env.WORKSPACE_ROOT }}/da_case_studies/ch00-tech-prep/test_env.py
+            **/*.py
+            !ch00-tech-prep/test_env.py
           retention-days: 7
