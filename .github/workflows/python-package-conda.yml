@@ -23,18 +23,18 @@ jobs:
           
           # Download the complete dataset zip from OSF.io using correct URL format
           echo "Downloading datasets from OSF.io..."
-          curl -L -o data.zip "https://osf.io/3u5em/?action=download"
+          curl -L "https://files.osf.io/v1/resources/3u5em/providers/osfstorage/?zip=" -o project_3u5em.zip
           
           # Check if download succeeded
-          file data.zip
-          ls -la data.zip
+          file project_3u5em.zip
+          ls -la project_3u5em.zip
           
           # Extract the data
           echo "Extracting data..."
-          unzip -q data.zip
+          unzip -q project_3u5em.zip
           
           # Clean up zip file
-          rm data.zip
+          rm project_3u5em.zip
           
           # List what was extracted to verify structure
           echo "Extracted contents:"
