@@ -18,8 +18,16 @@ jobs:
 
       - name: Download data from OSF.io
         run: |
+          # DEBUG: Print current location and structure
+          echo "Current directory: $(pwd)"
+          echo "Workspace root: $GITHUB_WORKSPACE"
+          
+          # Target directory expected by notebooks: /home/runner/work/da_data_repo
+          # We'll construct this absolute path to be safe
+          TARGET_DATA_DIR="/home/runner/work/da_data_repo"
+          
           # Go to parent directory (workspace root)
-          cd ..
+          cd .. 
           
           # Create a specific directory for the download to avoid conflicts
           mkdir -p raw_data_download
@@ -34,36 +42,31 @@ jobs:
           unzip -q project_3u5em.zip
           rm project_3u5em.zip
           
-          # Determine structure and move to ../../da_data_repo (grand-parent)
-          # The notebooks expect data at split("da_case_studies")[0] + "da_data_repo"
-          # On GH Actions, path is .../work/da_case_studies/da_case_studies
-          # So split gives .../work/, so we need data at .../work/da_data_repo
-          
-          # Move to download dir parent check
-          cd .. 
-          # Now at .../work/da_case_studies
-          
-          # We need to move the data folder to .../work/ (one level up)
-          DEST_DIR="../../da_data_repo"
+          # Move data to the absolute target directory
+          echo "Moving data to $TARGET_DATA_DIR ..."
           
           # Count items in the download dir
-          dir_count=$(find raw_data_download -maxdepth 1 -mindepth 1 -type d | wc -l)
-          file_count=$(find raw_data_download -maxdepth 1 -mindepth 1 -type f | wc -l)
+          dir_count=$(find . -maxdepth 1 -mindepth 1 -type d | wc -l)
+          file_count=$(find . -maxdepth 1 -mindepth 1 -type f | wc -l)
           
           if [ "$dir_count" -eq 1 ] && [ "$file_count" -eq 0 ]; then
             # Case: Zip contained a single folder wrapping the data
-            single_dir=$(find raw_data_download -maxdepth 1 -mindepth 1 -type d)
+            single_dir=$(find . -maxdepth 1 -mindepth 1 -type d)
             echo "Found single wrapper folder: $single_dir"
-            mv "$single_dir" "$DEST_DIR"
-            rmdir raw_data_download
+            mv "$single_dir" "$TARGET_DATA_DIR"
           else
-            # Case: Zip contained loose files/folders, so raw_data_download IS the data folder
-            echo "Found loose files/folders, using download dir as data repo"
-            mv raw_data_download "$DEST_DIR"
+            # Case: Zip contained loose files/folders
+            echo "Found loose files/folders, moving current dir content"
+            # Move the content of the current dir to the target
+            mkdir -p "$TARGET_DATA_DIR"
+            mv * "$TARGET_DATA_DIR/"
           fi
           
-          echo "Data repository setup complete at $(readlink -f $DEST_DIR)"
-          ls -la "$DEST_DIR"
+          echo "Data directory contents:"
+          ls -la "$TARGET_DATA_DIR"
+          
+          echo "DEBUG: Listing full structure of /home/runner/work/"
+          find /home/runner/work -maxdepth 3 -type d
 
       - name: Set up Miniconda
         uses: conda-incubator/setup-miniconda@v3
@@ -81,10 +84,10 @@ jobs:
           conda info
           python --version
 
-      - name: Install CmdStan (required for Prophet)
-        shell: bash -el {0}
-        run: |
-          python -c "import cmdstanpy; cmdstanpy.install_cmdstan()"
+      #- name: Install CmdStan (required for Prophet)
+      #  shell: bash -el {0}
+      #  run: |
+      #    python -c "import cmdstanpy; cmdstanpy.install_cmdstan()"
 
       - name: Run notebook tests
         shell: bash -el {0}
