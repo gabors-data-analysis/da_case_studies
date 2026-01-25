@@ -56,7 +56,7 @@ NOTEBOOKS = [
     "ch23-immunization-life/ch23-immunization-life.ipynb",
     "ch23-import-demand-and-production/ch23-asia-ip-imports.ipynb",
     "ch24-football-manager-replace/ch24-football-manager-replace.ipynb",
-    "ch24-haiti-earthquake-gdp/haiti-earthquake-gdp.ipynb",
+    "ch24-haiti-earthquake-gdp/ch24-haiti-earthquake-gdp.ipynb",
     "da_illustrations/da_illustration_plots.ipynb",
 ]
 
