@@ -3,8 +3,14 @@ name: Test Notebooks
 on:
   push:
     branches: [main, master]
+    paths:
+      - '**/*.py'
+      - '**/*.ipynb'
   pull_request:
     branches: [main, master]
+    paths:
+      - '**/*.py'
+      - '**/*.ipynb'
   workflow_dispatch:  # Allows manual triggering
 
 jobs:
@@ -16,56 +22,35 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Data and Paths
+      - name: Setup Data and Paths (Debug Experiment)
         run: |
-          # 1. Download and set up data
-          # Create data directory at absolute path expected by notebooks
-          TARGET_DATA_DIR="/home/runner/work/da_data_repo"
-          echo "Setting up data at $TARGET_DATA_DIR"
-          
-          # Go to workspace root to handle download
           cd ..
+          echo "=== 1. Initial State ==="
+          ls -F
           
-          # Download
+          echo "=== 2. Downloading and Unzipping data.zip ==="
           curl -sL "https://files.osf.io/v1/resources/3u5em/providers/osfstorage/?zip=" -o data.zip
-          unzip -q data.zip
-          rm data.zip
+          unzip -q data.zip && rm data.zip
+          ls -R
           
-          # Handle nested zip if present (common OSF pattern)
+          # Check for nested zip
           if [ -f "da_data_repo.zip" ]; then
-             unzip -q da_data_repo.zip
-             rm da_data_repo.zip
+            echo "=== 3. Found nested da_data_repo.zip, unzipping ==="
+            unzip -q da_data_repo.zip && rm da_data_repo.zip
+            ls -R
           fi
           
-          # Normalize folder structure
-          # If extracted to a single folder named da_data_repo, move it to target
-          if [ -d "da_data_repo" ]; then
-             # Flatten nested da_data_repo if it exists inside (da_data_repo/da_data_repo)
-             if [ -d "da_data_repo/da_data_repo" ]; then
-                rsync -a da_data_repo/da_data_repo/ da_data_repo/
-                rm -rf da_data_repo/da_data_repo
-             fi
-             mv da_data_repo "$TARGET_DATA_DIR"
-          else
-             # Handle loose files or other wrapper folders
-             dir_count=$(find . -maxdepth 1 -mindepth 1 -type d -not -name "da_case_studies" | wc -l)
-             if [ "$dir_count" -eq 1 ]; then
-                single_dir=$(find . -maxdepth 1 -mindepth 1 -type d -not -name "da_case_studies")
-                mv "$single_dir" "$TARGET_DATA_DIR"
-             else
-                # Move everything else if loose
-                mkdir -p "$TARGET_DATA_DIR"
-                mv * "$TARGET_DATA_DIR/" 2>/dev/null || true
-             fi
-          fi
+          # We will use these logs to find the simplest possible normalization path
+          # For now, let's keep the most basic move:
+          [ -d "da_data_repo" ] || mv $(find . -maxdepth 1 -type d ! -name "da_case_studies" ! -name ".") da_data_repo 2>/dev/null || true
           
-          # 2. Fix 'data_out' paths using Symlinks
-          # Notebooks expect to write to peer directories of the repo root.
-          # We symlink repo sub-folders to the parent directory to allow this.
-          echo "Symlinking chapter folders..."
-          ln -s da_case_studies/ch* .
-          ln -s da_case_studies/da* .
-          ln -s da_case_studies/pre* . || true
+          echo "=== 4. Final Structure === "
+          ls -R da_data_repo | head -n 20
+          
+          echo "=== 5. Symlinking ==="
+          ln -s da_case_studies/ch* . 2>/dev/null || true
+          ln -s da_case_studies/da* . 2>/dev/null || true
+          ln -s da_case_studies/pre* . 2>/dev/null || true
 
       - name: Install System Dependencies
         run: |
@@ -102,5 +87,4 @@ jobs:
           name: failed-test-outputs
           path: |
             **/*.log
-            !ch00-tech-prep/test_env.py
           retention-days: 7
