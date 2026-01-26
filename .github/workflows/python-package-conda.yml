@@ -6,11 +6,13 @@ on:
     paths:
       - '**/*.py'
       - '**/*.ipynb'
+      - '.github/workflows/test_notebooks.yml'
   pull_request:
     branches: [main, master]
     paths:
       - '**/*.py'
       - '**/*.ipynb'
+      - '.github/workflows/test_notebooks.yml'
   workflow_dispatch:  # Allows manual triggering
 
 jobs:
@@ -22,35 +24,22 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Data and Paths (Debug Experiment)
+      - name: Setup Data and Paths
         run: |
           cd ..
-          echo "=== 1. Initial State ==="
-          ls -F
-          
-          echo "=== 2. Downloading and Unzipping data.zip ==="
+          # 1. Download and extract (handles the nested zip structure)
           curl -sL "https://files.osf.io/v1/resources/3u5em/providers/osfstorage/?zip=" -o data.zip
-          unzip -q data.zip && rm data.zip
-          ls -R
+          unzip -q data.zip && unzip -q da_data_repo.zip
           
-          # Check for nested zip
-          if [ -f "da_data_repo.zip" ]; then
-            echo "=== 3. Found nested da_data_repo.zip, unzipping ==="
-            unzip -q da_data_repo.zip && rm da_data_repo.zip
-            ls -R
-          fi
+          # 2. Move to the absolute path expected by notebooks
+          mv da_data_repo /home/runner/work/da_data_repo
           
-          # We will use these logs to find the simplest possible normalization path
-          # For now, let's keep the most basic move:
-          [ -d "da_data_repo" ] || mv $(find . -maxdepth 1 -type d ! -name "da_case_studies" ! -name ".") da_data_repo 2>/dev/null || true
-          
-          echo "=== 4. Final Structure === "
-          ls -R da_data_repo | head -n 20
-          
-          echo "=== 5. Symlinking ==="
-          ln -s da_case_studies/ch* . 2>/dev/null || true
-          ln -s da_case_studies/da* . 2>/dev/null || true
-          ln -s da_case_studies/pre* . 2>/dev/null || true
+          # 3. Cleanup and Symlinks
+          rm data.zip da_data_repo.zip
+          rm -rf __MACOSX
+          ln -s da_case_studies/ch* .
+          ln -s da_case_studies/da* .
+          ln -s da_case_studies/pre* . || true
 
       - name: Install System Dependencies
         run: |
