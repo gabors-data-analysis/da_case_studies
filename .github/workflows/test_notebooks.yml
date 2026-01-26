@@ -17,34 +17,61 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
-    timeout-minutes: 60  # Extended timeout for notebook execution + data download
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            os_name: linux
+          - os: macos-latest
+            os_name: macos
+          - os: windows-latest
+            os_name: windows
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Install System Dependencies (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y graphviz
+
+      - name: Install System Dependencies (macOS)
+        if: matrix.os == 'macos-latest'
+        run: brew install graphviz
+
+      - name: Install System Dependencies (Windows)
+        if: matrix.os == 'windows-latest'
+        run: choco install graphviz
+
       - name: Setup Data and Paths
+        shell: bash
         run: |
           cd ..
+          # Determine the target directory for da_data_repo
+          # github.workspace/../ is reliable across platforms
+          TARGET_DIR="${{ github.workspace }}/../"
+          
           # 1. Download and extract (handles the nested zip structure)
           curl -sL "https://files.osf.io/v1/resources/3u5em/providers/osfstorage/?zip=" -o data.zip
           unzip -q data.zip && unzip -q da_data_repo.zip
           
-          # 2. Move to the absolute path expected by notebooks
-          mv da_data_repo /home/runner/work/da_data_repo
+          # 2. Move to the target directory
+          # On Windows, we might need to be careful with paths, but bash shell handles it
+          rm -rf "${TARGET_DIR}/da_data_repo"
+          mv da_data_repo "${TARGET_DIR}/"
           
-          # 3. Cleanup and Symlinks
+          # 3. Cleanup and Symlinks (Symlinks only for Unix-like for now, notebooks use absolute paths)
           rm data.zip da_data_repo.zip
           rm -rf __MACOSX
-          ln -s da_case_studies/ch* .
-          ln -s da_case_studies/da* .
-          ln -s da_case_studies/pre* . || true
-
-      - name: Install System Dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y graphviz
+          if [ "${{ matrix.os }}" != "windows-latest" ]; then
+            ln -s da_case_studies/ch* .
+            ln -s da_case_studies/da* .
+            ln -s da_case_studies/pre* . || true
+          fi
 
       - name: Set up Miniconda
         uses: conda-incubator/setup-miniconda@v3
@@ -52,7 +79,7 @@ jobs:
           miniforge-variant: Miniforge3
           miniforge-version: latest
           activate-environment: daenv
-          environment-file: ch00-tech-prep/daenv_linux.yml
+          environment-file: ch00-tech-prep/daenv_${{ matrix.os_name }}.yml
           python-version: "3.12"
           auto-activate-base: false
 
@@ -67,7 +94,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: failed-test-outputs
+          name: failed-test-outputs-${{ matrix.os_name }}
           path: |
             **/*.log
           retention-days: 7
