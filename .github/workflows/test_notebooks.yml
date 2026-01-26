@@ -50,26 +50,40 @@ jobs:
       - name: Setup Data and Paths
         shell: bash
         run: |
-          cd ..
-          # Determine the target directory for da_data_repo
-          # github.workspace/../ is reliable across platforms
-          TARGET_DIR="${{ github.workspace }}/../"
+          # Logging for debug
+          echo "GITHUB_WORKSPACE: ${{ github.workspace }}"
+          echo "RUNNER_WORKSPACE: ${{ runner.workspace }}"
           
-          # 1. Download and extract (handles the nested zip structure)
+          # 1. Download and extract in the current workspace
           curl -sL "https://files.osf.io/v1/resources/3u5em/providers/osfstorage/?zip=" -o data.zip
           unzip -q data.zip && unzip -q da_data_repo.zip
           
-          # 2. Move to the target directory
-          # On Windows, we might need to be careful with paths, but bash shell handles it
-          rm -rf "${TARGET_DIR}/da_data_repo"
-          mv da_data_repo "${TARGET_DIR}/"
+          # 2. Determine target directory
+          # The notebooks use: dirname = current_path.split("da_case_studies")[0]
+          # This means da_data_repo must be a sibling to the FIRST occurrence of 'da_case_studies'
+          # On GHA: github.workspace = /home/runner/work/REPO/REPO (Unix) or D:\a\REPO\REPO (Windows)
+          # So first 'da_case_studies' parent = /home/runner/work/ or D:\a\
+          # runner.workspace = /home/runner/work/REPO or D:\a\REPO
+          # dirname(runner.workspace) gives us the correct location
           
-          # 3. Cleanup and Symlinks (Symlinks only for Unix-like for now, notebooks use absolute paths)
+          # Convert backslashes to forward slashes for bash compatibility on Windows
+          RUNNER_WS=$(echo "${{ runner.workspace }}" | sed 's|\\|/|g')
+          TARGET_ROOT=$(dirname "$RUNNER_WS")
+          echo "TARGET_ROOT: $TARGET_ROOT"
+          
+          # 3. Move to the target directory
+          rm -rf "$TARGET_ROOT/da_data_repo"
+          mv da_data_repo "$TARGET_ROOT/"
+          
+          # 4. Cleanup
           rm data.zip da_data_repo.zip
           rm -rf __MACOSX
-          if [ "${{ matrix.os }}" != "windows-latest" ]; then
-            ln -s da_case_studies/ch* .
-            ln -s da_case_studies/da* .
+          
+          # 5. Symlinks (Unix only, notebooks use absolute paths so not strictly required)
+          if [ "${{ matrix.os_name }}" != "windows" ]; then
+            cd ..
+            ln -s da_case_studies/ch* . || true
+            ln -s da_case_studies/da* . || true
             ln -s da_case_studies/pre* . || true
           fi
 
