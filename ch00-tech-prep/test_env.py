@@ -85,8 +85,16 @@ class TestNotebooks(unittest.TestCase):
                 print(f"Executing {notebook}")
                 env = os.environ.copy()
                 env["MPLBACKEND"] = "Agg"
+                
+                # Add ch00-tech-prep to PYTHONPATH so notebooks can find py_helper_functions
+                repo_root = os.getcwd()
+                tech_prep_path = os.path.join(repo_root, "ch00-tech-prep")
+                if "PYTHONPATH" in env:
+                    env["PYTHONPATH"] = f"{tech_prep_path}{os.pathsep}{env['PYTHONPATH']}"
+                else:
+                    env["PYTHONPATH"] = tech_prep_path
                 try:
-                    subprocess.run(
+                    result = subprocess.run(
                         ["python", py_file],
                         check=True,
                         env=env,
@@ -94,6 +102,28 @@ class TestNotebooks(unittest.TestCase):
                         text=True,
                     )
                     os.remove(py_file)
+                except subprocess.CalledProcessError as e:
+                    print(f"\n{'='*60}")
+                    print(f"FAILED: {notebook}")
+                    print(f"{'='*60}")
+                    if e.stdout:
+                        print(f"STDOUT:\n{e.stdout}")
+                    if e.stderr:
+                        print(f"STDERR:\n{e.stderr}")
+                    print(f"{'='*60}\n")
+                    
+                    # Save error log to file for artifact upload
+                    log_file = py_file.replace(".py", ".log")
+                    with open(log_file, "w") as f:
+                        f.write(f"FAILED: {notebook}\n")
+                        f.write(f"{'='*60}\n")
+                        f.write("STDOUT:\n")
+                        f.write(e.stdout or "")
+                        f.write(f"\n{'='*60}\n")
+                        f.write("STDERR:\n")
+                        f.write(e.stderr or "")
+                    
+                    self.fail(f"Execution failed for {notebook}: {e.stderr[:500] if e.stderr else str(e)}")
                 except Exception as e:
                     self.fail(f"Execution failed for {notebook}: {e}")
 
