@@ -33,36 +33,25 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Rename checkout directory (Windows)
+      - name: Setup Windows paths (Windows)
         if: matrix.os == 'windows-latest'
-        shell: bash
+        shell: cmd
         run: |
-          # The default checkout on Windows is D:\a\da_case_studies\da_case_studies
-          # The notebook code uses split("da_case_studies")[0] which gets D:\a\
-          # Then it looks for D:\a\da_case_studies\..., but the repo is at D:\a\da_case_studies\da_case_studies
-          # 
-          # Fix: Move the repo files up one level so they're at D:\a\da_case_studies
+          REM The default checkout on Windows is D:\a\da_case_studies\da_case_studies
+          REM The notebook code uses split("da_case_studies")[0] which gets D:\a\
+          REM Then it looks for D:\a\da_case_studies\..., but the repo is at D:\a\da_case_studies\da_case_studies
+          REM
+          REM Fix: Create junction points from D:\a\da_case_studies\chXX to D:\a\da_case_studies\da_case_studies\chXX
+          REM This way notebooks can write to the paths they expect
           
-          echo "Current workspace: ${{ github.workspace }}"
+          cd /d D:\a\da_case_studies
           
-          # Go to parent of github.workspace (D:\a\da_case_studies)
-          cd "${{ github.workspace }}/.."
-          echo "Now at: $(pwd)"
-          ls -la
+          REM Create junctions for all chapter directories
+          for /d %%i in (da_case_studies\ch*) do mklink /J "%%~nxi" "%%i"
+          for /d %%i in (da_case_studies\da*) do mklink /J "%%~nxi" "%%i"
+          for /d %%i in (da_case_studies\pre*) do mklink /J "%%~nxi" "%%i"
           
-          # Rename the inner da_case_studies to a temp folder
-          mv da_case_studies temp_repo
-          
-          # Move all files (including hidden) from temp_repo to current directory
-          shopt -s dotglob
-          mv temp_repo/* .
-          shopt -u dotglob
-          
-          # Remove the now-empty temp folder
-          rmdir temp_repo
-          
-          echo "After reorganization:"
-          ls -la
+          dir
 
       - name: Install System Dependencies (Linux)
         if: matrix.os == 'ubuntu-latest'
@@ -81,13 +70,9 @@ jobs:
       - name: Setup Data and Paths
         shell: bash
         run: |
-          # On Windows after rename, workspace is at D:\a\da_case_studies
-          # On Unix, workspace is at /home/runner/work/da_case_studies/da_case_studies
-          if [ "${{ matrix.os_name }}" == "windows" ]; then
-            REPO_DIR="${{ runner.workspace }}"
-          else
-            REPO_DIR="${{ github.workspace }}"
-          fi
+          # On Windows, repo is at D:\a\da_case_studies\da_case_studies
+          # On Unix, repo is at /home/runner/work/da_case_studies/da_case_studies
+          REPO_DIR="${{ github.workspace }}"
           echo "REPO_DIR: $REPO_DIR"
           
           cd "$REPO_DIR"
@@ -98,9 +83,17 @@ jobs:
           
           # 2. Determine target directory for da_data_repo
           # The notebooks use: dirname = current_path.split("da_case_studies")[0]
-          # So da_data_repo must be in the parent of the 'da_case_studies' folder
+          # So da_data_repo must be in that parent directory
+          # On Windows: split gives D:\a\, on Unix: split gives /home/runner/work/da_case_studies/
           REPO_DIR_NORMALIZED=$(echo "$REPO_DIR" | sed 's|\\|/|g')
-          TARGET_ROOT=$(dirname "$REPO_DIR_NORMALIZED")
+          
+          if [ "${{ matrix.os_name }}" == "windows" ]; then
+            # Windows: the split will give D:\a\ so put da_data_repo there
+            TARGET_ROOT="/d/a"
+          else
+            # Unix: parent of github.workspace
+            TARGET_ROOT=$(dirname "$REPO_DIR_NORMALIZED")
+          fi
           echo "TARGET_ROOT: $TARGET_ROOT"
           
           # 3. Move da_data_repo to the target directory
@@ -125,7 +118,7 @@ jobs:
           miniforge-variant: Miniforge3
           miniforge-version: latest
           activate-environment: daenv
-          environment-file: ${{ matrix.os == 'windows-latest' && format('{0}/ch00-tech-prep/daenv_windows.yml', runner.workspace) || format('ch00-tech-prep/daenv_{0}.yml', matrix.os_name) }}
+          environment-file: ch00-tech-prep/daenv_${{ matrix.os_name }}.yml
           python-version: "3.12"
           auto-activate-base: false
 
@@ -133,7 +126,6 @@ jobs:
         shell: bash -el {0}
         env:
           MPLBACKEND: Agg
-        working-directory: ${{ matrix.os == 'windows-latest' && runner.workspace || github.workspace }}
         run: |
           python ch00-tech-prep/test_env.py
 
