@@ -33,6 +33,33 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Rename checkout directory (Windows)
+        if: matrix.os == 'windows-latest'
+        shell: bash
+        run: |
+          # The default checkout on Windows is D:\a\da_case_studies\da_case_studies
+          # The notebook code uses split("da_case_studies")[0] which gets D:\a\
+          # Then it looks for D:\a\da_case_studies\..., but the repo is at D:\a\da_case_studies\da_case_studies
+          # 
+          # Fix: Move the contents up one level, renaming appropriately
+          # Actually, the simplest fix is to check out the repo as-is, 
+          # but then create the expected directory structure using junction points
+          # 
+          # Alternative: The test script runs from within the repo, so current_path will correctly
+          # contain "da_case_studies". The issue is the SECOND occurrence in the GHA path.
+          # 
+          # Simplest approach: Move the entire repo contents to a temp dir, then rename
+          cd "${{ github.workspace }}"
+          ls -la
+          # Move up one directory level
+          cd ..
+          ls -la
+          # Rename the inner da_case_studies to just 'repo' temporarily
+          mv da_case_studies/da_case_studies repo_contents
+          rmdir da_case_studies
+          mv repo_contents da_case_studies
+          ls -la
+
       - name: Install System Dependencies (Linux)
         if: matrix.os == 'ubuntu-latest'
         run: |
@@ -50,28 +77,29 @@ jobs:
       - name: Setup Data and Paths
         shell: bash
         run: |
-          # Logging for debug
-          echo "GITHUB_WORKSPACE: ${{ github.workspace }}"
-          echo "RUNNER_WORKSPACE: ${{ runner.workspace }}"
+          # On Windows after rename, workspace is at D:\a\da_case_studies
+          # On Unix, workspace is at /home/runner/work/da_case_studies/da_case_studies
+          if [ "${{ matrix.os_name }}" == "windows" ]; then
+            REPO_DIR="${{ runner.workspace }}"
+          else
+            REPO_DIR="${{ github.workspace }}"
+          fi
+          echo "REPO_DIR: $REPO_DIR"
           
-          # 1. Download and extract in the current workspace
+          cd "$REPO_DIR"
+          
+          # 1. Download and extract
           curl -sL "https://files.osf.io/v1/resources/3u5em/providers/osfstorage/?zip=" -o data.zip
           unzip -q data.zip && unzip -q da_data_repo.zip
           
-          # 2. Determine target directory
+          # 2. Determine target directory for da_data_repo
           # The notebooks use: dirname = current_path.split("da_case_studies")[0]
-          # This means da_data_repo must be a sibling to the FIRST occurrence of 'da_case_studies'
-          # On GHA: github.workspace = /home/runner/work/REPO/REPO (Unix) or D:\a\REPO\REPO (Windows)
-          # So first 'da_case_studies' parent = /home/runner/work/ or D:\a\
-          # runner.workspace = /home/runner/work/REPO or D:\a\REPO
-          # dirname(runner.workspace) gives us the correct location
-          
-          # Convert backslashes to forward slashes for bash compatibility on Windows
-          RUNNER_WS=$(echo "${{ runner.workspace }}" | sed 's|\\|/|g')
-          TARGET_ROOT=$(dirname "$RUNNER_WS")
+          # So da_data_repo must be in the parent of the 'da_case_studies' folder
+          REPO_DIR_NORMALIZED=$(echo "$REPO_DIR" | sed 's|\\|/|g')
+          TARGET_ROOT=$(dirname "$REPO_DIR_NORMALIZED")
           echo "TARGET_ROOT: $TARGET_ROOT"
           
-          # 3. Move to the target directory
+          # 3. Move da_data_repo to the target directory
           rm -rf "$TARGET_ROOT/da_data_repo"
           mv da_data_repo "$TARGET_ROOT/"
           
@@ -79,7 +107,7 @@ jobs:
           rm data.zip da_data_repo.zip
           rm -rf __MACOSX
           
-          # 5. Symlinks (Unix only, notebooks use absolute paths so not strictly required)
+          # 5. Symlinks (Unix only)
           if [ "${{ matrix.os_name }}" != "windows" ]; then
             cd ..
             ln -s da_case_studies/ch* . || true
@@ -93,7 +121,7 @@ jobs:
           miniforge-variant: Miniforge3
           miniforge-version: latest
           activate-environment: daenv
-          environment-file: ch00-tech-prep/daenv_${{ matrix.os_name }}.yml
+          environment-file: ${{ matrix.os == 'windows-latest' && format('{0}/ch00-tech-prep/daenv_windows.yml', runner.workspace) || format('ch00-tech-prep/daenv_{0}.yml', matrix.os_name) }}
           python-version: "3.12"
           auto-activate-base: false
 
@@ -101,6 +129,7 @@ jobs:
         shell: bash -el {0}
         env:
           MPLBACKEND: Agg
+        working-directory: ${{ matrix.os == 'windows-latest' && runner.workspace || github.workspace }}
         run: |
           python ch00-tech-prep/test_env.py
 
