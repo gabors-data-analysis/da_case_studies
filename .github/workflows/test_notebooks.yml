@@ -83,16 +83,17 @@ jobs:
           
           # 2. Determine target directory for da_data_repo
           # The notebooks use: dirname = current_path.split("da_case_studies")[0]
-          # So da_data_repo must be in that parent directory
-          # On Windows: split gives D:\a\, on Unix: split gives /home/runner/work/da_case_studies/
+          # On Unix: /home/runner/work/da_case_studies/da_case_studies/... → split gives /home/runner/work/
+          # On Windows: D:\a\da_case_studies\da_case_studies\... → split gives D:\a\
+          # So we need the GRANDPARENT of github.workspace (parent of parent)
           REPO_DIR_NORMALIZED=$(echo "$REPO_DIR" | sed 's|\\|/|g')
           
           if [ "${{ matrix.os_name }}" == "windows" ]; then
-            # Windows: the split will give D:\a\ so put da_data_repo there
             TARGET_ROOT="/d/a"
           else
-            # Unix: parent of github.workspace
-            TARGET_ROOT=$(dirname "$REPO_DIR_NORMALIZED")
+            # Unix: grandparent of github.workspace
+            PARENT=$(dirname "$REPO_DIR_NORMALIZED")
+            TARGET_ROOT=$(dirname "$PARENT")
           fi
           echo "TARGET_ROOT: $TARGET_ROOT"
           
@@ -106,7 +107,7 @@ jobs:
           
           # 5. Symlinks (Unix only)
           if [ "${{ matrix.os_name }}" != "windows" ]; then
-            cd ..
+            cd "$PARENT"
             ln -s da_case_studies/ch* . || true
             ln -s da_case_studies/da* . || true
             ln -s da_case_studies/pre* . || true
