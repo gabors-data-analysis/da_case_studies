@@ -14,7 +14,6 @@ dependencies:
   - matplotlib=3.10.1
   - seaborn=0.13.2
   # Prophet & Backend
-  - prophet=1.1.5
   - cmdstanpy
   - cmdstan
   # Notebook execution
@@ -42,3 +41,4 @@ dependencies:
       - tabulate==0.9.0
       - pandas-market-calendars==4.4.1
       - regex==2023.10.3
+      - prophet==1.1.5
