@@ -5,7 +5,7 @@ dependencies:
   # Core runtime
   - python=3.12.4
   - pip
-  # Data science core (pinned for reproducibility)
+  # Data science core
   - numpy=1.26.4
   - pandas=2.2.3
   - scipy=1.14.1
@@ -13,14 +13,15 @@ dependencies:
   - statsmodels=0.14.4
   - matplotlib=3.9.2
   - seaborn=0.13.2
+  # Prophet & Backend
+  - prophet=1.1.5
+  - cmdstanpy
+  - cmdstan
   # Notebook execution
   - nbconvert
   - ipykernel
   # Graphviz for decision trees
   - graphviz
-  # Prophet backend
-  - cmdstanpy
-  - cmdstan
   - pip:
       # Analysis packages
       - arch==7.0.0
@@ -31,10 +32,8 @@ dependencies:
       - scikit-image==0.25.2
       - scikit-misc==0.5.1
       - pmdarima==2.0.4
-      - prophet==1.1.5
       - pysyncon==1.5.1
       - pydotplus==2.0.2
-      - stanio==0.5.1
       - linearmodels==6.0
       - plotnine==0.12.4
       - polars==1.13.0
