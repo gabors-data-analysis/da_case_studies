@@ -78,7 +78,7 @@ class TestNotebooks(unittest.TestCase):
 
                 # Save the Python script to a file
                 py_file = notebook.replace(".ipynb", ".py")
-                with open(py_file, "w") as f:
+                with open(py_file, "w", encoding="utf-8") as f:
                     f.write(output)
 
                 # Execute the Python script
@@ -114,7 +114,7 @@ class TestNotebooks(unittest.TestCase):
                     
                     # Save error log to file for artifact upload
                     log_file = py_file.replace(".py", ".log")
-                    with open(log_file, "w") as f:
+                    with open(log_file, "w", encoding="utf-8") as f:
                         f.write(f"FAILED: {notebook}\n")
                         f.write(f"{'='*60}\n")
                         f.write("STDOUT:\n")

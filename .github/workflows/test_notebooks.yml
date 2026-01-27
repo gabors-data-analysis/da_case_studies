@@ -7,44 +7,107 @@ on:
       - '**/*.py'
       - '**/*.ipynb'
       - '.github/workflows/test_notebooks.yml'
+      - 'ch00-tech-prep/daenv_linux.yml'
+      - 'ch00-tech-prep/daenv_macos.yml'
+      - 'ch00-tech-prep/daenv_windows.yml'
   pull_request:
     branches: [main, master]
     paths:
       - '**/*.py'
       - '**/*.ipynb'
       - '.github/workflows/test_notebooks.yml'
+      - 'ch00-tech-prep/daenv_linux.yml'
+      - 'ch00-tech-prep/daenv_macos.yml'
+      - 'ch00-tech-prep/daenv_windows.yml'
   workflow_dispatch:  # Allows manual triggering
 
 jobs:
   test:
-    runs-on: ubuntu-latest
-    timeout-minutes: 60  # Extended timeout for notebook execution + data download
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            os_name: linux
+          - os: macos-latest
+            os_name: macos
+          - os: windows-latest
+            os_name: windows
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Data and Paths
+      - name: Setup Windows paths (Windows)
+        if: matrix.os == 'windows-latest'
+        shell: cmd
         run: |
-          cd ..
-          # 1. Download and extract (handles the nested zip structure)
-          curl -sL "https://files.osf.io/v1/resources/3u5em/providers/osfstorage/?zip=" -o data.zip
-          unzip -q data.zip && unzip -q da_data_repo.zip
+          REM The default checkout on Windows is D:\a\da_case_studies\da_case_studies
+          REM The notebook code uses split("da_case_studies")[0] which gets D:\a\
+          REM Then it looks for D:\a\da_case_studies\..., but the repo is at D:\a\da_case_studies\da_case_studies
+          REM
+          REM Fix: Create junction points from D:\a\da_case_studies\chXX to D:\a\da_case_studies\da_case_studies\chXX
+          REM This way notebooks can write to the paths they expect
           
-          # 2. Move to the absolute path expected by notebooks
-          mv da_data_repo /home/runner/work/da_data_repo
+          cd /d D:\a\da_case_studies
           
-          # 3. Cleanup and Symlinks
-          rm data.zip da_data_repo.zip
-          rm -rf __MACOSX
-          ln -s da_case_studies/ch* .
-          ln -s da_case_studies/da* .
-          ln -s da_case_studies/pre* . || true
+          REM Create junctions for all chapter directories
+          for /d %%i in (da_case_studies\ch*) do mklink /J "%%~nxi" "%%i"
+          for /d %%i in (da_case_studies\da*) do mklink /J "%%~nxi" "%%i"
+          for /d %%i in (da_case_studies\pre*) do mklink /J "%%~nxi" "%%i"
+          
+          dir
 
-      - name: Install System Dependencies
+      - name: Install System Dependencies (Linux)
+        if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt-get update
           sudo apt-get install -y graphviz
+
+      - name: Install System Dependencies (macOS)
+        if: matrix.os == 'macos-latest'
+        run: brew install graphviz
+
+      - name: Install System Dependencies (Windows)
+        if: matrix.os == 'windows-latest'
+        run: choco install graphviz
+
+      - name: Setup Data and Paths
+        shell: bash
+        run: |
+          REPO_DIR="${{ github.workspace }}"
+          cd "$REPO_DIR"
+          
+          # 1. Download and extract
+          curl -sL "https://files.osf.io/v1/resources/3u5em/providers/osfstorage/?zip=" -o data.zip
+          unzip -q data.zip && unzip -q da_data_repo.zip
+          
+          # Determine target directory for da_data_repo (grandparent of workspace)
+          REPO_DIR_NORMALIZED=$(echo "$REPO_DIR" | sed 's|\\|/|g')
+          
+          if [ "${{ matrix.os_name }}" == "windows" ]; then
+            TARGET_ROOT="/d/a"
+          else
+            PARENT=$(dirname "$REPO_DIR_NORMALIZED")
+            TARGET_ROOT=$(dirname "$PARENT")
+          fi
+          
+          # 3. Move da_data_repo to the target directory
+          rm -rf "$TARGET_ROOT/da_data_repo"
+          mv da_data_repo "$TARGET_ROOT/"
+          
+          # 4. Cleanup
+          rm data.zip da_data_repo.zip
+          rm -rf __MACOSX
+          
+          # 5. Symlinks (Unix only)
+          if [ "${{ matrix.os_name }}" != "windows" ]; then
+            cd "$PARENT"
+            ln -s da_case_studies/ch* . || true
+            ln -s da_case_studies/da* . || true
+            ln -s da_case_studies/pre* . || true
+          fi
 
       - name: Set up Miniconda
         uses: conda-incubator/setup-miniconda@v3
@@ -52,9 +115,10 @@ jobs:
           miniforge-variant: Miniforge3
           miniforge-version: latest
           activate-environment: daenv
-          environment-file: ch00-tech-prep/daenv_linux.yml
+          environment-file: ch00-tech-prep/daenv_${{ matrix.os_name }}.yml
           python-version: "3.12"
-          auto-activate-base: false
+          auto-activate: false
+          conda-remove-defaults: true
 
       - name: Run notebook tests
         shell: bash -el {0}
@@ -67,7 +131,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: failed-test-outputs
+          name: failed-test-outputs-${{ matrix.os_name }}
           path: |
             **/*.log
           retention-days: 7
