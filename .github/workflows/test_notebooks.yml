@@ -7,12 +7,18 @@ on:
       - '**/*.py'
       - '**/*.ipynb'
       - '.github/workflows/test_notebooks.yml'
+      - 'ch00-tech-prep/daenv_linux.yml'
+      - 'ch00-tech-prep/daenv_macos.yml'
+      - 'ch00-tech-prep/daenv_windows.yml'
   pull_request:
     branches: [main, master]
     paths:
       - '**/*.py'
       - '**/*.ipynb'
       - '.github/workflows/test_notebooks.yml'
+      - 'ch00-tech-prep/daenv_linux.yml'
+      - 'ch00-tech-prep/daenv_macos.yml'
+      - 'ch00-tech-prep/daenv_windows.yml'
   workflow_dispatch:  # Allows manual triggering
 
 jobs:
