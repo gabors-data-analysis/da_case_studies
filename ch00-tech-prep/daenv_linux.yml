@@ -5,7 +5,7 @@ channels:
 dependencies:
   - python=3.12.4
   - bzip2=1.0.8
-  - ca-certificates=2025.1.4
+  - ca-certificates=2025.8.3
   - libexpat=2.7.1
   - libffi=3.4.6
   - ncurses=6.5
