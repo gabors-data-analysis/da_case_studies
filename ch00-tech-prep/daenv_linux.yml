@@ -1,7 +1,6 @@
 name: daenv
 channels:
   - conda-forge
-  - nodefaults
 dependencies:
   - python=3.12.4
   - bzip2=1.0.8

@@ -118,6 +118,7 @@ jobs:
           environment-file: ch00-tech-prep/daenv_${{ matrix.os_name }}.yml
           python-version: "3.12"
           auto-activate: false
+          conda-remove-defaults: true
 
       - name: Run notebook tests
         shell: bash -el {0}

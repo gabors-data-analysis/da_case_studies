@@ -1,7 +1,6 @@
 name: daenv
 channels:
   - conda-forge
-  - nodefaults
 dependencies:
   - boost-cpp=1.82.0
   - bzip2=1.0.8
