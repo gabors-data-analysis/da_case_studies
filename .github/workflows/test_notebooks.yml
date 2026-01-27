@@ -26,11 +26,11 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: ubuntu-latest
+          - os: ubuntu-22.04
             os_name: linux
-          - os: macos-latest
+          - os: macos-14
             os_name: macos
-          - os: windows-latest
+          - os: windows-2022
             os_name: windows
     runs-on: ${{ matrix.os }}
     timeout-minutes: 60
@@ -40,7 +40,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setup Windows paths (Windows)
-        if: matrix.os == 'windows-latest'
+        if: matrix.os_name == 'windows'
         shell: cmd
         run: |
           REM The default checkout on Windows is D:\a\da_case_studies\da_case_studies
@@ -60,17 +60,17 @@ jobs:
           dir
 
       - name: Install System Dependencies (Linux)
-        if: matrix.os == 'ubuntu-latest'
+        if: matrix.os_name == 'linux'
         run: |
           sudo apt-get update
           sudo apt-get install -y graphviz
 
       - name: Install System Dependencies (macOS)
-        if: matrix.os == 'macos-latest'
+        if: matrix.os_name == 'macos'
         run: brew install graphviz
 
       - name: Install System Dependencies (Windows)
-        if: matrix.os == 'windows-latest'
+        if: matrix.os_name == 'windows'
         run: choco install graphviz
 
       - name: Setup Data and Paths
