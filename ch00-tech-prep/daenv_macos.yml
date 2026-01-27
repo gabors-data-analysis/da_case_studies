@@ -18,6 +18,9 @@ dependencies:
   - ipykernel
   # Graphviz for decision trees
   - graphviz
+  # Prophet backend
+  - cmdstanpy
+  - cmdstan
   - pip:
       # Analysis packages
       - arch==7.0.0
@@ -31,6 +34,7 @@ dependencies:
       - prophet==1.1.5
       - pysyncon==1.5.1
       - pydotplus==2.0.2
+      - stanio==0.5.1
       - xgboost==3.1.3
       # Utilities
       - openpyxl==3.1.5
