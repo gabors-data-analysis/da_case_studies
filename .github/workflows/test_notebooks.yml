@@ -117,7 +117,7 @@ jobs:
           activate-environment: daenv
           environment-file: ch00-tech-prep/daenv_${{ matrix.os_name }}.yml
           python-version: "3.12"
-          auto-activate-base: false
+          auto-activate: false
 
       - name: Run notebook tests
         shell: bash -el {0}
