@@ -14,11 +14,6 @@ WORKSPACE_FOLDER="${CODESPACE_VSCODE_FOLDER:-/workspaces}"
 # Navigate to the environment definition
 cd "$WORKSPACE_FOLDER/da_case_studies/ch00-tech-prep"
 
-# Create the example R data directory file (needed by some notebooks)
-if [ ! -f "set-data-directory.R" ]; then
-  cp set-data-directory-example.R set-data-directory.R
-fi
-
 # Create conda environment if it does not already exist
 echo "Ensuring conda environment 'daenv' exists..."
 if conda env list | grep -q "^daenv "; then
