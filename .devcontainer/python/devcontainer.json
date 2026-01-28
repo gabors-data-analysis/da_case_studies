@@ -1,0 +1,57 @@
+{
+  // Python-only devcontainer for data analysis case studies
+  // This container provides a lightweight Python environment with Jupyter support
+  "name": "Data Analysis - Python",
+  
+  // Use Microsoft's Python devcontainer base image with conda included
+  "image": "mcr.microsoft.com/devcontainers/miniconda:latest",
+  
+  "features": {
+    "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/devcontainers/features/common-utils:2": {
+      "installOhMyZsh": false,
+      "installZsh": false
+    }
+  },
+
+  "containerEnv": {
+    "DEBIAN_FRONTEND": "noninteractive"
+  },
+
+  // Run setup script after container is created
+  // This installs the Python environment non-interactively
+  "postCreateCommand": "bash .devcontainer/python/setup-python.sh",
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        // Python language support
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        
+        // Jupyter notebook support
+        "ms-toolsai.jupyter",
+        "ms-toolsai.jupyter-keymap",
+        "ms-toolsai.jupyter-renderers"
+      ],
+      "settings": {
+        // Point to the conda environment created by setup-python.sh
+        "python.defaultInterpreterPath": "/opt/conda/envs/daenv/bin/python",
+        
+        // Enable conda environment activation
+        "python.terminal.activateEnvironment": true,
+        
+        // Jupyter settings
+        "jupyter.widgetScriptSources": ["jsdelivr.com", "unpkg.com"]
+      }
+    }
+  },
+  
+  "forwardPorts": [],
+
+  "workspaceFolder": "/workspaces/da_case_studies",
+  
+  // Post-attach command to ensure conda is initialized
+  "postAttachCommand": "echo 'Python environment ready. Run: conda activate daenv'"
+}

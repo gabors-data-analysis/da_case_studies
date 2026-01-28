@@ -1,0 +1,57 @@
+{
+  // R-only devcontainer for data analysis case studies
+  // This container provides a lightweight R environment for VS Code (no RStudio)
+  "name": "Data Analysis - R",
+  
+  // Use the Rocker R base image (lightweight, no RStudio)
+  "image": "ghcr.io/rocker-org/devcontainer/r-ver:4.5",
+  
+  "features": {
+    "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/devcontainers/features/common-utils:2": {
+      "installOhMyZsh": false,
+      "installZsh": false
+    }
+  },
+
+  "containerEnv": {
+    "DEBIAN_FRONTEND": "noninteractive"
+  },
+
+  // Run setup script after container is created
+  // This restores R packages from renv.lock non-interactively
+  "postCreateCommand": "bash .devcontainer/r/setup-r.sh",
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        // R language support
+        "REditorSupport.r",
+        
+        // R debugger
+        "RDebugger.r-debugger"
+      ],
+      "settings": {
+        // R terminal settings for Linux
+        "r.rterm.linux": "/usr/local/bin/R",
+        
+        // Enable bracketed paste for better terminal interaction
+        "r.bracketedPaste": true,
+        
+        // Use httpgd for plotting in VS Code
+        "r.plot.useHttpgd": true,
+        
+        // Always use active terminal for R commands
+        "r.alwaysUseActiveTerminal": true
+      }
+    }
+  },
+  
+  "forwardPorts": [],
+
+  "workspaceFolder": "/workspaces/da_case_studies",
+  
+  // Post-attach message
+  "postAttachCommand": "echo 'R environment ready. R packages installed via renv.'"
+}
