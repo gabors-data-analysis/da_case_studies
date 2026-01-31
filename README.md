@@ -19,10 +19,10 @@ On the [textbook's website](https://gabors-data-analysis.com/), we have detailed
 
 Alternatively, you can also run Python and R codes in GitHub Codespaces with pre-configured environments. To start a Codespace for your desired language, press one of the buttons below:
 
-**Python**
+**Click to open Codespaces with *Python* environment:**
 [![Open in GitHub Codespaces for Python](https://github.com/codespaces/badge.svg)](https://codespaces.new/gabors-data-analysis/da_case_studies?quickstart=1&devcontainer_path=.devcontainer%2Fpython%2Fdevcontainer.json)
 
-**R**
+**Click to open Codespaces with *R* environment:**
 [![Open in GitHub Codespaces for R](https://github.com/codespaces/badge.svg)](https://codespaces.new/gabors-data-analysis/da_case_studies?quickstart=1&devcontainer_path=.devcontainer%2Fr%2Fdevcontainer.json)
 
 
