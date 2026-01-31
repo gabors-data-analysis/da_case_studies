@@ -32,6 +32,31 @@ A lightweight R-only environment with:
 3. Wait for the environment to build (first time only)
 4. R packages will be installed automatically via renv
 
+## 🎨 R with RStudio Server
+
+Location: `.devcontainer/r-rstudio/`
+
+A full-featured R environment with:
+- R 4.5 with packages from `renv.lock`
+- RStudio Server IDE accessible via browser
+- VS Code R extensions (optional)
+- Auto-forwarded port for seamless access to RStudio
+
+**To use:**
+1. Open the repository in VS Code
+2. When prompted to reopen in container, select **"Data Analysis - R with RStudio"**
+3. Wait for the environment to build (first time only)
+4. R packages will be installed automatically via renv
+5. RStudio Server will automatically open in your browser when the container is ready
+   - If not, access it manually via the forwarded port link (typically `http://localhost:8787`)
+   - No authentication required in the dev container
+
+**Benefits:**
+- Full RStudio interface for interactive R development
+- Integrated console, editor, and plotting panels
+- Better for exploratory data analysis
+- Familiar environment for R users
+
 ## 📦 Data Download
 
 **Neither environment downloads data automatically.**
@@ -61,8 +86,16 @@ Use the new separate configurations in `.devcontainer/python/` or `.devcontainer
 - Creates conda env from: `ch00-tech-prep/daenv_linux.yml`
 
 ### R Setup
-- Base image: `ghcr.io/rocker-org/devcontainer/r-ver:4.5`
-- Setup script: `.devcontainer/r/setup-r.sh`
+- **R only** (`r/`):
+  - Base image: `ghcr.io/rocker-org/devcontainer/r-ver:4.5`
+  - Setup script: `.devcontainer/r/setup-r.sh`
+  - No RStudio (VS Code terminal only)
+  
+- **R with RStudio** (`r-rstudio/`):
+  - Base image: `ghcr.io/rocker-org/devcontainer/rstudio:4.5`
+  - Setup script: `.devcontainer/r-rstudio/setup-r-rstudio.sh`
+  - Includes RStudio Server with automatic port forwarding
+  
 - Restores packages from: `renv.lock`
 
 ### Switching Environments

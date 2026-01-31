@@ -25,14 +25,7 @@ sudo apt-get install -y \
   libjpeg-dev
 
 # Navigate to the workspace root
-cd /workspaces/da_case_studies_fork
-
-# Create the example R data directory file if it doesn't exist
-if [ ! -f "ch00-tech-prep/set-data-directory.R" ]; then
-  cd ch00-tech-prep
-  cp set-data-directory-example.R set-data-directory.R
-  cd ..
-fi
+cd /workspaces/da_case_studies
 
 # Restore R packages from renv.lock
 echo ""

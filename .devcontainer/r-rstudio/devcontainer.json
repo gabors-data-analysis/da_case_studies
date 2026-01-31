@@ -1,0 +1,66 @@
+{
+  // R with RStudio Server devcontainer for data analysis case studies
+  // This container provides a full R environment with RStudio Server IDE accessible via browser
+  "name": "Data Analysis - R with RStudio",
+  
+  // Use the Rocker RStudio image (includes R + RStudio Server)
+  "image": "ghcr.io/rocker-org/devcontainer/rstudio:4.5",
+  
+  "features": {
+    "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/devcontainers/features/common-utils:2": {
+      "installOhMyZsh": false,
+      "installZsh": false
+    }
+  },
+
+  "containerEnv": {
+    "DEBIAN_FRONTEND": "noninteractive",
+    "RSTUDIO_LAUNCHER_TIMEOUT": "0",
+    "DISABLE_AUTH": "true"
+  },
+
+  // Run setup scripts after container is created
+  // This installs RStudio Server and restores R packages from renv.lock
+  "postCreateCommand": "bash .devcontainer/r-rstudio/setup-r-rstudio.sh",
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        // R language support
+        "REditorSupport.r",
+        
+        // R debugger
+        "RDebugger.r-debugger"
+      ],
+      "settings": {
+        // R terminal settings for Linux
+        "r.rterm.linux": "/usr/local/bin/R",
+        
+        // Enable bracketed paste for better terminal interaction
+        "r.bracketedPaste": true,
+        
+        // Use httpgd for plotting in VS Code
+        "r.plot.useHttpgd": true,
+        
+        // Always use active terminal for R commands
+        "r.alwaysUseActiveTerminal": true
+      }
+    }
+  },
+  
+  // Forward RStudio Server port to host
+  "forwardPorts": [8787],
+  "portsAttributes": {
+    "8787": {
+      "label": "RStudio Server",
+      "onAutoForward": "open"
+    }
+  },
+
+  "workspaceFolder": "/workspaces/da_case_studies",
+  
+  // Post-attach message
+  "postAttachCommand": "echo 'RStudio Server environment ready! Access RStudio at the forwarded port (8787).'"
+}
