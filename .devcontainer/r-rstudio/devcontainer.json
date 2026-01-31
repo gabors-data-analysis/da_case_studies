@@ -4,7 +4,7 @@
   "name": "Data Analysis - R with RStudio",
   
   // Use the Rocker RStudio image (includes R + RStudio Server)
-  "image": "ghcr.io/rocker-org/devcontainer/rstudio:4.5",
+  "image": "rocker/rstudio:4.5",
   
   "features": {
     "ghcr.io/devcontainers/features/git:1": {},
