@@ -1,5 +1,7 @@
 # Welcome to R in GitHub Codespaces!
 
+Please wait for the `postCreateCommand` to finish (it might take several minutes). This makes sure that all the necessary dependencies are correctly installed in your environment. If you want to check what is happening in the background, press `Ctrl/Cmd+Shift+P` to open the VSCode command palette, and search for *Codespaces: View Creation Log*. This will show all the background processes that were executed to set up your environment.
+
 ## How to start?
 
 1. Download the data repository from OSF if you plan to use this Codespace in the long run. This is not mandatory, as the you can also download the individual files in each code by uncommenting the relevant lines.
