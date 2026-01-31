@@ -1,69 +1,57 @@
-#!/bin/bash
-# Data download script for Data Analysis Case Studies
-# This script downloads and extracts the data repository
-# 
+#!/usr/bin/env bash
+# Download and extract data for Data Analysis Case Studies
+#
 # Usage: bash .devcontainer/scripts/download-data.sh
-# 
-# This script is idempotent - safe to run multiple times.
-# It will skip downloading if the data already exists.
+# Safe to run multiple times.
 
-set -e  # Exit on any error
+set -euo pipefail
 
 echo "========================================="
 echo "Data Download Script"
 echo "========================================="
 
-# Navigate to workspace root
-cd /workspaces/da_case_studies
+# Workspace root (Codespaces or local)
+WORKSPACE_FOLDER="${CODESPACE_VSCODE_FOLDER:-$(pwd)}"
 
-# Define data directory and archive name
-DATA_DIR="da_data_repo"
-DATA_ARCHIVE="da_data_repo.zip"
+DATA_DIR="/workspaces/da_data_repo"
+DATA_ARCHIVE="${WORKSPACE_FOLDER}/da_data_repo.zip"
 DATA_URL="https://osf.io/download/9gw4a"
 
-# Check if data already exists
-if [ -d "$DATA_DIR" ]; then
-  echo ""
-  echo "Data directory '$DATA_DIR' already exists."
-  read -p "Do you want to re-download and overwrite? [y/N]: " -n 1 -r
-  echo
-  
-  if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-    echo "Skipping download. Existing data will be kept."
-    exit 0
-  fi
-  
-  echo "Removing existing data directory..."
-  rm -rf "$DATA_DIR"
+# Exit early if data already exists
+if [[ -d "$DATA_DIR" ]]; then
+  echo "Data directory already exists at:"
+  echo "  $DATA_DIR"
+  echo "Skipping download."
+  exit 0
 fi
 
-# Download the data archive
 echo ""
 echo "Downloading data from OSF repository..."
 echo "URL: $DATA_URL"
 
-if command -v curl &> /dev/null; then
-  curl -J -L -o "$DATA_ARCHIVE" "$DATA_URL"
-elif command -v wget &> /dev/null; then
+if command -v curl >/dev/null 2>&1; then
+  curl -fL -o "$DATA_ARCHIVE" "$DATA_URL"
+elif command -v wget >/dev/null 2>&1; then
   wget -O "$DATA_ARCHIVE" "$DATA_URL"
 else
-  echo "Error: Neither curl nor wget is available. Cannot download data."
+  echo "Error: curl or wget is required but not installed."
   exit 1
 fi
 
-# Extract the archive
 echo ""
-echo "Extracting data archive..."
-unzip -q "$DATA_ARCHIVE"
+echo "Extracting archive..."
+unzip -q "$DATA_ARCHIVE" -d "$WORKSPACE_FOLDER" -x "__MACOSX/*"
 
-# Clean up the archive file
-echo "Cleaning up archive file..."
+echo "Cleaning up..."
 rm -f "$DATA_ARCHIVE"
+
+echo "Moving data to final location..."
+mv "${WORKSPACE_FOLDER}/da_data_repo" "/workspaces/"
 
 echo ""
 echo "========================================="
 echo "Data download complete!"
 echo "========================================="
-echo ""
-echo "Data has been extracted to: $DATA_DIR/"
+echo "Data available at:"
+echo "  /workspaces/da_data_repo"
 echo ""

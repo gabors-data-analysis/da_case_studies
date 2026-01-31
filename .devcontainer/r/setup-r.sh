@@ -8,6 +8,9 @@ echo "========================================="
 echo "Setting up R environment..."
 echo "========================================="
 
+# Store the workspace folder path
+WORKSPACE_FOLDER="${CODESPACE_VSCODE_FOLDER:-$(pwd)}"
+
 # Install system dependencies that might be needed by R packages
 echo "Installing system dependencies..."
 sudo apt-get update
@@ -25,7 +28,7 @@ sudo apt-get install -y \
   libjpeg-dev
 
 # Navigate to the workspace root
-cd /workspaces/da_case_studies
+cd "$WORKSPACE_FOLDER/da_case_studies"
 
 # Restore R packages from renv.lock
 echo ""
