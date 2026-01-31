@@ -48,6 +48,9 @@ rm -f "$DATA_ARCHIVE"
 echo "Moving data to final location..."
 mv "${WORKSPACE_FOLDER}/da_data_repo" "/workspaces/"
 
+echo "Finalizing data repository path set-up for R-scripts..."
+mv "${WORKSPACE_FOLDER}/ch00-tech-prep/set-data-directory-example.R" "${WORKSPACE_FOLDER}/ch00-tech-prep/set-data-directory.R"
+
 echo ""
 echo "========================================="
 echo "Data download complete!"
