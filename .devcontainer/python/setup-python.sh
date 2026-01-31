@@ -1,33 +1,26 @@
 #!/bin/bash
 # Python environment setup script for Data Analysis Case Studies
-# This script is executed non-interactively during devcontainer creation
+# Executed non-interactively during devcontainer creation
 
-set -e  # Exit on any error
+set -e
 
 echo "========================================="
 echo "Setting up Python environment..."
 echo "========================================="
 
-# Update conda to latest version
-echo "Updating conda..."
-conda update -n base -c defaults conda -y
+# Resolve workspace folder
+WORKSPACE_FOLDER="${CODESPACE_VSCODE_FOLDER:-/workspaces}"
 
 # Navigate to the environment definition
-cd /workspaces/da_case_studies/ch00-tech-prep
+cd "$WORKSPACE_FOLDER/da_case_studies/ch00-tech-prep"
 
-# Create the example R data directory file (needed by some notebooks)
-# This is done regardless of environment choice
-if [ ! -f "set-data-directory.R" ]; then
-  cp set-data-directory-example.R set-data-directory.R
+# Create conda environment if it does not already exist
+echo "Ensuring conda environment 'daenv' exists..."
+if conda env list | grep -q "^daenv "; then
+  echo "Conda environment 'daenv' already exists. Skipping creation."
+else
+  conda env create -f daenv_linux.yml
 fi
-
-# Create the Python environment from the conda environment file
-echo "Creating Python environment 'daenv' from daenv_linux.yml..."
-conda env create -f daenv_linux.yml
-
-# Initialize conda for bash shell
-echo "Initializing conda for bash..."
-conda init bash
 
 echo ""
 echo "========================================="
@@ -35,7 +28,6 @@ echo "Python environment setup complete!"
 echo "========================================="
 echo ""
 echo "The 'daenv' conda environment is ready."
-echo "To activate it manually, run: conda activate daenv"
 echo ""
 echo "Note: Data files are NOT downloaded automatically."
 echo "To download data, run: bash .devcontainer/scripts/download-data.sh"
