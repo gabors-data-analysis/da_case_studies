@@ -28,7 +28,7 @@ sudo apt-get install -y \
   libjpeg-dev
 
 # Navigate to the workspace root
-cd "$WORKSPACE_FOLDER/da_case_studies"
+cd "$WORKSPACE_FOLDER"
 
 # Restore R packages from renv.lock
 echo ""
