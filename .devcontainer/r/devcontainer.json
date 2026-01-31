@@ -45,6 +45,11 @@
         // Always use active terminal for R commands
         "r.alwaysUseActiveTerminal": true
       }
+    },
+    "codespaces": {
+      "openFiles": [
+        ".devcontainer/r/welcome_r.md"
+      ]
     }
   },
   

@@ -34,6 +34,11 @@
         "python.defaultInterpreterPath": "/opt/conda/envs/daenv/bin/python",
         "python.terminal.activateEnvironment": true
       }
+    },
+    "codespaces": {
+      "openFiles": [
+        ".devcontainer/python/welcome_python.md"
+      ]
     }
   }
 }
