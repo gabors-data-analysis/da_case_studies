@@ -17,6 +17,14 @@ All code available for R, Stata and Python. To see options for various languages
 
 On the [textbook's website](https://gabors-data-analysis.com/), we have detailed discussion of how to set up libraries, get data: [Overview of data and code](https://gabors-data-analysis.com/data-and-code/)
 
+Alternatively, you can also run Python and R codes in GitHub Codespaces with pre-configured environments. To start a Codespace for your desired language, press one of the buttons below:
+
+**Click to open Codespaces with *Python* environment:**
+[![Open in GitHub Codespaces for Python](https://github.com/codespaces/badge.svg)](https://codespaces.new/gabors-data-analysis/da_case_studies?quickstart=1&devcontainer_path=.devcontainer%2Fpython%2Fdevcontainer.json)
+
+**Click to open Codespaces with *R* environment:**
+[![Open in GitHub Codespaces for R](https://github.com/codespaces/badge.svg)](https://codespaces.new/gabors-data-analysis/da_case_studies?quickstart=1&devcontainer_path=.devcontainer%2Fr%2Fdevcontainer.json)
+
 
 ## Status
 

@@ -1,0 +1,44 @@
+{
+  // Python-only devcontainer for data analysis case studies
+  "name": "Data Analysis - Python",
+
+  // Lightweight Python + conda base image
+  "image": "mcr.microsoft.com/devcontainers/miniconda:3",
+
+  "features": {
+    "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/devcontainers/features/common-utils:2": {
+      "installOhMyZsh": false,
+      "installZsh": false
+    }
+  },
+
+  "containerEnv": {
+    "DEBIAN_FRONTEND": "noninteractive"
+  },
+
+  // Install Python environment non-interactively
+  "postCreateCommand": "bash .devcontainer/python/setup-python.sh",
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-toolsai.jupyter",
+        "ms-toolsai.jupyter-keymap",
+        "ms-toolsai.jupyter-renderers"
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "/opt/conda/envs/daenv/bin/python",
+        "python.terminal.activateEnvironment": true
+      }
+    },
+    "codespaces": {
+      "openFiles": [
+        ".devcontainer/python/welcome_python.md"
+      ]
+    }
+  }
+}
