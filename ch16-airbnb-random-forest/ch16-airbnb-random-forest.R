@@ -23,7 +23,7 @@
 # It is advised to start a new session for every case study
 # CLEAR MEMORY
 rm(list=ls())
-
+renv::activate()
 
 library(rattle)
 library(tidyverse)
@@ -70,7 +70,7 @@ create_output_if_doesnt_exist(output)
 
 # Used area
 area <- "london"
-data <- read_csv(paste0(data_in, "airbnb_", area, "_workfile_adj_book.csv")) %>%
+data <- read_csv(paste0(data_in, "airbnb_", area, "_workfile_r.csv")) %>%
   mutate_if(is.character, factor) %>%
   filter(!is.na(price))
 
@@ -88,9 +88,6 @@ count_missing_values(data)
 data <- data %>% filter(n_accommodates < 8)
 
 
-
-# copy a variable - purpose later, see at variable importance
-data <- data %>% mutate(n_accommodates_copy = n_accommodates)
 
 # basic descr stat -------------------------------------------
 skimr::skim(data)
@@ -122,7 +119,7 @@ dim(data_holdout)
 
 # Define models: simpler, extended -----------------------------------------------------------
 
-# Basic Variables inc neighnourhood
+# Basic Variables inc neighborhood
 basic_vars <- c(
   "n_accommodates", "n_beds", "n_days_since",
   "f_property_type","f_room_type", "f_bathroom", "f_cancellation_policy", "f_bed_type",
@@ -185,7 +182,7 @@ rf_model_1 <- train(
 })
 rf_model_1
 
-# set tuning for benchamrk model (2)
+# set tuning for benchmark model (2)
 tune_grid <- expand.grid(
   .mtry = c(8, 10, 12),
   .splitrule = "variance",
@@ -206,32 +203,13 @@ rf_model_2 <- train(
 
 rf_model_2
 
-# auto tuning first
-# set.seed(1234)
-# system.time({
-#   rf_model_2auto <- train(
-#     formula(paste0("price ~", paste0(predictors_2, collapse = " + "))),
-#     data = data_train,
-#     method = "ranger",
-#     trControl = train_control,
-#     importance = "impurity"
-#   )
-# })
-# rf_model_2auto 
-rf_model_2auto <-rf_model_2
-
-
-
-
 
 # evaluate random forests -------------------------------------------------
 
 results <- resamples(
   list(
     model_1  = rf_model_1,
-    model_2  = rf_model_2,
-    model_2b = rf_model_2auto
-    
+    model_2  = rf_model_2
   )
 )
 summary(results)
@@ -253,26 +231,22 @@ kable(x = rf_tuning_modelB, format = "latex", digits = 2, caption = "CV RMSE") %
 result_1 <- matrix(c(
                      rf_model_1$finalModel$mtry,
                      rf_model_2$finalModel$mtry,
-                     rf_model_2auto$finalModel$mtry,
                      rf_model_1$finalModel$min.node.size,
-                     rf_model_2$finalModel$min.node.size,
-                     rf_model_2auto$finalModel$min.node.size
-
+                     rf_model_2$finalModel$min.node.size
                      ),
-                    nrow=3, ncol=2,
-                    dimnames = list(c("Model A", "Model B","Model B auto"),
+                    nrow=2, ncol=2,
+                    dimnames = list(c("Model A", "Model B"),
                                     c("Min vars","Min nodes"))
                    )
 kable(x = result_1, format = "latex", digits = 3) %>%
   cat(.,file= paste0(output,"rf_models_turning_choices.tex"))
 
 # Turning parameter choice 2
-result_2 <- matrix(c(mean(results$values$`model_1~RMSE`),
-                     mean(results$values$`model_2~RMSE`),
-                     mean(results$values$`model_2b~RMSE`)
-),
-nrow=3, ncol=1,
-dimnames = list(c("Model A", "Model B","Model B auto"),
+result_2 <- matrix(
+  c(mean(results$values$`model_1~RMSE`),
+                     mean(results$values$`model_2~RMSE`)),
+  nrow=2, ncol=1,
+  dimnames = list(c("Model A", "Model B"),
                 c(results$metrics[2]))
 )
 
@@ -334,7 +308,7 @@ rf_model_2_var_imp_plot <- ggplot(rf_model_2_var_imp_df[rf_model_2_var_imp_df$im
   xlab("Variable Name") +
   coord_flip() +
   scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
-  theme_bg() +
+  theme_bw() +
   theme(axis.text.x = element_text(size=6), axis.text.y = element_text(size=6),
         axis.title.x = element_text(size=6), axis.title.y = element_text(size=6))
 rf_model_2_var_imp_plot
@@ -354,7 +328,7 @@ rf_model_2_var_imp_plot_b <- ggplot(rf_model_2_var_imp_df[1:10,], aes(x=reorder(
   xlab("Variable Name") +
   coord_flip() +
   scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
-  theme_bg() +
+  theme_bw() +
   theme(axis.text.x = element_text(size=4), axis.text.y = element_text(size=4),
         axis.title.x = element_text(size=4), axis.title.y = element_text(size=4))
 rf_model_2_var_imp_plot_b
@@ -397,7 +371,7 @@ rf_model_2_var_imp_grouped_plot <-
   coord_flip() +
   # expand=c(0,0),
   scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
-theme_bg() +
+theme_bw() +
   theme(axis.text.x = element_text(size=4), axis.text.y = element_text(size=4),
         axis.title.x = element_text(size=4), axis.title.y = element_text(size=4))
 rf_model_2_var_imp_grouped_plot
@@ -418,7 +392,7 @@ pdp_n_acc_plot <- pdp_n_acc %>%
   ylab("Predicted price") +
   xlab("Accommodates (persons)") +
   scale_x_continuous(limit=c(1,7), breaks=seq(1,7,1))+
-theme_bg()
+theme_bw()
 pdp_n_acc_plot
 #save_fig("rf_pdp_n_accom", output, "small")
 save_fig("ch16-figure-3a-rf-pdp-n-accom", output, "small")
@@ -431,7 +405,7 @@ pdp_n_roomtype_plot <- pdp_n_roomtype %>%
   ylab("Predicted price") +
   xlab("Room type") +
   scale_y_continuous(limits=c(60,120), breaks=seq(60,120, by=10)) +
-  theme_bg()
+  theme_bw()
 pdp_n_roomtype_plot
 #save_fig("rf_pdp_roomtype", output, "small")
 save_fig("ch16-figure-3b-rf-pdp-roomtype", output, "small")
