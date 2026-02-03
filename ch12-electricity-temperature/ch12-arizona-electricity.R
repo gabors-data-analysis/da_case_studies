@@ -25,7 +25,6 @@ library(tidyverse)
 library(lubridate)
 library(cowplot)
 library(scales)
-library(DataCombine)
 library(stargazer)
 library(sandwich)
 library(dyn) 
@@ -150,7 +149,7 @@ save_fig("ch12-figure-7a-electricity-ts-q", output, "small")
 
 
 electricity_ts_lnQ<- ggplot(data = data, aes(x = date, y = lnQ))+
-  geom_line_da(size = 0.5) +
+  geom_line_da() +
   ylab("ln(residential electricity consumption, GWh)") +
   xlab("Date (month)") +
   scale_y_continuous(limits = c(7,8.5), breaks = seq(7,8.5,0.25)) +  
@@ -163,7 +162,7 @@ save_fig("ch12-figure-7b-electricity-ts-lnq", output, "small")
 
 
 electricity_ts_CL<-ggplot(data = data, aes(x = date, y = CLDD_avg))+
-  geom_line_da(size = 0.5) +
+  geom_line_da() +
   ylab("Cooling degrees (Farenheit)") +
   xlab("Date (month)") +
   scale_y_continuous(expand = c(0.01,0.01),limits = c(0,35), breaks = seq(0,35,5)) +  
@@ -176,7 +175,7 @@ save_fig("ch12-figure-8a-electricity-ts-ct", output, "small")
 
 
 electricity_ts_HT<- ggplot(data = data, aes(x = date, y = HTDD_avg))+
-  geom_line_da( size = 0.5) +
+  geom_line_da() +
   ylab("Heating degrees (Farenheit)") +
   xlab("Date (month)") +
   scale_y_continuous(expand = c(0.01,0.01),limits = c(0,14), breaks = seq(0,14,2)) +  
