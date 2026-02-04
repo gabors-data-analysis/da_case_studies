@@ -321,7 +321,6 @@ summary(lpm, vcov=sandwich)
 logit <- glm(stayshealthy ~ smoking + ever_smoked + female + age + lspline(eduyears, c(8,18)) + 
                income10 + lspline(bmi, c(35)) + exerc + as.factor(country), data=share, family='binomial')
 summary(logit)
-glance(logit)
 #TODO
 # consider change to margins package
 
