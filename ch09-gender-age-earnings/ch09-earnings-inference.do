@@ -13,213 +13,320 @@
 * Chapter 09
 * CH09A Estimating gender and age differences in earnings
 * using the cps-earnings dataset
-* version 0.91 2020-09-10
+* version 1.1 2025-12-09
+*
+* STATA VERSION: This code is optimized for Stata 18
+* Backward compatibility notes for Stata 15 and below are included
 ********************************************************************
 
+* Stata version check and setup
+version 18
+clear all
+set more off
+set varabbrev off
 
+
+********************************************************************
 * SETTING UP DIRECTORIES
+********************************************************************
 
-* STEP 1: set working directory for da_case_studies.
-* for example:
-* cd "C:/Users/xy/Dropbox/gabors_data_analysis/da_case_studies"
+* STEP 1: set working directory for da_case_studies
+* Example: cd "C:/Users/xy/Dropbox/gabors_data_analysis/da_case_studies"
 
+* STEP 2: Set data directory
+* Option 1: Run directory-setting do file (RECOMMENDED)
+capture do set-data-directory.do 
+	/* This one-line do file should sit in your working directory
+	   It contains: global data_dir "path/to/da_data_repo"
+	   More details: gabors-data-analysis.com/howto-stata/ */
 
-* STEP 2: * Directory for data
-* Option 1: run directory-setting do file
-do set-data-directory.do 
-							/* this is a one-line do file that should sit in 
-							the working directory you have just set up
-							this do file has a global definition of your working directory
-							more details: gabors-data-analysis.com/howto-stata/   */
+* Option 2: Set directory directly here
+* Example: global data_dir "C:/Users/xy/gabors_data_analysis/da_data_repo"
 
-* Option 2: set directory directly here
-* for example:
-* global data_dir "C:/Users/xy/gabors_data_analysis/da_data_repo"
+* Set up paths
+global data_in  "${data_dir}/cps-earnings/clean"
+global work     "ch09-gender-age-earnings"
+global output   "${work}/output"
 
-
-global data_in  "$data_dir/cps-earnings/clean"
-global work  	"ch09-gender-age-earnings"
-
-cap mkdir 		"$work/output"
-global output 	"$work/output"
-
+* Create directories
+capture mkdir "${work}"
+capture mkdir "${output}"
 
 
-* load data
-clear
-use "$data_in/morg-2014-emp.dta"
-* Or download directly from OSF:
+********************************************************************
+* LOAD DATA
+********************************************************************
+
+* Option 1: Load from local repository
+use "${data_in}/morg-2014-emp.dta", clear
+
+* Option 2: Download directly from OSF (uncomment to use)
 /*
-copy "https://osf.io/download/rtmga/" "workfile.dta"
-use "workfile.dta", clear
-erase "workfile.dta"
-*/ 
+tempfile cps_data
+copy "https://osf.io/download/rtmga/" `cps_data'
+use `cps_data', clear
+*/
 
 count
+display as text "Total observations loaded: " as result r(N)
 
-* new variables
-gen female=sex==2
-lab var earnwke "Earnings per week"
-lab var uhours "Usual hours per week"
-gen w = earnwke/uhours
-lab var w "Earnings per hour"
 
-gen lnw=ln(w)
-lab var lnw "ln earnings per hour"
+********************************************************************
+* FEATURE ENGINEERING
+********************************************************************
 
-** SELECT OCCUPATION
-gen sample=0
-replace sample=1 if occ2012==0735 /* Market research analysts and marketing specialists */
-replace sample=2 if occ2012>=1005 & occ2012<=1240 /* ** Computer and Mathematical Occupations */
-label define sa 1 "market research analysts" 2 "computer sci occupations"
-label value sample sa
+* Create binary female indicator
+generate female = (sex == 2)
 
-tab sample
+* Label variables
+label variable earnwke "Earnings per week"
+label variable uhours "Usual hours per week"
 
+* Calculate hourly wage
+generate w = earnwke / uhours
+label variable w "Earnings per hour"
+
+* Log hourly wage
+generate lnw = ln(w)
+label variable lnw "ln earnings per hour"
+
+
+********************************************************************
+* SAMPLE SELECTION BY OCCUPATION
+********************************************************************
+
+* Create sample indicator
+generate sample = 0
+replace sample = 1 if occ2012 == 0735  /* Market research analysts */
+replace sample = 2 if occ2012 >= 1005 & occ2012 <= 1240  /* Computer/Math */
+
+label define sample_lbl 1 "Market research analysts" ///
+                        2 "Computer science occupations"
+label values sample sample_lbl
+
+* Check sample distribution
+tabulate sample
+
+* Select working sample (change to =2 for computer occupations)
+keep if sample == 1
+
+* Order and compress
 order hhid-stfips weight earnwke uhours w lnw female age ind02 occ2012
 compress
 
-* set sample here
-keep if sample==1 /* change to =2 */
-save "$work/earnings_inference.dta",replace
+* Save working file
+save "${work}/earnings_inference.dta", replace
 count
+display as text "Sample size after selection: " as result r(N)
 
 
-use "$work/earnings_inference.dta" ,clear
-cap erase "$output/earnings_female.tex"
+********************************************************************
+* DESCRIPTIVE STATISTICS
+********************************************************************
 
-** DISTRIBUTION OF EARNINGS
+use "${work}/earnings_inference.dta", clear
 
-tabstat earnwke uhours w , s(mean min p5 p50 p95 max n) col(s)
-tabstat earnwke uhours w if w>=1, s(mean min p5 p50 p95 max n) col(s)
+* Summary statistics for key variables
+tabstat earnwke uhours w, ///
+    statistics(mean min p5 p50 p95 max n) columns(statistics)
+    
+tabstat earnwke uhours w if w >= 1, ///
+    statistics(mean min p5 p50 p95 max n) columns(statistics)
 
-** LN EARNINGS AND GENDER
 
-tab female 
-tab occ2012 female 
+********************************************************************
+* GENDER WAGE GAP ANALYSIS
+********************************************************************
 
-reg lnw female 
-reg lnw female , robust
- outreg2 using "$output/T09_reg1.tex", 2aster tex(frag) nonotes bdec(2)  replace 
+* Check distribution by gender
+tabulate female
 
-* bootstrap
+tabulate occ2012 female
+
+* Simple regression: gender wage gap
+regress lnw female 
+outreg2 using "${output}/ch09-table-1-gender-reg-Stata.tex", ///
+    2aster tex(fragment) nonotes bdec(2) replace
+
+* With robust standard errors
+regress lnw female, robust
+outreg2 using "${output}/ch09-table-1-gender-reg-Stata.tex", ///
+    2aster tex(fragment) nonotes bdec(2) append
+
+
+********************************************************************
+* FIGURE 1: BOOTSTRAP DISTRIBUTION
+********************************************************************
+
+* Bootstrap the gender coefficient
 set seed 201711
-bootstrap, reps(1000) saving("$output\b_earnings_female",replace): reg lnw female if sample==1
-use "$output\b_earnings_female",replace
-hist _b_female, percent width(0.025) color(navy*0.8) lcolor(white) ///
- xline(-0.11, lw(vthick) extend) ///
- text(18 -0.09 "mean") ///
- xlab(-0.3(0.1)0.1, grid) xtitle("Slope coefficients from bootstrap samples") ///
-   graphregion(fcolor(white) ifcolor(none))  ///
- plotregion(fcolor(white) ifcolor(white))
-graph export "$output/ch09-figure-1-bootstrap-hist-Stata.png",replace
+bootstrap, reps(1000) ///
+    saving("${output}/b_earnings_female", replace): ///
+    reg lnw female if sample == 1
+
+* Load bootstrap results and create histogram
+use "${output}/b_earnings_female", clear
+histogram _b_female, percent width(0.025) ///
+    color(navy*0.8) lcolor(white) ///
+    xline(-0.11, lwidth(vthick) extend) ///
+    text(18 -0.09 "mean") ///
+    xlabel(-0.3(0.1)0.1, grid) ///
+    xtitle("Slope coefficients from bootstrap samples") ///
+    graphregion(fcolor(white) ifcolor(none)) ///
+    plotregion(fcolor(white) ifcolor(white))
+graph export "${output}/ch09-figure-1-bootstrap-hist-Stata.png", replace
 
 
-* CI for linear
-* Figure 2a
-use "$work/earnings_inference.dta" ,replace
-reg lnw age if sample==1, r
- cap drop SE
- predict SE, stdp
-graph twoway lfitci lnw age if  lnw<4.4 & lnw>2, lc(green*0.8) stdp ///
- || scatter lnw age if  lnw<4.4 & lnw>2, sort mc(navy*0.6) ///
- xlab(20(10)60, grid) ylab(2(0.4)4.4, grid) legend(rows(1)) ///
- xtitle("Age (years)")  ytitle("ln earnings per hour") ///
- legend(off) ///
- graphregion(fcolor(white) ifcolor(none))  ///
- plotregion(fcolor(white) ifcolor(white))
-graph export "$output/ch09-figure-2a-wage-age-ci-Stata.png", replace
+********************************************************************
+* AGE-EARNINGS ANALYSIS
+********************************************************************
 
-* PI for linear
-* Figure 2b
-reg lnw age if sample==1
- cap drop SE
- predict SE, stdf
-graph twoway lfitci lnw age if  lnw<4.4 & lnw>2, lc(green*0.8) stdf ///
- || scatter lnw age if  lnw<4.4 & lnw>2, sort mc(navy*0.6) ///
- xlab(20(10)60, grid) ylab(2(0.4)4.4, grid) legend(rows(1)) ///
- xtitle("Age (years)")  ytitle("ln earnings per hour") ///
- legend(off) ///
- graphregion(fcolor(white) ifcolor(none))  ///
- plotregion(fcolor(white) ifcolor(white))
-graph export "$output/ch09-figure-2b-wage-age-pi-Stata.png", replace
- 
+use "${work}/earnings_inference.dta", clear
 
-** LN EARNINGS AND AGE
-* lowess nonparametric regression
-lowess lnw age if sample==1, lineop( lw(vthick) lc(dkgreen) ) ///
-	 mcolor(navy) msize(small) ///
-	 xlab(20(10)60, grid) ylab(1.5(0.5)4.5, grid) ///
-	 graphregion(fcolor(white) ifcolor(none))  ///
-	 plotregion(fcolor(white) ifcolor(white)) 
-graph export "$output/ch09-figure-3a-wage-lowess-Stata.png", replace
+* Create age squared
+generate agesq = age^2
 
- 
-* splines, quadratic
-mkspline agesp1 30 agesp2 40 agesp3 = age 
-gen agesq = age^2
+* Create age splines (knots at 30 and 40)
+mkspline agesp1 30 agesp2 40 agesp3 = age
 
-label var age "age"
-label var agesq "age squared" 
-label var lnw "ln wage"
-label var agesp1 "age spline <30" 
-label var agesp2 "age spline 30-40" 
-label var agesp3 "age spline 40<"
-	
-reg lnw age , r
- outreg2 using "$output/T09_reg2.tex", label 2aster bdec(3) tex(frag) nonotes replace
-reg lnw age agesq , r
- outreg2 using "$output/T09_reg2.tex", label 2aster tex(frag) nonotes bdec(3) append
-reg lnw agesp* , r
- outreg2 using "$output/T09_reg2.tex", label 2aster sortvar(age agesq agesp*) tex(frag) nonotes bdec(3) append
-	  
-
-* intervals
-
-reg lnw age agesq , r
- predict lnwpred_ageq
-  lab var lnwpred_ageq "quadratic"
- predict lnwpred_ageqSE , stdp
- cap gen lnwpred_ageqCIUP = .
- replace lnwpred_ageqCIUP = lnwpred_ageq + 2*lnwpred_ageqSE
- cap gen lnwpred_ageqCILO = .
- replace lnwpred_ageqCILO = lnwpred_ageq - 2*lnwpred_ageqSE
-
-reg lnw agesp* , r
- predict lnwpred_agesp 
-  lab var lnwpred_agesp "piecewise linear spline"
- predict lnwpred_agespSE , stdp
- cap gen lnwpred_agespCIUP = .
- replace lnwpred_agespCIUP = lnwpred_agesp + 2*lnwpred_agespSE
- cap gen lnwpred_agespCILO = .
- replace lnwpred_agespCILO = lnwpred_agesp - 2*lnwpred_agespSE
-
-* lowess reg
-lowess lnw age,  nogra gen(lnwpred_agel)
- lab var lnwpred_agel "lowess"
-
-* all three visualized w/o CI 
-* Figure 3b
-line lnwpred_agel lnwpred_agesp lnwpred_ageq age,  sort ///
- lp(solid dash shortdash) lw(vthick thick thick) lc(navy*0.8 green*0.8 black) ///
- xlab(20(10)60, grid) ylab(2.6(0.2)3.4, grid) legend(rows(1)) ytitle("ln earnings per hour") ///
-   graphregion(fcolor(white) ifcolor(none))  ///
- plotregion(fcolor(white) ifcolor(white))
-graph export "$output/ch09-figure-3b-wage-various-Stata.png", replace
-
-* all three visualized, parametric ones with CI 
-* Figure 4
-line lnwpred_agel lnwpred_agesp lnwpred_agespCIUP lnwpred_agespCILO ///
- lnwpred_ageq lnwpred_ageqCIUP lnwpred_ageqCILO age , sort ///
- lp(solid dash dash dash shortdash shortdash shortdash) ///
- lw(vthick thick thin thin thick thin thin) ///
- lc(navy*0.8 green*0.8 green*0.8 green*0.8 black black black) ///
- xlab(20(10)60, grid) ylab(2.6(0.2)3.4, grid) ytitle("ln earnings per hour") ///
-  legend(rows(1)  order(1 2 5) ) ///
-   graphregion(fcolor(white) ifcolor(none))  ///
- plotregion(fcolor(white) ifcolor(white)) 
-graph export "$output/ch09-figure-4-wage-age-reg-ci-Stata.png", replace
+* Label variables for regression output
+label variable age "Age"
+label variable agesq "Age squared"
+label variable lnw "ln wage"
+label variable agesp1 "Age spline <30"
+label variable agesp2 "Age spline 30-40"
+label variable agesp3 "Age spline 40<"
 
 
+********************************************************************
+* FIGURE 2: CONFIDENCE AND PREDICTION INTERVALS
+********************************************************************
+
+* Figure 2a - Confidence interval for linear model
+regress lnw age if sample == 1, robust
+capture drop SE
+predict SE, stdp
+
+graph twoway ///
+    (lfitci lnw age if lnw < 4.4 & lnw > 2, lcolor(green*0.8) stdp) ///
+    (scatter lnw age if lnw < 4.4 & lnw > 2, sort mcolor(navy*0.6)), ///
+    xlabel(20(10)60, grid) ylabel(2(0.4)4.4, grid) ///
+    legend(off) ///
+    xtitle("Age (years)") ytitle("ln earnings per hour") ///
+    graphregion(fcolor(white) ifcolor(none)) ///
+    plotregion(fcolor(white) ifcolor(white))
+graph export "${output}/ch09-figure-2a-wage-age-ci-Stata.png", replace
+
+
+* Figure 2b - Prediction interval for linear model
+regress lnw age if sample == 1
+capture drop SE
+predict SE, stdf
+
+graph twoway ///
+    (lfitci lnw age if lnw < 4.4 & lnw > 2, lcolor(green*0.8) stdf) ///
+    (scatter lnw age if lnw < 4.4 & lnw > 2, sort mcolor(navy*0.6)), ///
+    xlabel(20(10)60, grid) ylabel(2(0.4)4.4, grid) ///
+    legend(off) ///
+    xtitle("Age (years)") ytitle("ln earnings per hour") ///
+    graphregion(fcolor(white) ifcolor(none)) ///
+    plotregion(fcolor(white) ifcolor(white))
+graph export "${output}/ch09-figure-2b-wage-age-pi-Stata.png", replace
+
+
+********************************************************************
+* FIGURE 3: LOWESS AND REGRESSION COMPARISONS
+********************************************************************
+
+* Figure 3a - Lowess nonparametric regression
+lowess lnw age if sample == 1, ///
+    lineopts(lwidth(vthick) lcolor(dkgreen)) ///
+    mcolor(navy) msize(small) ///
+    xlabel(20(10)60, grid) ylabel(1.5(0.5)4.5, grid) ///
+	xtitle("Age (years)") ytitle("ln earnings per hour") ///
+    graphregion(fcolor(white) ifcolor(none)) ///
+    plotregion(fcolor(white) ifcolor(white))
+graph export "${output}/ch09-figure-3a-wage-lowess-Stata.png", replace
+
+
+********************************************************************
+* TABLE 2: REGRESSION MODELS COMPARISON
+********************************************************************
+
+* Run different age specifications
+regress lnw age, robust
+outreg2 using "${output}/ch09-table-2-age-models-Stata.tex", ///
+    label 2aster bdec(3) tex(fragment) nonotes replace
+
+regress lnw age agesq, robust
+outreg2 using "${output}/ch09-table-2-age-models-Stata.tex", ///
+    label 2aster tex(fragment) nonotes bdec(3) append
+
+regress lnw agesp*, robust
+outreg2 using "${output}/ch09-table-2-age-models-Stata.tex", ///
+    label 2aster sortvar(age agesq agesp*) ///
+    tex(fragment) nonotes bdec(3) append
+
+
+********************************************************************
+* GENERATE PREDICTIONS FOR PLOTTING
+********************************************************************
+
+* Quadratic model predictions
+regress lnw age agesq, robust
+predict lnwpred_ageq
+label variable lnwpred_ageq "Quadratic"
+
+predict lnwpred_ageqSE, stdp
+capture generate lnwpred_ageqCIUP = lnwpred_ageq + 2 * lnwpred_ageqSE
+capture generate lnwpred_ageqCILO = lnwpred_ageq - 2 * lnwpred_ageqSE
+
+* Spline model predictions
+regress lnw agesp*, robust
+predict lnwpred_agesp
+label variable lnwpred_agesp "Piecewise linear spline"
+
+predict lnwpred_agespSE, stdp
+capture generate lnwpred_agespCIUP = lnwpred_agesp + 2 * lnwpred_agespSE
+capture generate lnwpred_agespCILO = lnwpred_agesp - 2 * lnwpred_agespSE
+
+* Lowess predictions
+lowess lnw age, nograph generate(lnwpred_agel)
+label variable lnwpred_agel "Lowess"
+
+
+********************************************************************
+* FIGURE 3B: COMPARE THREE MODELS (NO CI)
+********************************************************************
+
+line lnwpred_agel lnwpred_agesp lnwpred_ageq age, sort ///
+    lpattern(solid dash shortdash) ///
+    lwidth(vthick thick thick) ///
+    lcolor(navy*0.8 green*0.8 black) ///
+    xlabel(20(10)60, grid) ylabel(2.6(0.2)3.4, grid) ///
+    legend(rows(1)) ///
+    ytitle("ln earnings per hour") ///
+    graphregion(fcolor(white) ifcolor(none)) ///
+    plotregion(fcolor(white) ifcolor(white))
+graph export "${output}/ch09-figure-3b-wage-various-Stata.png", replace
+
+
+********************************************************************
+* FIGURE 4: THREE MODELS WITH CONFIDENCE INTERVALS
+********************************************************************
+
+line lnwpred_agel ///
+     lnwpred_agesp lnwpred_agespCIUP lnwpred_agespCILO ///
+     lnwpred_ageq lnwpred_ageqCIUP lnwpred_ageqCILO ///
+     age, sort ///
+    lpattern(solid dash dash dash shortdash shortdash shortdash) ///
+    lwidth(vthick thick thin thin thick thin thin) ///
+    lcolor(navy*0.8 green*0.8 green*0.8 green*0.8 black black black) ///
+    xlabel(20(10)60, grid) ylabel(2.6(0.2)3.4, grid) ///
+    ytitle("ln earnings per hour") ///
+    legend(rows(1) order(1 2 5)) ///
+    graphregion(fcolor(white) ifcolor(none)) ///
+    plotregion(fcolor(white) ifcolor(white))
+graph export "${output}/ch09-figure-4-wage-age-reg-ci-Stata.png", replace
 
 
