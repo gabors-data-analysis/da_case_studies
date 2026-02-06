@@ -110,7 +110,7 @@ tab_rating <- data %>%
   mutate(percent = round((n / sum(n)), 3),
          cumpercent = round(cumsum(freq = n / sum(n)),3))
 
-View(tab_rating)
+if (interactive()) View(tab_rating)
 
 # check: frequency table of all values incl. missing varlues
 
@@ -120,7 +120,7 @@ tab_rating_reviewcount <- data %>%
   mutate(percent = round((n / sum(n)), 3),
          cumpercent = round(cumsum(freq = n / sum(n)),3))
 
-View(tab_rating_reviewcount)
+if (interactive()) View(tab_rating_reviewcount)
 
 data <- data%>% mutate(rating_count = as.numeric(rating_reviewcount))
 
@@ -139,7 +139,7 @@ tab_stars <- data %>%
   mutate(percent = round((n / sum(n)), 3),
          cumpercent = round(cumsum(freq = n / sum(n)),3))
 
-View(tab_stars)
+if (interactive()) View(tab_stars)
 
 tab_rating <- data %>%
   group_by(rating) %>%
@@ -147,7 +147,7 @@ tab_rating <- data %>%
   mutate(percent = round((n / sum(n)), 3),
          cumpercent = round(cumsum(freq = n / sum(n)),3))
 
-View(tab_rating)
+if (interactive()) View(tab_rating)
 
 #**********************************************
 #     Table 2.10

@@ -55,15 +55,15 @@ epl_games <-  read_csv(paste0(data_in,"epl_games.csv"))
 
 epl_games <-  epl_games %>%
   arrange(.,team_home)
-View(epl_games)
+if (interactive()) View(epl_games)
 
 epl_games <-  epl_games %>%
   arrange(.,season, team_home)
-View(epl_games)
+if (interactive()) View(epl_games)
 
 epl_games <-  epl_games %>%
   filter(season == 2016)
-View(epl_games)
+if (interactive()) View(epl_games)
 #---------------------------------------------------------------------------------------------------------
 # look at data for team-game level
 # TODO: change to csv when we have it
@@ -73,7 +73,7 @@ epl_teams_games <-  read_csv(paste0(data_in, "epl-teams-games.csv"))
 
 epl_teams_games <-  epl_teams_games %>%
   arrange(.,team)
-View(epl_games)
+if (interactive()) View(epl_games)
 
 epl_teams_games <-  epl_teams_games %>%
   arrange(.,season, team)
@@ -81,12 +81,12 @@ epl_teams_games <-  epl_teams_games %>%
 epl_teams_games <-  epl_teams_games %>%
   filter(season == 2016) %>%
   arrange(., date)
-View(epl_games)
+if (interactive()) View(epl_games)
 
 football_managers <- read_csv(paste0(data_in, "football_managers.csv"))
 # From the web
 # football_managers <- read_csv("https://osf.io/download/pcu6s/")
-View(football_managers)
+if (interactive()) View(football_managers)
 Hmisc:: describe(football_managers$manager_id)
 
 
