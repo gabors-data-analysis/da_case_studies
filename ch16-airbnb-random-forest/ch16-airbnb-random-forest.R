@@ -23,7 +23,6 @@
 # It is advised to start a new session for every case study
 # CLEAR MEMORY
 rm(list=ls())
-renv::activate()
 
 library(rattle)
 library(tidyverse)
@@ -70,7 +69,7 @@ create_output_if_doesnt_exist(output)
 
 # Used area
 area <- "london"
-data <- read_csv(paste0(data_in, "airbnb_", area, "_workfile_r.csv")) %>%
+data <- read_csv(paste0(data_in, "airbnb_", area, "_workfile.csv")) %>%
   mutate_if(is.character, factor) %>%
   filter(!is.na(price))
 
