@@ -26,12 +26,8 @@ rm(list=ls())
 
 # Import libraries
 library(tidyverse)
-library(arm)
-library(segmented)
 library(lmtest)
 library(lspline)
-library(gridExtra)
-library(cowplot)
 
 
 # set working directory

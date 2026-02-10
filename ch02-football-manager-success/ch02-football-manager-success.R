@@ -20,9 +20,6 @@
 rm(list=ls())
 
 library(tidyverse)
-library(haven)
-library(lspline)
-library(grid)
 library(cowplot)
 #----------------------------------------------------------------------------------------------------
 

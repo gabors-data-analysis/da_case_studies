@@ -20,12 +20,9 @@
 rm(list=ls())
 
 library(tidyverse)
-library(purrr)
-library(haven)
 library(MatchIt)
-library(Matching) # masks dplyr select!!! #
-library(gmodels)
 library(fixest)
+library(gmodels)
 
 getwd()
 # set working directory

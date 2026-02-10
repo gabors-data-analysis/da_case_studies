@@ -27,11 +27,6 @@ rm(list=ls())
 
 # Import libraries
 library(tidyverse)
-library(haven)
-library(lspline)
-library(grid)
-library(cowplot)
-library(scales)
 
 
 # set working directory

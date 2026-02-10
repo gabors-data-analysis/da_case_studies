@@ -22,9 +22,6 @@ rm(list=ls())
 
 # Import libraries
 library(tidyverse)
-library(haven)
-library(cowplot)
-library(grid)
 library(scales)
 library(Hmisc)
 

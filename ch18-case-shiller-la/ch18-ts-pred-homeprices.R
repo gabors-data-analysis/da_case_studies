@@ -26,7 +26,6 @@ rm(list=ls())
 # Descriptive statistics and regressions
 library(tidyverse)
 library(fpp3)
-library(cowplot)
 
 # set data dir, data used
 source("ch00-tech-prep/set-data-directory.R")             # data_dir must be first defined 

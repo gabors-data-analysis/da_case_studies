@@ -27,10 +27,7 @@ rm(list=ls())
 # Import libraries
 library(tidyverse)
 library(modelsummary)
-library(purrr)
-#library(kableExtra)
 library(cowplot)
-library(gridExtra)
 library(fixest)
 
 

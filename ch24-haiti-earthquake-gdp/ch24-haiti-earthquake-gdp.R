@@ -26,13 +26,9 @@ rm(list = ls())
 
 # Import libraries
 library(tidyverse)
-library(modelsummary)
 library(cowplot)
-library(gridExtra)
-library(purrr)
-library(kableExtra)
-library(haven)
 library(Synth)
+library(haven)
 
 
 

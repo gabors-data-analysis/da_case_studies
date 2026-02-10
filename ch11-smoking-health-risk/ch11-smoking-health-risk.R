@@ -24,16 +24,13 @@ rm(list=ls())
 # Import libraries
 library(tidyverse)
 library(xtable)
-library(haven)
-library(cowplot)
 library(lspline)
 library(data.table)
 library(mfx)
 library(margins)
 library(stargazer)
-library(psych)
-library(estimatr)
 library(huxtable)
+library(psych)
 
 
 # set working directory

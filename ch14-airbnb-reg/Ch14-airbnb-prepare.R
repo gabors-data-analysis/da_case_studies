@@ -26,7 +26,6 @@ rm(list=ls())
 
 
 library(tidyverse)
-library(stargazer)
 library(Hmisc)
 
 # option A: open material as project
