@@ -22,25 +22,25 @@ echo "" >> "$OUTPUT_FILE"
 SUCCESS_COUNT=0
 FAIL_COUNT=0
 
+# Exclusion patterns for find command
+EXCLUDE_PATHS=(
+  -path "*/ch00-tech-prep/*"
+  -o -path "*/renv/*"
+  -o -path "*/ch16-airbnb-random-forest/ch16-airbnb-random-forest.R"
+  -o -path "*/ch17-predicting-firm-exit/ch17-predicting-firm-exit.R"
+  -o -path "*/ch11-smoking-health-risk/ch11-smoking-health-risk-01-munging.R"
+  -o -path "*/ch11-smoking-health-risk/ch11-smoking-health-risk-02-analysis.R"
+)
+
 # Find all files ending in .R or .r recursively from the starting directory
 # Sort them to ensure consistent execution order (some scripts depend on others)
 # Prioritize *-prepare.R, *-munging.R, *-setup.R, *-dataprep.R, *-maker.R files first, then alphabetical
-# Exclude: ch00-tech-prep, ch16-airbnb-random-forest.R, ch17-predicting-firm-exit.R,
-#          ch11-smoking-health-risk-01-munging.R, ch11-smoking-health-risk-02-analysis.R
 scripts=$(
   {
     find "$START_DIR" -type f \( -name "*.R" -o -name "*.r" \) \
-      ! -path "*/ch00-tech-prep/*" \
-      ! -path "*/ch16-airbnb-random-forest/ch16-airbnb-random-forest.R" \
-      ! -path "*/ch17-predicting-firm-exit/ch17-predicting-firm-exit.R" \
-      ! -path "*/ch11-smoking-health-risk/ch11-smoking-health-risk-01-munging.R" \
-      ! -path "*/ch11-smoking-health-risk/ch11-smoking-health-risk-02-analysis.R" | grep -E '(prepare|munging|setup|dataprep|maker)' || true
+      ! \( "${EXCLUDE_PATHS[@]}" \) | grep -E '(prepare|munging|setup|dataprep|maker)' || true
     find "$START_DIR" -type f \( -name "*.R" -o -name "*.r" \) \
-      ! -path "*/ch00-tech-prep/*" \
-      ! -path "*/ch16-airbnb-random-forest/ch16-airbnb-random-forest.R" \
-      ! -path "*/ch17-predicting-firm-exit/ch17-predicting-firm-exit.R" \
-      ! -path "*/ch11-smoking-health-risk/ch11-smoking-health-risk-01-munging.R" \
-      ! -path "*/ch11-smoking-health-risk/ch11-smoking-health-risk-02-analysis.R" | grep -vE '(prepare|munging|setup|dataprep|maker)' || true
+      ! \( "${EXCLUDE_PATHS[@]}" \) | grep -vE '(prepare|munging|setup|dataprep|maker)' || true
   } | sort
 )
 
@@ -71,6 +71,7 @@ done <<< "$scripts"
 
 # Clean up
 rm -r tinytable_assets 2>/dev/null
+rm -r Rplots.pdf 2>/dev/null
 
 # Write summary to output file
 echo "" >> "$OUTPUT_FILE"
