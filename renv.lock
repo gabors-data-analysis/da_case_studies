@@ -340,35 +340,6 @@
       "Maintainer": "Noah Greifer <noah.greifer@gmail.com>",
       "Repository": "CRAN"
     },
-    "Matching": {
-      "Package": "Matching",
-      "Version": "4.10-15",
-      "Source": "Repository",
-      "Date": "2024-10-14",
-      "Title": "Multivariate and Propensity Score Matching with Balance Optimization",
-      "Authors@R": "c( person(\"Jasjeet\", \"Singh Sekhon\", role = c(\"aut\",\"cre\"), email = \"jas.sekhon@yale.edu\"), person(\"Theo\", \"Saarinen\", role = c(\"aut\"), email = \"theo_s@berkeley.edu\") )",
-      "Maintainer": "Jasjeet Singh Sekhon <jas.sekhon@yale.edu>",
-      "Description": "Provides functions for multivariate and propensity score matching  and for finding optimal balance based on a genetic search algorithm.  A variety of univariate and multivariate metrics to determine if balance has been obtained are also provided. For details, see the paper by Jasjeet Sekhon  (2007, <doi:10.18637/jss.v042.i07>).",
-      "Depends": [
-        "R (>= 2.6.0)",
-        "MASS (>= 7.2-1)",
-        "graphics",
-        "grDevices",
-        "stats"
-      ],
-      "Suggests": [
-        "parallel",
-        "rgenoud (>= 2.12)",
-        "testthat"
-      ],
-      "License": "GPL-3",
-      "URL": "https://github.com/JasjeetSekhon/Matching",
-      "NeedsCompilation": "yes",
-      "RoxygenNote": "7.2.1",
-      "Author": "Jasjeet Singh Sekhon [aut, cre], Theo Saarinen [aut]",
-      "Repository": "RSPM",
-      "Encoding": "UTF-8"
-    },
     "Matrix": {
       "Package": "Matrix",
       "Version": "1.7-3",
@@ -4048,60 +4019,6 @@
       "Maintainer": "Thomas Lin Pedersen <thomas.pedersen@posit.co>",
       "Repository": "RSPM"
     },
-    "ggthemes": {
-      "Package": "ggthemes",
-      "Version": "5.1.0",
-      "Source": "Repository",
-      "Title": "Extra Themes, Scales and Geoms for 'ggplot2'",
-      "Authors@R": "c(person(\"Jeffrey B.\", \"Arnold\", role = c(\"aut\", \"cre\"), email = \"jeffrey.arnold@gmail.com\",  comment = \"<https://orcid.org/0000-0001-9953-3904>\"), person(\"Gergely\", \"Daroczi\", role = \"ctb\"), person(\"Bo\", \"Werth\", role = \"ctb\"), person(\"Brian\", \"Weitzner\", role = \"ctb\"), person(\"Joshua\", \"Kunst\", role = \"ctb\"), person(\"Baptise\", \"Auguie\", role = \"ctb\"), person(\"Bob\", \"Rudis\", role = \"ctb\"), person(\"Hadley\", \"Wickham\", role = c(\"ctb\"), comment = \"Code from the ggplot2 package.\"), person(\"Justin\",  \"Talbot\", role = \"ctb\", comment = \"Code from the labeling package\"), person(\"Joshua\", \"London\", role = \"ctb\"))",
-      "Depends": [
-        "R (>= 3.3.0)"
-      ],
-      "Imports": [
-        "ggplot2 (>= 3.0.0)",
-        "graphics",
-        "grid",
-        "lifecycle",
-        "methods",
-        "purrr",
-        "scales",
-        "stringr",
-        "tibble"
-      ],
-      "Suggests": [
-        "dplyr",
-        "covr",
-        "extrafont",
-        "glue",
-        "knitr",
-        "lattice",
-        "lintr",
-        "maps",
-        "mapproj",
-        "pander",
-        "quantreg",
-        "rlang",
-        "rmarkdown",
-        "spelling",
-        "testthat (>= 3.2.0)",
-        "tidyr",
-        "vdiffr",
-        "withr"
-      ],
-      "Description": "Some extra themes, geoms, and scales for 'ggplot2'. Provides 'ggplot2' themes and scales that replicate the look of plots by Edward Tufte, Stephen Few, 'Fivethirtyeight', 'The Economist', 'Stata', 'Excel', and 'The Wall Street Journal', among others. Provides 'geoms' for Tufte's box plot and range frame.",
-      "License": "GPL-2",
-      "URL": "https://jrnold.github.io/ggthemes/, https://github.com/jrnold/ggthemes",
-      "BugReports": "https://github.com/jrnold/ggthemes/issues",
-      "RoxygenNote": "7.3.1",
-      "LazyData": "true",
-      "Language": "en-US",
-      "Encoding": "UTF-8",
-      "Config/testthat/edition": "3",
-      "NeedsCompilation": "no",
-      "Author": "Jeffrey B. Arnold [aut, cre] (<https://orcid.org/0000-0001-9953-3904>), Gergely Daroczi [ctb], Bo Werth [ctb], Brian Weitzner [ctb], Joshua Kunst [ctb], Baptise Auguie [ctb], Bob Rudis [ctb], Hadley Wickham [ctb] (Code from the ggplot2 package.), Justin Talbot [ctb] (Code from the labeling package), Joshua London [ctb]",
-      "Maintainer": "Jeffrey B. Arnold <jeffrey.arnold@gmail.com>",
-      "Repository": "CRAN"
-    },
     "glmnet": {
       "Package": "glmnet",
       "Version": "4.1-10",
@@ -5085,28 +5002,6 @@
       "Author": "Daniel Lüdecke [aut, cre] (ORCID: <https://orcid.org/0000-0002-8895-3206>), Dominique Makowski [aut, ctb] (ORCID: <https://orcid.org/0000-0001-5375-9967>), Indrajeet Patil [aut, ctb] (ORCID: <https://orcid.org/0000-0003-1995-6531>), Philip Waggoner [aut, ctb] (ORCID: <https://orcid.org/0000-0002-7825-7573>), Mattan S. Ben-Shachar [aut, ctb] (ORCID: <https://orcid.org/0000-0002-4287-4801>), Brenton M. Wiernik [aut, ctb] (ORCID: <https://orcid.org/0000-0001-9560-6336>), Vincent Arel-Bundock [aut, ctb] (ORCID: <https://orcid.org/0000-0003-2042-7063>), Etienne Bacher [aut, ctb] (ORCID: <https://orcid.org/0000-0002-9271-5075>), Alex Hayes [rev] (ORCID: <https://orcid.org/0000-0002-4985-5160>), Grant McDermott [ctb] (ORCID: <https://orcid.org/0000-0001-7883-8573>), Rémi Thériault [ctb] (ORCID: <https://orcid.org/0000-0003-4315-6788>), Alex Reinhart [ctb] (ORCID: <https://orcid.org/0000-0002-6658-514X>)",
       "Repository": "CRAN"
     },
-    "inum": {
-      "Package": "inum",
-      "Version": "1.0-5",
-      "Source": "Repository",
-      "Title": "Interval and Enum-Type Representation of Vectors",
-      "Date": "2023-03-09",
-      "Authors@R": "person(\"Torsten\", \"Hothorn\", role = c(\"aut\", \"cre\"), email = \"Torsten.Hothorn@R-project.org\")",
-      "Description": "Enum-type representation of vectors and representation of intervals, including a method of coercing variables in data frames.",
-      "Depends": [
-        "R (>= 3.3.0)"
-      ],
-      "Imports": [
-        "stats",
-        "libcoin (>= 1.0-0)"
-      ],
-      "License": "GPL-2",
-      "NeedsCompilation": "no",
-      "Author": "Torsten Hothorn [aut, cre]",
-      "Maintainer": "Torsten Hothorn <Torsten.Hothorn@R-project.org>",
-      "Repository": "RSPM",
-      "Encoding": "UTF-8"
-    },
     "ipred": {
       "Package": "ipred",
       "Version": "0.9-15",
@@ -5613,34 +5508,6 @@
       "Author": "Hadley Wickham [aut, cre], RStudio [cph]",
       "Maintainer": "Hadley Wickham <hadley@rstudio.com>",
       "Repository": "CRAN"
-    },
-    "libcoin": {
-      "Package": "libcoin",
-      "Version": "1.0-10",
-      "Source": "Repository",
-      "Title": "Linear Test Statistics for Permutation Inference",
-      "Date": "2023-09-26",
-      "Authors@R": "c(person(\"Torsten\", \"Hothorn\", role = c(\"aut\", \"cre\"), email = \"Torsten.Hothorn@R-project.org\", comment = c(ORCID = \"0000-0001-8301-0471\")), person(\"Henric\", \"Winell\", role = \"aut\", comment = c(ORCID = \"0000-0001-7995-3047\")))",
-      "Description": "Basic infrastructure for linear test statistics and permutation inference in the framework of Strasser and Weber (1999) <https://epub.wu.ac.at/102/>. This package must not be used by end-users. CRAN package 'coin' implements all user interfaces and is ready to be used by anyone.",
-      "Depends": [
-        "R (>= 3.4.0)"
-      ],
-      "Suggests": [
-        "coin"
-      ],
-      "Imports": [
-        "stats",
-        "mvtnorm"
-      ],
-      "LinkingTo": [
-        "mvtnorm"
-      ],
-      "NeedsCompilation": "yes",
-      "License": "GPL-2",
-      "Author": "Torsten Hothorn [aut, cre] (<https://orcid.org/0000-0001-8301-0471>), Henric Winell [aut] (<https://orcid.org/0000-0001-7995-3047>)",
-      "Maintainer": "Torsten Hothorn <Torsten.Hothorn@R-project.org>",
-      "Repository": "RSPM",
-      "Encoding": "UTF-8"
     },
     "lifecycle": {
       "Package": "lifecycle",
@@ -6877,59 +6744,6 @@
       "NeedsCompilation": "no",
       "Author": "Daniel Lüdecke [aut, cre] (ORCID: <https://orcid.org/0000-0002-8895-3206>), Dominique Makowski [aut] (ORCID: <https://orcid.org/0000-0001-5375-9967>), Mattan S. Ben-Shachar [aut] (ORCID: <https://orcid.org/0000-0002-4287-4801>), Indrajeet Patil [aut] (ORCID: <https://orcid.org/0000-0003-1995-6531>), Søren Højsgaard [aut], Brenton M. Wiernik [aut] (ORCID: <https://orcid.org/0000-0001-9560-6336>), Zen J. Lau [ctb], Vincent Arel-Bundock [ctb] (ORCID: <https://orcid.org/0000-0003-2042-7063>), Jeffrey Girard [ctb] (ORCID: <https://orcid.org/0000-0002-7359-3746>), Christina Maimone [rev], Niels Ohlsen [rev], Douglas Ezra Morrison [ctb] (ORCID: <https://orcid.org/0000-0002-7195-830X>), Joseph Luchman [ctb] (ORCID: <https://orcid.org/0000-0002-8886-9717>)",
       "Repository": "CRAN"
-    },
-    "partykit": {
-      "Package": "partykit",
-      "Version": "1.2-24",
-      "Source": "Repository",
-      "Title": "A Toolkit for Recursive Partytioning",
-      "Date": "2025-05-02",
-      "Authors@R": "c(person(given = \"Torsten\", family = \"Hothorn\", role = c(\"aut\", \"cre\"), email = \"Torsten.Hothorn@R-project.org\", comment = c(ORCID = \"0000-0001-8301-0471\")), person(given = \"Heidi\", family = \"Seibold\", role = \"ctb\", email = \"heidi@seibold.co\", comment = c(ORCID = \"0000-0002-8960-9642\")), person(given = \"Achim\", family = \"Zeileis\", role = \"aut\", email = \"Achim.Zeileis@R-project.org\", comment = c(ORCID = \"0000-0003-0918-3766\")))",
-      "Description": "A toolkit with infrastructure for representing, summarizing, and visualizing tree-structured regression and classification models. This unified infrastructure can be used for reading/coercing tree models from different sources ('rpart', 'RWeka', 'PMML') yielding objects that share functionality for print()/plot()/predict() methods. Furthermore, new and improved reimplementations of conditional inference trees (ctree()) and model-based recursive partitioning (mob()) from the 'party' package are provided based on the new infrastructure. A description of this package was published by Hothorn and Zeileis (2015) <https://jmlr.org/papers/v16/hothorn15a.html>.",
-      "Depends": [
-        "R (>= 3.5.0)",
-        "graphics",
-        "grid",
-        "libcoin (>= 1.0-0)",
-        "mvtnorm"
-      ],
-      "Imports": [
-        "grDevices",
-        "stats",
-        "utils",
-        "survival",
-        "Formula (>= 1.2-1)",
-        "inum (>= 1.0-0)",
-        "rpart (>= 4.1-11)"
-      ],
-      "Suggests": [
-        "XML",
-        "pmml",
-        "rJava",
-        "sandwich",
-        "strucchange",
-        "vcd",
-        "AER",
-        "mlbench",
-        "TH.data (>= 1.0-3)",
-        "coin (>= 1.1-0)",
-        "RWeka (>= 0.4-19)",
-        "datasets",
-        "parallel",
-        "psychotools (>= 0.3-0)",
-        "psychotree",
-        "party (>= 1.3-0)",
-        "randomForest"
-      ],
-      "LazyData": "yes",
-      "License": "GPL-2 | GPL-3",
-      "URL": "http://partykit.r-forge.r-project.org/partykit/",
-      "RoxygenNote": "6.1.1",
-      "NeedsCompilation": "yes",
-      "Author": "Torsten Hothorn [aut, cre] (ORCID: <https://orcid.org/0000-0001-8301-0471>), Heidi Seibold [ctb] (ORCID: <https://orcid.org/0000-0002-8960-9642>), Achim Zeileis [aut] (ORCID: <https://orcid.org/0000-0003-0918-3766>)",
-      "Maintainer": "Torsten Hothorn <Torsten.Hothorn@R-project.org>",
-      "Repository": "RSPM",
-      "Encoding": "UTF-8"
     },
     "pastecs": {
       "Package": "pastecs",
@@ -8760,28 +8574,6 @@
       "Author": "Jennifer Bryan [aut, cre] (<https://orcid.org/0000-0002-6983-2759>), Jim Hester [aut] (<https://orcid.org/0000-0002-2739-7082>), David Robinson [aut], Hadley Wickham [aut] (<https://orcid.org/0000-0003-4757-117X>), Christophe Dervieux [aut] (<https://orcid.org/0000-0003-4474-2498>), Posit Software, PBC [cph, fnd]",
       "Maintainer": "Jennifer Bryan <jenny@posit.co>",
       "Repository": "RSPM"
-    },
-    "reshape": {
-      "Package": "reshape",
-      "Version": "0.8.10",
-      "Source": "Repository",
-      "Title": "Flexibly Reshape Data",
-      "Description": "Flexibly restructure and aggregate data using  just two functions: melt and cast.",
-      "Authors@R": "person(\"Hadley\", \"Wickham\", , \"hadley@rstudio.com\", c(\"aut\", \"cre\"))",
-      "URL": "http://had.co.nz/reshape",
-      "Depends": [
-        "R (>= 2.6.1)"
-      ],
-      "Imports": [
-        "plyr"
-      ],
-      "License": "MIT + file LICENSE",
-      "LazyData": "true",
-      "NeedsCompilation": "no",
-      "Author": "Hadley Wickham [aut, cre]",
-      "Maintainer": "Hadley Wickham <hadley@rstudio.com>",
-      "Repository": "RSPM",
-      "Encoding": "UTF-8"
     },
     "reshape2": {
       "Package": "reshape2",
