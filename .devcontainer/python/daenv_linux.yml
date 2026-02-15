@@ -1,0 +1,43 @@
+name: daenv
+channels:
+  - conda-forge
+dependencies:
+  # Core runtime
+  - python=3.12.4
+  - pip
+  # Data science core (pinned for reproducibility)
+  - numpy=1.26.4
+  - pandas=2.2.3
+  - scipy=1.15.2
+  - scikit-learn=1.6.1
+  - statsmodels=0.14.5
+  - matplotlib=3.10.1
+  - seaborn=0.13.2
+  # Prophet & Backend
+  - prophet=1.2.1
+  - cmdstanpy
+  - cmdstan
+  # Notebook execution
+  - nbconvert
+  - ipykernel
+  # Graphviz for decision trees
+  - graphviz
+  - pip:
+      # Analysis packages
+      - arch==7.0.0
+      - pyfixest==0.30.2
+      - stargazer==0.0.7
+      - shap==0.46.0
+      - lime==0.2.0.1
+      - scikit-image==0.25.2
+      - scikit-misc==0.5.1
+      - pmdarima==2.0.4
+      - pysyncon==1.5.1
+      - pydotplus==2.0.2
+      # Utilities
+      - openpyxl==3.1.5
+      - beautifulsoup4==4.13.4
+      - great-tables==0.18.0
+      - tabulate==0.9.0
+      - pandas-market-calendars==4.4.1
+      - regex==2023.10.3
