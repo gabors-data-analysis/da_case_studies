@@ -1,4 +1,4 @@
-# python ch00-tech-prep/test_env.py
+# python ch00-tech-prep/run_all_python.py
 
 import unittest
 import nbconvert
@@ -86,7 +86,7 @@ class TestNotebooks(unittest.TestCase):
                 env = os.environ.copy()
                 env["MPLBACKEND"] = "Agg"
                 
-                # Add ch00-tech-prep to PYTHONPATH so notebooks can find py_helper_functions
+                # Add ch00-tech-prep to PYTHONPATH so notebooks can find da_helper_functions
                 repo_root = os.getcwd()
                 tech_prep_path = os.path.join(repo_root, "ch00-tech-prep")
                 if "PYTHONPATH" in env:

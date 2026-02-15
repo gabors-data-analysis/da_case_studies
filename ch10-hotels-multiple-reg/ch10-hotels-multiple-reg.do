@@ -13,142 +13,190 @@
 * Chapter 10
 * CH10A Finding a good deal among hotels with multiple regression
 * using the hotels-vienna dataset
-* version 0.9 2020-09-06
+* version 1.1 2025-12-09
+*
+* STATA VERSION: This code is optimized for Stata 18
+* Backward compatibility notes for Stata 15 and below are included
 ********************************************************************
 
+* Stata version check and setup
+version 18
+clear all
+set more off
+set varabbrev off
 
+
+********************************************************************
 * SETTING UP DIRECTORIES
+********************************************************************
 
-* STEP 1: set working directory for da_case_studies.
-* for example:
-* cd "C:/Users/xy/Dropbox/gabors_data_analysis/da_case_studies"
+* STEP 1: set working directory for da_case_studies
+* Example: cd "C:/Users/xy/Dropbox/gabors_data_analysis/da_case_studies"
 
-* STEP 2: * Directory for data
-* Option 1: run directory-setting do file
-do set-data-directory.do 
-							/* this is a one-line do file that should sit in 
-							the working directory you have just set up
-							this do file has a global definition of your working directory
-							more details: gabors-data-analysis.com/howto-stata/   */
+* STEP 2: Set data directory
+* Option 1: Run directory-setting do file (RECOMMENDED)
+capture do set-data-directory.do 
+	/* This one-line do file should sit in your working directory
+	   It contains: global data_dir "path/to/da_data_repo"
+	   More details: gabors-data-analysis.com/howto-stata/ */
 
-* Option 2: set directory directly here
-* for example:
-* global data_dir "C:/Users/xy/gabors_data_analysis/da_data_repo"
+* Option 2: Set directory directly here
+* Example: global data_dir "C:/Users/xy/gabors_data_analysis/da_data_repo"
 
+* Set up paths
+global data_in  "${data_dir}/hotels-vienna/clean"
+global work     "ch10-hotels-multiple-reg"
+global output   "${work}/output"
 
-global data_in  "$data_dir/hotels-vienna/clean"
-global work  	"ch10-hotels-multiple-reg"
-
-cap mkdir 		"$work/output"
-global output 	"$work/output"
-
-
+* Create directories
+capture mkdir "${work}"
+capture mkdir "${output}"
 
 
-* add user written library
-ssc install listtex
+********************************************************************
+* LOAD DATA
+********************************************************************
 
-*********************************************************************
-*** LOAD and PREP DATA
+* Option 1: Load from local repository
+use "${data_in}/hotels-vienna.dta", clear
 
-
-
-* load in clean and tidy data and create workfile
-use "$data_in/hotels-vienna.dta", clear
-
-* Or download directly from OSF:
+* Option 2: Download directly from OSF (uncomment to use)
 /*
-copy "https://osf.io/download/dn8je/" "workfile.dta"
-use "workfile.dta", clear
-erase "workfile.dta"
-*/ 
+tempfile hotels_data
+copy "https://osf.io/download/dn8je/" `hotels_data'
+use `hotels_data', clear
+*/
 
 
+********************************************************************
+* SAMPLE SELECTION
+********************************************************************
 
-*** SAMPLE SELECTION
+* Keep 3 to 4-star hotels (including 3.5 stars)
+keep if stars >= 3 & stars <= 4
+keep if accommodation_type == "Hotel"
+label variable distance "Distance to city center, miles"
 
-*** 3 to 4-star hotels (incl 3.5 stars)
-keep if stars>=3 & stars<=4
-keep if accommodation_type=="Hotel"
-label var distance "Distance to city center, miles"
-drop if price>600 	/* likely error */
+* Drop likely error (price > $600)
+drop if price > 600
+
+* Keep only hotels actually in Vienna
+tabulate city_actual
+
+keep if city_actual == "Vienna"
+
+count
+display as text "Final sample size: " as result r(N) " hotels"
 
 
-*** drop hotels not really in Vienna
-tab city_actual 
-keep if city_actual=="Vienna"
+********************************************************************
+* FEATURE ENGINEERING
+********************************************************************
 
-*** take log price
-gen lnprice=ln(price)
- lab var lnprice "ln(Price)"
+* Log price
+generate lnprice = ln(price)
+label variable lnprice "ln(Price)"
 
-*** piecewise lins pline of distance
+* Piecewise linear spline for distance (knots at 1 and 4 miles)
 mkspline distsp1 1 distsp2 4 distsp3 = distance
 
-*** piecewise lins pline rating
-mkspline ratingsp1 3.5 ratingsp2  = rating
+* Piecewise linear spline for rating (knot at 3.5)
+mkspline ratingsp1 3.5 ratingsp2 = rating
 
-*** stars: binary indicators
-gen star35 = stars==3.5
-gen star4 = stars==4
+* Star rating: binary indicators
+generate star35 = (stars == 3.5)
+generate star4 = (stars == 4)
 
-tabstat price distance lnprice, s(mean sd min p25 p50 p75 max n) col(s)
- 
-
-*********************************************************************
-*regressions
-*********************************************************************
-
-reg lnprice distance, robust  
- outreg2 using "$output/T10_hotels.tex",  tex(frag) excel bdec(3) replace 
-reg lnprice rating, robust  
- outreg2 using "$output/T10_hotels.tex",  tex(frag) excel bdec(3) append
-reg lnprice distance rating, robust  
- outreg2 using "$output/T10_hotels.tex",  tex(frag) excel bdec(2) append
-reg distance rating, robust  
- outreg2 using "$output/T10_hotels.tex",  tex(frag) excel bdec(2) append
+* Summary statistics
+tabstat price distance lnprice, ///
+    statistics(mean sd min p25 p50 p75 max n) columns(statistics)
 
 
+********************************************************************
+* BASIC REGRESSIONS
+********************************************************************
+
+* Distance only
+regress lnprice distance, robust
+outreg2 using "${output}/ch10-table-1-hotels-basic-Stata.tex", ///
+    tex(fragment) excel bdec(3) replace
+
+* Rating only  
+regress lnprice rating, robust
+outreg2 using "${output}/ch10-table-1-hotels-basic-Stata.tex", ///
+    tex(fragment) excel bdec(3) append
+
+* Distance and rating
+regress lnprice distance rating, robust
+outreg2 using "${output}/ch10-table-1-hotels-basic-Stata.tex", ///
+    tex(fragment) excel bdec(2) append
+
+* Auxiliary regression: distance on rating
+regress distance rating, robust
+outreg2 using "${output}/ch10-table-1-hotels-basic-Stata.tex", ///
+    tex(fragment) excel bdec(2) append
 
 
-* basic
-reg lnprice distance rating, robust  
+********************************************************************
+* MULTIPLE REGRESSION WITH SPLINES
+********************************************************************
 
-
-* predicted values 
-reg lnprice distsp1 distsp2 distsp3 star35 star4 ratingsp1 ratingsp2, robust  
+* Full model with splines and star indicators
+regress lnprice distsp1 distsp2 distsp3 star35 star4 ratingsp1 ratingsp2, robust
 predict lnprice_hat
-predict lnprice_resid, resid
+predict lnprice_resid, residual
 
-* compare R-sqared with distance only
-reg lnprice distsp1 distsp2 distsp3,r 
+* Compare R-squared: distance splines only vs. full model
+regress lnprice distsp1 distsp2 distsp3, robust
 
-* list of 5 best deals
+
+********************************************************************
+* IDENTIFY BEST DEALS
+********************************************************************
+
+* Sort by residuals (lowest = best deals)
 sort lnprice_resid
 
+* Format for display
 format lnprice_resid %5.3f
 format distance %3.1f
-list hotel_id price lnprice_resid distance stars rating if _n<=5
-* outputing the list in a LaTex format
-listtex hotel_id price lnprice_resid distance stars rating ///
- using "$output\ch10-table-6-hotels-good-deals-Stata.tex" if _n<=5, replace ///  
- headlines( "\begin{tabular}{l c c c c c}" ///
- \hline "Hotel name & price & residual in ln(price) & distance & stars & rating \\" \hline) ///
- footlines(\hline \end{tabular}) rstyle(tabular) 
- /* the tabular style makes the table LaTex friendly */
- /* headlines defines the way the table layed out */
 
-* yhat - y graph
-* two scatterplot commants, one for best 5 deals, one for rest
-* Figure 10.3
+* List top 5 best deals
+display as text _newline "Top 5 Best Hotel Deals:"
+list hotel_id price lnprice_resid distance stars rating if _n <= 5
+
+* Export to LaTeX table
+listtex hotel_id price lnprice_resid distance stars rating ///
+    using "${output}/ch10-table-6-hotels-good-deals-Stata.tex" ///
+    if _n <= 5, replace ///
+    headlines("\begin{tabular}{l c c c c c}" ///
+    "\hline" ///
+    "Hotel name & Price & Residual & Distance & Stars & Rating \\" ///
+    "\hline") ///
+    footlines("\hline" "\end{tabular}") ///
+    rstyle(tabular)
+
+
+********************************************************************
+* FIGURE 3: PREDICTED VS ACTUAL (Y-HAT VS Y)
+********************************************************************
+
+* Create scatter plot with best deals highlighted
 sort lnprice_resid
-scatter lnprice lnprice_hat if _n>5, ms(O) mc(navy*0.6) ///
- || scatter lnprice lnprice_hat if _n<=5, ms(O) mc(black) ///
- || line lnprice lnprice, sort lw(thick) lc(green*0.6) lp(dash)  ///
- graphregion(fcolor(white) ifcolor(none))  ///
- plotregion(fcolor(white) ifcolor(white)) ///
- xlab(3.75(0.25)6, grid) ylab(3.75(0.25)6, grid) legend(off) ///
- ytitle("ln(price, US dollars)") xtitle("predicted ln(price, US dollars)") ///
- text(4.1 4.84 "Best deal") 
-graph export "$output\ch10-figure-3-hitels-yhat-y.png", replace
- 
+
+scatter lnprice lnprice_hat if _n > 5, ///
+    msize(medium) mcolor(navy*0.6) ///
+    || scatter lnprice lnprice_hat if _n <= 5, ///
+    msize(medium) mcolor(black) ///
+    || line lnprice lnprice, sort lwidth(thick) lcolor(green*0.6) ///
+    lpattern(dash) ///
+    graphregion(fcolor(white) ifcolor(none)) ///
+    plotregion(fcolor(white) ifcolor(white)) ///
+    xlabel(3.75(0.25)6, grid) ylabel(3.75(0.25)6, grid) ///
+    legend(off) ///
+    ytitle("ln(price, US dollars)") ///
+    xtitle("Predicted ln(price, US dollars)") ///
+    text(4.1 4.84 "Best deal")
+graph export "${output}/ch10-figure-3-hotels-yhat-y-Stata.png", replace
+
+

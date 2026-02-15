@@ -24,16 +24,13 @@ rm(list=ls())
 # Import libraries
 library(tidyverse)
 library(xtable)
-library(haven)
-library(cowplot)
 library(lspline)
 library(data.table)
 library(mfx)
 library(margins)
 library(stargazer)
-library(psych)
-library(estimatr)
 library(huxtable)
+library(psych)
 
 
 # set working directory
@@ -321,7 +318,6 @@ summary(lpm, vcov=sandwich)
 logit <- glm(stayshealthy ~ smoking + ever_smoked + female + age + lspline(eduyears, c(8,18)) + 
                income10 + lspline(bmi, c(35)) + exerc + as.factor(country), data=share, family='binomial')
 summary(logit)
-glance(logit)
 #TODO
 # consider change to margins package
 

@@ -21,7 +21,6 @@ rm(list=ls())
 
 # Import libraries
 library(tidyverse)
-library(scales)
 
 
 # set working directory

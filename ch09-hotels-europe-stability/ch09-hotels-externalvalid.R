@@ -26,10 +26,7 @@ rm(list=ls())
 
 # Import libraries
 library(tidyverse)
-library(haven)
-library(data.table)
 library(rms)
-# library(xtabs)
 library(lspline)
 library(huxtable)
 library(modelsummary)

@@ -1,0 +1,133 @@
+name: Test R Scripts
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - '**/*.R'
+      - '**/*.r'
+      - 'renv.lock'
+      - 'ch00-tech-prep/run_all_r.sh'
+      - 'ch00-tech-prep/set-data-directory.R'
+      - '.github/workflows/test_r_scripts.yml'
+  pull_request:
+    branches: [main, master]
+    paths:
+      - '**/*.R'
+      - '**/*.r'
+      - 'renv.lock'
+      - 'ch00-tech-prep/run_all_r.sh'
+      - 'ch00-tech-prep/set-data-directory.R'
+      - '.github/workflows/test_r_scripts.yml'
+  workflow_dispatch:
+
+jobs:
+  test-r:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-22.04
+            os_name: linux
+          - os: macos-14
+            os_name: macos
+          - os: windows-2022
+            os_name: windows
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Windows paths (Windows)
+        if: matrix.os_name == 'windows'
+        shell: cmd
+        run: |
+          REM The default checkout on Windows is D:\a\da_case_studies\da_case_studies
+          REM Some scripts assume the repo lives at D:\a\da_case_studies
+          REM Create junctions to align expected paths
+
+          cd /d D:\a\da_case_studies
+
+          for /d %%i in (da_case_studies\ch*) do mklink /J "%%~nxi" "%%i"
+          for /d %%i in (da_case_studies\da*) do mklink /J "%%~nxi" "%%i"
+          for /d %%i in (da_case_studies\pre*) do mklink /J "%%~nxi" "%%i"
+
+          dir
+
+      - name: Install System Dependencies (Linux)
+        if: matrix.os_name == 'linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential libcurl4-openssl-dev libpng-dev libharfbuzz-dev libfribidi-dev pandoc
+
+      - name: Install System Dependencies (macOS)
+        if: matrix.os_name == 'macos'
+        run: |
+          brew install xquartz gettext gcc gfortran libpng pandoc
+          brew link gettext --force
+
+      - name: Install System Dependencies (Windows)
+        if: matrix.os_name == 'windows'
+        run: choco install pandoc
+
+      - name: Setup Data and Paths
+        shell: bash
+        run: |
+          REPO_DIR="${{ github.workspace }}"
+          PARENT_DIR=$(dirname "$REPO_DIR")
+          cd "$REPO_DIR"
+
+          # 1. Download and extract da_data_repo
+          curl -sL "https://files.osf.io/v1/resources/3u5em/providers/osfstorage/?zip=" -o data.zip
+          unzip -q data.zip && unzip -q da_data_repo.zip
+
+          # 2. Move da_data_repo to parent directory (sibling of da_case_studies)
+          rm -rf "$PARENT_DIR/da_data_repo"
+          mv da_data_repo "$PARENT_DIR/"
+
+          # 3. Cleanup
+          rm data.zip da_data_repo.zip
+          rm -rf __MACOSX
+
+          # 4. Create set-data-directory.R from example
+          cp ch00-tech-prep/set-data-directory-example.R ch00-tech-prep/set-data-directory.R
+
+          # 5. Export data path for reference (optional)
+          echo "DA_DATA_DIR=$PARENT_DIR/da_data_repo" >> "$GITHUB_ENV"
+
+      - name: Set up R
+        uses: r-lib/actions/setup-r@v2
+
+      - name: Configure R compilation (macOS)
+        if: matrix.os_name == 'macos'
+        run: |
+          GETTEXT_DIR=$(brew --prefix gettext)
+          LIBPNG_DIR=$(brew --prefix libpng)
+          mkdir -p ~/.R
+          cat > ~/.R/Makevars << EOF
+          LDFLAGS=-L${GETTEXT_DIR}/lib -L${LIBPNG_DIR}/lib
+          CPPFLAGS=-I${GETTEXT_DIR}/include -I${LIBPNG_DIR}/include
+          EOF
+          cat ~/.R/Makevars
+
+      - name: Restore R packages (renv)
+        uses: r-lib/actions/setup-renv@v2
+        with:
+          cache-version: 2
+          bypass-cache: "never"
+
+      - name: Run R script tests
+        shell: bash
+        run: |
+          bash ch00-tech-prep/run_all_r.sh
+
+      - name: Upload test artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: failed-r-test-outputs-${{ matrix.os_name }}
+          path: |
+            **/*.log
+          retention-days: 7

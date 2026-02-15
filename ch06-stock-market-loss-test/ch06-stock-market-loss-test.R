@@ -22,12 +22,8 @@ rm(list=ls())
 
 # Import libraries
 library(tidyverse)
-#install.packages("arm")
 library(arm)
-#install.packages("pastecs")
 library(pastecs)
-#install.packages("DataCombine")
-# library(DataCombine)
 library(janitor)
 
 

@@ -27,9 +27,6 @@ rm(list=ls())
 library(tidyverse)
 library(haven)
 library(zoo)
-library(stargazer)
-library(estimatr)
-library(modelsummary)
 library(cowplot)
 
 # set data dir, data used

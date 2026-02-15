@@ -23,7 +23,6 @@ rm(list=ls())
 # Import libraries
 library(tidyverse)
 library(scales)
-library(xtable)
 library(modelsummary)
 
 

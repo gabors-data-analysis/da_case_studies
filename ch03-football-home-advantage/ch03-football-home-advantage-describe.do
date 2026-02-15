@@ -11,25 +11,48 @@
 * 	Not to be used for commercial purposes.
 *
 * Chapter 03
-* CH03C Measurig home team advantage in football
+* CH03D Describe the likelihood of loss / tie / win for home team
 * using the football dataset
-* version 0.9 2020-09-06
+* version 1.1 2025-12-09
+*
+* STATA VERSION: This code is optimized for Stata 18
+* Backward compatibility notes for Stata 15 and below are included
 ********************************************************************
 
+* Stata version check and setup
+version 18
+clear all
+set more off
+set varabbrev off
 
+
+********************************************************************
 * SETTING UP DIRECTORIES
+********************************************************************
 
-* STEP 1: set working directory for da_case_studies.
-* for example:
-* cd "C:/Users/xy/Dropbox/gabors_data_analysis/da_case_studies"
+* STEP 1: set working directory for da_case_studies
+* Example: cd "C:/Users/xy/Dropbox/gabors_data_analysis/da_case_studies"
 
-* STEP 2: * Directory for data
-* Option 1: run directory-setting do file
-do set-data-directory.do 
-							/* this is a one-line do file that should sit in 
-							the working directory you have just set up
-							this do file has a global definition of your working directory
-							more details: gabors-data-analysis.com/howto-stata/   */
+* STEP 2: Set data directory
+* Option 1: Run directory-setting do file (RECOMMENDED)
+capture do set-data-directory.do 
+	/* This one-line do file should sit in your working directory
+	   It contains: global data_dir "path/to/da_data_repo"
+	   More details: gabors-data-analysis.com/howto-stata/ */
+
+* Option 2: Set directory directly here
+* Example: global data_dir "C:/Users/xy/gabors_data_analysis/da_data_repo"
+
+* Set up paths
+global data_in  "${data_dir}/football/clean"
+global work     "ch03-football-home-advantage"
+global output   "${work}/output"
+
+* Create directories
+capture mkdir "${work}"
+capture mkdir "${output}"
+
+
 
 * Option 2: set directory directly here
 * for example:
@@ -38,13 +61,13 @@ do set-data-directory.do
 global data_in  "$data_dir/football/clean"
 global work  	"ch03-football-home-advantage"
 
-cap mkdir 		"$work/output"
-global output 	"$work/output"
+capture mkdir 		"${work}/output"
+global output 	"${work}/output"
 
 
 
-* use full 11 season data table on games
-use "$data_in\epl_games.dta", clear
+* Use full 11 season data table on games
+use "${data_in}/epl_games.dta", clear
 
 * Or download directly from OSF:
 /*
@@ -53,34 +76,40 @@ use "workfile.dta", clear
 erase "workfile.dta"
 */ 
 
-* sample design: keep one season
+* Sample design: keep one season
 keep if season == 2016
 
-* generate home goal advantage
-gen home_goaladv = goals_home- goals_away
-* generate direction of home goal advantage (negative - zero - positive)
-gen home_goaldir = -1 if home_goaladv<0
- replace home_goaldir = 0 if home_goaladv==0
- replace home_goaldir = 1 if home_goaladv>0
+* Generate home goal advantage
+generate home_goaladv = goals_home - goals_away
+
+* Generate direction of home goal advantage (negative - zero - positive)
+generate home_goaldir = -1 if home_goaladv<0
+replace home_goaldir = 0 if home_goaladv==0
+replace home_goaldir = 1 if home_goaladv>0
 
 
 
-* histogram
+* Histogram
 * Figure 3.9
 colorpalette viridis, n(4) select(2) nograph
-histogram home_goaladv,  ///
-	discrete percent ///
-	ylabel(0(5)25, grid) xlabel(-6(1)6, grid) /// 
-	color(`r(p)') lcol(white) lw(vthin) ///
-	ytitle(Share of games (percent)) xtitle(Goal difference) ///
-	addlabel addlabopts(yvarformat(%4.1f))  ///
-	graphregion(fcolor(white) ifcolor(none)) ///
-	plotregion(fcolor(white) ifcolor(white)) 	
- graph export "$output/ch03-figure-9-hist-goaldiff-Stata.png", replace
+local color1 `r(p)'
 
-* statistics
+histogram home_goaladv, ///
+	discrete percent ///
+	ylabel(0(5)25, grid) ///
+	xlabel(-6(1)6, grid) ///
+	color("`color1'") lcol(white) lw(vthin) ///
+	ytitle(Share of games (percent)) ///
+	xtitle(Goal difference) ///
+	addlabel addlabopts(yvarformat(%4.1f)) ///
+	graphregion(fcolor(white) ifcolor(none)) ///
+	plotregion(fcolor(white) ifcolor(white))
+
+graph export "${output}/ch03-figure-9-hist-goaldiff-Stata.png", replace as(png)
+
+* Statistics
 * Table 3.7
-* same as Table 3.9
+* Same as Table 3.9
 tabstat home_goaladv, s(mean sd n) format(%4.1f)
-tab home_goaldir
+tabulate home_goaldir
 

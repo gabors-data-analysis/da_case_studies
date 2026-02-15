@@ -25,9 +25,7 @@ rm(list=ls())
 
 # Descriptive statistics and regressions
 library(tidyverse)
-library(haven)
 library(fixest)
-library(reshape)
 library(cowplot)
 
 # set data dir, data used
