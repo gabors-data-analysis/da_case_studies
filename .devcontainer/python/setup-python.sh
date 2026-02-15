@@ -8,11 +8,8 @@ echo "========================================="
 echo "Setting up Python environment..."
 echo "========================================="
 
-# Resolve workspace folder
-WORKSPACE_FOLDER="${CODESPACE_VSCODE_FOLDER:-/workspaces}"
-
 # Navigate to the environment definition
-cd "$WORKSPACE_FOLDER/da_case_studies/ch00-tech-prep"
+cd "workspaces/da_case_studies/ch00-tech-prep"
 
 # Create conda environment if it does not already exist
 echo "Ensuring conda environment 'daenv' exists..."
