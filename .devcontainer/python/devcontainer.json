@@ -2,8 +2,10 @@
   // Python-only devcontainer for data analysis case studies
   "name": "Data Analysis - Python",
 
-  // Lightweight Python + conda base image
-  "image": "mcr.microsoft.com/devcontainers/miniconda:3",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": ".."
+  },
 
   "features": {
     "ghcr.io/devcontainers/features/git:1": {},
@@ -17,9 +19,6 @@
   "containerEnv": {
     "DEBIAN_FRONTEND": "noninteractive"
   },
-
-  // Install Python environment non-interactively
-  "postCreateCommand": "bash .devcontainer/python/setup-python.sh",
 
   "customizations": {
     "vscode": {

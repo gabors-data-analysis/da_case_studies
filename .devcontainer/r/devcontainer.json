@@ -3,8 +3,10 @@
   // This container provides a lightweight R environment for VS Code (no RStudio)
   "name": "Data Analysis - R",
   
-  // Use the Rocker R base image (lightweight, no RStudio)
-  "image": "ghcr.io/rocker-org/devcontainer/r-ver:4.5",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": ".."
+  },
   
   "features": {
     "ghcr.io/devcontainers/features/git:1": {},
@@ -18,10 +20,6 @@
   "containerEnv": {
     "DEBIAN_FRONTEND": "noninteractive"
   },
-
-  // Run setup script after container is created
-  // This restores R packages from renv.lock non-interactively
-  "postCreateCommand": "bash .devcontainer/r/setup-r.sh",
 
   "customizations": {
     "vscode": {
@@ -55,8 +53,5 @@
   
   "forwardPorts": [],
 
-  "workspaceFolder": "/workspaces/da_case_studies",
-  
-  // Post-attach message
-  "postAttachCommand": "echo 'R environment ready. R packages installed via renv.'"
+  "workspaceFolder": "/workspaces/da_case_studies"
 }
