@@ -7,7 +7,7 @@ RUN conda install -n base -c conda-forge mamba -y && \
     conda clean -afy
 
 # Copy env file (symlink resolves automatically)
-COPY daenv_linux.yml /tmp/daenv_linux.yml
+COPY python/daenv_linux.yml /tmp/daenv_linux.yml
 
 # Create environment
 RUN mamba env create -f /tmp/daenv_linux.yml && \
@@ -16,5 +16,3 @@ RUN mamba env create -f /tmp/daenv_linux.yml && \
 # Make env default
 ENV CONDA_DEFAULT_ENV=daenv
 ENV PATH=/opt/conda/envs/daenv/bin:$PATH
-
-RUN echo "conda activate daenv" >> /etc/bash.bashrc
