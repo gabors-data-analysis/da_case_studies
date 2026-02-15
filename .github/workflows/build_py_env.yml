@@ -1,4 +1,4 @@
-name: Py Env Build & Puch Docker Img
+name: Py Env Build & Push Docker Img
 
 on:
   push:

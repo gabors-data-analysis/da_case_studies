@@ -1,4 +1,4 @@
-name: R Env Build & Puch Docker Img
+name: R Env Build & Push Docker Img
 
 on:
   push:
