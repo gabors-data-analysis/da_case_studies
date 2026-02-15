@@ -7,7 +7,7 @@ RUN conda install -n base -c conda-forge mamba -y && \
     conda clean -afy
 
 # Copy env file (symlink resolves automatically)
-COPY python/daenv_linux.yml /tmp/daenv_linux.yml
+COPY .devcontainer/python/daenv_linux.yml /tmp/daenv_linux.yml
 
 # Create environment
 RUN mamba env create -f /tmp/daenv_linux.yml && \

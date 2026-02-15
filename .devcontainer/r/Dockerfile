@@ -25,7 +25,7 @@ RUN R -e "install.packages('renv', repos='https://cloud.r-project.org')"
 WORKDIR /usr/local/src/project
 
 # Copy renv.lock (via symlink)
-COPY r/renv.lock renv.lock
+COPY .devcontainer/r/renv.lock renv.lock
 
 # Restore packages
 RUN R -e "renv::restore(lockfile = 'renv.lock', prompt = FALSE)"
