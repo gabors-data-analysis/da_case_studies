@@ -3,7 +3,8 @@
   "name": "Data Analysis - Python",
 
   "build": {
-    "dockerfile": "Dockerfile"
+    "dockerfile": "Dockerfile",
+    "context": ".."
   },
 
   "features": {

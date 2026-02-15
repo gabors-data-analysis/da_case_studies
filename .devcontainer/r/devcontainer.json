@@ -4,7 +4,8 @@
   "name": "Data Analysis - R",
   
   "build": {
-    "dockerfile": "Dockerfile"
+    "dockerfile": "Dockerfile",
+    "context": ".."
   },
   
   "features": {
