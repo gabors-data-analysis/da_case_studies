@@ -9,7 +9,7 @@ echo "Setting up Python environment..."
 echo "========================================="
 
 # Navigate to the environment definition
-cd "workspaces/da_case_studies/ch00-tech-prep"
+cd "/workspaces/da_case_studies/ch00-tech-prep"
 
 # Create conda environment if it does not already exist
 echo "Ensuring conda environment 'daenv' exists..."
