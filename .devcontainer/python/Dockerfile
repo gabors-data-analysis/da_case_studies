@@ -1,22 +1,20 @@
-# Base image
 FROM mcr.microsoft.com/devcontainers/miniconda:3
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Install devcontainer features dependencies
-RUN apt-get update && apt-get install -y \
-    bash \
-    && apt-get clean
-
-# Copy environment definition into image
-COPY ch00-tech-prep/daenv_linux.yml /tmp/daenv_linux.yml
-
-# Create conda environment
-RUN conda env create -f /tmp/daenv_linux.yml && \
+# Install mamba
+RUN conda install -n base -c conda-forge mamba -y && \
     conda clean -afy
 
-# Set default shell to use the environment
+# Copy env file (symlink resolves automatically)
+COPY daenv_linux.yml /tmp/daenv_linux.yml
+
+# Create environment
+RUN mamba env create -f /tmp/daenv_linux.yml && \
+    conda clean -afy
+
+# Make env default
+ENV CONDA_DEFAULT_ENV=daenv
 ENV PATH=/opt/conda/envs/daenv/bin:$PATH
 
-# Optional: activate environment automatically for bash
 RUN echo "conda activate daenv" >> /etc/bash.bashrc
