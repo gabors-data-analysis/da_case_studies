@@ -26,7 +26,6 @@ rm(list=ls())
 
 # Import libraries ---------------------------------------------------
 library(tidyverse)
-library(stargazer)
 library(Hmisc)
 library(timeDate)
 library(lubridate)

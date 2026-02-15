@@ -29,7 +29,6 @@ rm(list=ls())
 
 # packages
 library(tidyverse)
-library(haven)
 library(Hmisc)
 library(binsreg)
 library(xtable)

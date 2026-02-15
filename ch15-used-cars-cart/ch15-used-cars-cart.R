@@ -27,16 +27,9 @@ rm(list=ls())
 # Descriptive statistics and regressions
 library(caret)
 library(tidyverse)
-library(skimr)
-library(ggthemes)
-library(gridExtra)
-library(lattice)
-library(glmnet)
 library(rpart)
-library(rattle)
 library(rpart.plot)
 library(xtable)
-library(Hmisc)
 library(modelsummary)
 
 

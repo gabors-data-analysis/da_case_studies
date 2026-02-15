@@ -23,12 +23,6 @@
 rm(list=ls())
 
 
-# Import libraries
-library(haven)
-library(lspline)
-library(gridExtra)
-library(cowplot)
-library(scales)
 library(tidyverse)
 library(stargazer)
 

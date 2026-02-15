@@ -21,10 +21,7 @@ rm(list=ls())
 
 library(tidyverse)
 library(lubridate)
-library(cowplot)
 library(scales)
-# library(DataCombine)
-library(stargazer)
 library(sandwich)
 library(dyn) 
 library(lmtest)
@@ -356,5 +353,5 @@ p_candle <- stock_data %>%
          xaxis = list(rangeslider = list(visible = F)))
 p_candle
 htmlwidgets::saveWidget(as_widget(p_candle), paste0(output,"ch12_g02.html"))
-dev.off()
+if (dev.cur() > 1) dev.off()
 

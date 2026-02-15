@@ -365,7 +365,7 @@ Fig7<-   ggplot(data= hotels, aes(x = distance, y = price)) +
              size = 1.5, shape = 21, alpha = 0.8, show.legend=F) +
   geom_point(data = filter(hotels,reg1_res=="top5"), aes(color=factor(reg1_res)), 
              size = 1.3, shape = 16, alpha = 0.6, show.legend=F) +
-  geom_smooth_da(method="lm", size=1)+
+  geom_smooth_da(method="lm")+
   coord_cartesian( xlim = c(0, 7), ylim = c(0, 400)) +
   expand_limits(x = 0.01, y = 0.01) +
   scale_x_continuous(expand = c(0.01,0.01), limits=c(0, 7), breaks=seq(0, 7, by=1)) + 

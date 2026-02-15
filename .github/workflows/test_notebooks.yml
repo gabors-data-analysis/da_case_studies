@@ -125,7 +125,7 @@ jobs:
         env:
           MPLBACKEND: Agg
         run: |
-          python ch00-tech-prep/test_env.py
+          python ch00-tech-prep/run_all_python.py
 
       - name: Upload test artifacts on failure
         if: failure()

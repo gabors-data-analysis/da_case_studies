@@ -27,10 +27,8 @@ rm(list=ls())
 # Import libraries
 library(tidyverse)
 library(lspline)
-library(cowplot)
 library(boot)
 library(estimatr)
-library(huxtable)
 library(stargazer)
 library(modelsummary)
 

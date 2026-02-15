@@ -26,7 +26,6 @@ rm(list=ls())
 # Descriptive statistics and regressions
 library(tidyverse)
 library(fpp3)
-library(cowplot)
 
 # set data dir, data used
 source("ch00-tech-prep/set-data-directory.R")             # data_dir must be first defined 
@@ -560,7 +559,7 @@ save_fig("ch18-figure-9b-pred-p-mp-fan", output, "small")
 # do the prediction for an extra year
 ###########################
 
-data <- read_rds(paste(use_case_dir,"case-shiller-workfile-2000-2018.rds",sep=""))
+data <- read_rds(paste(data_in,"case-shiller-workfile-2000-2018.rds",sep=""))
 
 # Last year of data
 data_holdout<- data %>%
