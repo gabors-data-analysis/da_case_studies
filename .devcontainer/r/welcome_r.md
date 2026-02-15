@@ -1,6 +1,6 @@
 # Welcome to R in GitHub Codespaces!
 
-Please wait for the `postCreateCommand` to finish (it might take several minutes). This makes sure that all the necessary dependencies are correctly installed in your environment. If you want to check what is happening in the background, press `Ctrl/Cmd+Shift+P` to open the VSCode command palette, and search for *Codespaces: View Creation Log*. This will show all the background processes that were executed to set up your environment.
+If you want to check what has just happened in the background, press `Ctrl/Cmd+Shift+P` to open the VSCode command palette, and search for *Codespaces: View Creation Log*. This will show all the background processes that were executed to set up your environment.
 
 ## How to start?
 
