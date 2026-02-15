@@ -2,10 +2,7 @@
   // Python-only devcontainer for data analysis case studies
   "name": "Data Analysis - Python",
 
-  "build": {
-    "dockerfile": "Dockerfile",
-    "context": ".."
-  },
+  "image" : "ghcr.io/marton-nagy-marton/da_case_studies/py_env:latest",
 
   "features": {
     "ghcr.io/devcontainers/features/git:1": {},
