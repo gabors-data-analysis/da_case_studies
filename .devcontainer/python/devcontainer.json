@@ -2,7 +2,7 @@
   // Python-only devcontainer for data analysis case studies
   "name": "Data Analysis - Python",
 
-  "image" : "ghcr.io/marton-nagy-marton/da_case_studies/py_env:latest",
+  "image" : "ghcr.io/gabors-data-analysis/da_case_studies/py_env:latest",
 
   "features": {
     "ghcr.io/devcontainers/features/git:1": {},

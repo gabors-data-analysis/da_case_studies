@@ -3,10 +3,7 @@
   // This container provides a lightweight R environment for VS Code (no RStudio)
   "name": "Data Analysis - R",
   
-  "build": {
-    "dockerfile": "Dockerfile",
-    "context": ".."
-  },
+  "image" : "ghcr.io/gabors-data-analysis/da_case_studies/r_env:latest",
   
   "features": {
     "ghcr.io/devcontainers/features/git:1": {},
