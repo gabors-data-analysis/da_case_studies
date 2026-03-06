@@ -6,6 +6,7 @@ by Gábor Békés (CEU) and Gábor Kézdi (U. Michigan)
 Published on 6 May 2021 by Cambridge University Press  
 [**gabors-data-analysis.com**](https://gabors-data-analysis.com/)
 
+*Last update: 2026-03-06*
 
 ## How to use
 
@@ -17,7 +18,11 @@ All code available for R, Stata and Python. To see options for various languages
 
 On the [textbook's website](https://gabors-data-analysis.com/), we have detailed discussion of how to set up libraries, get data: [Overview of data and code](https://gabors-data-analysis.com/data-and-code/)
 
-Alternatively, you can also run Python and R codes in GitHub Codespaces with pre-configured environments. You can read more details on Codespaces [here](ch00-tech-prep/da-setup-codespaces.md). To start a Codespace for your desired language, press one of the buttons below:
+## GitHub codespaces (NEW)
+
+As of March 2026, you can also run *Python* and *R* codes in [GitHub Codespaces](https://github.com/features/codespaces) with pre-configured environments. You can read more details on how our [case studies work in Codespaces](ch00-tech-prep/da-setup-codespaces.md). 
+
+To start a Codespace for your desired language, press one of the buttons below:
 
 **Click to open Codespaces with *Python* environment:**
 [![Open in GitHub Codespaces for Python](https://github.com/codespaces/badge.svg)](https://codespaces.new/gabors-data-analysis/da_case_studies?quickstart=1&devcontainer_path=.devcontainer%2Fpython%2Fdevcontainer.json)
@@ -25,6 +30,7 @@ Alternatively, you can also run Python and R codes in GitHub Codespaces with pre
 **Click to open Codespaces with *R* environment:**
 [![Open in GitHub Codespaces for R](https://github.com/codespaces/badge.svg)](https://codespaces.new/gabors-data-analysis/da_case_studies?quickstart=1&devcontainer_path=.devcontainer%2Fr%2Fdevcontainer.json)
 
+This is a new feature, if you find a bug or have ideas, post an issue or a PR. Or contact us.  
 
 ## Status
 
