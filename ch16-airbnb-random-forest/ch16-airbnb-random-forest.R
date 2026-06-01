@@ -281,30 +281,67 @@ kable(x = result_2, format = "latex", digits = 3) %>%
 #########################################################################################
 # Variable Importance Plots -------------------------------------------------------
 #########################################################################################
-# first need a function to calculate grouped varimp
-calculate_grouped_importance <- function(rf.obj, groups) {
-  var.imp <- as.matrix(sapply(groups, function(g) {
-    sum(rf.obj$variable.importance[g], na.rm = TRUE)
-  }))
-  colnames(var.imp) <- "MeanDecreaseGini"
-  return(var.imp)
+add_importance_percentage <- function(var_imp_df, total_imp) {
+  var_imp_df %>%
+    arrange(desc(imp)) %>%
+    mutate(imp_percentage = imp/total_imp)
 }
 
+calculate_grouped_importance <- function(var_imp, factor_varnames) {
+  varnames <- names(var_imp)
+  factor_groups <- setNames(
+    lapply(factor_varnames, function(f) varnames[startsWith(varnames, f)]),
+    factor_varnames
+  )
+  factor_groups <- factor_groups[lengths(factor_groups) > 0]
+  grouped_factor_varnames <- unique(unlist(factor_groups, use.names = FALSE))
+  ungrouped_varnames <- setdiff(varnames, grouped_factor_varnames)
+  groups <- c(factor_groups, setNames(as.list(ungrouped_varnames), ungrouped_varnames))
 
-# variable importance plot
-# 1) full varimp plot, full
-# 2) varimp plot grouped
-# 3) varimp plot , top 10
-# 4) varimp plot  w copy, top 10
+  data.frame(
+    varname = names(groups),
+    imp = vapply(groups, function(g) sum(var_imp[g], na.rm = TRUE), numeric(1)),
+    row.names = NULL
+  )
+}
 
+plot_importance <- function(plot_data,
+                            y_var = "imp_percentage",
+                            y_label = "Importance (Percent)",
+                            point_size = 1,
+                            segment_size = 0.75,
+                            text_size = 4,
+                            title_size = 6,
+                            title = NULL,
+                            percent_axis = TRUE) {
+  plot <- ggplot(plot_data, aes(x = reorder(varname, imp), y = .data[[y_var]])) +
+    geom_point(color = color[1], size = point_size) +
+    geom_segment(aes(x = varname, xend = varname, y = 0, yend = .data[[y_var]]),
+                 color = color[1], linewidth = segment_size) +
+    ylab(y_label) +
+    xlab("Variable Name") +
+    coord_flip() +
+    theme_bw() +
+    theme(axis.text.x = element_text(size = text_size), axis.text.y = element_text(size = text_size),
+          axis.title.x = element_text(size = text_size), axis.title.y = element_text(size = text_size),
+          plot.title = element_text(size = title_size))
+
+  if (percent_axis) {
+    plot <- plot + scale_y_continuous(labels = scales::percent_format(accuracy = 1))
+  }
+  if (!is.null(title)) {
+    plot <- plot + ggtitle(title)
+  }
+  plot
+}
 
 rf_model_2_var_imp <- rf_model_2$finalModel$variable.importance/1000
+rf_model_2_total_imp <- sum(rf_model_2_var_imp, na.rm = TRUE)
 rf_model_2_var_imp_df <-
-  data.frame(varname = names(rf_model_2_var_imp),imp = rf_model_2_var_imp) %>%
+  data.frame(varname = names(rf_model_2_var_imp), imp = rf_model_2_var_imp) %>%
   mutate(varname = gsub("f_neighbourhood_cleansed", "Borough:", varname) ) %>%
   mutate(varname = gsub("f_room_type", "Room type:", varname) ) %>%
-  arrange(desc(imp)) %>%
-  mutate(imp_percentage = imp/sum(imp))
+  add_importance_percentage(rf_model_2_total_imp)
 
 
 ##############################
@@ -314,81 +351,42 @@ rf_model_2_var_imp_df <-
 # to have a quick look
 plot(varImp(rf_model_2))
 
-cutoff = 600
-rf_model_2_var_imp_plot <- ggplot(rf_model_2_var_imp_df[rf_model_2_var_imp_df$imp>cutoff,],
-                                  aes(x=reorder(varname, imp), y=imp_percentage)) +
-  geom_point(color=color[1], size=1.5) +
-  geom_segment(aes(x=varname,xend=varname,y=0,yend=imp_percentage), color=color[1], size=1) +
-  ylab("Importance (Percent)") +
-  xlab("Variable Name") +
-  coord_flip() +
-  scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
-  theme_bw() +
-  theme(axis.text.x = element_text(size=6), axis.text.y = element_text(size=6),
-        axis.title.x = element_text(size=6), axis.title.y = element_text(size=6))
+cutoff <- 600
+rf_model_2_var_imp_plot <- rf_model_2_var_imp_df %>%
+  filter(imp > cutoff) %>%
+  plot_importance(title = "Most important variables")
 rf_model_2_var_imp_plot
 #save_fig("rf_varimp1",output, "large")
 save_fig("ch16-figure-1-rf-varimp-base",output, "large")
 
 ##############################
-# 2) full varimp plot, top 10 only
+# 2) ungrouped varimp plot, top 10 only
 ##############################
 
 
 # have a version with top 10 vars only
-rf_model_2_var_imp_plot_b <- ggplot(rf_model_2_var_imp_df[1:10,], aes(x=reorder(varname, imp), y=imp_percentage)) +
-  geom_point(color=color[1], size=1) +
-  geom_segment(aes(x=varname,xend=varname,y=0,yend=imp_percentage), color=color[1], size=0.75) +
-  ylab("Importance (Percent)") +
-  xlab("Variable Name") +
-  coord_flip() +
-  scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
-  theme_bw() +
-  theme(axis.text.x = element_text(size=4), axis.text.y = element_text(size=4),
-        axis.title.x = element_text(size=4), axis.title.y = element_text(size=4))
+rf_model_2_var_imp_plot_b <- rf_model_2_var_imp_df %>%
+  head(10) %>%
+  plot_importance(title = "Top 10 most important variables")
 rf_model_2_var_imp_plot_b
 #save_fig("rf_varimp1_b",output, "small")
 save_fig("ch16-figure-2b-rf-varimp-top10",output, "small")
 
 
 ##############################
-# 2) varimp plot grouped
+# 3) grouped varimp plot
 ##############################
-# grouped variable importance - keep binaries created off factors together
+# grouped variable importance - keep binaries created off factors together,
+# and keep all other model predictors as one-variable groups.
 
-varnames <- rf_model_2$finalModel$xNames
-f_neighbourhood_cleansed_varnames <- grep("f_neighbourhood_cleansed",varnames, value = TRUE)
-f_cancellation_policy_varnames <- grep("f_cancellation_policy",varnames, value = TRUE)
-f_bed_type_varnames <- grep("f_bed_type",varnames, value = TRUE)
-f_property_type_varnames <- grep("f_property_type",varnames, value = TRUE)
-f_room_type_varnames <- grep("f_room_type",varnames, value = TRUE)
+factor_varnames <- predictors_2[startsWith(predictors_2, "f_")]
+rf_model_2_var_imp_grouped_df <- rf_model_2_var_imp %>%
+  calculate_grouped_importance(factor_varnames) %>%
+  add_importance_percentage(rf_model_2_total_imp)
 
-groups <- list(f_neighbourhood_cleansed=f_neighbourhood_cleansed_varnames,
-               f_cancellation_policy = f_cancellation_policy_varnames,
-               f_bed_type = f_bed_type_varnames,
-               f_property_type = f_property_type_varnames,
-               f_room_type = f_room_type_varnames,
-               f_bathroom = "f_bathroom",
-               n_days_since = "n_days_since",
-               n_accommodates = "n_accommodates",
-               n_beds = "n_beds")
-
-rf_model_2_var_imp_grouped <- calculate_grouped_importance(rf_model_2$finalModel, groups)
-rf_model_2_var_imp_grouped_df <- data.frame(varname = rownames(rf_model_2_var_imp_grouped),
-                                            imp = rf_model_2_var_imp_grouped[,1])  %>%
-  mutate(imp_percentage = imp/sum(imp))
-
-rf_model_2_var_imp_grouped_plot <-
-  ggplot(rf_model_2_var_imp_grouped_df, aes(x=reorder(varname, imp), y=imp_percentage)) +
-  geom_point(color=color[1], size=1) +
-  geom_segment(aes(x=varname,xend=varname,y=0,yend=imp_percentage), color=color[1], size=0.7) +
-  ylab("Importance (Percent)") +   xlab("Variable Name") +
-  coord_flip() +
-  # expand=c(0,0),
-  scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
-theme_bw() +
-  theme(axis.text.x = element_text(size=4), axis.text.y = element_text(size=4),
-        axis.title.x = element_text(size=4), axis.title.y = element_text(size=4))
+rf_model_2_var_imp_grouped_plot <- rf_model_2_var_imp_grouped_df %>%
+  head(10) %>%
+  plot_importance(title = "Top 10 most important variables - factor variables summed")
 rf_model_2_var_imp_grouped_plot
 #save_fig("rf_varimp_grouped1",output, "small")
 save_fig("ch16-figure-2a-rf-varimp-group",output, "small")
@@ -398,21 +396,25 @@ save_fig("ch16-figure-2a-rf-varimp-group",output, "small")
 # To address this issue, we can employ a model-agnostic feature importance technique. 
 # One such technique is permutation feature importance, which randomly shuffles the values of variables and measures how much the fit of the prediction is decreased.
 
-# Permutation Importance
-rf_model_2_var_imp_perm <- vip(rf_model_2, method = "permute", 
-                               target = "price", metric = "rmse",
-                               geom = "point",
-                               pred_wrapper = predict, 
-                               nsim = 5,
-                               train = data_train,
-                               parallel = TRUE)
+##############################
+# 4) permutation importance
+##############################
 
-rf_model_2_var_imp_perm_plot <- rf_model_2_var_imp_perm +
-  geom_segment(aes(x = Variable, xend = Variable, y = 0, yend = Importance), 
-               color = color[1], size = 0.7) +
-  geom_point(color = color[1], size = 1.5) +
-  ggtitle("Top 10 most important variable calculated with permutation importance") +
-  theme_bw()
+rf_model_2_var_imp_perm_df <- vip::vi(rf_model_2, method = "permute", 
+                                      target = "price", metric = "rmse",
+                                      pred_wrapper = predict, 
+                                      nsim = 5,
+                                      train = data_train,
+                                      parallel = TRUE) %>%
+  transmute(varname = Variable, imp = Importance) %>%
+  arrange(desc(imp))
+
+rf_model_2_var_imp_perm_plot <- rf_model_2_var_imp_perm_df %>%
+  head(10) %>%
+  plot_importance(y_var = "imp",
+                  y_label = "Importance",
+                  title = "Top 10 most important variable calculated with permutation importance",
+                  percent_axis = FALSE)
 
 rf_model_2_var_imp_perm_plot
 save_fig("ch16-figure-2c-rf-varimp-perm", output, "small")
