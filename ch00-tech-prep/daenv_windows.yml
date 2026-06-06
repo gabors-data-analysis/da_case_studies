@@ -34,6 +34,7 @@ dependencies:
       - pmdarima==2.0.4
       - pysyncon==1.5.1
       - pydotplus==2.0.2
+      - xgboost==3.1.3
       - linearmodels==6.0
       - plotnine==0.12.4
       - polars==1.13.0
