@@ -23,6 +23,7 @@ dependencies:
   - graphviz
   - pip:
       # Analysis packages
+      - numpy==1.26.4 # Re-pinned for pip to ensure consistency with conda
       - arch==7.0.0
       - pyfixest==0.30.2
       - stargazer==0.0.7
