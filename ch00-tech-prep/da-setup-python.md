@@ -169,19 +169,3 @@ uv sync --frozen
 Project maintainers should use `uv add`, `uv remove`, or `uv lock` when
 dependencies intentionally change, and commit both `pyproject.toml` and
 `uv.lock`.
-
-## Legacy Conda setup
-
-Conda is supported as a deprecated fallback for one transition release. The
-files `ch00-tech-prep/daenv_linux.yml`, `daenv_macos.yml`, and
-`daenv_windows.yml` remain available temporarily:
-
-```bash
-cd ch00-tech-prep
-conda env create -f daenv_{SYSTEM}.yml
-conda activate daenv
-```
-
-Replace `{SYSTEM}` with `linux`, `macos`, or `windows`. New installations
-should use uv because the Conda definitions and legacy CI workflow will be
-removed after the transition release.
