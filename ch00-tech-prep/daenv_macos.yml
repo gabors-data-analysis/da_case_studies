@@ -1,3 +1,5 @@
+# DEPRECATED: uv is the primary Python environment manager.
+# This Conda definition remains available for one transition release.
 name: daenv
 channels:
   - conda-forge

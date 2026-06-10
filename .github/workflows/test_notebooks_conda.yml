@@ -1,4 +1,4 @@
-name: Test Notebooks
+name: Test Notebooks (Legacy Conda)
 
 on:
   push:
@@ -6,20 +6,20 @@ on:
     paths:
       - '**/*.py'
       - '**/*.ipynb'
-      - '.github/workflows/test_notebooks.yml'
-      - '.python-version'
-      - 'pyproject.toml'
-      - 'uv.lock'
+      - '.github/workflows/test_notebooks_conda.yml'
+      - 'ch00-tech-prep/daenv_linux.yml'
+      - 'ch00-tech-prep/daenv_macos.yml'
+      - 'ch00-tech-prep/daenv_windows.yml'
   pull_request:
     branches: [main, master]
     paths:
       - '**/*.py'
       - '**/*.ipynb'
-      - '.github/workflows/test_notebooks.yml'
-      - '.python-version'
-      - 'pyproject.toml'
-      - 'uv.lock'
-  workflow_dispatch:  # Allows manual triggering
+      - '.github/workflows/test_notebooks_conda.yml'
+      - 'ch00-tech-prep/daenv_linux.yml'
+      - 'ch00-tech-prep/daenv_macos.yml'
+      - 'ch00-tech-prep/daenv_windows.yml'
+  workflow_dispatch:
 
 jobs:
   test:
@@ -49,14 +49,14 @@ jobs:
           REM
           REM Fix: Create junction points from D:\a\da_case_studies\chXX to D:\a\da_case_studies\da_case_studies\chXX
           REM This way notebooks can write to the paths they expect
-          
+
           cd /d D:\a\da_case_studies
-          
+
           REM Create junctions for all chapter directories
           for /d %%i in (da_case_studies\ch*) do mklink /J "%%~nxi" "%%i"
           for /d %%i in (da_case_studies\da*) do mklink /J "%%~nxi" "%%i"
           for /d %%i in (da_case_studies\pre*) do mklink /J "%%~nxi" "%%i"
-          
+
           dir
 
       - name: Install System Dependencies (Linux)
@@ -78,29 +78,29 @@ jobs:
         run: |
           REPO_DIR="${{ github.workspace }}"
           cd "$REPO_DIR"
-          
+
           # 1. Download and extract
           curl -sL "https://files.osf.io/v1/resources/3u5em/providers/osfstorage/?zip=" -o data.zip
           unzip -q data.zip && unzip -q da_data_repo.zip
-          
+
           # Determine target directory for da_data_repo (grandparent of workspace)
           REPO_DIR_NORMALIZED=$(echo "$REPO_DIR" | sed 's|\\|/|g')
-          
+
           if [ "${{ matrix.os_name }}" == "windows" ]; then
             TARGET_ROOT="/d/a"
           else
             PARENT=$(dirname "$REPO_DIR_NORMALIZED")
             TARGET_ROOT=$(dirname "$PARENT")
           fi
-          
+
           # 3. Move da_data_repo to the target directory
           rm -rf "$TARGET_ROOT/da_data_repo"
           mv da_data_repo "$TARGET_ROOT/"
-          
+
           # 4. Cleanup
           rm data.zip da_data_repo.zip
           rm -rf __MACOSX
-          
+
           # 5. Symlinks (Unix only)
           if [ "${{ matrix.os_name }}" != "windows" ]; then
             cd "$PARENT"
@@ -109,34 +109,29 @@ jobs:
             ln -s da_case_studies/pre* . || true
           fi
 
-      - name: Install uv
-        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+      - name: Set up Miniconda
+        uses: conda-incubator/setup-miniconda@v3
         with:
-          version: "0.11.20"
-          enable-cache: true
-          cache-dependency-glob: "uv.lock"
+          miniforge-variant: Miniforge3
+          miniforge-version: latest
+          activate-environment: daenv
+          environment-file: ch00-tech-prep/daenv_${{ matrix.os_name }}.yml
+          python-version: "3.12"
+          auto-activate: false
+          conda-remove-defaults: true
 
-      - name: Install Python
-        run: uv python install
-
-      - name: Verify lockfile
-        run: uv lock --check
-
-      - name: Sync Python environment
-        run: uv sync --frozen
-
-      - name: Run notebook tests with uv
-        shell: bash
+      - name: Run notebook tests
+        shell: bash -el {0}
         env:
           MPLBACKEND: Agg
         run: |
-          uv run --frozen python ch00-tech-prep/run_all_python.py
+          python ch00-tech-prep/run_all_python.py
 
       - name: Upload test artifacts on failure
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: failed-test-outputs-${{ matrix.os_name }}
+          name: failed-conda-test-outputs-${{ matrix.os_name }}
           path: |
             **/*.log
           retention-days: 7
