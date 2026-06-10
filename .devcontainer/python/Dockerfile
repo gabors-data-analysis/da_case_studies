@@ -7,8 +7,17 @@ ENV DEBIAN_FRONTEND=noninteractive \
 
 COPY --from=ghcr.io/astral-sh/uv:0.11.20 /uv /uvx /bin/
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
+# The base image currently includes an unused Yarn repository whose expired
+# signing key can break apt-get update. Remove only that third-party source.
+RUN find /etc/apt/sources.list.d -type f -exec sh -c \
+    'for file do grep -q "dl.yarnpkg.com" "$file" && rm -f "$file" || true; done' sh {} + \
+    && if [ -f /etc/apt/sources.list ]; then \
+        sed -i '/dl\.yarnpkg\.com/d' /etc/apt/sources.list; \
+    fi \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends \
     graphviz \
+    && dot -V \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
