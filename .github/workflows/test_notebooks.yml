@@ -67,7 +67,7 @@ jobs:
 
       - name: Install System Dependencies (macOS)
         if: matrix.os_name == 'macos'
-        run: brew install graphviz
+        run: brew install graphviz libomp
 
       - name: Install System Dependencies (Windows)
         if: matrix.os_name == 'windows'
@@ -124,6 +124,9 @@ jobs:
 
       - name: Sync Python environment
         run: uv sync --frozen
+
+      - name: Verify compiled Python dependencies
+        run: uv run --frozen python -c "import xgboost"
 
       - name: Run notebook tests with uv
         shell: bash

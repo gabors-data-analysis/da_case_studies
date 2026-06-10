@@ -67,7 +67,7 @@ jobs:
 
       - name: Install System Dependencies (macOS)
         if: matrix.os_name == 'macos'
-        run: brew install graphviz
+        run: brew install graphviz libomp
 
       - name: Install System Dependencies (Windows)
         if: matrix.os_name == 'windows'

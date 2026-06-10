@@ -15,6 +15,7 @@ install anything locally, use the pre-configured Python
 - **Visual Studio Code** provides the editor and notebook interface.
 - **Git** downloads and updates the repository.
 - **Graphviz** is a small system program used by decision-tree diagrams.
+- **OpenMP** is required by XGBoost on macOS.
 
 The project currently uses Python 3.12.4. You do not need to install Python
 separately: uv installs the correct version when the environment is created.
@@ -64,10 +65,10 @@ cd da_case_studies
 You can also clone the repository through VS Code with
 `Clone Git Repository...`.
 
-## 4. Install Graphviz
+## 4. Install system dependencies
 
-Graphviz is not a Python package, so uv does not install it. Use the command
-for your operating system:
+Some required components are not Python packages, so uv does not install them.
+Use the command for your operating system:
 
 ### Windows with Chocolatey
 
@@ -78,7 +79,7 @@ choco install graphviz
 ### macOS with Homebrew
 
 ```bash
-brew install graphviz
+brew install graphviz libomp
 ```
 
 ### Ubuntu or Debian Linux
@@ -89,7 +90,8 @@ sudo apt-get install graphviz
 ```
 
 See the [Graphviz download page](https://graphviz.org/download/) if you do not
-use one of these package managers.
+use one of these package managers. On macOS, XGBoost also requires the OpenMP
+runtime supplied by Homebrew's `libomp` package.
 
 ## 5. Create the project environment
 
