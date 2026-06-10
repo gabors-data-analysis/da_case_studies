@@ -153,7 +153,8 @@ Open a notebook in VS Code:
 
 1. Click **Select Kernel** in the top-right corner.
 2. Choose **Python Environments**.
-3. Select the interpreter inside the repository's `.venv` directory.
+3. Select `da-case-studies (3.12.4)`. If that label is not shown, select the
+   interpreter inside the repository's `.venv` directory.
 
 The interpreter path ends in `.venv/bin/python` on macOS and Linux, or
 `.venv\Scripts\python.exe` on Windows. VS Code normally discovers it

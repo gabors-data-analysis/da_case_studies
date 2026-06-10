@@ -42,7 +42,7 @@ To actually be able to run the codes the set-up differs between the languages:
 ### Python
 
 - Open any Jupyter notebook you want to run. Click the *Select kernel* button in the top right corner.
-- Select the pre-configured Python interpreter at `/opt/venv/bin/python`.
+- Select the pre-configured `da-case-studies (3.12.4)` kernel.
 - You can now run codecells in the notebook by clicking in it and pressing `Ctrl/Cmd + Enter`.
 
 ### R
