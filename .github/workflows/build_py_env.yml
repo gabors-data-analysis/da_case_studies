@@ -7,8 +7,6 @@ on:
       - '.python-version'
       - 'pyproject.toml'
       - 'uv.lock'
-      - '.dockerignore'
-      - '.devcontainer/python/Dockerfile'
       - '.github/workflows/build_py_env.yml'
   pull_request:
     branches: [main, master]
@@ -16,8 +14,6 @@ on:
       - '.python-version'
       - 'pyproject.toml'
       - 'uv.lock'
-      - '.dockerignore'
-      - '.devcontainer/python/Dockerfile'
       - '.github/workflows/build_py_env.yml'
   workflow_dispatch:
 
