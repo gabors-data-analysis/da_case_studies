@@ -35,14 +35,14 @@ Altenatively, you can also go to the root of the repository, click `Code` in the
 
 Once you have started the set-up, you will see a mostly blank web-based Visual Studio Code editor in your browser. This means that low-level dependencies as well as the coding environment are currently being installed in the Codespace, which usually takes around 5-10 minutes. After this is done, the repository structure will appear in your editor, and a `markdown` file will open up detailing the next steps.
 
-At this point, the environment is fully set-up and you could start coding. However, if you plan to use your Codespace in the long run, we recommend that you download the data files as well. To do so, paste the following command in the terminal than hit Enter: `bash .devcontainer/scripts/download-data.sh`.
+At this point, the environment is fully set-up and you could start coding. However, if you plan to use your Codespace in the long run, we recommend that you download the data files as well. To do so, paste the following command in the terminal, then hit Enter: `bash .devcontainer/scripts/download-data.sh`.
 
 To actually be able to run the codes the set-up differs between the languages:
 
 ### Python
 
 - Open any Jupyter notebook you want to run. Click the *Select kernel* button in the top right corner.
-- Select the pre-configured `daenv` Python environment.
+- Select the pre-configured `da-case-studies (3.12.4)` kernel.
 - You can now run codecells in the notebook by clicking in it and pressing `Ctrl/Cmd + Enter`.
 
 ### R
@@ -61,9 +61,11 @@ GitHub Codespaces allow you to open, edit and execute any code in a repository. 
 
 These configuration files essentially tell GitHub Codespaces what kind of software we need on the virtual machine behind our Codespace instance. These include lower-level dependencies that are needed for executing any code in the selected language (e.g. the programming language and its interpreter), as well as higher-level dependencies (like the specific packages and libraries we need for our analytics work).
 
-The configuration in our case consists of two components: a `Dockerfile` and a `devcontainer.json`. The former serves as our base, as it contains the exact containers to pull from a remote container repository. These essentially include the core for our set-up: for R, we use `ghcr.io/rocker-org/devcontainer/r-ver:4.5`, while for Python, we opt for `mcr.microsoft.com/devcontainers/miniconda:3`. On a high-level, these containers include the related programming languages and their dependencies. The `Dockerfile` also includes a set of additional commands we want the Codespace to run when it builds our environment. These commands depend on the language we want to set-up the environment for, and they are reliable for creating the correct environment for you. Executing all the commands in our `Dockerfile`s take a long time - thus, even if it would be possible to execute them (that is, to build our Docker image) when a Codespace is started, it would be painfully slow. Therefore, we have opted for another approach, which is to build the images only once when one of our environment definitions changes, and store the resulting image on GitHub Container Repository. We can then load the pre-configured images from here when a Codespace is started. 
+The configuration in our case consists of two components: a `Dockerfile` and a `devcontainer.json`. The former defines the base software and dependencies. For R, we use `ghcr.io/rocker-org/devcontainer/r-ver:4.5`. For Python, we use the Microsoft Python 3.12 devcontainer image and restore the locked environment with [uv](https://docs.astral.sh/uv/) from `pyproject.toml` and `uv.lock`. Graphviz is installed separately as a system dependency.
+
+Building these images takes longer than starting a Codespace. Therefore, GitHub Actions rebuilds an image when an environment definition changes and stores it in GitHub Container Registry. Codespaces then load the pre-built image. The Python container also runs `uv sync --frozen` when it is created, which quickly verifies that `/opt/venv` matches the checked-out lockfile.
 
 > [!NOTE]
 > While understanding how a `Dockerfile` works is not a must for every data professional, it is certainly a nice-to-have in most cases. You can read more about it [here](https://docs.docker.com/reference/dockerfile/).
 
-The `devcontainer.json` acts as the main orchestrator for configuring the Codespace. It starts with pulling the environment specified in the `Dockerfile` from GitHub Container Repository. In addition, it also prompts the Codespace to install certain useful additional features (like CLI Git and GitHub interfaces) and configure Visual Studio Code with some extensions needed for the specific languages. You can read more about `devcontainer.json` files [here](https://docs.github.com/en/codespaces/setting-up-your-project-for-codespaces/adding-a-dev-container-configuration/introduction-to-dev-containers).
+The `devcontainer.json` acts as the main orchestrator for configuring the Codespace. It starts by pulling the environment specified in the `Dockerfile` from GitHub Container Registry. In addition, it also prompts the Codespace to install certain useful additional features (like CLI Git and GitHub interfaces) and configure Visual Studio Code with some extensions needed for the specific languages. You can read more about `devcontainer.json` files [here](https://docs.github.com/en/codespaces/setting-up-your-project-for-codespaces/adding-a-dev-container-configuration/introduction-to-dev-containers).

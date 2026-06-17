@@ -7,18 +7,18 @@ on:
       - '**/*.py'
       - '**/*.ipynb'
       - '.github/workflows/test_notebooks.yml'
-      - 'ch00-tech-prep/daenv_linux.yml'
-      - 'ch00-tech-prep/daenv_macos.yml'
-      - 'ch00-tech-prep/daenv_windows.yml'
+      - '.python-version'
+      - 'pyproject.toml'
+      - 'uv.lock'
   pull_request:
     branches: [main, master]
     paths:
       - '**/*.py'
       - '**/*.ipynb'
       - '.github/workflows/test_notebooks.yml'
-      - 'ch00-tech-prep/daenv_linux.yml'
-      - 'ch00-tech-prep/daenv_macos.yml'
-      - 'ch00-tech-prep/daenv_windows.yml'
+      - '.python-version'
+      - 'pyproject.toml'
+      - 'uv.lock'
   workflow_dispatch:  # Allows manual triggering
 
 jobs:
@@ -67,7 +67,7 @@ jobs:
 
       - name: Install System Dependencies (macOS)
         if: matrix.os_name == 'macos'
-        run: brew install graphviz
+        run: brew install graphviz libomp
 
       - name: Install System Dependencies (Windows)
         if: matrix.os_name == 'windows'
@@ -109,23 +109,31 @@ jobs:
             ln -s da_case_studies/pre* . || true
           fi
 
-      - name: Set up Miniconda
-        uses: conda-incubator/setup-miniconda@v3
+      - name: Install uv
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
         with:
-          miniforge-variant: Miniforge3
-          miniforge-version: latest
-          activate-environment: daenv
-          environment-file: ch00-tech-prep/daenv_${{ matrix.os_name }}.yml
-          python-version: "3.12"
-          auto-activate: false
-          conda-remove-defaults: true
+          version: "0.11.20"
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
 
-      - name: Run notebook tests
-        shell: bash -el {0}
+      - name: Install Python
+        run: uv python install
+
+      - name: Verify lockfile
+        run: uv lock --check
+
+      - name: Sync Python environment
+        run: uv sync --frozen
+
+      - name: Verify compiled Python dependencies
+        run: uv run --frozen python -c "import xgboost"
+
+      - name: Run notebook tests with uv
+        shell: bash
         env:
           MPLBACKEND: Agg
         run: |
-          python ch00-tech-prep/run_all_python.py
+          uv run --frozen python ch00-tech-prep/run_all_python.py
 
       - name: Upload test artifacts on failure
         if: failure()

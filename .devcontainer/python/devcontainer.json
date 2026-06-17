@@ -27,7 +27,7 @@
         "ms-toolsai.jupyter-renderers"
       ],
       "settings": {
-        "python.defaultInterpreterPath": "/opt/conda/envs/daenv/bin/python",
+        "python.defaultInterpreterPath": "/opt/venv/bin/python",
         "python.terminal.activateEnvironment": true
       }
     },
@@ -36,5 +36,7 @@
         ".devcontainer/python/welcome_python.md"
       ]
     }
-  }
+  },
+
+  "postCreateCommand": "uv sync --frozen"
 }

@@ -8,7 +8,15 @@ If you want to check what has just happened in the background, press `Ctrl/Cmd+S
     - To do so, open a terminal (hit `Ctrl/Cmd+Shift+C` or use the sidebar's Terminal > New Terminal option). Paste the following command and hit Enter: `bash .devcontainer/scripts/download-data.sh`
     - This will automatically download, extract and place in the right folder structure all the data files that are needed to run the scripts.
 2. Open any Jupyter notebook you want to run. Click the *Select kernel* button in the top right corner.
-3. Select the pre-configured `daenv` Python environment.
+3. Select the pre-configured `da-case-studies (3.12.4)` kernel.
 4. Enjoy.
+
+The environment is managed by [uv](https://docs.astral.sh/uv/) from the
+repository's `pyproject.toml` and `uv.lock`. Run commands with `uv run`, for
+example:
+
+```bash
+uv run python ch00-tech-prep/run_all_python.py
+```
 
 *Note: This is a Python-only environment! To run R codes, you have to set up a Codespace configured with an R environment. To do so, follow the README of the repository on GitHub.*

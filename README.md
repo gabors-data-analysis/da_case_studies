@@ -6,7 +6,7 @@ by Gábor Békés (CEU) and Gábor Kézdi (U. Michigan)
 Published on 6 May 2021 by Cambridge University Press  
 [**gabors-data-analysis.com**](https://gabors-data-analysis.com/)
 
-*Last update: 2026-03-06*
+*Last update: 2026-06-10*
 
 ## How to use
 
@@ -46,7 +46,7 @@ Overall, the transition to `seaborn` and `pyfixest` drove most of the **Python**
 ## Code language versions
 1. **R** -- We used R 4.0.2. 
 2. **Stata** -- We used version 15, allmost all code should work in version 13 up.
-3. **Python** -- We used Python 3.12.0.
+3. **Python** -- We use Python 3.12.4, managed with [uv](https://docs.astral.sh/uv/).
 
 ## Get data
 Data is hosted on OSF.io

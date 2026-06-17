@@ -13,6 +13,7 @@
 *.rds
 *.pkl
 __pycache__/
+.venv/
 .ipynb_checkpoints/
 .ipynb_checkpoints
 .virtual_documents/

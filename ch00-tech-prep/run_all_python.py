@@ -4,6 +4,8 @@ import unittest
 import nbconvert
 import os
 import subprocess
+import sys
+from unittest import mock
 
 NOTEBOOKS = [
     "ch01-hotels-data-collect/ch01-hotels-data-collect.ipynb",
@@ -61,6 +63,16 @@ NOTEBOOKS = [
 ]
 
 
+def run_python_file(py_file, env):
+    return subprocess.run(
+        [sys.executable, py_file],
+        check=True,
+        env=env,
+        capture_output=True,
+        text=True,
+    )
+
+
 class TestNotebooks(unittest.TestCase):
     notebooks_to_test = NOTEBOOKS
 
@@ -94,13 +106,7 @@ class TestNotebooks(unittest.TestCase):
                 else:
                     env["PYTHONPATH"] = tech_prep_path
                 try:
-                    result = subprocess.run(
-                        ["python", py_file],
-                        check=True,
-                        env=env,
-                        capture_output=True,
-                        text=True,
-                    )
+                    run_python_file(py_file, env)
                     os.remove(py_file)
                 except subprocess.CalledProcessError as e:
                     print(f"\n{'='*60}")
@@ -126,6 +132,12 @@ class TestNotebooks(unittest.TestCase):
                     self.fail(f"Execution failed for {notebook}: {e.stderr[:500] if e.stderr else str(e)}")
                 except Exception as e:
                     self.fail(f"Execution failed for {notebook}: {e}")
+
+    def test_runner_uses_current_interpreter(self):
+        with mock.patch.object(subprocess, "run") as run:
+            run_python_file("notebook.py", {})
+
+        self.assertEqual(run.call_args.args[0], [sys.executable, "notebook.py"])
 
     @classmethod
     def tearDownClass(cls):
