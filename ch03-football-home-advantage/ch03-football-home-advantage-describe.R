@@ -22,7 +22,6 @@ rm(list=ls())
 
 # Import libraries
 library(tidyverse)
-library(scales)
 library(Hmisc)
 
 
@@ -100,7 +99,6 @@ df %>%
                    Median = median(home_goaladv, na.rm=TRUE),
                    Std = sd(home_goaladv, na.rm=TRUE),
                    Min = min(home_goaladv, na.rm=TRUE))
-
 
 
 

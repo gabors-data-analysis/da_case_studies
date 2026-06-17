@@ -17,8 +17,6 @@
 # CLEAR MEMORY
 rm(list=ls())
 library(tidyverse)
-library(haven)
-library(Hmisc)
 
 # set working directory
 # option A: open material as project
@@ -56,7 +54,6 @@ data %>% arrange(countryname, year)
 
 #Table 2.4
 data %>% pivot_wider(names_from = c(year),values_from=c(imm,gdppc))
-
 
 
 

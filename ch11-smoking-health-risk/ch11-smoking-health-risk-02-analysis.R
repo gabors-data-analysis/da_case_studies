@@ -30,11 +30,9 @@ rm(list=ls())
 
 
 # Import libraries
-library(haven)
 library(tidyverse)
 library(modelsummary)
 library(lspline)
-library(skimr)
 library(fixest)
 library(mfx)
 

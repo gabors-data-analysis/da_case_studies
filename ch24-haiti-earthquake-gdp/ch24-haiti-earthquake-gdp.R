@@ -26,7 +26,6 @@ rm(list = ls())
 
 # Import libraries
 library(tidyverse)
-library(cowplot)
 library(Synth)
 library(haven)
 

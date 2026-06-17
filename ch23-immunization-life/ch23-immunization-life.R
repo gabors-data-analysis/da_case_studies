@@ -25,7 +25,6 @@ rm(list=ls())
 
 # Import libraries
 library(tidyverse)
-library(modelsummary)
 library(fixest)
 
 
@@ -261,7 +260,6 @@ etable(fd_lm_5_cumul_trend, fd_lm_5_cumul_trend_c, fd_lm_5_cumul_trend_c_country
 
 library(estimatr)
 library(car)
-library(lmtest)
 # * FD, 5 lags, cumul, aggreg trend, confounders 
 lags_helper  <- paste(paste0("lag(d2_imm, ", c(0:4), ")"), collapse = " + ")
 lags_helper2 <- paste(paste0("lag(d_lngdppc, ", c(0:5), ")"), collapse = " + ")
@@ -281,4 +279,3 @@ fd_lm_5_cumul_trend_c <- lm_robust(fd_lm_5_cumul_trend_c_formula,
 # run tests
 linearHypothesis(fd_lm_5_cumul_trend_c, paste0(lags_helper2," =0"))
 linearHypothesis(fd_lm_5_cumul_trend_c, paste0(lags_helper3," =0"))
-

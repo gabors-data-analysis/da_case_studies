@@ -22,13 +22,9 @@ rm(list=ls())
 library(tidyverse)
 library(lubridate)
 library(scales)
-library(sandwich)
-library(dyn) 
-library(lmtest)
 library(estimatr)
 library(huxtable)
 library(plotly)
-library(htmlwidgets)
 library(xtable)
 library(aTSA)
 
@@ -354,4 +350,3 @@ p_candle <- stock_data %>%
 p_candle
 htmlwidgets::saveWidget(as_widget(p_candle), paste0(output,"ch12_g02.html"))
 if (dev.cur() > 1) dev.off()
-

@@ -27,7 +27,6 @@ rm(list=ls())
 # Import libraries
 library(tidyverse)
 library(Hmisc)
-library(modelsummary)
 
 
 # set working directory
@@ -353,4 +352,3 @@ save_fig("ch17-extra-3", output, "small")
 
 write_csv(data,paste0(data_out,"bisnode_firms_clean.csv"))
 write_rds(data,paste0(data_out,"bisnode_firms_clean.rds"))
-

@@ -22,8 +22,6 @@ rm(list=ls())
 # Import libraries 
 library(tidyverse)
 library(stargazer)
-library(haven)
-library(scales)
 library(lspline)
 
 
@@ -158,7 +156,6 @@ ggplot(data = hotels, aes(x = lnprice_hat, y = lnprice_resid)) +
   coord_cartesian(xlim = c(4, 5.5)) +
   theme_bg() 
   #background_grid(major = "xy", minor="xy", size.major = 0.2)    
-
 
 
 

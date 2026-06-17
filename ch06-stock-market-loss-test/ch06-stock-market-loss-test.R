@@ -22,8 +22,6 @@ rm(list=ls())
 
 # Import libraries
 library(tidyverse)
-library(arm)
-library(pastecs)
 library(janitor)
 
 
@@ -72,4 +70,3 @@ options(digits = 6)
 
 # t-test to show p-value of two sided. One sided p-value is p/2
 t.test(sp500$loss5,mu=0.01)	
-

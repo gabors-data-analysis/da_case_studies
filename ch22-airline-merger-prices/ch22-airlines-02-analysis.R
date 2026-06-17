@@ -25,7 +25,6 @@ rm(list=ls())
 library(tidyverse)
 library(haven)
 library(zoo)
-library(cowplot)
 library(fixest)
 
 # set data dir, data used

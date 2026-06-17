@@ -23,13 +23,11 @@ rm(list=ls())
 
 # Import libraries
 library(tidyverse)
-library(xtable)
 library(lspline)
 library(data.table)
 library(mfx)
 library(margins)
 library(stargazer)
-library(huxtable)
 library(psych)
 
 

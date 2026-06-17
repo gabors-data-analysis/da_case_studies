@@ -145,8 +145,6 @@ data <- data %>%
 data <- data %>%
   drop_na(price)
 
-
-library(skimr)
 ##################################
 # DESCRIBE
 
@@ -346,4 +344,3 @@ for (j in 1:ncol(data) ) data.table::set(data, which(is.infinite(data[[j]])), j,
 write_csv(data, paste0(data_out, "airbnb_hackney_workfile_adj_book1.csv"))
 
 #------------------------------------------------------------------------------------------------
-

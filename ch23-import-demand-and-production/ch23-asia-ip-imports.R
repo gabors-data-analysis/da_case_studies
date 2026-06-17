@@ -22,7 +22,6 @@ rm(list=ls())
 
 # Libraries
 library(tidyverse)
-library(haven)
 library(fixest)
 
 # set data dir, data used
@@ -249,6 +248,5 @@ etable(tha_reg_lt,mys_reg_lt,phl_reg_lt,sgp_reg_lt,pooled_reg_lt,
         "ccPhilippines" = "Philippines", 
         "ccSingapore"="Singapore", 
         "(Intercept)" = "Constant") )
-
 
 

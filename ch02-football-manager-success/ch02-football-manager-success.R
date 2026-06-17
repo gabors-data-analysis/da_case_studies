@@ -20,7 +20,6 @@
 rm(list=ls())
 
 library(tidyverse)
-library(cowplot)
 #----------------------------------------------------------------------------------------------------
 
 
@@ -147,5 +146,4 @@ top_managers_graph <- top_managers %>%
 top_managers_graph
 #save_fig("03_top_managers_R", output, "small")
 save_fig("ch02-figures1-top-managers", output, "small")
-
 

@@ -25,7 +25,9 @@ rm(list=ls())
 
 # Descriptive statistics and regressions
 library(tidyverse)
-library(fpp3)
+library(fable)
+library(tsibble)
+library(lubridate)
 
 # set data dir, data used
 source("ch00-tech-prep/set-data-directory.R")             # data_dir must be first defined 
@@ -648,4 +650,3 @@ pred_p_mp_fan2018_R <- ggplot(data = data_plot , aes(x = as.Date(date), y = p))+
   guides(linetype = guide_legend(override.aes = list(size = 0.6)))
 pred_p_mp_fan2018_R
 save_fig("ch18-figure-11-pred-p-mp-fan2018", output, "small")
-

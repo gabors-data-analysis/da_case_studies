@@ -26,7 +26,6 @@ rm(list=ls())
 
 # Import libraries
 library(tidyverse)
-library(modelsummary)
 library(cowplot)
 library(fixest)
 
@@ -271,7 +270,6 @@ fe_panel <- feols(points6avg ~ before_7_12 + after_1_6 + after_7_12 +
 etable(fe_panel_treatment, fe_panel_control, fe_panel)
 
 #ch24-table-1-football-manager-reg1
-
 
 
 

@@ -24,11 +24,8 @@
 # CLEAR MEMORY
 rm(list=ls())
 
-library(xtable)
-library(vip)
 library(lime)
 library(DALEX)
-library(DALEXtra)
 library(tidyverse)
 library(caret)
 library(ranger)
@@ -37,6 +34,7 @@ library(Hmisc)
 library(knitr)
 library(kableExtra)
 library(xgboost)
+library(gbm)
 library(doParallel)
 
 

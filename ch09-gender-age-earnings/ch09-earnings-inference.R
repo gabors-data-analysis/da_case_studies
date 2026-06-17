@@ -29,7 +29,6 @@ library(tidyverse)
 library(lspline)
 library(boot)
 library(estimatr)
-library(stargazer)
 library(modelsummary)
 
 
@@ -348,4 +347,3 @@ save_fig("ch09-figure-1-bootstrap-dist-wdiff",output, "small")
 #ch09-table-4-hotels-extval-time2
 #ch09-table-5-hotels-extval-city1
 #ch09-table-6-hotels-extval-type
-

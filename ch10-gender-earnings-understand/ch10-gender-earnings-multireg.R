@@ -22,8 +22,6 @@ rm(list=ls())
 # Import libraries 
 library(tidyverse)
 library(fixest)
-library(segmented)
-library(cowplot)
 
 
 

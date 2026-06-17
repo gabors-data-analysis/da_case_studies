@@ -32,8 +32,6 @@ library(glmnet)
 library(purrr)
 library(margins)
 library(kableExtra)
-library(Hmisc)
-library(lspline)
 library(modelsummary)
 library(caret)
 library(pROC)
@@ -712,6 +710,3 @@ kable(x = summary_results, format = "latex", booktabs=TRUE,  digits = 3, row.nam
       linesep = "", col.names = c("Number of predictors", "CV RMSE", "CV AUC",
                                   "CV threshold", "CV expected Loss")) %>%
   cat(.,file= paste0(output, "summary_results.tex"))
-
-
-

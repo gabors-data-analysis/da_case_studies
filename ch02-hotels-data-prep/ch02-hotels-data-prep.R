@@ -21,10 +21,7 @@
 rm(list=ls())
 
 library(tidyverse)
-library(haven)
 library(Hmisc)
-library(desc)
-library(reshape2)
 library(modelsummary)
 
 # set working directory
@@ -191,5 +188,4 @@ data %>% group_by(accommodation_type,misrating) %>% summarise(mean(price))
 data %>% filter((misrating == 1)&(accommodation_type == "Hotel")) %>% 
   select(hotel_id, accommodation_type,price,distance, stars,rating,rating_count) %>%
   slice(1)
-
 

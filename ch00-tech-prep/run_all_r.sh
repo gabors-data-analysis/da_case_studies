@@ -5,6 +5,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Set the starting directory to the parent of the script's directory
 START_DIR="$(dirname "$SCRIPT_DIR")"
+cd "$START_DIR" || exit 1
 
 # Create output file with timestamp
 TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
