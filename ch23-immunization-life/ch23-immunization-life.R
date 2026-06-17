@@ -70,7 +70,7 @@ p1 <- ggplot(data, aes(x = year, y = imm_SAS)) +
   theme_bg()
 
 for (name in names(data)[2:6]) {
-  p1 <- p1 + geom_line(aes(x = year, y = !!sym(name)), color = "grey", size = 0.5)
+  p1 <- p1 + geom_line(aes(x = year, y = !!sym(name)), color = "grey", linewidth= 0.5)
 }
 p1
 save_fig("ch23-figure-2a-tsimmun", output, size = "small")
@@ -89,7 +89,7 @@ p2 <- ggplot(data, aes(x = year, y = surv_SAS)) +
   theme_bg()
 
 for (name in names(data)[9:13]) {
-  p2 <- p2 + geom_line(aes(x = year, y = !!sym(name)), color = "grey", size = 0.5)
+  p2 <- p2 + geom_line(aes(x = year, y = !!sym(name)), color = "grey", linewidth= 0.5)
 }
 p2
 save_fig("ch23-figure-2b-tssurvival", output, size = "small")

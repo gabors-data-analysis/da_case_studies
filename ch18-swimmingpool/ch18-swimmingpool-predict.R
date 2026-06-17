@@ -131,7 +131,7 @@ daily_agg$month_abb <-factor(month.abb[daily_agg$month],levels=month.abb)
 
 
 g1 <-ggplot(data=daily_agg[daily_agg$year==2015,], aes(x=date, y=QUANTITY)) +
-  geom_line(size=0.4, color=color[1]) +
+  geom_line(linewidth=0.4, color=color[1]) +
   theme_bg() +
   scale_x_date(breaks = as.Date(c("2015-01-01","2015-04-01","2015-07-01","2015-10-01","2016-01-01")),
                labels = date_format("%d%b%Y"),
@@ -142,7 +142,7 @@ g1
 save_fig("ch18-figure-3a-swimmingpool-2015", output, "small")
 
 g2<-ggplot(data=daily_agg[(daily_agg$year>=2010) & (daily_agg$year<=2014),], aes(x=date, y=QUANTITY)) +
-  geom_line(size=0.2, color=color[1]) +
+  geom_line(linewidth=0.2, color=color[1]) +
   theme_bg() +
   scale_x_date(breaks = as.Date(c("2010-01-01","2011-01-01","2012-01-01","2013-01-01","2014-01-01","2015-01-01")),
                labels = date_format("%d%b%Y"),
@@ -369,14 +369,14 @@ save_fig("ch18-figure-7b-swim-predictions-rmse", output, "small", plot=g_predict
 
 g_predictions<-
   ggplot(data=data_holdout, aes(x=date, y=QUANTITY)) +
-  geom_line(aes(size="Actual", colour="Actual", linetype = "Actual") ) +
-  geom_line(aes(y=y_hat_5, size="Predicted" ,colour="Predicted",  linetype= "Predicted")) +
+  geom_line(aes(linewidth="Actual", colour="Actual", linetype = "Actual") ) +
+  geom_line(aes(y=y_hat_5, linewidth="Predicted" ,colour="Predicted",  linetype= "Predicted")) +
   scale_y_continuous(expand = c(0,0))+
   scale_x_date(expand=c(0,0), breaks = as.Date(c("2016-01-01","2016-03-01","2016-05-01","2016-07-01","2016-09-01","2016-11-01", "2017-01-01")),
                labels = date_format("%d%b%Y"),
                date_minor_breaks = "1 month" )+
   scale_color_manual(values=color[1:2], name="")+
-  scale_size_manual(name="", values=c(0.4,0.7))+
+  scale_linewidth_manual(name="", values=c(0.4,0.7))+
   #scale_linetype_manual(name = "", values=c("solid", "solid")) +
   scale_linetype_manual(name = "", values=c("solid", "twodash")) +
   labs( x = "Date (day)", y="Daily ticket sales" ) +
@@ -389,7 +389,7 @@ g_predictions<-
       legend.text = element_text(size = 6),
       legend.key.width = unit(.8, "cm"),
       legend.key.height = unit(.3, "cm")) + 
-  guides(linetype = guide_legend(override.aes = list(size = 0.8))
+  guides(linetype = guide_legend(override.aes = list(linewidth = 0.8))
          )
 g_predictions
 #save_fig("ch18_swim_predictions", output, "large")
@@ -397,15 +397,15 @@ save_fig("ch18-figure-6-swim-predictions", output, "large", plot=g_predictions)
 
 
 g_predictions_m <- ggplot(data=data_holdout %>% filter(month==8), aes(x=date, y=QUANTITY)) +
-  geom_line(aes(size="Actual", colour="Actual", linetype = "Actual") ) +
-  geom_line(aes(y=y_hat_5, size="Predicted" ,colour="Predicted",  linetype= "Predicted")) +
+  geom_line(aes(linewidth="Actual", colour="Actual", linetype = "Actual") ) +
+  geom_line(aes(y=y_hat_5, linewidth="Predicted" ,colour="Predicted",  linetype= "Predicted")) +
   geom_ribbon(aes(ymin=QUANTITY,ymax=y_hat_5), fill=color[4], alpha=0.3) +
   scale_y_continuous(expand = c(0.01,0.01), limits = c(0,150))+
   scale_x_date(expand=c(0.01,0.01), breaks = as.Date(c("2016-08-01","2016-08-08","2016-08-15","2016-08-22","2016-08-29")),
                limits = as.Date(c("2016-08-01","2016-08-31")),
                labels = date_format("%d%b")) +
   scale_color_manual(values=color[1:2], name="")+
-  scale_size_manual(name="", values=c(0.4,0.7))+
+  scale_linewidth_manual(name="", values=c(0.4,0.7))+
   #scale_linetype_manual(name = "", values=c("solid", "solid")) +
   scale_linetype_manual(name = "", values=c("solid", "twodash")) +
   labs( x = "Date (day)", y="Daily ticket sales" ) +
@@ -418,7 +418,7 @@ g_predictions_m <- ggplot(data=data_holdout %>% filter(month==8), aes(x=date, y=
         legend.text = element_text(size = 4),
         legend.key.width = unit(.8, "cm"),
         legend.key.height = unit(.2, "cm")) + 
-  guides(linetype = guide_legend(override.aes = list(size = 0.6))
+  guides(linetype = guide_legend(override.aes = list(linewidth = 0.6))
   )
 g_predictions_m
 #save_fig("ch18_swim_predictions_m", output, "small")

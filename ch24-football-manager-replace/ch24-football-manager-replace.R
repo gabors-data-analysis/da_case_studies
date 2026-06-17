@@ -112,7 +112,7 @@ data_balanced %>%
 
 # figure: average number interventions by game number
 p3<- ggplot(data = data_balanced, aes(x = gameno, y = intervention)) +
-  geom_col(fill = color[1], size = 0.25, alpha = 0.8,  show.legend=F, na.rm =TRUE) +
+  geom_col(fill = color[1], linewidth= 0.25, alpha = 0.8,  show.legend=F, na.rm =TRUE) +
   labs(y = "Number of manager changes", x = "Game number") +
   scale_y_continuous(expand=c(0.0,0.0), breaks = seq(1, 6, by = 1), limits = c(0, 6)) +
   scale_x_continuous(expand=c(0.01,0.01), breaks = seq(0, 38, 4), limits = c(0, 38)) +

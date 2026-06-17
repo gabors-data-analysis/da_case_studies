@@ -218,7 +218,7 @@ save_fig("ch14-figure-3b-airbnb-lnprice", output, "small")
 ## Boxplot of price by room type
 g4 <- ggplot(data = datau, aes(x = f_room_type, y = price)) +
   stat_boxplot(aes(group = f_room_type), geom = "errorbar", width = 0.3,
-               color = c(color[2],color[1], color[3]), size = 0.5, na.rm=T)+
+               color = c(color[2],color[1], color[3]), linewidth= 0.5, na.rm=T)+
   geom_boxplot(aes(group = f_room_type),
                color = c(color[2],color[1], color[3]), fill = c(color[2],color[1], color[3]),
                size = 0.5, width = 0.6, alpha = 0.3, na.rm=T, outlier.shape = NA) +
@@ -232,7 +232,7 @@ save_fig("ch14-figure-4a-airbnb-room", output, "small")
 g5 <- ggplot(datau, aes(x = factor(n_accommodates), y = price,
                         fill = factor(f_property_type), color=factor(f_property_type))) +
   geom_boxplot(alpha=0.8, na.rm=T, outlier.shape = NA, width = 0.8) +
-    stat_boxplot(geom = "errorbar", width = 0.8, size = 0.3, na.rm=T)+
+    stat_boxplot(geom = "errorbar", width = 0.8, linewidth= 0.3, na.rm=T)+
     scale_color_manual(name="",
                      values=c(color[2],color[1])) +
   scale_fill_manual(name="",
@@ -421,7 +421,7 @@ t1_levels <- t1 %>%
 
 model_result_plot_levels <- ggplot(data = t1_levels,
                                    aes(x = factor(nvars2), y = value, color=factor(var), group = var)) +
-  geom_line(size=1,show.legend=FALSE, na.rm = TRUE) +
+  geom_line(linewidth=1,show.legend=FALSE, na.rm = TRUE) +
   scale_color_manual(name="",
                      values=c(color[2],color[1])) +
   scale_y_continuous(name = "RMSE", limits = c(26, 50), breaks = seq(26,50, 2)) +
@@ -534,7 +534,7 @@ level_vs_pred <- ggplot(data = d) +
              shape = 16, alpha = 0.7, show.legend=FALSE, na.rm=TRUE) +
   #geom_smooth(aes(y=ylev, x=predlev), method="lm", color=color[2], se=F, size=0.8, na.rm=T)+
   # geom_segment(aes(x = 0, y = 0, xend = 350, yend =350), size=0.5, color=color[2], linetype=2) +
-  annotate("segment",x = 0, y = 0, xend = 350, yend =350, size=0.5, color=color[2], linetype=2)+
+  annotate("segment",x = 0, y = 0, xend = 350, yend =350, linewidth=0.5, color=color[2], linetype=2)+
   coord_cartesian(xlim = c(0, 350), ylim = c(0, 350)) +
   scale_x_continuous(expand = c(0.01,0.01),limits=c(0, 350), breaks=seq(0, 350, by=50)) +
   scale_y_continuous(expand = c(0.01,0.01),limits=c(0, 350), breaks=seq(0, 350, by=50)) +

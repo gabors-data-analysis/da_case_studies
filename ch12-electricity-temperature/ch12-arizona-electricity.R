@@ -132,7 +132,7 @@ data %>% dplyr::select(Q,lnQ,CLDD_avg,HTDD_avg) %>% summary()
 
 # PLOT THE TIME SERIES
 electricity_ts_Q<- ggplot(data = data, aes(x = date, y = Q))+
-  geom_line(color = color[1], size = 0.7) +
+  geom_line(color = color[1], linewidth= 0.7) +
   ylab("Residential electricity consumption (GWh)") +
   xlab("Date (month)") +
   scale_y_continuous(limits = c(1000,5000), breaks = seq(1000,5000,1000)) +  
@@ -197,14 +197,14 @@ data <- data %>% mutate(DlnQ=lnQ-lag(lnQ),
 # functional form investigations (not in textbook)
 ggplot(data = data, aes(x=DCLDD_avg, y=DlnQ)) +
   geom_point(size=2,  shape=20, stroke=2, fill="blue", color="blue") +
-  geom_smooth(method="loess", se=F, colour="black", size=1.5, span=0.9) +
+  geom_smooth(method="loess", se=F, colour="black", linewidth=1.5, span=0.9) +
   labs(x = "Cooling degrees (Farenheit), first difference",y = "ln(monthly electricity consumption), first difference") +
   theme_bg() +
   scale_x_continuous(limits = c(-20,20), breaks = seq(-20,20, 10))
 
 ggplot(data = data, aes(x=DHTDD_avg, y=DlnQ)) +
   geom_point(size=2,  shape=20, stroke=2, fill="blue", color="blue") +
-  geom_smooth(method="loess", se=F, colour="black", size=1.5, span=0.9) +
+  geom_smooth(method="loess", se=F, colour="black", linewidth=1.5, span=0.9) +
   labs(x = "Heating degrees (Farenheit), first difference",y = "ln(monthly electricity consumption), first difference") +
   theme_bg() +
   scale_x_continuous(limits = c(-10,10), breaks = seq(-10,10, 10))

@@ -129,8 +129,8 @@ ggplot(data_agg, aes(x = date, y = lnavgprice, color = factor(treated))) +
   geom_line(data = filter(data_agg, treated==0), linewidth = 0.7) +
   annotate("text", x = as.yearqtr("2013-1"), y = 5.59, label = "Unreated markets", size=2, color = color[1]) +
   annotate("text", x = as.yearqtr("2013-1"), y = 5.49, label = "Treated markets", size=2, color = color[2]) +
-  geom_vline(xintercept = as.yearqtr("2012-1"), color = color[3], size = 0.6, linetype="longdash")+
-  geom_vline(xintercept = as.yearqtr("2015-3"), color = color[3], size = 0.6, linetype="longdash") +
+  geom_vline(xintercept = as.yearqtr("2012-1"), color = color[3], linewidth= 0.6, linetype="longdash")+
+  geom_vline(xintercept = as.yearqtr("2015-3"), color = color[3], linewidth= 0.6, linetype="longdash") +
   scale_color_manual(values=color[1:2], labels = c("Untreated markets", "Treated markets"), name="") +
   labs(y = "ln(average price)", x="") +
   scale_x_yearqtr(format = "%YQ%q") +
@@ -157,8 +157,8 @@ ggplot(data_agg, aes(x = date, y = lnavgprice, color = factor(treated))) +
   geom_line(data = filter(data_agg, treated==0), linewidth = 0.7) +
   annotate("text", x = as.yearqtr("2013-1"), y = 4.3, label = "Unreated markets", size=2, color = color[1]) +
   annotate("text", x = as.yearqtr("2013-1"), y = 4.9, label = "Treated markets", size=2, color = color[2]) +
-  geom_vline(xintercept = as.yearqtr("2012-1"), color = color[3], size = 0.6, linetype="longdash")+
-  geom_vline(xintercept = as.yearqtr("2015-3"), color = color[3], size = 0.6, linetype="longdash") +
+  geom_vline(xintercept = as.yearqtr("2012-1"), color = color[3], linewidth= 0.6, linetype="longdash")+
+  geom_vline(xintercept = as.yearqtr("2015-3"), color = color[3], linewidth= 0.6, linetype="longdash") +
   scale_color_manual(values=color[1:2], labels = c("Untreated markets", "Treated markets"), name="") +
   labs(y = "ln(average price)", x="") +
   scale_x_yearqtr(format = "%YQ%q") +

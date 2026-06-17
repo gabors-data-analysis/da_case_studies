@@ -231,7 +231,7 @@ pred_cart1t <- predict(cart1, data_train)
 
 g2<-ggplot(data = data_train, aes(x=age , y=price)) +
   geom_point_da() +
-  geom_segment(data = plot_helper_df, aes(x = age, y=yend, xend=xend, yend=yend), color=color[2], size=1, na.rm=TRUE) +
+  geom_segment(data = plot_helper_df, aes(x = age, y=yend, xend=xend, yend=yend), color=color[2], linewidth=1, na.rm=TRUE) +
   scale_y_continuous(expand=c(0.01,0.01), limits=c(0, 20000), breaks=seq(0, 20000, by=2500)) +
   scale_x_continuous(expand=c(0.01,0.01),limits=c(0, 25), breaks=seq(0, 25, by=5)) +
   labs(x = "Age (years)", y = "Price (US dollars)") +
@@ -264,7 +264,7 @@ pred_cart3t <- predict(cart3, data_train)
 
 g3<-ggplot(data = data_train, aes(x=age , y=price)) +
   geom_point_da() +
-  geom_segment(data = plot_helper_df, aes(x = age, y=yend, xend=xend, yend=yend), color=color[2], size=1, na.rm=TRUE) +
+  geom_segment(data = plot_helper_df, aes(x = age, y=yend, xend=xend, yend=yend), color=color[2], linewidth=1, na.rm=TRUE) +
   scale_y_continuous(expand=c(0.01,0.01), limits=c(0, 20000), breaks=seq(0, 20000, by=2500)) +
   scale_x_continuous(expand=c(0.01,0.01),limits=c(0, 25), breaks=seq(0, 25, by=5)) +
   labs(x = "Age (years)", y = "Price (US dollars)") +
@@ -287,7 +287,7 @@ pred_linreg1t<- predict(linreg1, data_train)
 
 g4<-ggplot(data = data_train) +
   geom_point(aes(x = age, y = price), color = color[1], size = 1,  shape = 16, alpha = 0.7, show.legend=FALSE, na.rm = TRUE) +
-  geom_line(aes(x=age,y=pred_linreg1t), colour=color[2], size=0.7) +
+  geom_line(aes(x=age,y=pred_linreg1t), colour=color[2], linewidth=0.7) +
   scale_y_continuous(expand=c(0.01,0.01), limits=c(0, 20000), breaks=seq(0, 20000, by=2500)) +
   scale_x_continuous(expand=c(0.01,0.01), limits=c(0, 25), breaks=seq(0, 25, by=5)) +
   labs(x = "Age (years)", y = "Price (US dollars)") +
@@ -313,7 +313,7 @@ ggplot(data = data_train, aes(x=age , y=price)) +
   geom_point(size=1, colour="black" ) +
   labs(x = "Age", y = "Price") +
   coord_cartesian(xlim=c(0, 25), ylim=c(0, 20000)) +
-  geom_smooth(method="loess", colour="darkblue", se=F, size=1.5) +
+  geom_smooth(method="loess", colour="darkblue", se=F, linewidth=1.5) +
   theme_bg()
 
 
@@ -480,7 +480,7 @@ cart4_var_imp_df <-
 
 cart4_var_imp_plot <- ggplot(cart4_var_imp_df, aes(x=reorder(varname, imp), y=imp_percentage)) +
   geom_point(color=color[1], size=2) +
-  geom_segment(aes(x=varname,xend=varname,y=0,yend=imp_percentage), color=color[1], size=1.5) +
+  geom_segment(aes(x=varname,xend=varname,y=0,yend=imp_percentage), color=color[1], linewidth=1.5) +
   ylab("Importance") +
   xlab("Variable Name") +
   coord_flip() +
@@ -515,7 +515,7 @@ cart4 <- train(
   
   cart4_var_imp_plot <- ggplot(cart4_var_imp_df, aes(x=reorder(varname, imp), y=imp_percentage)) +
     geom_point(color=color[1], size=2) +
-    geom_segment(aes(x=varname,xend=varname,y=0,yend=imp_percentage), color=color[1], size=1.5) +
+    geom_segment(aes(x=varname,xend=varname,y=0,yend=imp_percentage), color=color[1], linewidth=1.5) +
     ylab("Importance") +
     xlab("Variable Name") +
     coord_flip() +

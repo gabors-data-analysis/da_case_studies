@@ -186,11 +186,11 @@ bs_names <- c("intang_assets", "curr_liab", "fixed_assets", "liq_assets", "curr_
 
 # divide all pl_names elements by sales and create new column for it
 data <- data %>%
-  mutate_at(vars(pl_names), funs("pl"=./sales))
+  mutate(across(all_of(pl_names), list(pl = ~ .x / sales)))
 
 # divide all bs_names elements by total_assets_bs and create new column for it
 data <- data %>%
-  mutate_at(vars(bs_names), funs("bs"=ifelse(total_assets_bs == 0, 0, ./total_assets_bs)))
+  mutate(across(all_of(bs_names), list(bs = ~ ifelse(total_assets_bs == 0, 0, .x / total_assets_bs))))
 
 
 ########################################################################
@@ -203,22 +203,22 @@ zero <-  c("extra_exp_pl", "extra_inc_pl", "inventories_pl", "material_exp_pl", 
            "intang_assets_bs")
 
 data <- data %>%
-  mutate_at(vars(zero), funs("flag_high"= as.numeric(.> 1))) %>%
-  mutate_at(vars(zero), funs(ifelse(.> 1, 1, .))) %>%
-  mutate_at(vars(zero), funs("flag_error"= as.numeric(.< 0))) %>%
-  mutate_at(vars(zero), funs(ifelse(.< 0, 0, .)))
+  mutate(across(all_of(zero), list(flag_high = ~ as.numeric(.x > 1)))) %>%
+  mutate(across(all_of(zero), ~ ifelse(.x > 1, 1, .x))) %>%
+  mutate(across(all_of(zero), list(flag_error = ~ as.numeric(.x < 0)))) %>%
+  mutate(across(all_of(zero), ~ ifelse(.x < 0, 0, .x)))
 
 
 # for vars that could be any, but are mostly between -1 and 1
 any <-  c("extra_profit_loss_pl", "inc_bef_tax_pl", "profit_loss_year_pl", "share_eq_bs")
 
 data <- data %>%
-  mutate_at(vars(any), funs("flag_low"= as.numeric(.< -1))) %>%
-  mutate_at(vars(any), funs(ifelse(.< -1, -1, .))) %>%
-  mutate_at(vars(any), funs("flag_high"= as.numeric(.> 1))) %>%
-  mutate_at(vars(any), funs(ifelse(.> 1, 1, .))) %>%
-  mutate_at(vars(any), funs("flag_zero"= as.numeric(.== 0))) %>%
-  mutate_at(vars(any), funs("quad"= .^2))
+  mutate(across(all_of(any), list(flag_low = ~ as.numeric(.x < -1)))) %>%
+  mutate(across(all_of(any), ~ ifelse(.x < -1, -1, .x))) %>%
+  mutate(across(all_of(any), list(flag_high = ~ as.numeric(.x > 1)))) %>%
+  mutate(across(all_of(any), ~ ifelse(.x > 1, 1, .x))) %>%
+  mutate(across(all_of(any), list(flag_zero = ~ as.numeric(.x == 0)))) %>%
+  mutate(across(all_of(any), list(quad = ~ .x^2)))
 
 
 # dropping flags with no variation
@@ -325,11 +325,11 @@ Hmisc::describe(data$age)
 
 # drop unused factor levels
 data <- data %>%
-  mutate_at(vars(colnames(data)[sapply(data, is.factor)]), funs(fct_drop))
+  mutate(across(where(is.factor), fct_drop))
 
 d1sale_2<-ggplot(data = data, aes(x=d1_sales_mil_log_mod, y=as.numeric(default))) +
   geom_point(size=0.1,  shape=20, stroke=2, fill=color[2], color=color[2]) +
-  geom_smooth(method="loess", se=F, colour=color[1], size=1.5, span=0.9) +
+  geom_smooth(method="loess", se=F, colour=color[1], linewidth=1.5, span=0.9) +
   labs(x = "Growth rate (Diff of ln sales)",y = "default") +
   theme_bg() +
   scale_x_continuous(limits = c(-1.5,1.5), breaks = seq(-1.5,1.5, 0.5))

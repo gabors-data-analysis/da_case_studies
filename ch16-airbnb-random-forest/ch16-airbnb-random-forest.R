@@ -60,10 +60,16 @@ output <- paste0(use_case_dir,"output/")
 create_output_if_doesnt_exist(output)
 
 # Parallel Processing Setup
-n_cores = parallel::detectCores() - 1
+detected_cores <- parallel::detectCores()
+n_cores <- ifelse(is.na(detected_cores), 1, max(1, detected_cores - 1))
 
-cl <- makePSOCKcluster(n_cores)
-registerDoParallel(cl)
+cl <- NULL
+if (n_cores > 1) {
+  cl <- makePSOCKcluster(n_cores)
+  registerDoParallel(cl)
+} else {
+  registerDoSEQ()
+}
 
 # Speed Flag: Set to TRUE for quick testing, FALSE for full analysis
 FAST_RUN <- TRUE 
@@ -425,11 +431,11 @@ save_fig("ch16-figure-2c-rf-varimp-perm", output, "small")
 # Partial Dependence Plots -------------------------------------------------------
 #########################################################################################
 
-pdp_n_acc <- pdp::partial(rf_model_2, pred.var = "n_accommodates", pred.grid = distinct_(data_holdout, "n_accommodates"), train = data_train)
+pdp_n_acc <- pdp::partial(rf_model_2, pred.var = "n_accommodates", pred.grid = distinct(data_holdout, n_accommodates), train = data_train)
 pdp_n_acc_plot <- pdp_n_acc %>%
   autoplot( ) +
   geom_point(color=color[1], size=2) +
-  geom_line(color=color[1], size=1) +
+  geom_line(color=color[1], linewidth=1) +
   ylab("Predicted price") +
   xlab("Accommodates (persons)") +
   scale_x_continuous(limit=c(1,7), breaks=seq(1,7,1))+
@@ -440,12 +446,12 @@ save_fig("ch16-figure-3a-rf-pdp-n-accom", output, "small")
 
 # Partial Dependence Plot with ICE curves
 pdp_n_acc_ice <- pdp::partial(rf_model_2, pred.var = "n_accommodates", 
-                               pred.grid = distinct_(data_holdout, "n_accommodates"), 
+                               pred.grid = distinct(data_holdout, n_accommodates), 
                                train = data_train, ice = TRUE)
 
 pdp_n_acc_ice_plot <- pdp_n_acc_ice %>%
   autoplot(alpha = 0.05, color = color[2]) +
-  geom_line(data = pdp_n_acc, aes(x = n_accommodates, y = yhat), color = color[1], size = 1) +
+  geom_line(data = pdp_n_acc, aes(x = n_accommodates, y = yhat), color = color[1], linewidth= 1) +
   geom_point(data = pdp_n_acc, aes(x = n_accommodates, y = yhat), color=color[1], size=2) +
   ylab("Predicted price") +
   xlab("Accommodates (persons)") +
@@ -455,7 +461,7 @@ pdp_n_acc_ice_plot
 save_fig("ch16-figure-3c-rf-pdp-n-accom-ice", output, "small")
 
 
-pdp_n_roomtype <- pdp::partial(rf_model_2, pred.var = "f_room_type", pred.grid = distinct_(data_holdout, "f_room_type"), train = data_train)
+pdp_n_roomtype <- pdp::partial(rf_model_2, pred.var = "f_room_type", pred.grid = distinct(data_holdout, f_room_type), train = data_train)
 pdp_n_roomtype_plot <- pdp_n_roomtype %>%
   autoplot( ) +
   geom_point(color=color[1], size=2) +
@@ -468,12 +474,12 @@ pdp_n_roomtype_plot
 save_fig("ch16-figure-3b-rf-pdp-roomtype", output, "small")
 
 pdp_n_roomtype_ice <- pdp::partial(rf_model_2, pred.var = "f_room_type", 
-                                    pred.grid = distinct_(data_holdout, "f_room_type"), 
+                                    pred.grid = distinct(data_holdout, f_room_type), 
                                     train = data_train, ice = TRUE)
 
 pdp_n_roomtype_ice_plot <- ggplot(pdp_n_roomtype_ice, aes(x = f_room_type, y = yhat, group = yhat.id)) +
   geom_line(alpha = 0.05, color = color[2]) +
-  geom_line(data = pdp_n_roomtype, aes(x = f_room_type, y = yhat, group = 1), color = color[1], size = 1) +
+  geom_line(data = pdp_n_roomtype, aes(x = f_room_type, y = yhat, group = 1), color = color[1], linewidth= 1) +
   geom_point(data = pdp_n_roomtype, aes(x = f_room_type, y = yhat, group = 1), color = color[1], size = 2) +
   ylab("Predicted price") +
   xlab("Room type") +
@@ -811,7 +817,9 @@ kable(x = model_performance, format = "latex", digits = 3, booktabs = TRUE, line
   cat(., file = paste0(output, "horse_race_of_models.tex"))
 
 # Stop parallel cluster
-stopCluster(cl)
+if (!is.null(cl)) {
+  stopCluster(cl)
+}
 registerDoSEQ()
 
 #ch16-table-1-rf-models-turning-choices

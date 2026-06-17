@@ -243,7 +243,7 @@ price_diff_by_variables <- function(df, factor_var, dummy_var){
 
   stats[,2] <- lapply(stats[,2], factor)
 
-  ggplot(stats, aes_string(colnames(stats)[1], colnames(stats)[3], fill = colnames(stats)[2]))+
+  ggplot(stats, aes(x = .data[[colnames(stats)[1]]], y = .data[[colnames(stats)[3]]], fill = .data[[colnames(stats)[2]]]))+
     geom_bar(stat='identity', position = position_dodge(width=0.9))+
     geom_errorbar(aes(ymin=Mean-(1.96*se),ymax=Mean+(1.96*se)),
                   position=position_dodge(width = 0.9), width = 0.25)+
@@ -375,7 +375,7 @@ createLossPlot <- function(r, best_coords, file_name,  myheight_small = 5.625, m
   l <- all_coords[all_coords$threshold == t, "loss"]
 
   loss_plot <- ggplot(data = all_coords, aes(x = threshold, y = loss)) +
-    geom_line(color=color[1], size=0.7) +
+    geom_line(color=color[1], linewidth=0.7) +
     scale_x_continuous(limits = c(0, 1), breaks = seq(0, 1, by = 0.1)) +
     geom_vline(xintercept = t , color = color[2] ) +
     annotate(geom = "text", x = t, y= min(all_coords$loss),
@@ -405,7 +405,7 @@ createRocPlotWithOptimal <- function(r, best_coords, file_name,  myheight_small 
   se <- best_coords$sensitivity[1]
 
   roc_plot <- ggplot(data = all_coords, aes(x = specificity, y = sensitivity)) +
-    geom_line(color=color[1], size=0.7) +
+    geom_line(color=color[1], linewidth=0.7) +
     scale_y_continuous(breaks = seq(0, 1, by = 0.1)) +
     scale_x_reverse(breaks = seq(0, 1, by = 0.1)) +
     geom_point(aes(x = sp, y = se)) +
@@ -429,7 +429,7 @@ createRocPlot <- function(r, file_name,  myheight_small = 5.625, mywidth_small =
   all_coords <- coords(r, x="all", ret="all", transpose = FALSE)
 
   roc_plot <- ggplot(data = all_coords, aes(x = fpr, y = tpr)) +
-    geom_line(color=color[1], size = 0.7) +
+    geom_line(color=color[1], linewidth= 0.7) +
     geom_area(aes(fill = color[4], alpha=0.4), alpha = 0.3, position = 'identity', color = color[1]) +
     scale_fill_viridis(discrete = TRUE, begin=0.6, alpha=0.5, guide = "none") +
     xlab("False Positive Rate (1-Specifity)") +
@@ -466,8 +466,8 @@ getPointsGraph <- function(data, colors) {
     mutate(group_mean = mean(mean)) %>%
     ggplot(data = ., aes(x = t_event, y = mean)) +
     geom_point(color = color[1]) +
-    geom_line(aes(x = t_event, y = group_mean, group = t_event_6), size = 1, color = color[1]) +
-    geom_vline(xintercept = 0, color = color[3], size=1.5, linetype = "dashed" ) +
+    geom_line(aes(x = t_event, y = group_mean, group = t_event_6), linewidth= 1, color = color[1]) +
+    geom_vline(xintercept = 0, color = color[3], linewidth=1.5, linetype = "dashed" ) +
     labs(y = "Average points", x = "Event time: games before/after manager change") +
     scale_x_continuous(breaks = c(-12, -6, -1, 1, 6, 12), limits = c(-12, 12)) +
     scale_y_continuous(expand=c(0.01,0.01), breaks = seq(0, 1.6, 0.2), limits = c(0, 1.7)) +
@@ -498,10 +498,10 @@ getPointsGraphWithPseudo <- function(data, colors) {
   ggplot(data = data_plot, aes(x = t_event, y = mean, color = factor(countpseudo))) +
     geom_point() +
     geom_line(data = filter(data_plot, countpseudo == 0),
-              aes(x = t_event, y = group_mean, group = t_event_6), size = 1) +
+              aes(x = t_event, y = group_mean, group = t_event_6), linewidth= 1) +
     geom_line(data = filter(data_plot, countpseudo == 1),
-              aes(x = t_event, y = group_mean, group = t_event_6), size = 1) +
-    geom_vline(xintercept = 0, color = color[3], size=1.5, linetype = "dashed" ) +
+              aes(x = t_event, y = group_mean, group = t_event_6), linewidth= 1) +
+    geom_vline(xintercept = 0, color = color[3], linewidth=1.5, linetype = "dashed" ) +
     labs(y = "Average points", x = "Event time: games before/after intervention or pseudo intervention") +
     scale_x_continuous(breaks = c(-12, -6, -1, 1, 6, 12), limits = c(-12, 12)) +
     scale_y_continuous(expand=c(0.01,0.01), breaks = seq(0, 1.6, 0.2), limits = c(0, 1.7)) +
@@ -528,9 +528,9 @@ create_calibration_plot <- function(data, file_name, prob_var, actual_var, y_lab
     summarise(mean_prob = mean(!!as.name(prob_var)), mean_actual = mean(!!as.name(actual_var)), n = n())
 
     p <- ggplot(data = binned_data) +
-      geom_line(aes(mean_prob, mean_actual), color=color[1], size=0.6, show.legend = TRUE) +
+      geom_line(aes(mean_prob, mean_actual), color=color[1], linewidth=0.6, show.legend = TRUE) +
       geom_point(aes(mean_prob,mean_actual), color = color[1], size = 1, shape = 16, alpha = 0.7, show.legend=F, na.rm = TRUE) +
-      geom_segment(x=min(breaks), xend=max(breaks), y=min(breaks), yend=max(breaks), color=color[2], size=0.3) +
+      geom_segment(x=min(breaks), xend=max(breaks), y=min(breaks), yend=max(breaks), color=color[2], linewidth=0.3) +
       theme_bg() +
       labs(x= "Predicted event probability",
            y= y_lab) +

@@ -98,7 +98,7 @@ ht<-etable(reg,reg2, reg3,
 ht
 
 # not in book
-F10_earnings_hist<- ggplot(data = cps, aes (x = age, y = 2*(..count..)/sum(..count..))) +
+F10_earnings_hist<- ggplot(data = cps, aes (x = age, y = 2*(after_stat(count))/sum(after_stat(count)))) +
   geom_histogram(binwidth = 4, color = color.outline, fill = color[1], linewidth = 0.25, alpha = 0.8,  
                  boundary=0, closed='left',  show.legend=F, na.rm =TRUE) +
   labs(x = "Age (years)", y = "Percent") +
@@ -111,8 +111,8 @@ F10_earnings_hist
 
 
 
-F10_earnings_density <- ggplot(data = cps, aes(x=age, y = stat(density), color = female)) +
-  geom_density(adjust=1.5, show.legend=F, na.rm =TRUE, size=0.7) +
+F10_earnings_density <- ggplot(data = cps, aes(x=age, y = after_stat(density), color = female)) +
+  geom_density(adjust=1.5, show.legend=F, na.rm =TRUE, linewidth=0.7) +
   labs(x="Age (years)", y="Density", color = "") +
   scale_color_manual(name="", 
                      values=c(color[2],color[1]),

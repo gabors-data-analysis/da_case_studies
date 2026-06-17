@@ -75,7 +75,7 @@ datasummary( diff ~ Mean + SD + Min + Max + Median + Max , data = pd )
 
 hist1<- ggplot(data=pd, aes(diff))+
   geom_histogram(binwidth = 5, boundary=0, closed="left",
-                 fill = color[1], size = 0.25, alpha = 0.8,  show.legend=F, na.rm=TRUE) +
+                 fill = color[1], linewidth= 0.25, alpha = 0.8,  show.legend=F, na.rm=TRUE) +
   labs(x = "Online - offline price difference (US dollars)", y = "Frequency") +
   theme_bg()+
   scale_x_continuous(limits = c(-420, 420), breaks = seq(-400, 420, by = 100)) +
@@ -96,7 +96,7 @@ Hmisc::describe(pd1$diff)
 
 hist2<- ggplot(data=pd, aes(diff))+
   geom_histogram(binwidth = 0.5, boundary=-0, closed="left",
-                 color = color.outline, fill = color[1], size = 0.25, alpha = 0.8,  show.legend=F, na.rm=TRUE) +
+                 color = color.outline, fill = color[1], linewidth= 0.25, alpha = 0.8,  show.legend=F, na.rm=TRUE) +
   labs(x = "Online - offline price difference (US dollars)", y = "Frequency") +
   theme_bg()+
   expand_limits(x = 0.01, y = 0.01) +

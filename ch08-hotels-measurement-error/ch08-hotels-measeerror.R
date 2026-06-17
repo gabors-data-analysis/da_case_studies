@@ -93,8 +93,8 @@ hotels$yhat3<-predict(reg_me3,hotels)
 
 
 F08_noise1<- ggplot(data = hotels) +
-  geom_line(aes(x = rating, y = yhat, color = color[2]), size = 1)+ 
-  geom_line(aes(x = rating, y = yhat3, color = color[1]), size = 1)+ 
+  geom_line(aes(x = rating, y = yhat, color = color[2]), linewidth= 1)+ 
+  geom_line(aes(x = rating, y = yhat3, color = color[1]), linewidth= 1)+ 
   scale_color_manual(name = "", values=c(color[2], color[1]), labels=NULL, guide = 'none') +
   coord_cartesian(xlim = c(2, 5), ylim = c(3.5, 5)) +
   expand_limits(x = 0.01, y = 0.01) +

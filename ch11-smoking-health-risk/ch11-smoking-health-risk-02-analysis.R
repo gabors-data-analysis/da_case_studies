@@ -107,7 +107,7 @@ share<-share %>%
   mutate(weight_2=(weight/1000))
 
 # Show graph with actual and predicted probabilities
-g1<-ggplot(data = share, label=smoking) +
+g1<-ggplot(data = share) +
   geom_point(aes(x = smoking, y = pred1), size = 1, color=color[1], shape = 16) +
   geom_line(aes(x = smoking, y = pred1), colour=color[1],  linewidth=0.7) +
   geom_point(aes(x = smoking, y = stayshealthy, size=weight_2), fill = color[2], color=color[2], shape = 16, alpha=0.8, show.legend=F, na.rm=TRUE)  +
@@ -327,7 +327,8 @@ msummary( pmodels ,
           gof_omit = 'DF|Deviance|Log.Lik.|F|R2 Adj.|AIC|BIC|R2|PseudoR2',
           stars=c('*' = .05, '**' = .01),
           coef_rename = cm,
-          coef_omit = 'as.factor(country)*')
+          coef_omit = 'as.factor(country)*',
+          component = "marginal")
 
 # msummary(pmodels1)
 # msummary(pmodels)
@@ -340,7 +341,8 @@ msummary( pmodels ,
           gof_omit = 'DF|Deviance|Log.Lik.|F|R2 Adj.|AIC|BIC|R2|PseudoR2',
           stars=c('*' = .05, '**' = .01),
           coef_rename = cm,
-          coef_omit = 'country')
+          coef_omit = 'country',
+          component = "marginal")
 
 # could also save it by adding output...
 msummary( pmodels ,
@@ -349,6 +351,7 @@ msummary( pmodels ,
           stars=c('*' = .05, '**' = .01),
           coef_rename = cm,
           coef_omit = 'as.factor(country)*',
+          component = "marginal",
           output = paste0(output,"prob_models_coeff.html")
 )
 
@@ -396,7 +399,7 @@ g5<-ggplot(data = share) +
   geom_point(aes(x=pred_lpm, y=pred_logit,  color="Logit"), size=0.4,  shape=16) +
   #geom_line(aes(x=pred_lpm, y=pred_probit, color="Probit"), size=0.3) +
   #geom_line(aes(x=pred_lpm, y=pred_logit,  color="Logit"), size=0.3) +
-  geom_line(aes(x=pred_lpm, y=pred_lpm,    color="45 degree line"), size=0.4) +
+  geom_line(aes(x=pred_lpm, y=pred_lpm,    color="45 degree line"), linewidth=0.4) +
   labs(x = "Predicted probability of staying healthy (LPM)", y="Predicted probability")+
   scale_y_continuous(expand = c(0.00,0.0), limits = c(0,1), breaks = seq(0,1,0.1)) +
   scale_x_continuous(expand = c(0.00,0.0), limits = c(0,1), breaks = seq(0,1,0.1)) +
@@ -420,10 +423,10 @@ share$pred_lpmbase <- predict( lpmbase )
 # LPM simple model
 g7a<-ggplot(data = share,aes(x=pred_lpmbase)) + 
   geom_histogram(data=subset(share[share$stayshealthy == 1, ]), 
-                 aes(fill=as.factor(stayshealthy), color=as.factor(stayshealthy), y = (..count..)/sum(..count..)*100),
+                 aes(fill=as.factor(stayshealthy), color=as.factor(stayshealthy), y = (after_stat(count))/sum(after_stat(count))*100),
                  binwidth = 0.05, boundary=0, alpha=0.8) +
   geom_histogram(data=subset(share[share$stayshealthy == 0, ]), 
-                 aes(fill=as.factor(stayshealthy), color=as.factor(stayshealthy), y = (..count..)/sum(..count..)*100), 
+                 aes(fill=as.factor(stayshealthy), color=as.factor(stayshealthy), y = (after_stat(count))/sum(after_stat(count))*100), 
                  binwidth = 0.05, boundary=0, alpha=0) +
   scale_fill_manual(name="", values=c("0" = "white", "1" = color[1]),labels=c("Did not stay healthy","Stayed healthy")) +
   scale_color_manual(name="", values=c("0" = color[2], "1" = color[1]),labels=c("Did not stay healthy","Stayed healthy")) +
@@ -441,10 +444,10 @@ save_fig("ch11-figure-7a-pred-hist-byoutcome-lpmbase", output, "small")
 # LPM rich model
 g7b<-ggplot(data = share,aes(x=pred_lpm)) + 
   geom_histogram(data=subset(share[share$stayshealthy == 1, ]), 
-                 aes(fill=as.factor(stayshealthy), color=as.factor(stayshealthy), y = (..count..)/sum(..count..)*100),
+                 aes(fill=as.factor(stayshealthy), color=as.factor(stayshealthy), y = (after_stat(count))/sum(after_stat(count))*100),
                  binwidth = 0.05, boundary=0, alpha=0.8) +
   geom_histogram(data=subset(share[share$stayshealthy == 0, ]), 
-                 aes(fill=as.factor(stayshealthy), color=as.factor(stayshealthy), y = (..count..)/sum(..count..)*100), 
+                 aes(fill=as.factor(stayshealthy), color=as.factor(stayshealthy), y = (after_stat(count))/sum(after_stat(count))*100), 
                  binwidth = 0.05, boundary=0, alpha=0) +
   scale_fill_manual(name="", values=c("0" = "white", "1" = color[1]),labels=c("Did not stay healthy","Stayed healthy")) +
   scale_color_manual(name="", values=c("0" = color[2], "1" = color[1]),labels=c("Did not stay healthy","Stayed healthy")) +
@@ -562,14 +565,14 @@ share$illustr_probit <- pnorm(share$bx_probit)
 
 #Figure 11.4: The logit and probit link functions
 g4<-ggplot(data = share) + 
-  geom_line(aes(x=bx_logit, y=illustr_logit, color="Logit"), size=0.7) +
-  geom_line(aes(x=bx_logit, y=illustr_probit, color="Probit"), size=0.7) +
+  geom_line(aes(x=bx_logit, y=illustr_logit, color="Logit"), linewidth=0.7) +
+  geom_line(aes(x=bx_logit, y=illustr_probit, color="Probit"), linewidth=0.7) +
   ylab("Probability") +
   xlab("z values") +
   scale_y_continuous(expand = c(0.00,0.0), limits = c(0,1), breaks = seq(0,1,0.2)) +
   scale_color_manual(name="", values=c(color[1],color[2])) +
   theme_bg() +
-  theme(axis.line.y=element_line(color="grey70",size=.1))
+  theme(axis.line.y=element_line(color="grey70",linewidth=.1))
 
 g4
 #save_fig("logit_probit_curves_R", output, "small")

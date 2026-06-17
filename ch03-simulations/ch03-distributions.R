@@ -58,8 +58,8 @@ obs <- N
 bernoulli <- as.data.frame(rbinom(obs, 1, 0.7))
 colnames(bernoulli) <- "bernoulli"
 
-g_bernoulli<- ggplot(data = bernoulli, aes (x = bernoulli, y = (..count..)/sum(..count..))) +
-  geom_histogram(binwidth = 0.1, color = color.outline, fill = color[1], size = 0.25, alpha = 0.8,  show.legend=F, na.rm =TRUE) +
+g_bernoulli<- ggplot(data = bernoulli, aes (x = bernoulli, y = (after_stat(count))/sum(after_stat(count)))) +
+  geom_histogram(binwidth = 0.1, color = color.outline, fill = color[1], linewidth= 0.25, alpha = 0.8,  show.legend=F, na.rm =TRUE) +
   labs(y = "Percent") +
   expand_limits(x = 0.01, y = 0.01) +
   coord_cartesian(clip = "off") +
@@ -76,7 +76,7 @@ Nbinom <- 20
 binomial <- as.data.frame(rbinom(obs,Nbinom,0.4))
 colnames(binomial) <- "binomial"
 
-g_binom<-ggplot(data = binomial, aes (x = binomial, y = (..count..)/sum(..count..))) +
+g_binom<-ggplot(data = binomial, aes (x = binomial, y = (after_stat(count))/sum(after_stat(count)))) +
   geom_histogram_da(binwidth = 0.5, type="percent") +
   labs(y = "Percent") +
   coord_cartesian(clip = "off") +
@@ -92,9 +92,9 @@ save_fig("ch03-figure-rb7-1b-binomial", output, size = "small")
 uniform <- as.data.frame(runif(obs, 0, 1))
 colnames(uniform) <- "uniform"
 
-g_uniform<-ggplot(data = uniform, aes (x = uniform, y = (..count..)/sum(..count..))) +
+g_uniform<-ggplot(data = uniform, aes (x = uniform, y = (after_stat(count))/sum(after_stat(count)))) +
   geom_histogram(bins =50, center=1,
-                 color = color.outline, fill = color[1], size = 0.25, alpha = 0.8,  show.legend=F, na.rm =TRUE) +
+                 color = color.outline, fill = color[1], linewidth= 0.25, alpha = 0.8,  show.legend=F, na.rm =TRUE) +
   labs(y = "Percent") +
   scale_x_continuous(expand = c(0.01,0.01), limits=c(0, 1), breaks=seq(0, 1, by=0.1)) + 
   scale_y_continuous(expand = c(0.001,0.001), labels = scales::percent_format(accuracy = .1)) +
@@ -107,8 +107,8 @@ save_fig("ch03-figure-rb7-1c-uniform", output, size = "small")
 normal <- as.data.frame(rnorm(obs, 0,1))
 colnames(normal) <- "normal"
 
-g_normal<-ggplot(data = normal, aes (x = normal, y = (..count..)/sum(..count..))) +
-  geom_histogram(binwidth = 0.2, color = color.outline, fill = color[1], size = 0.25, alpha = 0.8,  show.legend=F, na.rm =TRUE) +
+g_normal<-ggplot(data = normal, aes (x = normal, y = (after_stat(count))/sum(after_stat(count)))) +
+  geom_histogram(binwidth = 0.2, color = color.outline, fill = color[1], linewidth= 0.25, alpha = 0.8,  show.legend=F, na.rm =TRUE) +
   labs(y = "Percent") +
   scale_y_continuous(labels = scales::percent_format(accuracy = 1), limits=c(0, 0.1), breaks=seq(0, 0.1, by=0.02)) +
   scale_x_continuous(expand = c(0.01,0.01), limits=c(-5, 5), breaks=seq(-4, 4, by=1)) + 
@@ -123,9 +123,9 @@ save_fig("ch03-figure-rb7-2a-normal", output, size = "small")
 lognormal <- as.data.frame(exp(normal))
 colnames(lognormal) <- "lognormal"
 
-g_lognormal<-ggplot(data = subset(lognormal, lognormal <10), aes (x = lognormal, y = (..count..)/sum(..count..))) +
+g_lognormal<-ggplot(data = subset(lognormal, lognormal <10), aes (x = lognormal, y = (after_stat(count))/sum(after_stat(count)))) +
   geom_histogram(binwidth = 0.1, boundary=0.0,
-                 color = color.outline, fill = color[1], size = 0.25, alpha = 0.8,  show.legend=F, na.rm =TRUE) +
+                 color = color.outline, fill = color[1], linewidth= 0.25, alpha = 0.8,  show.legend=F, na.rm =TRUE) +
   labs(y = "Percent") +
   scale_y_continuous(labels = scales::percent_format(accuracy = 1), limits=c(0, 0.08), breaks=seq(0, 0.08, by=0.02)) +
   scale_x_continuous(expand = c(0.01,0.01), limits=c(0, 8), breaks=seq(0, 8, by=1)) + 
@@ -147,9 +147,9 @@ powerlaw <- powerlaw / sum(powerlaw)
 powerlaw <- as.data.frame(powerlaw)
 
 
-g_power<-ggplot(data = subset(powerlaw, powerlaw < histrange), aes (x = powerlaw, y = (..count..)/sum(..count..))) +
+g_power<-ggplot(data = subset(powerlaw, powerlaw < histrange), aes (x = powerlaw, y = (after_stat(count))/sum(after_stat(count)))) +
   geom_histogram(bins=50, boundary=0.5,
-                 color = color.outline, fill = color[1], size = 0.25, alpha = 0.8,  show.legend=F, na.rm =TRUE) +
+                 color = color.outline, fill = color[1], linewidth= 0.25, alpha = 0.8,  show.legend=F, na.rm =TRUE) +
   labs(y = "Percent") +
   scale_y_continuous(labels = scales::percent_format(accuracy = 5L)) +
   scale_x_continuous(labels = fancy_scientific) +

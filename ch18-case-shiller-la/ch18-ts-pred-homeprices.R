@@ -516,8 +516,8 @@ data_plot <- data %>%
 
 
 pred_p_plot <- ggplot(data = data_plot , aes(x = as.Date(date), y = p))+
-  geom_line(size = 0.8, aes(color = "Actual")) +
-  geom_line(aes(x = as.Date(date), y = p_pred, color = "Prediction "),  size = 1) +
+  geom_line(linewidth= 0.8, aes(color = "Actual")) +
+  geom_line(aes(x = as.Date(date), y = p_pred, color = "Prediction "),  linewidth= 1) +
   #annotate("text", x = yearmonth("2017-08"), y = 257, label = "Prediction ", size=2.5, vjust = 2, color = color[2])+  
   #annotate("text", x = yearmonth("2017-03"), y = 258, label = "Actual", size=2.5, hjust = 1.5, color = color[1])+  
   ylab("Case-Shiller Home Price Index") +
@@ -530,7 +530,7 @@ pred_p_plot <- ggplot(data = data_plot , aes(x = as.Date(date), y = p))+
         legend.text = element_text(size = 4),
         legend.key.width = unit(.8, "cm"),
         legend.key.height = unit(.2, "cm")) + 
-  guides(linetype = guide_legend(override.aes = list(size = 0.6)))
+  guides(linetype = guide_legend(override.aes = list(linewidth = 0.6)))
 pred_p_plot
 save_fig("ch18-figure-9a-pred-p-mp", output, "small")  
 
@@ -539,8 +539,8 @@ save_fig("ch18-figure-9a-pred-p-mp", output, "small")
 conf_level_lower <- paste0(conf_level_chr, "_lower")
 conf_level_upper <- paste0(conf_level_chr, "_upper")
 pred_p_mp_fan_R <- ggplot(data = data_plot , aes(x = as.Date(date), y = p))+
-  geom_line(size = 0.8, aes(color = "Actual")) +
-  geom_line(aes(x = as.Date(date), y = p_pred, color = "Prediction "),  size = 1) +
+  geom_line(linewidth= 0.8, aes(color = "Actual")) +
+  geom_line(aes(x = as.Date(date), y = p_pred, color = "Prediction "),  linewidth= 1) +
   geom_ribbon(aes(ymin =  get(conf_level_lower), ymax = get(conf_level_upper)), alpha=0.2,   bg=color[2]) +
   ylab("Case-Shiller Price index") +
   xlab("Date (month)") +
@@ -552,7 +552,7 @@ pred_p_mp_fan_R <- ggplot(data = data_plot , aes(x = as.Date(date), y = p))+
         legend.text = element_text(size = 4),
         legend.key.width = unit(.8, "cm"),
         legend.key.height = unit(.2, "cm")) + 
-  guides(linetype = guide_legend(override.aes = list(size = 0.6)))
+  guides(linetype = guide_legend(override.aes = list(linewidth = 0.6)))
 pred_p_mp_fan_R
 save_fig("ch18-figure-9b-pred-p-mp-fan", output, "small")
 
@@ -634,8 +634,8 @@ data_plot <- data %>%
 
 # with uncertainty fan
 pred_p_mp_fan2018_R <- ggplot(data = data_plot , aes(x = as.Date(date), y = p))+
-  geom_line(size = 0.8, aes(color = "Actual")) +
-  geom_line(aes(x = as.Date(date), y = p_pred, color = "Prediction "),  size = 1) +
+  geom_line(linewidth= 0.8, aes(color = "Actual")) +
+  geom_line(aes(x = as.Date(date), y = p_pred, color = "Prediction "),  linewidth= 1) +
   geom_ribbon(aes(ymin =  get(conf_level_lower), ymax = get(conf_level_upper)), alpha=0.2,   bg=color[2]) +
   ylab("Case-Shiller Price index") +
   xlab("Date (month)") +
@@ -647,6 +647,6 @@ pred_p_mp_fan2018_R <- ggplot(data = data_plot , aes(x = as.Date(date), y = p))+
         legend.text = element_text(size = 4),
         legend.key.width = unit(.8, "cm"),
         legend.key.height = unit(.2, "cm")) + 
-  guides(linetype = guide_legend(override.aes = list(size = 0.6)))
+  guides(linetype = guide_legend(override.aes = list(linewidth = 0.6)))
 pred_p_mp_fan2018_R
 save_fig("ch18-figure-11-pred-p-mp-fan2018", output, "small")

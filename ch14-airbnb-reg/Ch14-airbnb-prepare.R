@@ -170,14 +170,14 @@ data <- data %>%
 
 # Histograms
 R_F14_h_lnprice <- ggplot(data, aes(ln_price)) +
-  geom_histogram(binwidth = 0.15, fill = color[1], color = color.outline, alpha = 0.8, size = 0.25) +
+  geom_histogram(binwidth = 0.15, fill = color[1], color = color.outline, alpha = 0.8, linewidth= 0.25) +
   ylab("Count") +
   xlab("Log price") +
   theme_bg()
 R_F14_h_lnprice
 
 R_F14_h_price <- ggplot(data, aes(price)) +
-  geom_histogram(binwidth = 25, fill = color[1], color = color.outline, alpha = 0.8, size = 0.25) +
+  geom_histogram(binwidth = 25, fill = color[1], color = color.outline, alpha = 0.8, linewidth= 0.25) +
   ylab("count") +
   xlab("Price") +
   theme_bg()
@@ -224,7 +224,7 @@ data <- data %>%
 
 ## bathrooms
 ggplot(data, aes(n_bathrooms)) +
-  geom_histogram(binwidth = 0.5, fill = color[1], color = color.outline, alpha = 0.8, size = 0.25) +
+  geom_histogram(binwidth = 0.5, fill = color[1], color = color.outline, alpha = 0.8, linewidth= 0.25) +
   ylab("") +
   xlab("N of bathrooms") +
   theme_bg()
@@ -243,7 +243,7 @@ nreview_plot <- data %>%
   filter(n_number_of_reviews <100)
 
 ggplot(nreview_plot, aes(n_number_of_reviews)) +
-  geom_histogram(binwidth = 5, fill = color[1], color = color.outline, alpha = 0.8, size = 0.25) +
+  geom_histogram(binwidth = 5, fill = color[1], color = color.outline, alpha = 0.8, linewidth= 0.25) +
   ylab("") +
   xlab("N of reviews") +
   theme_bg()
@@ -253,7 +253,7 @@ data <- data %>%
   mutate(ln_number_of_reviews = log(n_number_of_reviews+1))
 
 ggplot(data, aes(ln_number_of_reviews)) +
-  geom_histogram(binwidth = 0.5, fill = color[1], color = color.outline, alpha = 0.8, size = 0.25) +
+  geom_histogram(binwidth = 0.5, fill = color[1], color = color.outline, alpha = 0.8, linewidth= 0.25) +
   ylab("") +
   xlab("Log N of reviews") +
   theme_bg()

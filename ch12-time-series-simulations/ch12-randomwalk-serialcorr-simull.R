@@ -108,7 +108,7 @@ uncorr
 whitenoise <- ggplot(uncorr,aes(t, x)) + 
   geom_line (show.legend = FALSE, linewidth =0.6, color=color[1]) +
   geom_hline(yintercept=0, 
-             color = color[2], size=1)+
+             color = color[2], linewidth=1)+
   labs(x = "Time period", 
        y = "Value of the simulated variable") +
   theme_bg() +

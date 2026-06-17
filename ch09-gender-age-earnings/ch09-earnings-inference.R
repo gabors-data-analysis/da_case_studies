@@ -207,7 +207,7 @@ F09_3b<- ggplot(data=data,aes(x=age)) +
         legend.text = element_text(size = 3),
         legend.key.width = unit(.8, "cm"),
         legend.key.height = unit(.2, "cm")) + 
-  guides(linetype = guide_legend(override.aes = list(size = 0.6)))
+  guides(linetype = guide_legend(override.aes = list(linewidth = 0.6)))
   F09_3b
   save_fig("ch09-figure-3b-wage-various",output, "small")
   
@@ -232,20 +232,20 @@ F09_3b<- ggplot(data=data,aes(x=age)) +
           legend.text = element_text(size = 4),
           legend.key.width = unit(.8, "cm"),
           legend.key.height = unit(.2, "cm")) + 
-  guides(linetype = guide_legend(override.aes = list(size = 0.6)))
+  guides(linetype = guide_legend(override.aes = list(linewidth = 0.6)))
   F09_2b
   
     
 #graph with the fitted values from the three reg with CI
   F09_2_CI <- ggplot(data=data,aes(x=age))+
-  geom_line(aes(y=lnwpred_agel, color="Lowess", linetype="Lowess"),size=1.2)+
-  geom_line(aes(y=lnwpred_ageq, color="Quadratic", linetype="Quadratic"), size=1.2)+
-  geom_line(aes(y=lnwpred_ageqCIUP, color="Quadratic", linetype="Quadratic"), size=0.6)+
-  geom_line(aes(y=lnwpred_ageqCILO, color="Quadratic", linetype="Quadratic"), size=0.6)+
+  geom_line(aes(y=lnwpred_agel, color="Lowess", linetype="Lowess"),linewidth=1.2)+
+  geom_line(aes(y=lnwpred_ageq, color="Quadratic", linetype="Quadratic"), linewidth=1.2)+
+  geom_line(aes(y=lnwpred_ageqCIUP, color="Quadratic", linetype="Quadratic"), linewidth=0.6)+
+  geom_line(aes(y=lnwpred_ageqCILO, color="Quadratic", linetype="Quadratic"), linewidth=0.6)+
   geom_ribbon(aes(ymin = lnwpred_ageqCILO, ymax = lnwpred_ageqCIUP), alpha=0.2, bg = color[3]) +
-  geom_line(aes(y=lnwpred_agesp, color="Piecewise linear spline", linetype="Piecewise linear spline") ,size=1.2)+
-  geom_line(aes(y=lnwpred_agespCIUP,color="Piecewise linear spline", linetype="Piecewise linear spline"),size=0.6)+
-  geom_line(aes(y=lnwpred_agespCILO,color="Piecewise linear spline", linetype="Piecewise linear spline"),size=0.6)+
+  geom_line(aes(y=lnwpred_agesp, color="Piecewise linear spline", linetype="Piecewise linear spline") ,linewidth=1.2)+
+  geom_line(aes(y=lnwpred_agespCIUP,color="Piecewise linear spline", linetype="Piecewise linear spline"),linewidth=0.6)+
+  geom_line(aes(y=lnwpred_agespCILO,color="Piecewise linear spline", linetype="Piecewise linear spline"),linewidth=0.6)+
   geom_ribbon(aes(ymin = lnwpred_agespCILO, ymax = lnwpred_agespCIUP), alpha=0.2,   bg=color[2]) +
   coord_cartesian(xlim = c(20, 65), ylim = c(2.6, 3.6)) +
   scale_x_continuous(expand=c(0.01, 0.01), limits = c(20, 65),   breaks=seq(20, 65,   by=5)) +  
@@ -259,7 +259,7 @@ F09_3b<- ggplot(data=data,aes(x=age)) +
         legend.text = element_text(size = 4),
         legend.key.width = unit(.8, "cm"),
         legend.key.height = unit(.2, "cm")) + 
-  guides(linetype = guide_legend(override.aes = list(size = 0.6)))
+  guides(linetype = guide_legend(override.aes = list(linewidth = 0.6)))
   F09_2_CI
   save_fig("ch09-figure-4-wage-age-reg-ci",output, "large")
 
@@ -274,9 +274,9 @@ pred_confidence <- bind_cols(data,as_tibble(predict(reg7, data, interval="confid
 
 F09_2a_CI<- ggplot(data = pred_confidence %>% filter(data$lnw<4.4 & data$lnw>2), aes(x = age, y = lnw)) +
   geom_point(color = color[1], size = 1,  shape = 16, alpha = 0.8, show.legend=F, na.rm = TRUE) + 
-  geom_smooth(formula = y ~ x, method="lm", colour=color[2], se=F, size = 0.8, linetype = 1)+
-  geom_line(data = pred_confidence, aes(x = age, y = lwr), size = 0.5, linetype = 2, colour=color[2]) +
-  geom_line(data = pred_confidence, aes(x = age, y = upr), size = 0.5, linetype = 2, colour=color[2]) +
+  geom_smooth(formula = y ~ x, method="lm", colour=color[2], se=F, linewidth= 0.8, linetype = 1)+
+  geom_line(data = pred_confidence, aes(x = age, y = lwr), linewidth= 0.5, linetype = 2, colour=color[2]) +
+  geom_line(data = pred_confidence, aes(x = age, y = upr), linewidth= 0.5, linetype = 2, colour=color[2]) +
   coord_cartesian(xlim = c(20, 65), ylim = c(1.5, 4.5)) +
   scale_x_continuous(expand=c(0.01, 0.01), limits = c(20, 65),   breaks=seq(20, 65,   by=5)) +  
   scale_y_continuous(expand=c(0.01, 0.01), limits = c(1.5, 4.5), breaks=seq(1.5, 4.5, by=0.50)) +
@@ -293,9 +293,9 @@ pred_interval <- bind_cols(data,as_tibble(predict(reg7, data, interval="predicti
 
 F09_2b_PI<- ggplot(data=pred_interval %>% filter(lnw<4.4 & lnw>2),aes(x=age,y=lnw)) +  
   geom_point(color = color[1], size = 1,  shape = 16, alpha = 0.8, show.legend=F, na.rm = TRUE) +
-  geom_smooth(formula = y ~ x, method="lm", colour=color[2], se=F, size = 0.8, linetype = 1)+
-  geom_line(data = pred_interval, aes(y = lwr), size = 0.5, linetype = 2, colour=color[2]) +
-  geom_line(data = pred_interval, aes(y = upr), size = 0.5, linetype = 2, colour=color[2]) +
+  geom_smooth(formula = y ~ x, method="lm", colour=color[2], se=F, linewidth= 0.8, linetype = 1)+
+  geom_line(data = pred_interval, aes(y = lwr), linewidth= 0.5, linetype = 2, colour=color[2]) +
+  geom_line(data = pred_interval, aes(y = upr), linewidth= 0.5, linetype = 2, colour=color[2]) +
   coord_cartesian(xlim = c(20, 65), ylim = c(1.5, 4.5)) +
   scale_x_continuous(expand=c(0.01, 0.01), limits = c(20, 65),   breaks=seq(20, 65,   by=5)) +  
   scale_y_continuous(expand=c(0.01, 0.01), limits = c(1.5, 4.5), breaks=seq(1.5, 4.5, by=0.50)) +
@@ -329,10 +329,10 @@ colnames(b_earnings_female) <- c('_b_intercept','_b_female')
 
 
 F09_5<- ggplot(data=b_earnings_female, aes(`_b_female`)) +
-geom_histogram(aes(y = (..count..)/sum(..count..)), binwidth = 0.025,  center=0.0125, closed="left", 
+geom_histogram(aes(y = (after_stat(count))/sum(after_stat(count))), binwidth = 0.025,  center=0.0125, closed="left", 
                color = color.outline, fill = color[1],
-               size = 0.2, alpha = 0.8,  show.legend=F, na.rm=TRUE) +
-  annotate("segment",x = -0.11, y = 0, xend = -0.11, yend = 0.2, colour = color[2], size = 1)+
+               linewidth= 0.2, alpha = 0.8,  show.legend=F, na.rm=TRUE) +
+  annotate("segment",x = -0.11, y = 0, xend = -0.11, yend = 0.2, colour = color[2], linewidth= 1)+
   #geom_segment(aes(x = -0.11, y = 0, xend = -0.11, yend = 0.2), colour = color[2], size = 1)+
   annotate("text", x = -0.07, y = 0.18, label = "mean", size=2.5) +
   coord_cartesian(xlim = c(-0.3, 0.15), ylim = c(0, 0.2)) +

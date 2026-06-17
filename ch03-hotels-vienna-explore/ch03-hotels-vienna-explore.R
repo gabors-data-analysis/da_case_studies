@@ -65,9 +65,9 @@ table(vienna$accommodation_type)
 vienna_cut <- vienna %>% filter(accommodation_type=="Hotel")
 
 
-histstars_Vienna <- ggplot(data = vienna_cut ,aes(x=stars, y = (..count..)/sum(..count..)))+
+histstars_Vienna <- ggplot(data = vienna_cut ,aes(x=stars, y = (after_stat(count))/sum(after_stat(count))))+
   geom_bar(color = color.outline, fill = color[1], alpha=0.8, na.rm=T) +
-  geom_text(stat='count', aes(label=round((..count..)/sum(..count..)*100, 1)), vjust=-0.5, size = 2.5) +
+  geom_text(stat='count', aes(label=round((after_stat(count))/sum(after_stat(count))*100, 1)), vjust=-0.5, size = 2.5) +
   labs(x="Star rating (N. stars)", y="Percent") +
   expand_limits(x = 0.01, y = 0.01) +
   scale_x_continuous(expand = c(0.01,0.01), limits = c(0.5,5.5), breaks = seq(1, 5, 0.5)) +
@@ -80,7 +80,7 @@ save_fig("ch03-figure-1a-hist-stars", output, "small")
 
 histstars_Vienna2 <- ggplot(data = vienna_cut ,aes(x=stars))+
   geom_bar(color = color.outline, fill = color[1], alpha=0.8, na.rm=T) +
-  geom_text(stat='count', aes(label=..count..), vjust=-0.5, size = 2.5) +
+  geom_text(stat='count', aes(label=after_stat(count)), vjust=-0.5, size = 2.5) +
   labs(x="Star rating (N. stars)", y="Frequency") +
   expand_limits(x = 0.01, y = 0.01) +
   scale_x_continuous(expand = c(0.01,0.01), limits = c(0.5,5.5), breaks = seq(1, 5, 0.5)) +
@@ -111,7 +111,7 @@ datasummary( city + stars ~ N , data = vienna_cut )
 
 histprice_Vienna1 <- ggplot(data =  vienna_cut, aes (x = price)) +
   #geom_histogram_da(type="frequency", binwidth = 1, size=0.5)+
-  geom_histogram(binwidth = 1,  fill = color[1], size = 0.5, alpha = 0.8,  show.legend=F, na.rm =TRUE) +
+  geom_histogram(binwidth = 1,  fill = color[1], linewidth= 0.5, alpha = 0.8,  show.legend=F, na.rm =TRUE) +
   labs(x = "Price (US dollars)", y = "Frequency") +
   expand_limits(x = 0.01, y = 0.01) +
   scale_x_continuous(expand = c(0.01,0.01),limits = c(0,500), breaks = seq(0, 500, by = 50)) +
@@ -192,7 +192,7 @@ histdist_Vienna_annot <- ggplot(data =  vienna_cut, aes (x = distance)) +
   expand_limits(x = 0.01, y = 0.01) +
   scale_x_continuous(expand = c(0.01,0.01), limits = c(0,14), breaks = seq(0, 14, by = 2)) +
   scale_y_continuous(expand = c(0.00,0.00), limits = c(0,61), breaks = seq(0, 60, by = 10)) +
-  annotate("segment", x = 8.2, y = 0, xend = 8.2, yend = 60, color = color[2], size=1) +
+  annotate("segment", x = 8.2, y = 0, xend = 8.2, yend = 60, color = color[2], linewidth=1) +
   #geom_segment(aes(x = 10, y = 40, xend = 8.4, yend = 40), arrow = arrow(length = unit(0.2, "cm")))+
   annotate("text", x = 11, y = 29, label = "Too far out", size=2)+
   annotate("rect",xmin=8.2, xmax=14, ymin=0, ymax=60, fill=color[4], alpha=0.1)+

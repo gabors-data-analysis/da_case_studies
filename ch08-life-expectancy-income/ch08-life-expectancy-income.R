@@ -80,9 +80,9 @@ xc %>%dplyr:: select(lifeexp,gdppc,gdptot,lngdppc,lngdptot) %>% summary()
 # HISTOGRAMS
 
 ch08_lifeexp_hist1<- ggplot(data = xc, 
-                       aes (x = gdppc, y = (..count..)/sum(..count..))) +
+                       aes (x = gdppc, y = (after_stat(count))/sum(after_stat(count)))) +
   geom_histogram(binwidth = 3, boundary=0, closed='left', 
-                 color = color.outline, fill = color[1], size = 0.25, alpha = 0.8,  show.legend=F, na.rm=TRUE) +
+                 color = color.outline, fill = color[1], linewidth= 0.25, alpha = 0.8,  show.legend=F, na.rm=TRUE) +
   labs(x = "GDP per capita (thousand US dollars)", y = "Percent") +
   expand_limits(x = 0.01, y = 0.01) +
   scale_x_continuous(expand = c(0.01,0.01),limits = c(0, 120), breaks = seq(0, 120, by = 15)) +
@@ -93,9 +93,9 @@ save_fig("ch08-figure-3a-gdppercap-hist", output, "small")
 
 
 ch08_lifeexp_hist2<- ggplot(data = xc, 
-                        aes (x = lngdppc, y = (..count..)/sum(..count..))) +
+                        aes (x = lngdppc, y = (after_stat(count))/sum(after_stat(count)))) +
   geom_histogram(binwidth = 0.2, boundary=0, closed='left', 
-                 color = color.outline, fill = color[1], size = 0.25, alpha = 0.8,  show.legend=F, na.rm=TRUE) +
+                 color = color.outline, fill = color[1], linewidth= 0.25, alpha = 0.8,  show.legend=F, na.rm=TRUE) +
   labs(x = "ln(GDP per capita, thousand US dollars)", y = "Percent") +
   scale_x_continuous(expand = c(0.01,0.01), limits = c(0, 5), breaks = seq(0, 5, by = 1)) +
   scale_y_continuous(expand = c(0.0,0.0),limits = c(0,0.1), breaks = seq(0, 0.10, by = 0.02), labels = scales::percent_format(accuracy = 1)) +
@@ -221,8 +221,8 @@ xc$sppred<-predict(lm(lifeexp ~ lspline(lngdppc,cutoff_ln), data=xc))
 ch08_lifeexp_spline<- ggplot(data = xc, 
        aes(x = gdppc, y = lifeexp)) +
   geom_point_da() +
-  geom_line(data = xc, aes(x = gdppc, y = sppred), color = color[2], size = 0.7)+ 
-  geom_vline(xintercept = cutoff, color=color[3], size=0.5, linetype="dotted") +
+  geom_line(data = xc, aes(x = gdppc, y = sppred), color = color[2], linewidth= 0.7)+ 
+  geom_vline(xintercept = cutoff, color=color[3], linewidth=0.5, linetype="dotted") +
   coord_cartesian(ylim = c(50, 85)) +
   scale_x_continuous(trans = log_trans(),  breaks = c(0.1, 0.5, 1,2,5,10,20,50,100)) + 
   scale_y_continuous(expand = c(0.01,0.01), breaks = seq(50,85, by=5)) +
@@ -243,7 +243,7 @@ xc$e6 <- resid(reg6)
 # not in book
 ch08_lifeexp_quad<- ggplot(data = xc, aes(x = lngdppc, y = lifeexp)) +
   geom_point_da() +
-  geom_smooth(method = "lm", formula = y ~ poly(x,2), color=color[2], se = F, size=0.7)+
+  geom_smooth(method = "lm", formula = y ~ poly(x,2), color=color[2], se = F, linewidth=0.7)+
   coord_cartesian(xlim = c(-1, 5), ylim = c(50, 90)) +
   scale_x_continuous(breaks = seq(-1,5, by=0.5)) +
   scale_y_continuous(breaks = seq(50,90, by=5)) +
@@ -253,7 +253,7 @@ ch08_lifeexp_quad
 
 ch08_lifeexp_quad_level<- ggplot(data = xc, aes(x = gdppc, y = lifeexp)) +
   geom_point_da() +
-  geom_smooth(method = "lm", formula = y ~ poly(x,2), color=color[2], se = F, size=0.7)+
+  geom_smooth(method = "lm", formula = y ~ poly(x,2), color=color[2], se = F, linewidth=0.7)+
   coord_cartesian(ylim = c(50, 85)) +
   scale_x_continuous(trans = log_trans(),  breaks = c(0.1, 0.5, 1,2,5,10,20,50,100)) + 
   scale_y_continuous(expand = c(0.01,0.01), breaks = seq(50,85, by=5)) +
@@ -276,7 +276,7 @@ summary(reg8)
 
 ch08_lifeexp_weighted<- ggplot(data = xc, aes(x = gdppc, y = lifeexp)) +
   geom_point(data = xc, aes(size=population),  color = color[1], shape = 16, alpha = 0.6,  show.legend=F) +
-  geom_smooth(aes(weight = population), method = "lm", color=color[2], se = F, size=0.7)+
+  geom_smooth(aes(weight = population), method = "lm", color=color[2], se = F, linewidth=0.7)+
   scale_size(range = c(1, 15)) +
   coord_cartesian(ylim = c(50, 85)) +
   scale_x_continuous(trans = log_trans(),  breaks = c(0.1, 0.5, 1,2,5,10,20,50,100)) + 
@@ -294,8 +294,8 @@ save_fig("ch08-figure-9b-lifeexp-weighted", output, "small")
 
 # not in book
 F08_lifeexp_w_compare<- ggplot(data = xc, aes(x = gdppc, y = lifeexp)) +
-  geom_smooth(method = "lm", color=color[2], se = F, size=1)+
-  geom_smooth(aes(weight = population), method = "lm", color=color[3], se = F, size=1)+
+  geom_smooth(method = "lm", color=color[2], se = F, linewidth=1)+
+  geom_smooth(aes(weight = population), method = "lm", color=color[3], se = F, linewidth=1)+
   scale_size(range = c(1, 15)) +
   coord_cartesian(ylim = c(50, 85)) +
   scale_x_continuous(trans = log_trans(),  breaks = c(0.1, 0.5, 1,2,5,10,20,50,100)) + 
@@ -308,7 +308,7 @@ F08_lifeexp_w_compare
 # not in book
 ch08_lifeexp_weighted<- ggplot(data = xc, aes(x = lngdppc, y = lifeexp)) +
   geom_point(data = xc, aes(size=population),  color = color[1], shape = 16, alpha = 0.4,  show.legend=F) +
-  geom_smooth(aes(weight = population), method = "lm", color=color[2], se = F, size=0.7)+
+  geom_smooth(aes(weight = population), method = "lm", color=color[2], se = F, linewidth=0.7)+
   scale_size(range = c(1, 15)) +
   coord_cartesian(xlim = c(-1, 5), ylim = c(50, 90)) +
   scale_x_continuous(breaks = seq(-1,5, by=0.5)) +

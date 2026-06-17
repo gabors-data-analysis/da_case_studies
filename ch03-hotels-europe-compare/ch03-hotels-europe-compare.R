@@ -108,7 +108,7 @@ save_fig("ch03-figure-6b-hist-price-london", output, "small")
 
 # kernel density plots
 
-kdens_ViennaLondon_R<-ggplot(data = hotels_europe_cut, aes(x=price, y = stat(density), color = city)) +
+kdens_ViennaLondon_R<-ggplot(data = hotels_europe_cut, aes(x=price, y = after_stat(density), color = city)) +
   geom_line(stat="density",  show.legend=F, na.rm =TRUE) +
   labs(x="Price (US dollars)", y="Density", color = "") +
   scale_color_manual(name="", 

@@ -72,7 +72,7 @@ Hmisc::describe(filtered_women_height$height)
 
 # graph --height  
 ch03_normal_height <- ggplot(filtered_women_height, aes(x = height)) +
-  geom_histogram(aes(y = ..density..), binwidth = 0.025, boundary = min(filtered_women_height$height), 
+  geom_histogram(aes(y = after_stat(density)), binwidth = 0.025, boundary = min(filtered_women_height$height), 
                  fill = color[1], color = color.outline, alpha = 0.8, closed='left') +
   stat_function(fun = dnorm, colour= color[2],  
                 args = with(filtered_women_height, c(mean = mean(height), sd = sd(height)))) + 
@@ -96,7 +96,7 @@ Hmisc::describe(filtered_women_income$hhincome)
 
 # graph --income 
 ch03_lognormal_income <- ggplot(filtered_women_income, aes(x = hhincome)) +
-  geom_histogram(aes(y = (..count..)/sum(..count..)), binwidth = 20, boundary=0, closed='left', 
+  geom_histogram(aes(y = (after_stat(count))/sum(after_stat(count))), binwidth = 20, boundary=0, closed='left', 
                  fill = color[1], color = color.outline, alpha = 0.8) +
   ylab("Percent") +   xlab("Household income (thousand USD)") +
   expand_limits(x = 0.01, y = 0.01) +
@@ -117,7 +117,7 @@ filtered_women_income <- filtered_women_income %>%
 
 # graph --ln income
 ch03_lognormal_lnincome <- ggplot(filtered_women_income, aes(x = lnincome)) +
-  geom_histogram(aes(y = ..density..), binwidth = 0.25, boundary = 0, closed='left',
+  geom_histogram(aes(y = after_stat(density)), binwidth = 0.25, boundary = 0, closed='left',
                  fill = color[1], color = color.outline, alpha = 0.8) +
   stat_function(fun = dnorm, colour= color[2],  
                 args = with(filtered_women_income, c(mean = mean(lnincome), sd = sd(lnincome)))) + 

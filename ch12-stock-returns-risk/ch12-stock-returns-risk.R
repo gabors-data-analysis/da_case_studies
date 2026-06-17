@@ -190,7 +190,7 @@ pp.test(data_monthly$p_SP500)
 
 p4a <- ggplot(data=data_monthly,aes(x=date)) +
   geom_line(aes(y = PctRetMSFT),color = color[1], linewidth = 0.4)+
-  geom_hline(yintercept = 1.13,color=color[3], size=0.8) +
+  geom_hline(yintercept = 1.13,color=color[3], linewidth=0.8) +
   labs(y = "Microsoft monthly returns (percent)",x = "Date (month)")+
   scale_y_continuous(expand = c(0.01,0.01), limits=c(-45,45), breaks = seq(-40,40, by=20)) +
   scale_x_date(breaks = as.Date(c("1998-01-01","2002-01-01","2006-01-01","2010-01-01","2014-01-01","2018-01-01")),
@@ -258,12 +258,12 @@ p5<-ggplot(data=data_monthly,aes(x=PctRetSP500,y = PctRetMSFT)) +
   theme(axis.text.y=element_text(size=9)) +
   theme(axis.title.x=element_text(size=9)) +
   theme(axis.title.y=element_text(size=9)) +
-  annotate("segment", x = -20, y = -20, xend = 20, yend = 20, color=color[3], size=0.8, linetype="dashed")+
+  annotate("segment", x = -20, y = -20, xend = 20, yend = 20, color=color[3], linewidth=0.8, linetype="dashed")+
   # geom_segment(aes(x = -20, y = -20, xend = 20, yend = 20), color=color[3], size=0.8, linetype="dashed")+
-  annotate("segment", x = 10, y = 34, xend = 17, yend = 17,size=0.6 , color=color[3], arrow = arrow(length = unit(0.15, "cm")))+
+  annotate("segment", x = 10, y = 34, xend = 17, yend = 17,linewidth=0.6 , color=color[3], arrow = arrow(length = unit(0.15, "cm")))+
   # geom_segment(aes(x = 10, y = 34, xend = 17, yend = 17),size=0.6 , color=color[3], arrow = arrow(length = unit(0.15, "cm")))+
   annotate("text", x = 10, y = 35, size=2.5, color=color[3], label = "45 degree line for beta=1")+
-  annotate("segment", x = -13, y = -23, xend = -15, yend = -20, size=0.6 , color=color[2], arrow = arrow(length = unit(0.15, "cm")))+
+  annotate("segment", x = -13, y = -23, xend = -15, yend = -20, linewidth=0.6 , color=color[2], arrow = arrow(length = unit(0.15, "cm")))+
   # geom_segment(aes(x = -13, y = -23, xend = -15, yend = -20),size=0.6 , color=color[2], arrow = arrow(length = unit(0.15, "cm")))+
   annotate("text", x = -8, y = -23, size=2.5, color=color[2], label = "reg line, beta=1.26")
 p5
@@ -272,8 +272,8 @@ save_fig("ch12-figure-5-stocks-scatter-large",output, "large", plot=p5)
 
 p6a<-ggplot(data=data_monthly %>% select(date, PctRetMSFT, PctRetSP500) %>%  
              gather(key = "index", value = "pct_return", -date))+
-  geom_line(aes(x=date,y = pct_return,color=index,size=index))+
-  scale_size_manual( values = c(0.3,0.25),guide=FALSE) + 
+  geom_line(aes(x=date,y = pct_return,color=index,linewidth=index))+
+  scale_linewidth_manual( values = c(0.3,0.25),guide=FALSE) + 
   scale_color_manual(name = "", values=c(color[1], color[2]), 
                      labels = c("Microsoft", "S&P500")) +
   labs(x = 'Date (month)',y = "Monthly returns (percent)")+
@@ -287,7 +287,7 @@ p6a<-ggplot(data=data_monthly %>% select(date, PctRetMSFT, PctRetSP500) %>%
         legend.text = element_text(size = 4),
         legend.key.width = unit(.8, "cm"),
         legend.key.height = unit(.2, "cm")) + 
-  guides(linetype = guide_legend(override.aes = list(size = 0.6)))
+  guides(linetype = guide_legend(override.aes = list(linewidth = 0.6)))
 p6a
 save_fig("ch12-figure-6a-stocks-together-1",output, "small", plot = p6a)
 
@@ -307,7 +307,7 @@ p6b<-ggplot(data=data_monthly %>% select(date, PctRetMSFT, PctRetSP500) %>%
         legend.text = element_text(size = 4),
         legend.key.width = unit(.8, "cm"),
         legend.key.height = unit(.2, "cm")) + 
-  guides(linetype = guide_legend(override.aes = list(size = 0.6)))
+  guides(linetype = guide_legend(override.aes = list(linewidth = 0.6)))
 p6b
 save_fig("ch12-figure-6b-stocks-together-2",output, "small", plot=p6b)
 

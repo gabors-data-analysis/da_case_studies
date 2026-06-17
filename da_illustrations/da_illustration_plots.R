@@ -81,7 +81,7 @@ max <- max(df$management)
 
 ggplot(data = df, aes(x = emp3bins, y = management)) +
   geom_boxplot(color = color[1], fill = color[5], size = 0.5, width = 0.1, alpha = 0.5, na.rm=T) +
-  stat_boxplot(geom = "errorbar", width = 0.05, color = color[1], size = 0.5, na.rm=T) +
+  stat_boxplot(geom = "errorbar", width = 0.05, color = color[1], linewidth= 0.5, na.rm=T) +
   scale_y_continuous(limits = c(min,max)) +
   annotate("text", x = 1.1, y = ub, label = "<-- Upper adjacent value", hjust=0, size=2) +
   annotate("text", x = 1.1, y = q3, label = "<-- 75th percentile (upper hinge)", hjust=0, size=2) +
@@ -118,7 +118,7 @@ save_fig("ch03-figure-8a-boxplot", output, "small")
 
 #Violin
 ggplot(data = df, aes(x = emp3bins, y = management)) +
-  geom_violin(size=0.2,  width = 0.3, trim = F, show.legend=F, na.rm =TRUE, color = color[1], fill = color[1], alpha = 0.3) +
+  geom_violin(linewidth=0.2,  width = 0.3, trim = F, show.legend=F, na.rm =TRUE, color = color[1], fill = color[1], alpha = 0.3) +
   geom_boxplot(color = color[1], fill = color[5], size = 0.6, width = 0.1, alpha = 0.5, na.rm=T, outlier.shape = NA) +
   annotate("text", x = 1.05, y = ub, label = "<-- 95% Confidence Interval", hjust=0, size=2) +
   annotate("text", x = 1.05, y = lb, label = "<-- 95% Confidence Interval", hjust=0, size=2) +
@@ -175,9 +175,9 @@ d2 = dt(x, df, ncp = 2.6)
 
 data <- data.frame(x = x, d = d, d2 = d2)
 ggplot(data = data, aes(x=x, y=d2)) +
-  geom_line(size = 0.5, color = color[1]) +
+  geom_line(linewidth= 0.5, color = color[1]) +
   geom_area(data = data[data$x< 2,], fill = color[3], alpha=0.8) +
-  geom_line(aes(x=x, y=d), size = 0.5, color = color[3]) +
+  geom_line(aes(x=x, y=d), linewidth= 0.5, color = color[3]) +
   geom_area(aes(x=x, y=d2), data = data[data$x> 2 , ], fill = color[5], alpha=0.7) +
   
   geom_vline(xintercept = -2, linetype = "dashed") +
@@ -185,8 +185,8 @@ ggplot(data = data, aes(x=x, y=d2)) +
   annotate(geom = "text", x = 2.3, y = 0.42 , label = "Alternative is true",  size = 2.0, hjust = -0.1, color = color[1]) +
   annotate(geom = "text", x = -1.5,   y = 0.42 , label = "If Null were true", size = 2.0, hjust = -0.1, color = color[3]) +
   annotate(geom = "text", x = -1.0,   y = 0.48 , label = "Critical values", size = 2.0, hjust = -0.1, color = color[3]) +
-  annotate(geom = "segment", x = -1.3, y = 0.48, xend = -2, yend = 0.48, size=0.5, arrow = arrow(length = unit(1, "mm"))) +
-  annotate(geom = "segment", x = 1.3, y = 0.48, xend = 2, yend = 0.48, size=0.5, arrow = arrow(length = unit(1, "mm"))) +
+  annotate(geom = "segment", x = -1.3, y = 0.48, xend = -2, yend = 0.48, linewidth=0.5, arrow = arrow(length = unit(1, "mm"))) +
+  annotate(geom = "segment", x = 1.3, y = 0.48, xend = 2, yend = 0.48, linewidth=0.5, arrow = arrow(length = unit(1, "mm"))) +
   annotate(geom = "text", x = 1.2, y = 0.06 , label = "FN", size = 2.5, hjust = -0.1, color = "black") +
   annotate(geom = "text", x = 3.5, y = 0.06 , label = "TP", size = 2.5, hjust = -0.1, color = "black") +
   labs(y = "", x = "") +
@@ -210,9 +210,9 @@ l3 = ifelse(x<=0, abs(x) + (x^2)/10, abs(x) + (x^2)/4.4)
 
 data <- data.frame(x = x, l1 = l1, l2 = l2, l3 = l3)
 p <- ggplot(data = data, aes(x=x, y=l1)) +
-  geom_line(aes(color = "l1"), size = 1.5) +
-  geom_line(aes(x=x, y=l2, color = "l2"), size = 1.5) +
-  geom_line(aes(x=x, y=l3, color = "l3"), size = 1.5) +
+  geom_line(aes(color = "l1"), linewidth= 1.5) +
+  geom_line(aes(x=x, y=l2, color = "l2"), linewidth= 1.5) +
+  geom_line(aes(x=x, y=l3, color = "l3"), linewidth= 1.5) +
   scale_y_continuous(expand=c(0,0)) +
   coord_cartesian(ylim=c(0,30)) +
   scale_color_manual(values=color[1:3],
@@ -238,9 +238,9 @@ live = c(100,91,82,74,68,64,60,57,54,52,51,51,52,54,57,59,62,64,66,68)
 
 data <- data.frame(x = x, original = original, live = live)
 ggplot(data = data, aes(x=x, y=live)) +
-  geom_line(size = 1, color = color[1]) +
-  geom_line(aes(x=x, y=original), size = 1, color = color[2]) +
-  geom_linerange(aes(x = x, ymin = original, ymax = live), size = 1.5, color = "grey") +
+  geom_line(linewidth= 1, color = color[1]) +
+  geom_line(aes(x=x, y=original), linewidth= 1, color = color[2]) +
+  geom_linerange(aes(x = x, ymin = original, ymax = live), linewidth= 1.5, color = "grey") +
   annotate(geom = "segment", xend = 17, yend = data[data$x == 17, "live"],
            x =15, y = data[data$x == 15, "live"] + 8, arrow = arrow(length = unit(2, "mm"))) +
   annotate(geom = "text", x =15, y = data[data$x == 15, "live"] + 8, label = "live data", size = 2.5, hjust =1.2) +

@@ -204,7 +204,7 @@ hotels$xend <- c(hotels$dist4_s+1)
 hotels$yend <- c(hotels$Eprice_cat4)
 
 F07_2a <-  p1+
-  geom_segment(data=hotels, aes(x = dist4_s, y=yend, xend=xend, yend=yend), color=color[2], size=0.7, na.rm=TRUE) 
+  geom_segment(data=hotels, aes(x = dist4_s, y=yend, xend=xend, yend=yend), color=color[2], linewidth=0.7, na.rm=TRUE) 
 F07_2a
 save_fig("ch07-figure-2a-scatter-binscat2", output, "small")
 
@@ -234,7 +234,7 @@ hotels$yend <- c(hotels$Eprice_cat7_new)
 
 F07_2b <- p1 +
  #geom_point(data= dist7_new, aes(x = dist7_new, y = Eprice_cat7_new), size = 2, color = color[4], fill= color[2],  shape = 21, alpha = 0.8) 
- geom_segment(data=hotels, aes(x = dist7_s, y=yend, xend=xend, yend=yend), color=color[2], size=0.7, na.rm=TRUE) 
+ geom_segment(data=hotels, aes(x = dist7_s, y=yend, xend=xend, yend=yend), color=color[2], linewidth=0.7, na.rm=TRUE) 
 F07_2b
 save_fig("ch07-figure-2b-scatter-binscat2", output, "small")
 
@@ -269,8 +269,8 @@ save_fig("ch07-figure-5-scatter-linreg", output, "small")
 # SCATTERPLOT + REGRESSION LINE + LINES FOR AVERAGES (NOT in BOOK)
 F07_x5 <-  p1  +
   geom_smooth_da(method = "lm") +
-  geom_vline(xintercept = mean(hotels$distance),color = color[3], lty="dashed", size=0.3)+
-  geom_hline(yintercept = mean(hotels$price),color = color[3], lty="dashed", size=0.3)
+  geom_vline(xintercept = mean(hotels$distance),color = color[3], lty="dashed", linewidth=0.3)+
+  geom_hline(yintercept = mean(hotels$price),color = color[3], lty="dashed", linewidth=0.3)
 F07_x5
 
 
@@ -293,7 +293,7 @@ F07_6a <-   ggplot(data = hotels, aes(x = distance, y = price)) +
   geom_smooth_da(method="lm")+
   annotation_custom(grid.text("Residual", x=0.48,  y=0.5, gp=gpar(color="black", fontsize=4, fontface="bold"))) +
   annotate("pointrange", x = xa, y = ya, ymin = ya, ymax = ya, color = color[3], size = 0.1)+
-  geom_errorbar(data=subset(hotels, hotels$distance==xa), aes(x=distance, ymin=ym, ymax=ya), width=0.2, size=0.2, color=color[1]) +
+  geom_errorbar(data=subset(hotels, hotels$distance==xa), aes(x=distance, ymin=ym, ymax=ya), width=0.2, linewidth=0.2, color=color[1]) +
   expand_limits(x = 0.01, y = 0.01) +
   scale_x_continuous(expand = c(0.01,0.01), limits=c(0, 7),     breaks= seq(0, 7, by=1)) + 
   scale_y_continuous(expand = c(0.01,0.01), limits=c(0, 400), breaks= seq(0, 400, by = 50)) +
@@ -306,8 +306,8 @@ save_fig("ch07-figure-6a-resid-scatter", output, "small")
 # histogram of residuals
 F07_6b<-   ggplot(data = hotels, aes (x = e)) +
   #geom_histogram_da(binwidth = 20, type='percent')+
-  geom_histogram(aes(y = (..count..)/sum(..count..)), binwidth = 20, color = color.outline, fill = theme_colors[1],
-                 size = 0.2, alpha = 0.8,  show.legend=F, na.rm=TRUE, boundary=1)+
+  geom_histogram(aes(y = (after_stat(count))/sum(after_stat(count))), binwidth = 20, color = color.outline, fill = theme_colors[1],
+                 linewidth= 0.2, alpha = 0.8,  show.legend=F, na.rm=TRUE, boundary=1)+
   labs(x = "Residuals", y = "Percent") +
   scale_x_continuous(limits = c(-100, 300), breaks = seq(-100, 300, by = 100)) +
   scale_y_continuous(expand = c(0.0,0.0), limits = c(0, 0.3), breaks = seq(0, 0.3, by = 0.05), 
@@ -318,7 +318,7 @@ theme_bg()
 F07_6b<-   ggplot(data = hotels, aes (x = e)) +
   #geom_histogram_da(binwidth = 20, type='percent')+
   geom_histogram(aes(y = after_stat(count)/sum(after_stat(count))), binwidth = 20, color = color.outline, fill = theme_colors[1],
-                 size = 0.2, alpha = 0.8,  show.legend=F, na.rm=TRUE, boundary=1)+
+                 linewidth= 0.2, alpha = 0.8,  show.legend=F, na.rm=TRUE, boundary=1)+
   labs(x = "Residuals", y = "Percent") +
   scale_x_continuous(limits = c(-100, 300), breaks = seq(-100, 300, by = 100)) +
   scale_y_continuous(expand = c(0.0,0.0), limits = c(0, 0.3), breaks = seq(0, 0.3, by = 0.05), 

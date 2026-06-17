@@ -82,8 +82,8 @@ tsdata <- data %>%
   filter(ccode == 1)
 
 g1 <- ggplot(data = tsdata, aes(x = year, y = gdptb_us)) +
-  geom_line(color = color[1], size = 1) +
-  geom_vline(xintercept = 2010, color = color[3], size = 0.7, linetype = "dashed") +
+  geom_line(color = color[1], linewidth= 1) +
+  geom_vline(xintercept = 2010, color = color[3], linewidth= 0.7, linetype = "dashed") +
   labs(y = "Total GDP (bn US dollars)", x = "Date (year)") +
   scale_y_continuous(breaks = seq(6, 9.5, 0.5), limits = c(6, 9.5)) +
   scale_x_continuous(breaks = seq(2004, 2014, 2), limits = c(2004, 2015)) +
@@ -130,10 +130,10 @@ tsdata <- data %>%
   filter(ccode == 1)
 
 g2 <- ggplot(data = tsdata, aes(x = year, y = gdptb_us)) +
-  geom_line(color = color[1], size = 1) +
-  geom_line(aes(y = syn_haiti), color = color[2], size = 1) +
+  geom_line(color = color[1], linewidth= 1) +
+  geom_line(aes(y = syn_haiti), color = color[2], linewidth= 1) +
   geom_vline(
-    xintercept = 2010, color = color[3], size = 0.7, linetype = "dashed"
+    xintercept = 2010, color = color[3], linewidth= 0.7, linetype = "dashed"
   ) +
   labs(y = "Total GDP (billion US dollar)", x = "Date (year)") +
   scale_x_continuous(breaks = seq(2004, 2014, 2), limits = c(2004, 2015)) +
@@ -151,11 +151,11 @@ save_fig("haiti-gdp-synth", output, "small")
 tsdata <- data %>%
   filter(ccode == 1)
 g3 <- ggplot(data = tsdata, aes(x = year, y = log(gdptb_us) - log(syn_haiti))) +
-  geom_line(color = color[1], size = 1) +
+  geom_line(color = color[1], linewidth= 1) +
   geom_vline(
-    xintercept = 2010, color = color[3], size = 0.7, linetype = "dashed"
+    xintercept = 2010, color = color[3], linewidth= 0.7, linetype = "dashed"
   ) +
-  geom_hline(yintercept = 0, color = color[5], size = 0.7) +
+  geom_hline(yintercept = 0, color = color[5], linewidth= 0.7) +
   labs(y = "Effect estimate, ln(total GDP)", x = "Date (year)") +
   scale_x_continuous(breaks = seq(2004, 2014, 2), limits  = c(2004, 2015)) +
   geom_segment(

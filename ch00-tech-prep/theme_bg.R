@@ -135,8 +135,8 @@ geom_smooth_da <- function(formula = y ~ x,method="lm", color=theme_colors[2], s
   geom_smooth(formula = formula,method=method,color=color,se=se, linewidth=linewidth)
 }
 
-geom_segment_da <- function(color=theme_colors[2], size=0.7, na.rm=TRUE){
-  geom_segment(color=color,size=size,na.rm=na.rm)
+geom_segment_da <- function(color=theme_colors[2], linewidth=0.7, na.rm=TRUE){
+  geom_segment(color=color,linewidth=linewidth,na.rm=na.rm)
 }
 
 geom_line_da <- function(color=theme_colors[1], linewidth=0.4, na.rm=TRUE){
@@ -151,14 +151,14 @@ geom_line_da <- function(color=theme_colors[1], linewidth=0.4, na.rm=TRUE){
 
 geom_histogram_da <- function(type='percent',boundary=0, binwidth=NULL, bins=NULL,
                               color = color.outline, fill = theme_colors[1],
-                              size = 0.2, alpha = 0.8,  show.legend=F, na.rm=TRUE,closed='left'){
+                              linewidth = 0.2, alpha = 0.8,  show.legend=F, na.rm=TRUE,closed='left'){
   if(type=='percent'){
-    geom_histogram(aes(y = (..count..)/sum(..count..)),binwidth = binwidth, bins=bins, boundary=0,
-                   color = color, fill = fill, alpha = alpha,closed=closed)
+    geom_histogram(aes(y = (after_stat(count))/sum(after_stat(count))),binwidth = binwidth, bins=bins, boundary=0,
+                   color = color, fill = fill, linewidth = linewidth, alpha = alpha,closed=closed)
   }
   else if(type == 'frequency'){
     geom_histogram(binwidth = binwidth, bins=bins, boundary=0,
-                   color = color, fill = fill, alpha = alpha,closed=closed)
+                   color = color, fill = fill, linewidth = linewidth, alpha = alpha,closed=closed)
   }
   else {
     stop("Unknown type value for geom_histogram_da.")
@@ -253,5 +253,4 @@ save_fig <- function(filename, filepath, size,plot=last_plot()){
   print(plot)
   dev.off()
 }
-
 

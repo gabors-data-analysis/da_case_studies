@@ -139,7 +139,7 @@ df1 <- df %>%
 
 # Stacked bar
 g3a<-ggplot(data=df1, aes(x=emp3bins, y=Percent, fill = factor(lean1, levels = rev(unique(lean1))))) +
-  geom_bar(stat = "identity", position = "fill",width = 0.6,  color = "white",  size = 0.5, alpha = 0.8) +
+  geom_bar(stat = "identity", position = "fill",width = 0.6,  color = "white",  linewidth= 0.5, alpha = 0.8) +
   scale_y_continuous(expand=c(0,0), limits=c(0, 1), breaks = seq(0, 1, by = 0.2), labels = scales::percent_format()) +
   scale_x_discrete(labels=c("1" = "Small", "2" = "Medium", "3" = "Large")) +
   scale_fill_manual(values = c(color[3], color[1], color[5], color[2], color[4]), name = NULL) +
@@ -160,7 +160,7 @@ df1 <- df %>%
 
 
 g3b<-ggplot(data=df1, aes(x=emp3bins, y=Percent, fill = factor(perf2, levels = rev(unique(perf2))))) +
-  geom_bar(stat = "identity", position = "fill",width = 0.6,  color = "white",  size = 0.5, alpha = 0.8) +
+  geom_bar(stat = "identity", position = "fill",width = 0.6,  color = "white",  linewidth= 0.5, alpha = 0.8) +
   scale_y_continuous(expand=c(0,0), limits=c(0, 1), breaks = seq(0, 1, by = 0.2), labels = scales::percent_format()) +
   scale_x_discrete(labels=c("1" = "Small", "2" = "Medium", "3" = "Large")) +
   scale_fill_manual(values = c(color[3], color[1], color[5], color[2], color[4]), name = NULL) +
@@ -279,7 +279,7 @@ levels(df$emp3bins) <- c('Small','Medium', 'Large')
 
 # Boxplot
 g6a<-ggplot(data = df, aes(x = emp3bins, y = management)) +
-  stat_boxplot(aes(group = emp3bins), geom = "errorbar", width = 0.5, color = c(color[2], color[1], color[3]), size = 0.5, na.rm=T)+
+  stat_boxplot(aes(group = emp3bins), geom = "errorbar", width = 0.5, color = c(color[2], color[1], color[3]), linewidth= 0.5, na.rm=T)+
   geom_boxplot(aes(group = emp3bins),  color = c(color[2], color[1], color[3]), fill  = c(color[2], color[1], color[3]), size = 0.5, width = 0.5, alpha = 0.3, na.rm=T) +
   labs(x = "Firm size (employment), 3 bins",y = "Management score")+
   scale_y_continuous(expand = c(0.01,0.01),limits = c(1,5), breaks = seq(1,5,1)) +
@@ -291,7 +291,7 @@ save_fig("ch04-figure-6a-wms-mex-boxplot-mgmt-emp3bins",output , "small")
 
 # Violin plot
 g6b<-ggplot(data = df, aes(x = emp3bins, y = management, color=emp3bins, fill=emp3bins)) +
-  geom_violin(aes(group = emp3bins),   size=0.3,  alpha=0.3, trim = F, show.legend=F, na.rm =TRUE) +
+  geom_violin(aes(group = emp3bins),   linewidth=0.3,  alpha=0.3, trim = F, show.legend=F, na.rm =TRUE) +
   geom_boxplot(aes(group = emp3bins),  color = c(color[2], color[1], color[3]), fill  = c(color[2], color[1], color[3]), size = 0.5, width = 0.2, alpha = 0.3, na.rm=T) +
 #  geom_jitter(aes(color = emp3bins), position=position_jitter(0.1), size = 0.5, show.legend=F,  na.rm=TRUE, alpha = 0.8) +  labs(x = "Number of Employees, 3 bins",y = "Average management quality score")+
   labs(x = "Firm size (employment), 3 bins",y = "Management score")+

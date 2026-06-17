@@ -87,8 +87,8 @@ F07_sim <- ggplot(data = ols, aes(x = xvar, y = yvar)) +
   scale_y_continuous(expand = c(0.01,0.01), limits = c(0, 5), breaks = seq(0, 5, by = 1)) +
   labs(x = "Simulated x variable",y = "Simulated y variable")+
   theme_bg() +
-  geom_vline(xintercept = mean(xvar), color=color[3], linetype="dashed", size=0.4) +
-  geom_hline(yintercept = mean(yvar), color=color[3], linetype="dashed", size=0.4) +
+  geom_vline(xintercept = mean(xvar), color=color[3], linetype="dashed", linewidth=0.4) +
+  geom_hline(yintercept = mean(yvar), color=color[3], linetype="dashed", linewidth=0.4) +
   annotate("segment",x = 0.5, y = 3.5, xend = 0.5, yend = 2.9, arrow = arrow(length = unit(0.01, "cm")))+
   # geom_segment(aes(x = 0.5, y = 3.5, xend = 0.5, yend = 2.9), arrow = arrow(length = unit(0.01, "cm")))+
   annotate("text", x = 0.3, y = 3.6, label = "Average y", size=2) +

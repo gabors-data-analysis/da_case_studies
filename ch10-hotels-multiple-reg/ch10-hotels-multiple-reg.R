@@ -151,7 +151,7 @@ save_fig("ch10-figure-3-hotels-yhat-y", output, "large")
 # residual - yhat graph (not in book)
 ggplot(data = hotels, aes(x = lnprice_hat, y = lnprice_resid)) +
   geom_point(color = color[1], size = 1,  shape = 16, alpha = 0.6, show.legend=F, na.rm = TRUE) + 
-  geom_smooth(formula = y ~ x,method="lm", colour=color[4], se=F, size=1) +
+  geom_smooth(formula = y ~ x,method="lm", colour=color[4], se=F, linewidth=1) +
   labs(x = "ln(Predicted hotel price, US dollars)",y = "Residuals")+
   coord_cartesian(xlim = c(4, 5.5)) +
   theme_bg() 

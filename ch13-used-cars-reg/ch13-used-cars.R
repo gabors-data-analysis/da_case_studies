@@ -185,7 +185,7 @@ datasummary( age + odometer + LE + XLE + SE + cond_likenew + cond_excellent + co
 # price
 F13_h_price_R <- ggplot(data=data, aes(x=price)) +
   geom_histogram(aes(y = (after_stat(count))/sum(after_stat(count))), binwidth = 1000, boundary=0,
-                 color = color.outline, fill = color[1], size = 0.25, alpha = 0.8,  show.legend=F, na.rm=TRUE) +
+                 color = color.outline, fill = color[1], linewidth= 0.25, alpha = 0.8,  show.legend=F, na.rm=TRUE) +
   coord_cartesian(xlim = c(0, 20000)) +
   labs(x = "Price (US dollars)",y = "Percent")+
   theme_bg() +
@@ -197,8 +197,8 @@ F13_h_price_R
 
 # lnprice 
 F13_h_lnprice_R<- ggplot(data=data, aes(x=lnprice)) +
-  geom_histogram(aes(y = (..count..)/sum(..count..)), binwidth = 0.2, boundary=0,
-                 color = color.outline, fill = color[1], size = 0.25, alpha = 0.8,  show.legend=F, na.rm=TRUE) +
+  geom_histogram(aes(y = (after_stat(count))/sum(after_stat(count))), binwidth = 0.2, boundary=0,
+                 color = color.outline, fill = color[1], linewidth= 0.25, alpha = 0.8,  show.legend=F, na.rm=TRUE) +
   coord_cartesian(xlim = c(6, 10)) +
   labs(x = "ln(Price, US dollars)",y = "Percent")+
   expand_limits(x = 0.01, y = 0.01) +
@@ -217,7 +217,7 @@ F13_h_lnprice_R
 # lowess
 Ch13_p_age_lowess_R <- ggplot(data = data, aes(x=age, y=price)) +
   geom_point( color = color[1], size = 1,  shape = 16, alpha = 0.8, show.legend=F, na.rm = TRUE) + 
-  geom_smooth(formula = y ~ x, method="loess", se=F, colour=color[2], size=1, span=0.9) +
+  geom_smooth(formula = y ~ x, method="loess", se=F, colour=color[2], linewidth=1, span=0.9) +
   labs(x = "Age (years)",y = "Price (US dollars)") +
   theme_bg() +
   expand_limits(x = 0.01, y = 0.01) +
@@ -288,8 +288,8 @@ for ( i in 1:length(models)){
 
 # Lowess vs. quadratic (reg1) regression
 Ch13_p_age_quad_vs_lowess_R <- ggplot(data = data, aes(x=age)) +
-  geom_smooth(formula = y ~ x, aes(y=price, colour=color[1]), method="loess", se=F, size=1) +
-  geom_line(aes(y=predict(reg1), colour=color[2]), size=1,lty=2) +
+  geom_smooth(formula = y ~ x, aes(y=price, colour=color[1]), method="loess", se=F, linewidth=1) +
+  geom_line(aes(y=predict(reg1), colour=color[2]), linewidth=1,lty=2) +
   labs(x = "Age (years)",y = "Price (US dollars)") +
   scale_color_manual(name="", values=c(color[1],color[2]),labels=c("Lowess in age","Quadratic in age")) +
   theme_bg() +

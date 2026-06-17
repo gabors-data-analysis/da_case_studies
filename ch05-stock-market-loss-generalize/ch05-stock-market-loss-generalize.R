@@ -72,7 +72,7 @@ sp500$yearmonth <- sp500$year*100 + sp500$month
 # Figure 5.1
 returns_histogram <-ggplot(sp500,aes(pct_return))+
   geom_histogram_da(binwidth = 0.25, type="frequency")+
-  geom_vline(xintercept = -5, size = 0.7, color=color[2])+
+  geom_vline(xintercept = -5, linewidth= 0.7, color=color[2])+
   labs(x = "Daily return (percent)", y = "Frequency") +
   coord_cartesian(xlim = c(-10, 10), ylim = c(0, 400)) +
   scale_y_continuous(expand = c(0, 0)) +
@@ -131,7 +131,7 @@ options(digits = 2)
 resample1000<-ggplot(nobs_df,aes(nobs_1000)) +
       geom_histogram(binwidth = 0.1, color = color.outline, fill = color[1], alpha = 0.8, boundary=0, closed='left') +
       labs(x = "Percent of days with losses of 5% or more", y = "Frequency") +
-      geom_vline(aes(xintercept = mean(nobs_500)), color =color[2], size = 0.7) +
+      geom_vline(aes(xintercept = mean(nobs_500)), color =color[2], linewidth= 0.7) +
       coord_cartesian(xlim = c(0, 1.5), ylim = c(0, 2500)) +
       scale_x_continuous(expand=c(0.01, 0.01), limits = c(0,1.5), breaks = seq(0, 1.5, by = 0.25)) +
       scale_y_continuous(expand=c(0.00, 0.00), limits = c(0,2500),breaks = seq(0, 2500, by = 500)) +
@@ -145,15 +145,15 @@ save_fig("ch05-figure-2-resample1000", output, "small")
 
 # Figure 5.3
 ggplot(nobs_df,aes(nobs_1000))+
-  stat_density(geom="line", aes(color = 'n1000'), bw = 0.45,size = 1,kernel = "epanechnikov")+
-  stat_density(geom="line",aes(nobs_500, color = "n500"), bw=0.45,linetype="twodash", size = 1,kernel = "epanechnikov")+
+  stat_density(geom="line", aes(color = 'n1000'), bw = 0.45,linewidth= 1,kernel = "epanechnikov")+
+  stat_density(geom="line",aes(nobs_500, color = "n500"), bw=0.45,linetype="twodash", linewidth= 1,kernel = "epanechnikov")+
   labs(x="Percent of days with losses over 5%", y="Density")+
-  geom_vline(xintercept = 0.5,colour=color[3], size = 0.7, linetype="dashed")+
+  geom_vline(xintercept = 0.5,colour=color[3], linewidth= 0.7, linetype="dashed")+
   # geom_segment(aes(x = 0.9, y = 0.72, xend = 0.65, yend = 0.72), size = 0.5, arrow = arrow(length = unit(0.1, "cm")))+
-  annotate("segment",x = 0.9, y = 0.72, xend = 0.65, yend = 0.72, size = 0.5, arrow = arrow(length = unit(0.1, "cm")))+
+  annotate("segment",x = 0.9, y = 0.72, xend = 0.65, yend = 0.72, linewidth= 0.5, arrow = arrow(length = unit(0.1, "cm")))+
   annotate("text", x = 1.1, y = 0.72, label = "Larger sample", size=2)+
   # geom_segment(aes(x = 0.9, y = 0.68, xend = 0.65, yend = 0.68), size = 0.5, arrow = arrow(length = unit(0.1, "cm")))+
-  annotate("segment",x = 0.9, y = 0.68, xend = 0.65, yend = 0.68, size = 0.5, arrow = arrow(length = unit(0.1, "cm")))+
+  annotate("segment",x = 0.9, y = 0.68, xend = 0.65, yend = 0.68, linewidth= 0.5, arrow = arrow(length = unit(0.1, "cm")))+
   annotate("text", x = 1.1, y = 0.68, label = "Smaller sample", size=2) +
   scale_x_continuous(expand=c(0.01, 0.01), limits = c(0,1.5), breaks = seq(0, 1.5, by = 0.25)) +
   scale_y_continuous(expand=c(0.00, 0.00), limits = c(0,0.8),breaks = seq(0, 0.8, by = 0.2)) +
@@ -165,8 +165,8 @@ ggplot(nobs_df,aes(nobs_1000))+
 
 
 gh<-ggplot(data=nobs_df)+
-  geom_histogram( aes(x=nobs_500, y = (..count..)/sum(..count..)*100, color = "n500", fill = "n500"), binwidth = 0.2, boundary=0, closed='left', alpha=0.7) +
-  geom_histogram( aes(x=nobs_1000, y = (..count..)/sum(..count..)*100, color = "n1000", fill = "n1000"), binwidth = 0.2, boundary=0, closed='left', alpha=0.1, size=0.7) +
+  geom_histogram( aes(x=nobs_500, y = (after_stat(count))/sum(after_stat(count))*100, color = "n500", fill = "n500"), binwidth = 0.2, boundary=0, closed='left', alpha=0.7) +
+  geom_histogram( aes(x=nobs_1000, y = (after_stat(count))/sum(after_stat(count))*100, color = "n1000", fill = "n1000"), binwidth = 0.2, boundary=0, closed='left', alpha=0.1, linewidth=0.7) +
     ylab("Percent") +
   xlab("Percent of days with losses over 5%") +
   scale_x_continuous(expand=c(0.01, 0.01), limits = c(0,1.6), breaks = seq(0, 1.6, by = 0.2)) +
