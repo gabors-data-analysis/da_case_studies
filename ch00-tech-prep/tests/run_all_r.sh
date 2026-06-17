@@ -3,8 +3,8 @@
 # Get the directory where this script resides
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# Set the starting directory to the parent of the script's directory
-START_DIR="$(dirname "$SCRIPT_DIR")"
+# Set the starting directory to the repository root
+START_DIR="$(dirname "$(dirname "$SCRIPT_DIR")")"
 cd "$START_DIR" || exit 1
 
 is_r_script() {

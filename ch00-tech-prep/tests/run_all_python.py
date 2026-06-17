@@ -1,4 +1,4 @@
-# python ch00-tech-prep/run_all_python.py
+# python ch00-tech-prep/tests/run_all_python.py
 
 import unittest
 import nbconvert

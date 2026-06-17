@@ -10,6 +10,7 @@ on:
       - '.python-version'
       - 'pyproject.toml'
       - 'uv.lock'
+      - 'ch00-tech-prep/tests/ci/**'
   pull_request:
     branches: [main, master]
     paths:
@@ -19,6 +20,7 @@ on:
       - '.python-version'
       - 'pyproject.toml'
       - 'uv.lock'
+      - 'ch00-tech-prep/tests/ci/**'
   workflow_dispatch:  # Allows manual triggering
 
 jobs:
@@ -45,92 +47,21 @@ jobs:
         id: notebook-test-targets
         shell: bash
         run: |
-          set -euo pipefail
-
-          run_all=false
-          target_dirs_file="$RUNNER_TEMP/notebook_target_dirs.txt"
-          changed_files_file="$RUNNER_TEMP/notebook_changed_files.txt"
-          : > "$target_dirs_file"
-          : > "$changed_files_file"
-
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            run_all=true
-          else
-            if [ "${{ github.event_name }}" = "pull_request" ]; then
-              base="${{ github.event.pull_request.base.sha }}"
-              head="${{ github.sha }}"
-            else
-              base="${{ github.event.before }}"
-              head="${{ github.sha }}"
-            fi
-
-            if [ -z "$base" ] || [[ "$base" =~ ^0+$ ]]; then
-              git diff-tree --no-commit-id --name-only -r "$head" > "$changed_files_file"
-            elif ! git diff --name-only "$base" "$head" > "$changed_files_file"; then
-              echo "Could not diff $base..$head; running full notebook suite."
-              run_all=true
-            fi
-
-            if [ "$run_all" = "false" ]; then
-              while IFS= read -r file; do
-                [ -z "$file" ] && continue
-
-                case "$file" in
-                  .python-version|pyproject.toml|uv.lock|.github/workflows/test_notebooks.yml|ch00-tech-prep/*.py)
-                    run_all=true
-                    break
-                    ;;
-                  *.ipynb|*.py)
-                    dirname "$file" >> "$target_dirs_file"
-                    ;;
-                esac
-              done < "$changed_files_file"
-            fi
+          python_cmd=python3
+          if ! command -v "$python_cmd" >/dev/null 2>&1; then
+            python_cmd=python
           fi
-
-          if [ "$run_all" = "true" ]; then
-            echo "run_all=true" >> "$GITHUB_OUTPUT"
-            echo "has_targets=true" >> "$GITHUB_OUTPUT"
-            echo "Notebook target mode: all"
-          else
-            sort -u "$target_dirs_file" -o "$target_dirs_file"
-
-            if [ -s "$target_dirs_file" ]; then
-              echo "run_all=false" >> "$GITHUB_OUTPUT"
-              echo "has_targets=true" >> "$GITHUB_OUTPUT"
-              {
-                echo "targets<<EOF"
-                cat "$target_dirs_file"
-                echo "EOF"
-              } >> "$GITHUB_OUTPUT"
-              echo "Notebook target directories:"
-              cat "$target_dirs_file"
-            else
-              echo "run_all=false" >> "$GITHUB_OUTPUT"
-              echo "has_targets=false" >> "$GITHUB_OUTPUT"
-              echo "No eligible notebooks selected."
-            fi
-          fi
+          "$python_cmd" ch00-tech-prep/tests/ci/select_test_targets.py \
+            --kind notebooks \
+            --event-name "${{ github.event_name }}" \
+            --base "${{ github.event.pull_request.base.sha || github.event.before }}" \
+            --head "${{ github.sha }}" \
+            >> "$GITHUB_OUTPUT"
 
       - name: Setup Windows paths (Windows)
         if: matrix.os_name == 'windows'
         shell: cmd
-        run: |
-          REM The default checkout on Windows is D:\a\da_case_studies\da_case_studies
-          REM The notebook code uses split("da_case_studies")[0] which gets D:\a\
-          REM Then it looks for D:\a\da_case_studies\..., but the repo is at D:\a\da_case_studies\da_case_studies
-          REM
-          REM Fix: Create junction points from D:\a\da_case_studies\chXX to D:\a\da_case_studies\da_case_studies\chXX
-          REM This way notebooks can write to the paths they expect
-          
-          cd /d D:\a\da_case_studies
-          
-          REM Create junctions for all chapter directories
-          for /d %%i in (da_case_studies\ch*) do mklink /J "%%~nxi" "%%i"
-          for /d %%i in (da_case_studies\da*) do mklink /J "%%~nxi" "%%i"
-          for /d %%i in (da_case_studies\pre*) do mklink /J "%%~nxi" "%%i"
-          
-          dir
+        run: call ch00-tech-prep\tests\ci\setup_windows_paths.cmd
 
       - name: Install System Dependencies (Linux)
         if: matrix.os_name == 'linux'
@@ -148,39 +79,7 @@ jobs:
 
       - name: Setup Data and Paths
         shell: bash
-        run: |
-          REPO_DIR="${{ github.workspace }}"
-          cd "$REPO_DIR"
-          
-          # 1. Download and extract
-          curl -sL "https://files.osf.io/v1/resources/3u5em/providers/osfstorage/?zip=" -o data.zip
-          unzip -q data.zip && unzip -q da_data_repo.zip
-          
-          # Determine target directory for da_data_repo (grandparent of workspace)
-          REPO_DIR_NORMALIZED=$(echo "$REPO_DIR" | sed 's|\\|/|g')
-          
-          if [ "${{ matrix.os_name }}" == "windows" ]; then
-            TARGET_ROOT="/d/a"
-          else
-            PARENT=$(dirname "$REPO_DIR_NORMALIZED")
-            TARGET_ROOT=$(dirname "$PARENT")
-          fi
-          
-          # 3. Move da_data_repo to the target directory
-          rm -rf "$TARGET_ROOT/da_data_repo"
-          mv da_data_repo "$TARGET_ROOT/"
-          
-          # 4. Cleanup
-          rm data.zip da_data_repo.zip
-          rm -rf __MACOSX
-          
-          # 5. Symlinks (Unix only)
-          if [ "${{ matrix.os_name }}" != "windows" ]; then
-            cd "$PARENT"
-            ln -s da_case_studies/ch* . || true
-            ln -s da_case_studies/da* . || true
-            ln -s da_case_studies/pre* . || true
-          fi
+        run: bash ch00-tech-prep/tests/ci/setup_data.sh --kind python --os-name "${{ matrix.os_name }}"
 
       - name: Install uv
         uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
@@ -208,7 +107,7 @@ jobs:
           NOTEBOOK_TEST_TARGETS: ${{ steps.notebook-test-targets.outputs.targets }}
         run: |
           if [ "${{ steps.notebook-test-targets.outputs.run_all }}" = "true" ]; then
-            uv run --frozen python ch00-tech-prep/run_all_python.py
+            uv run --frozen python ch00-tech-prep/tests/run_all_python.py
           else
             targets=()
             while IFS= read -r target; do
@@ -220,7 +119,7 @@ jobs:
               exit 0
             fi
 
-            uv run --frozen python ch00-tech-prep/run_all_python.py "${targets[@]}"
+            uv run --frozen python ch00-tech-prep/tests/run_all_python.py "${targets[@]}"
           fi
 
       - name: Upload test artifacts on failure
