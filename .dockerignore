@@ -1,6 +1,7 @@
 **
 !.python-version
 !pyproject.toml
+!renv.lock
 !uv.lock
 !.devcontainer/
 !.devcontainer/python/
