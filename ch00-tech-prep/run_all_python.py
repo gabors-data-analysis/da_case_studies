@@ -63,6 +63,45 @@ NOTEBOOKS = [
 ]
 
 
+def normalize_repo_path(path):
+    normalized = path.replace("\\", os.sep)
+    if os.path.isabs(normalized):
+        try:
+            normalized = os.path.relpath(normalized, os.getcwd())
+        except ValueError:
+            pass
+    return os.path.normpath(normalized)
+
+
+def select_notebooks(targets):
+    if not targets:
+        return NOTEBOOKS
+
+    notebooks_by_path = {normalize_repo_path(notebook): notebook for notebook in NOTEBOOKS}
+    selected = set()
+
+    for target in targets:
+        normalized_target = normalize_repo_path(target)
+
+        if normalized_target in notebooks_by_path:
+            selected.add(notebooks_by_path[normalized_target])
+            continue
+
+        if os.path.isdir(normalized_target):
+            target_dir = normalized_target
+        elif normalized_target.endswith((".ipynb", ".py")):
+            target_dir = os.path.dirname(normalized_target)
+        else:
+            print(f"Skipping non-eligible notebook target: {target}", file=sys.stderr)
+            continue
+
+        for notebook in NOTEBOOKS:
+            if normalize_repo_path(os.path.dirname(notebook)) == target_dir:
+                selected.add(notebook)
+
+    return [notebook for notebook in NOTEBOOKS if notebook in selected]
+
+
 def run_python_file(py_file, env):
     return subprocess.run(
         [sys.executable, py_file],
@@ -154,5 +193,11 @@ class TestNotebooks(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    # Run the tests
-    unittest.main()
+    selected_notebooks = select_notebooks(sys.argv[1:])
+
+    if not selected_notebooks:
+        print("No eligible notebooks selected.")
+        sys.exit(0)
+
+    TestNotebooks.notebooks_to_test = selected_notebooks
+    unittest.main(argv=[sys.argv[0]])

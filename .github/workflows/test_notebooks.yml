@@ -38,6 +38,79 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Determine notebook test targets
+        id: notebook-test-targets
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          run_all=false
+          target_dirs_file="$RUNNER_TEMP/notebook_target_dirs.txt"
+          changed_files_file="$RUNNER_TEMP/notebook_changed_files.txt"
+          : > "$target_dirs_file"
+          : > "$changed_files_file"
+
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            run_all=true
+          else
+            if [ "${{ github.event_name }}" = "pull_request" ]; then
+              base="${{ github.event.pull_request.base.sha }}"
+              head="${{ github.sha }}"
+            else
+              base="${{ github.event.before }}"
+              head="${{ github.sha }}"
+            fi
+
+            if [ -z "$base" ] || [[ "$base" =~ ^0+$ ]]; then
+              git diff-tree --no-commit-id --name-only -r "$head" > "$changed_files_file"
+            elif ! git diff --name-only "$base" "$head" > "$changed_files_file"; then
+              echo "Could not diff $base..$head; running full notebook suite."
+              run_all=true
+            fi
+
+            if [ "$run_all" = "false" ]; then
+              while IFS= read -r file; do
+                [ -z "$file" ] && continue
+
+                case "$file" in
+                  .python-version|pyproject.toml|uv.lock|.github/workflows/test_notebooks.yml|ch00-tech-prep/*.py)
+                    run_all=true
+                    break
+                    ;;
+                  *.ipynb|*.py)
+                    dirname "$file" >> "$target_dirs_file"
+                    ;;
+                esac
+              done < "$changed_files_file"
+            fi
+          fi
+
+          if [ "$run_all" = "true" ]; then
+            echo "run_all=true" >> "$GITHUB_OUTPUT"
+            echo "has_targets=true" >> "$GITHUB_OUTPUT"
+            echo "Notebook target mode: all"
+          else
+            sort -u "$target_dirs_file" -o "$target_dirs_file"
+
+            if [ -s "$target_dirs_file" ]; then
+              echo "run_all=false" >> "$GITHUB_OUTPUT"
+              echo "has_targets=true" >> "$GITHUB_OUTPUT"
+              {
+                echo "targets<<EOF"
+                cat "$target_dirs_file"
+                echo "EOF"
+              } >> "$GITHUB_OUTPUT"
+              echo "Notebook target directories:"
+              cat "$target_dirs_file"
+            else
+              echo "run_all=false" >> "$GITHUB_OUTPUT"
+              echo "has_targets=false" >> "$GITHUB_OUTPUT"
+              echo "No eligible notebooks selected."
+            fi
+          fi
 
       - name: Setup Windows paths (Windows)
         if: matrix.os_name == 'windows'
@@ -132,8 +205,23 @@ jobs:
         shell: bash
         env:
           MPLBACKEND: Agg
+          NOTEBOOK_TEST_TARGETS: ${{ steps.notebook-test-targets.outputs.targets }}
         run: |
-          uv run --frozen python ch00-tech-prep/run_all_python.py
+          if [ "${{ steps.notebook-test-targets.outputs.run_all }}" = "true" ]; then
+            uv run --frozen python ch00-tech-prep/run_all_python.py
+          else
+            targets=()
+            while IFS= read -r target; do
+              [ -n "$target" ] && targets+=("$target")
+            done <<< "$NOTEBOOK_TEST_TARGETS"
+
+            if [ "${#targets[@]}" -eq 0 ]; then
+              echo "No eligible notebooks selected."
+              exit 0
+            fi
+
+            uv run --frozen python ch00-tech-prep/run_all_python.py "${targets[@]}"
+          fi
 
       - name: Upload test artifacts on failure
         if: failure()

@@ -7,11 +7,79 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 START_DIR="$(dirname "$SCRIPT_DIR")"
 cd "$START_DIR" || exit 1
 
+is_r_script() {
+  case "$1" in
+    *.R|*.r) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+is_excluded_script() {
+  case "$1" in
+    */ch00-tech-prep/*|\
+*/renv/*|\
+*/ch16-airbnb-random-forest/ch16-airbnb-random-forest.R|\
+*/ch17-predicting-firm-exit/ch17-predicting-firm-exit.R|\
+*/ch11-smoking-health-risk/ch11-smoking-health-risk-01-munging.R|\
+*/ch11-smoking-health-risk/ch11-smoking-health-risk-02-analysis.R)
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
+script_candidates_in_dir() {
+  find "$1" -type f \( -name "*.R" -o -name "*.r" \) | while IFS= read -r candidate; do
+    if ! is_excluded_script "$candidate"; then
+      printf '%s\n' "$candidate"
+    fi
+  done
+}
+
+resolve_target_path() {
+  case "$1" in
+    /*) printf '%s\n' "$1" ;;
+    *) printf '%s/%s\n' "$START_DIR" "$1" ;;
+  esac
+}
+
+selected_scripts() {
+  if [ "$#" -eq 0 ]; then
+    script_candidates_in_dir "$START_DIR"
+    return
+  fi
+
+  for target in "$@"; do
+    target_path="$(resolve_target_path "$target")"
+
+    if [ -d "$target_path" ]; then
+      script_candidates_in_dir "$target_path"
+    elif [ -f "$target_path" ] && is_r_script "$target_path" && ! is_excluded_script "$target_path"; then
+      printf '%s\n' "$target_path"
+    else
+      echo "Skipping non-eligible R target: $target" >&2
+    fi
+  done
+}
+
+order_scripts() {
+  awk '
+    /(prepare|munging|setup|dataprep|maker)/ { print "0\t" $0; next }
+    { print "1\t" $0 }
+  ' | sort -k1,1 -k2,2 | cut -f2-
+}
+
 # Create output file with timestamp
 TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
 OUTPUT_FILE="$SCRIPT_DIR/r_scripts_results_$TIMESTAMP.log"
 
-echo "Starting execution of all R scripts in directory: $START_DIR"
+if [ "$#" -eq 0 ]; then
+  echo "Starting execution of all R scripts in directory: $START_DIR"
+else
+  echo "Starting execution of selected R scripts in directory: $START_DIR"
+fi
 echo "Results will be written to: $OUTPUT_FILE"
 
 # Initialize the output file
@@ -23,27 +91,14 @@ echo "" >> "$OUTPUT_FILE"
 SUCCESS_COUNT=0
 FAIL_COUNT=0
 
-# Exclusion patterns for find command
-EXCLUDE_PATHS=(
-  -path "*/ch00-tech-prep/*"
-  -o -path "*/renv/*"
-  -o -path "*/ch16-airbnb-random-forest/ch16-airbnb-random-forest.R"
-  -o -path "*/ch17-predicting-firm-exit/ch17-predicting-firm-exit.R"
-  -o -path "*/ch11-smoking-health-risk/ch11-smoking-health-risk-01-munging.R"
-  -o -path "*/ch11-smoking-health-risk/ch11-smoking-health-risk-02-analysis.R"
-)
+# Sort selected files with data-prep style scripts first, then alphabetically.
+scripts=$(selected_scripts "$@" | sort -u | order_scripts)
 
-# Find all files ending in .R or .r recursively from the starting directory
-# Sort them to ensure consistent execution order (some scripts depend on others)
-# Prioritize *-prepare.R, *-munging.R, *-setup.R, *-dataprep.R, *-maker.R files first, then alphabetical
-scripts=$(
-  {
-    find "$START_DIR" -type f \( -name "*.R" -o -name "*.r" \) \
-      ! \( "${EXCLUDE_PATHS[@]}" \) | grep -E '(prepare|munging|setup|dataprep|maker)' || true
-    find "$START_DIR" -type f \( -name "*.R" -o -name "*.r" \) \
-      ! \( "${EXCLUDE_PATHS[@]}" \) | grep -vE '(prepare|munging|setup|dataprep|maker)' || true
-  } | sort
-)
+if [ -z "$scripts" ]; then
+  echo "No eligible R scripts selected."
+  echo "No eligible R scripts selected." >> "$OUTPUT_FILE"
+  exit 0
+fi
 
 while IFS= read -r r_script; do
   [ -z "$r_script" ] && continue
