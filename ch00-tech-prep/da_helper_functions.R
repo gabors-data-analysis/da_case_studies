@@ -126,6 +126,60 @@ stargazer_r <- function(list_of_models, type="text", align=TRUE, no.space=TRUE,
 }
 
 
+# modelsummary counterpart of stargazer_r(): a regression table with robust or
+# Newey-West standard errors. Lets chapters migrate from stargazer to
+# modelsummary while keeping identical SEs and the usual "... in parentheses"
+# note. Robust SEs use HC1 (= Stata's `robust`, the same as fixest vcov='hetero'),
+# so the numbers match stargazer_r()/calculate_se() to machine precision.
+#   list_of_models : a model object or list of model objects (lm, feols, ...)
+#   se   : 'robust' (HC1), 'traditional' (classical OLS), or 'newey-west' (uses max_lag)
+#   fmt  : digits for coefficients/SEs (stargazer `digits`)
+#   stars: append significance stars to estimates
+#   gof  : goodness-of-fit rows to keep (mirrors stargazer `keep.stat`);
+#          any subset of c('n','rsq','adj.rsq','aic','bic','rmse')
+#   output, title, ... : passed through to modelsummary() (e.g. output = "tab.tex")
+msummary_r <- function(list_of_models, se = "robust", max_lag = 0,
+                       fmt = 2, stars = FALSE, gof = c("n", "rsq"),
+                       output = "default", title = NULL, ...) {
+    if (!requireNamespace("modelsummary", quietly = TRUE))
+        stop("Required modelsummary package is missing.")
+    if (!inherits(list_of_models, "list")) list_of_models <- list(list_of_models)
+
+    vcov_spec <- switch(se,
+        traditional  = "classical",
+        robust       = "HC1",
+        `newey-west` = function(m) sandwich::NeweyWest(m, lag = max_lag, prewhite = FALSE),
+        stop("se should be one of 'traditional', 'robust' or 'newey-west'."))
+
+    note <- switch(se,
+        traditional  = "Standard errors in parentheses",
+        robust       = "Heteroskedasticity-robust (HC1) standard errors in parentheses",
+        `newey-west` = paste("Newey-West standard errors in parentheses - max lag:", max_lag))
+
+    gof_lookup <- list(
+        n       = list(raw = "nobs",          clean = "Num. obs.", fmt = 0),
+        rsq     = list(raw = "r.squared",     clean = "R2",        fmt = 3),
+        adj.rsq = list(raw = "adj.r.squared", clean = "R2 Adj.",   fmt = 3),
+        aic     = list(raw = "aic",           clean = "AIC",       fmt = 1),
+        bic     = list(raw = "bic",           clean = "BIC",       fmt = 1),
+        rmse    = list(raw = "rmse",          clean = "RMSE",      fmt = 2))
+    gof_map <- unname(gof_lookup[gof])
+
+    modelsummary::modelsummary(
+        list_of_models,
+        vcov      = vcov_spec,
+        estimate  = if (stars) "{estimate}{stars}" else "{estimate}",
+        statistic = "({std.error})",
+        fmt       = fmt,
+        gof_map   = gof_map,
+        notes     = note,
+        output    = output,
+        title     = title,
+        ...
+    )
+}
+
+
 pperron <- function(x, model = c('constant', 'trend'), type = "Z-tau") {
     if (!require(urca)) stop("Required urca package is missing.")
 

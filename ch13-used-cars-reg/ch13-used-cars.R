@@ -313,14 +313,17 @@ stargazer(eval, summary = F, out=paste(output,"ch13-table-4-bicrmse.tex",sep="")
 # old name: Ch13_bicrmse_R.tex
 # models 1-4 only, 5 too large
 
-# TODO 
-# use stargazer_r to get robust se
-# could be made nicer, also not producing it here
-stargazer_r(list(reg1, reg2, reg3, reg4 ), float=F, se = 'robust', digits=2, dep.var.caption = "Dep. var: price", keep.stat = c("rsq","n"),
-            out=paste0(output,"ch13-table-2-multireg1.tex",sep=""), no.space = T)
-stargazer(reg1, reg2, reg3, reg4 , align = T,   digits=2, dep.var.caption = "Dep. var: price", keep.stat = c("rsq","n"),
-            type="text", title = "Cars - regression", out=paste0(output,"ch13-table-2-multireg1.txt",sep=""), no.space = T)
+# Table 13.2: linear models 1-4, robust (HC1) standard errors.
+# Built with modelsummary via the msummary_r() helper (see da_helper_functions.R).
+# Robust SEs are HC1, identical to the previous stargazer_r() output.
+msummary_r(list(reg1, reg2, reg3, reg4), se = "robust", fmt = 2, gof = c("n", "rsq"),
+           title = "Dep. var: price",
+           output = paste0(output, "ch13-table-2-multireg1.tex"))
+msummary_r(list(reg1, reg2, reg3, reg4), se = "robust", fmt = 2, gof = c("n", "rsq"),
+           title = "Dep. var: price",
+           output = paste0(output, "ch13-table-2-multireg1.txt"))
 # old name: Ch13_multireg1_R.tex
+# previously: stargazer_r(list(reg1,reg2,reg3,reg4), se='robust', keep.stat=c("rsq","n"), ...)
 
 #################################################################
 # Cross-validation
