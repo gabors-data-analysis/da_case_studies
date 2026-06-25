@@ -66,12 +66,12 @@ glimpse( data )
 # SAMPLE DESIGN
 
 # manage missing
-data$fuel <- fct_explicit_na(data$fuel, na_level = "Missing")
-data$condition <- fct_explicit_na(data$condition, na_level = "Missing")
-data$drive <- fct_explicit_na(data$drive, na_level = "Missing")
-data$cylinders <- fct_explicit_na(data$cylinders, na_level = "Missing")
-data$transmission <- fct_explicit_na(data$transmission, na_level = "Missing")
-data$type <- fct_explicit_na(data$type, na_level = "Missing")
+data$fuel <- fct_na_value_to_level(data$fuel, level = "Missing")
+data$condition <- fct_na_value_to_level(data$condition, level = "Missing")
+data$drive <- fct_na_value_to_level(data$drive, level = "Missing")
+data$cylinders <- fct_na_value_to_level(data$cylinders, level = "Missing")
+data$transmission <- fct_na_value_to_level(data$transmission, level = "Missing")
+data$type <- fct_na_value_to_level(data$type, level = "Missing")
 
 
 # drop hybrid models then drop column
