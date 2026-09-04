@@ -13,8 +13,16 @@
 * Chapter 12
 * Simulating time series with various levels of serial correlation
 * no actual data used
-* version 0.9 2020-09-12
+* version 1.1 2026-09-04
+*
+* STATA VERSION: This code is written for Stata 18
 ********************************************************************
+
+* Stata version check and setup
+version 18
+clear all
+set more off
+set varabbrev off
 
 
 * SETTING UP DIRECTORIES
@@ -23,11 +31,11 @@
 * for example:
 * cd "C:/Users/xy/Dropbox/gabors_data_analysis/da_case_studies"
 
-global data_in  "$data_dir/hotels-vienna/clean"
+global data_in  "${data_dir}/hotels-vienna/clean"
 global work  	"ch12-time-series-simulations"
 
-cap mkdir 		"$work/output"
-global output 	"$work/output"
+capture mkdir 		"${work}/output"
+global output 	"${work}/output"
 
 clear
 set seed 2016
@@ -35,26 +43,26 @@ set obs 100
 global rho=0.8
 global sde=0.5
 
-gen t=_n
+generate t=_n
 tsset t
 
 ** serially uncorrelated series
-gen y1=rnormal(0,$sde)
- lab var y1 "simulated time series, no serial correlation"
+generate y1=rnormal(0,$sde)
+ label variable y1 "simulated time series, no serial correlation"
 
 tsline y1, lw(thick) lc(navy*0.8) ///
  yline(0) xlabel(, grid) ylabel(, grid) xtitle("Time period") ///
  graphregion(fcolor(white) ifcolor(none))
-graph export "$output\ch12-figure-9a-serialcorr-Stata.png", replace
+graph export "${output}/ch12-figure-9a-serialcorr-Stata.png", replace
 
 
 ** serially correlated series
-gen y2=0 if t==1
- lab var y2 "simulated time series, serial correlation = 0$rho"
+generate y2=0 if t==1
+ label variable y2 "simulated time series, serial correlation = 0$rho"
  replace y2=$rho*y2[_n-1] + rnormal(0,$sde) if t>1
 
 tsline y2, lw(thick) lc(navy*0.8) ///
  yline(0) xlabel(, grid) ylabel(, grid) xtitle("Time period") ///
  graphregion(fcolor(white) ifcolor(none))
-graph export "$output\ch12-figure-9b-serialcorr-Stata.png", replace
+graph export "${output}/ch12-figure-9b-serialcorr-Stata.png", replace
 

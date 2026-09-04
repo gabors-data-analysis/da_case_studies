@@ -10,6 +10,8 @@ ssc install egenmore, replace
 ssc install unique, replace
 ssc install regsave, replace
 ssc install matchit, replace
+ssc install psmatch2, replace
+ssc install synth, replace
 ssc install binscatter, replace
 ssc install vioplot, replace
 ssc install estout, replace
@@ -35,7 +37,7 @@ net install scheme_virdis, from(https://raw.github.com/vikjam/stata-scheme-virdi
 colorpalette, vertical n(20): viridis
 
 * stata
-ssc install wbopendata
+ssc install wbopendata, replace
 * datahelpdesk.worldbank.org/knowledgebase/articles/889464-wbopendata-stata-module-to-access-world-bank-data
 
 *fred

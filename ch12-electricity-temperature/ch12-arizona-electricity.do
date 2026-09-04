@@ -18,8 +18,7 @@
 * using the arizona-electricity dataset
 * version 1.1 2025-12-09
 *
-* STATA VERSION: This code is optimized for Stata 18
-* Backward compatibility notes for Stata 15 and below are included
+* STATA VERSION: This code is written for Stata 18
 ********************************************************************
 
 * Stata version check and setup
