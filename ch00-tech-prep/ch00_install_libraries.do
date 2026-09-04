@@ -12,6 +12,7 @@ ssc install regsave, replace
 ssc install matchit, replace
 ssc install psmatch2, replace
 ssc install synth, replace
+ssc install heatplot, replace
 ssc install binscatter, replace
 ssc install vioplot, replace
 ssc install estout, replace

@@ -204,7 +204,7 @@ graph box quantity, over(dayofweek) box(1, lcol(navy*0.8) fcol(none) lw(thick) )
 graph export "${output}/ch18-figure-4b-boxday-Stata.png", as(png) replace
 
 * HEATMAP
-* need to install heatplot.ado (type search heatplot and follow instructions)
+* heatplot is installed by ch00-tech-prep/ch00_install_libraries.do
 heatplot quantity month dayofweek , stat(mean) ybins(12) xbins(7) /// 
  col(viridis, reverse) xlab(1(1)7) ylab(1(1)12) 
 graph export "${output}/ch18-figure-5-heatmap-Stata.png", as(png) replace
