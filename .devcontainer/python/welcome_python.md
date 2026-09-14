@@ -16,7 +16,7 @@ repository's `pyproject.toml` and `uv.lock`. Run commands with `uv run`, for
 example:
 
 ```bash
-uv run python ch00-tech-prep/run_all_python.py
+uv run python ch00-tech-prep/tests/run_all_python.py
 ```
 
 *Note: This is a Python-only environment! To run R codes, you have to set up a Codespace configured with an R environment. To do so, follow the README of the repository on GitHub.*

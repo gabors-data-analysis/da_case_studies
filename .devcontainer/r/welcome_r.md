@@ -4,7 +4,7 @@ If you want to check what has just happened in the background, press `Ctrl/Cmd+S
 
 ## How to start?
 
-1. Download the data repository from OSF if you plan to use this Codespace in the long run. This is not mandatory, as the you can also download the individual files in each code by uncommenting the relevant lines.
+1. Download the data repository from OSF if you plan to use this Codespace in the long run. This is not mandatory, as you can also download the individual files in each code by uncommenting the relevant lines.
     - To do so, open a terminal (hit `Ctrl/Cmd+Shift+C` or use the sidebar's Terminal > New Terminal option). Paste the following command and hit Enter: `bash .devcontainer/scripts/download-data.sh`
     - This will automatically download, extract and place in the right folder structure all the data files that are needed to run the scripts.
 2. Start an interactive R terminal.
