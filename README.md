@@ -6,7 +6,7 @@ by Gábor Békés (CEU) and Gábor Kézdi (U. Michigan)
 Published on 6 May 2021 by Cambridge University Press  
 [**gabors-data-analysis.com**](https://gabors-data-analysis.com/)
 
-*Last update: 2026-06-10*
+*Last update: 2026-09-14*
 
 ## How to use
 
@@ -34,9 +34,14 @@ This is a new feature, if you find a bug or have ideas, post an issue or a PR. O
 
 ## Status
 
-The [Latest release, 0.9.0 "Frank Exchange of Views"](https://github.com/gabors-data-analysis/da_case_studies/releases/tag/v0.9.0) was released 14 August 2025. 
+[![Test Notebooks](https://github.com/gabors-data-analysis/da_case_studies/actions/workflows/test_notebooks.yml/badge.svg)](https://github.com/gabors-data-analysis/da_case_studies/actions/workflows/test_notebooks.yml)
+[![Test R Scripts](https://github.com/gabors-data-analysis/da_case_studies/actions/workflows/test_r_scripts.yml/badge.svg)](https://github.com/gabors-data-analysis/da_case_studies/actions/workflows/test_r_scripts.yml)
 
-Overall, the transition to `seaborn` and `pyfixest` drove most of the **Python**‑side evolution, while the **R** side adopted `fixest`/`marginaleffects`. **Stata** materials remained largely stable, reflecting a focus on modernizing the Python and R components for reproducibility and ease of use. No Julia yet. See detailes in the changelog / release notes. 
+The [latest release, 1.0.0 "Of Course I Still Love You"](https://github.com/gabors-data-analysis/da_case_studies/releases/tag/v1.0.0) was released 14 September 2026. See the [changelog](CHANGELOG.md) for details.
+
+This is the first release we call finished rather than pre-release. Every Python notebook and every R script now runs end to end in continuous integration on Linux, macOS and Windows, from a locked environment: `uv.lock` for Python, `renv.lock` for R. You can also run the whole thing in the browser through GitHub Codespaces.
+
+All 45 Stata do-files have been rewritten for Stata 18 and run against the data by hand — Stata cannot go in continuous integration, because GitHub's runners have no licence. **This means Stata 17 and below will no longer run the code.** See [how to run code in Stata](ch00-tech-prep/da-setup-stata.md). No Julia yet.
 
 ## Organization
 1. Each case study has a separate folder.
@@ -44,9 +49,23 @@ Overall, the transition to `seaborn` and `pyfixest` drove most of the **Python**
 3. Data should be downloaded and stored in a separate folder. 
 
 ## Code language versions
-1. **R** -- We used R 4.0.2. 
-2. **Stata** -- We used version 15, allmost all code should work in version 13 up.
+1. **R** -- We use R 4.5.2, with packages pinned in `renv.lock`.
+2. **Stata** -- We use version 18. Every `.do` file declares `version 18`, so older Stata will stop rather than run.
 3. **Python** -- We use Python 3.12.4, managed with [uv](https://docs.astral.sh/uv/).
+
+## Testing the code
+
+Every notebook and R script is run on each push, on Linux, macOS and Windows. You can run the same checks yourself from the repository root:
+
+```bash
+uv run python ch00-tech-prep/tests/run_all_python.py
+```
+
+```bash
+bash ch00-tech-prep/tests/run_all_r.sh
+```
+
+Both accept a chapter folder to check just one case study, for example `bash ch00-tech-prep/tests/run_all_r.sh ch13-used-cars-reg`. They need the data repository downloaded and the data directory set.
 
 ## Get data
 Data is hosted on OSF.io
