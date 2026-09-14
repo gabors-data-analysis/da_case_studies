@@ -234,7 +234,7 @@ wheels = [
 
 [[package]]
 name = "da-case-studies"
-version = "0.0.0"
+version = "1.0.0"
 source = { virtual = "." }
 dependencies = [
     { name = "arch", marker = "sys_platform == 'darwin' or sys_platform == 'linux' or sys_platform == 'win32'" },
