@@ -13,8 +13,16 @@
 * Chapter 20
 * CH20A Working from home and employee performance
 * using the working-from-home dataset
-* version 0.9 2020-09-14
+* version 1.1 2026-09-04
+*
+* STATA VERSION: This code is written for Stata 18
 ********************************************************************
+
+* Stata version check and setup
+version 18
+clear all
+set more off
+set varabbrev off
 
 
 * SETTING UP DIRECTORIES
@@ -27,22 +35,21 @@
 
 * STEP 2: * Directory for data
 * Option 1: run directory-setting do file
-do set-data-directory.do 
-							/* this is a one-line do file that should sit in 
-							the working directory you have just set up
-							this do file has a global definition of your working directory
-							more details: gabors-data-analysis.com/howto-stata/   */
+capture do set-data-directory.do
+	/* This one-line do file should sit in your working directory
+	   It contains: global data_dir "path/to/da_data_repo"
+	   More details: gabors-data-analysis.com/howto-stata/ */
 
 * Option 2: set directory directly here
 * for example:
 * global data_dir "C:/Users/xy/gabors_data_analysis/da_data_repo"
 
 
-global data_in  "$data_dir/working-from-home/clean"
+global data_in  "${data_dir}/working-from-home/clean"
 global work  	"ch20-working-from-home"
 
-cap mkdir 		"$work/output"
-global output 	"$work/output"
+capture mkdir 		"${work}/output"
+global output 	"${work}/output"
 
 
 
@@ -52,7 +59,7 @@ global output 	"$work/output"
 * same as tidy person-level data but variables ordered 
 * so balance table is easier to make
 
-use "$data_in/wfh_tidy_person", clear
+use "${data_in}/wfh_tidy_person", clear
 * Or download directly from OSF:
 /*
 copy "https://osf.io/download/jrydb/" "workfile.dta"
@@ -61,12 +68,12 @@ erase "workfile.dta"
 */ 
 
 order personid treatment ordertaker type quitjob phonecalls0 phonecalls1 ///
-  perform10 perform11 age male second_techn high_school tertiary_tec university ///
-  prior_experi tenure married children ageyoungestc rental costofcommut ///
+  perform10 perform11 age male second_technical high_school tertiary_technical university ///
+  prior_experience tenure married children ageyoungestchild rental costofcommute ///
   bedroom internet basewage bonus grosswage 
 
 
-save "$work/ch20-wfh-workfile", replace
+save "${work}/ch20-wfh-workfile", replace
 
 
 *******************************************************
@@ -74,11 +81,11 @@ save "$work/ch20-wfh-workfile", replace
 
 * Balance
 
-use "$work/ch20-wfh-workfile", replace
+use "${work}/ch20-wfh-workfile", replace
 
 *des perform10 age-grosswage
 
-replace ageyoungest = . if children==0
+replace ageyoungestchild = . if children==0
 
 
 * Table 20.1
@@ -94,7 +101,7 @@ tabstat perform10 age-grosswage ordertaker, s(sd) c(s) format(%5.2f)
 * Second part: t-tests for equal means (we do them by regression for simplicity)
 * need to enter p-values one by one to LaTex or Excel table
 foreach z of varlist perform10 age-grosswage ordertaker {
-	reg treatment `z', robust nohead
+	regress treatment `z', robust nohead
 }
 
 
@@ -103,47 +110,47 @@ foreach z of varlist perform10 age-grosswage ordertaker {
 * quit firm during 8 months of experiment
 * # phone calls worked, for order takers
 
-des quit phonecalls1
+des quitjob phonecalls1
 
 
-tabstat quit , by(treatment) s(mean sd n)
+tabstat quitjob , by(treatment) s(mean sd n)
 tabstat phonecalls1 if ordertaker==1, by(treatment) s(mean sd n)
 
 * Bar chart for quit rates
-gen quit_pct = quitjob*100
-gen stayed_pct = (1-quitjob)*100
-lab def treatment 0 "Working from office" 1 "Working from home"
-lab val treatment treatment
+generate quit_pct = quitjob*100
+generate stayed_pct = (1-quitjob)*100
+label def treatment 0 "Working from office" 1 "Working from home"
+label val treatment treatment
 graph bar (mean) stayed_pct quit_pct, over(treatment) stack ///
  bar(1, col(navy*0.8)) bar(2, col(green*0.8)) ///
  ytitle("Percent of employees") ylabel(0(25)100) ///
  legend(label(1 "stayed") label(2 "quit"))
-graph export "$output/ch20-figure-1-wfh-quitrates-Stata.png", replace
+graph export "${output}/ch20-figure-1-wfh-quitrates-Stata.png", replace
 
 
  
 * Regression 1: ATE estimates, no covariates
-lab var treatment "Treatment group"
-lab var quitjob "Quit job "
-lab var phonecalls1 "Phone calls (thousand)"
+label variable treatment "Treatment group"
+label variable quitjob "Quit job "
+label variable phonecalls1 "Phone calls (thousand)"
 la var married "Married"
-lab var children "Children"
-lab var internet "Internet at home"
+label variable children "Children"
+label variable internet "Internet at home"
 
 
-reg quitjob treatment , robust
- outreg2 using "$output/ch20-table-3-wfh-reg1-Stata", bdec(2) sdec(3) 2aster tex(frag) nonotes label replace
+regress quitjob treatment , robust
+ outreg2 using "${output}/ch20-table-3-wfh-reg1-Stata", bdec(2) sdec(3) 2aster tex(frag) nonotes label replace
 
-reg phonecalls1 treatment if ordertaker==1, robust
- outreg2 using "$output/ch20-table-3-wfh-reg1-Stata", bdec(2) sdec(2) 2aster tex(frag) nonotes label append
+regress phonecalls1 treatment if ordertaker==1, robust
+ outreg2 using "${output}/ch20-table-3-wfh-reg1-Stata", bdec(2) sdec(2) 2aster tex(frag) nonotes label append
 
 
  * Regression 2: ATE estimates, with covariates of some unbalance
 
-reg quitjob treatment married children internet, robust
- outreg2 using "$output/ch20-table-4-wfh-reg2-Stata", bdec(2) sdec(3) 2aster tex(frag) nonotes label replace
+regress quitjob treatment married children internet, robust
+ outreg2 using "${output}/ch20-table-4-wfh-reg2-Stata", bdec(2) sdec(3) 2aster tex(frag) nonotes label replace
 
-reg phonecalls1 treatment married children if ordertaker==1, robust
- outreg2 using "$output/ch20-table-4-wfh-reg2-Stata", bdec(2) sdec(2) 2aster tex(frag) nonotes label append
+regress phonecalls1 treatment married children if ordertaker==1, robust
+ outreg2 using "${output}/ch20-table-4-wfh-reg2-Stata", bdec(2) sdec(2) 2aster tex(frag) nonotes label append
  
  

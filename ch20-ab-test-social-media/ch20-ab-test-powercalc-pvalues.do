@@ -13,8 +13,16 @@
 * Chapter 20
 * CH20B Fine tuning social media advertising
 * using the ab-test-social-media dataset
-* version 0.91 2020-05-25
+* version 1.1 2026-09-04
+*
+* STATA VERSION: This code is written for Stata 18
 ********************************************************************
+
+* Stata version check and setup
+version 18
+clear all
+set more off
+set varabbrev off
 
 
 * SETTING UP DIRECTORIES
@@ -27,22 +35,21 @@
 
 * STEP 2: * Directory for data
 * Option 1: run directory-setting do file
-do set-data-directory.do 
-							/* this is a one-line do file that should sit in 
-							the working directory you have just set up
-							this do file has a global definition of your working directory
-							more details: gabors-data-analysis.com/howto-stata/   */
+capture do set-data-directory.do
+	/* This one-line do file should sit in your working directory
+	   It contains: global data_dir "path/to/da_data_repo"
+	   More details: gabors-data-analysis.com/howto-stata/ */
 
 * Option 2: set directory directly here
 * for example:
 * global data_dir "C:/Users/xy/gabors_data_analysis/da_data_repo"
 
 
-global data_in  "$data_dir/ab-test-social-media/clean"
+global data_in  "${data_dir}/ab-test-social-media/clean"
 global work  	"ch20-ab-test-social-media"
 
-cap mkdir 		"$work/output"
-global output 	"$work/output"
+capture mkdir 		"${work}/output"
+global output 	"${work}/output"
 
 
 
@@ -56,10 +63,10 @@ local clickthrough = 0.01
 local conversion = 0.05
 
 local proportionA = `clickthrough' * `conversion'
-dis `proportionA'
+display `proportionA'
 
 local proportionB = `proportionA' * 1.2
-dis `proportionB'
+display `proportionB'
 
 power twoproportions `proportionA' `proportionB'
 
@@ -72,10 +79,10 @@ local clickthrough = 0.0032
 local conversion = 0.0082
 
 local proportionA = `clickthrough' * `conversion'
-dis `proportionA'
+display `proportionA'
 
 local proportionB = `proportionA' * 1.2
-dis `proportionB'
+display `proportionB'
 
 power twoproportions `proportionA' `proportionB'
 
@@ -85,37 +92,37 @@ power twoproportions `proportionA' `proportionB'
 * p-value of tests 
 
 clear
-import excel "$data_in/ab-test-summary.xlsx", sheet("Sheet1") firstrow
+import excel "${data_in}/ab-test-summary.xlsx", sheet("Sheet1") firstrow
 
 * Or download directly from OSF:
 /*
 copy "https://osf.io/download/mhybr/" "workfile.xlsx"
-import excel "workfile.xlsx", sheet('Sheet1') firstrow
+import excel "workfile.xlsx", sheet("Sheet1") firstrow
 erase "workfile.xlsx"
 */ 
 
 foreach ab in A B{
 	foreach var in show clicks action {
-	su `var' if action_type =="Action `ab'", meanonly
+	summarize `var' if action_type =="Action `ab'", meanonly
 	local `var'_`ab' = r(mean)
-	dis ``var'_`ab''
+	display ``var'_`ab''
 	} 
 }
 
 clear
 local obs = `show_A' + `show_B'
 set obs `obs'
-gen type_b=_n>`show_A'
-tab type_b
-gen clicks = _n<=`clicks_A' 
+generate type_b=_n>`show_A'
+tabulate type_b
+generate clicks = _n<=`clicks_A' 
 local sc= `show_B'+`clicks_B'
  replace clicks = 1 if _n>`show_B'& _n<=`sc'
-tab type_b clicks
-gen action = _n<=`action_A'
+tabulate type_b clicks
+generate action = _n<=`action_A'
 
  local sa=`show_B'+`action_B'
  replace action = 1 if _n>`show_B' & _n<=`sa'
-tab type_b action
+tabulate type_b action
 
-reg clicks type_b, nohead robust
-reg action type_b, nohead robust
+regress clicks type_b, nohead robust
+regress action type_b, nohead robust

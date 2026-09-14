@@ -13,8 +13,16 @@
 * Chapter 24
 * CH24A Estimating the effect of the 2010 Haiti earthquake on GDP
 * using the haiti-earthquake dataset
-* version 0.9 2020-09-06
+* version 1.1 2026-09-04
+*
+* STATA VERSION: This code is written for Stata 18
 ********************************************************************
+
+* Stata version check and setup
+version 18
+clear all
+set more off
+set varabbrev off
 
 
 * SETTING UP DIRECTORIES
@@ -27,28 +35,27 @@
 
 * STEP 2: * Directory for data
 * Option 1: run directory-setting do file
-do set-data-directory.do 
-							/* this is a one-line do file that should sit in 
-							the working directory you have just set up
-							this do file has a global definition of your working directory
-							more details: gabors-data-analysis.com/howto-stata/   */
+capture do set-data-directory.do
+	/* This one-line do file should sit in your working directory
+	   It contains: global data_dir "path/to/da_data_repo"
+	   More details: gabors-data-analysis.com/howto-stata/ */
 
 * Option 2: set directory directly here
 * for example:
 * global data_dir "C:/Users/xy/gabors_data_analysis/da_data_repo"
 
 
-global data_in  "$data_dir/haiti-earthquake/clean"
+global data_in  "${data_dir}/haiti-earthquake/clean"
 global work  	"ch24-haiti-earthquake-gdp"
 
-cap mkdir 		"$work/output"
-global output	"$work/output"
+capture mkdir 		"${work}/output"
+global output	"${work}/output"
 
-cap mkdir 		"$work/temp"
-global temp 	"$work/temp"
+capture mkdir 		"${work}/temp"
+global temp 	"${work}/temp"
 
 
-use "$data_in/haiti-earthquake-mod.dta", clear	
+use "${data_in}/haiti-earthquake-mod.dta", clear	
 * Or download directly from OSF:
 /*
 copy "https://osf.io/download/h5yjm/" "workfile.dta"
@@ -58,12 +65,12 @@ erase "workfile.dta"
 
 
 *donor pool based on threshold calculations below: it is those countries with incomethreshold=1, and a balanced panel for all variables	
-	gen dp=0
+	generate dp=0
 	replace dp=1 if inlist(country, "Benin","Burkina Faso","Burundi" ,"Bangladesh"  ,"Cambodia","Cameroon" )
 	replace dp=1 if inlist(country, "Kenya"  	,"Kyrgyz Republic"  ,"Liberia","Madagascar"  ,"Mali","Moldova","Mozambique"  )
 	replace dp=1 if inlist(country, "Nicaragua" ,"Nepal"  ,"Rwanda","Senegal","Sierra Leone","Sudan","Tanzania","Togo","Uganda"  )
     replace dp=1 if country=="Haiti"  
-	lab var dp "Country in donor pool"
+	label variable dp "Country in donor pool"
 keep if dp==1	
 
 sort country year
@@ -77,7 +84,7 @@ xtdes
 
 compress
 clear matrix
-save "$work/haiti-earthquake-workfile.dta",replace
+save "${work}/haiti-earthquake-workfile.dta",replace
 
 
 * time series in Haiti
@@ -87,23 +94,27 @@ line gdptb_us year if ccode==1, lw(thick) lc(navy*0.8) ///
  text(8 2009 "Earthquake") ///
  graphregion(fcolor(white) ifcolor(none))  ///
  plotregion(fcolor(white) ifcolor(white)) 
-graph export "$output/ch24-figure-1-haiti-gdp-Stata.png", replace
+graph export "${output}/ch24-figure-1-haiti-gdp-Stata.png", replace
 
 
 * Haiti and synthetic control
 
+* synth builds temporary variables internally and needs variable
+* abbreviation on, so turn it back on just for this call
+set varabbrev on
 synth gdptb_us cons exp imp gcf land pop inf gdppc_w ///
   gdptb_us(2005) gdptb_us(2007) gdptb_us(2009) , ///
   trunit(1) trperiod(2010) xperiod(2004(1)2009) nested ///
-  unitnames(country) keep("$temp/gdp-1")replace
+  unitnames(country) keep("${temp}/gdp-1") replace
+set varabbrev off
 
-use "$temp/gdp-1",replace
-lab var _time "Year"
+use "${temp}/gdp-1",replace
+label variable _time "Year"
 
 
 * total GDP in Haiti and synthetid control
 * figure 24.2a
-line _Y_treated _Y_synth _time, lw(vthick vthick) lc(navy*0.8 green*0.6) ///
+line _Y_treated _Y_synthetic _time, lw(vthick vthick) lc(navy*0.8 green*0.6) ///
  xla(2004(2)2015, grid) yla(6(0.5)9, grid) ///
  xline(2010, lp(dash) lc(gray)) /// 
  text(8 2009 "Earthquake") ///
@@ -111,12 +122,12 @@ line _Y_treated _Y_synth _time, lw(vthick vthick) lc(navy*0.8 green*0.6) ///
   graphregion(fcolor(white) ifcolor(none))  ///
  plotregion(fcolor(white) ifcolor(white)) ///
  ytitle("Total GDP, constant USD, billion")
-graph export "$output/ch24-figure-2a-haiti-gdp-synth-Stata.png", replace
+graph export "${output}/ch24-figure-2a-haiti-gdp-synth-Stata.png", replace
 
 
 * differenence in log total GDP 
 * figure 24.2b
-gen lndiffY = ln(_Y_treated) - ln(_Y_synth)
+generate lndiffY = ln(_Y_treated) - ln(_Y_synthetic)
 line lndiffY _time, lw(vthick ) lc(navy*0.8) ///
  xla(2004(2)2015, grid) yla(-0.2(0.05)0.05, grid) yline(0) ///
  xline(2010, lp(dash) lc(gray)) /// 
@@ -124,16 +135,16 @@ line lndiffY _time, lw(vthick ) lc(navy*0.8) ///
  graphregion(fcolor(white) ifcolor(none))  ///
  plotregion(fcolor(white) ifcolor(white)) ///
  ytitle("Effect estimate, log of total GDP") 
-graph export "$output/ch24-figure-2b-haiti-gdp-synth-Stata.png", replace
+graph export "${output}/ch24-figure-2b-haiti-gdp-synth-Stata.png", replace
 
 
 ****************************************************
 * temporary stuff for textbook development
 * for R - temp
-use "$temp/gdp-1",replace
+use "${temp}/gdp-1",replace
 rename _Y_treated Ytreated
 rename _Y_synthetic Ysynthetic
 rename _time year
 drop _W_Weight  _Co_Number
 keep if year<.
-save "$temp\gdp-1-temp.dta",replace
+save "${temp}/gdp-1-temp.dta",replace

@@ -13,8 +13,16 @@
 * Chapter 14
 * CH14A Predicting uesd car value: log proces
 * using the used-car dataset
-* version 0.9 2020-09-12
+* version 1.1 2026-09-04
+*
+* STATA VERSION: This code is written for Stata 18
 ********************************************************************
+
+* Stata version check and setup
+version 18
+clear all
+set more off
+set varabbrev off
 
 
 * SETTING UP DIRECTORIES
@@ -27,25 +35,24 @@
 
 * STEP 2: * Directory for data
 * Option 1: run directory-setting do file
-do set-data-directory.do 
-							/* this is a one-line do file that should sit in 
-							the working directory you have just set up
-							this do file has a global definition of your working directory
-							more details: gabors-data-analysis.com/howto-stata/   */
+capture do set-data-directory.do
+	/* This one-line do file should sit in your working directory
+	   It contains: global data_dir "path/to/da_data_repo"
+	   More details: gabors-data-analysis.com/howto-stata/ */
 
 * Option 2: set directory directly here
 * for example:
 * global data_dir "C:/Users/xy/gabors_data_analysis/da_data_repo"
 
 
-global data_in  "$data_dir/used-cars/clean"
+global data_in  "${data_dir}/used-cars/clean"
 global work  	"ch14-used-cars-log"
 
-cap mkdir 		"$work/output"
-global output 	"$work/output"
+capture mkdir 		"${work}/output"
+global output 	"${work}/output"
 
 
-use "$data_in/used-cars_2cities_prep.dta", clear
+use "${data_in}/used-cars_2cities_prep.dta", clear
 * Or download directly from OSF:
 /*
 copy "https://osf.io/download/3zf8e/" "workfile.dta"
@@ -59,10 +66,10 @@ erase "workfile.dta"
 drop if Hybrid==1
 drop Hybrid
 
-tab fuel
+tabulate fuel
 keep if fuel=="gas"
 
-tab condition
+tabulate condition
 drop if condition=="new"
 drop if condition=="fair"
 
@@ -73,33 +80,33 @@ drop if odometer>100
 drop if price<1000 & (condition=="like new" | age<8)
 drop if price==.
 
-tab transmission
+tabulate transmission
 drop if transmission =="manual"
 drop pricestr
 
-tab type
+tabulate type
 drop if type=="truck"
 
-tab area
-gen chicago=area=="chicago"
+tabulate area
+generate chicago=area=="chicago"
 keep if chicago==1
 
 
 * Some feature engineering
 * condition
-gen cond_excellent = condition=="excellent"
-gen cond_good = condition=="good"
-gen cond_likenew = condition=="like new" 
+generate cond_excellent = condition=="excellent"
+generate cond_good = condition=="good"
+generate cond_likenew = condition=="like new" 
 
 * cylinders
-gen cylind6 = cylinders=="6 cylinders"
+generate cylind6 = cylinders=="6 cylinders"
 
 * price: quadratic
-gen agesq=age^2
-gen agecu=age^3
-gen odometersq=odometer^2
+generate agesq=age^2
+generate agecu=age^3
+generate odometersq=odometer^2
 
-save "$work/usedcars_work.dta", replace
+save "${work}/usedcars_work.dta", replace
 
 
 
@@ -110,14 +117,14 @@ lowess price age, mc(navy*0.6) lineopts( lc(green*0.8) lw(vthick)) ///
  title("") note("") ///
  graphregion(fcolor(white) ifcolor(none))  ///
  plotregion(fcolor(white) ifcolor(white))
-graph export "$output/ch14-figure-2a-p-age-lowess-Stata.png",replace
+graph export "${output}/ch14-figure-2a-p-age-lowess-Stata.png",replace
  
 lowess lnprice age, mc(navy*0.6) lineopts( lc(green*0.8) lw(vthick)) ///
  ylab(, grid) xlab(, grid) ytitle("ln(price, US dollars)") xtitle("Age (years)") ///
  title("") note("") ///
  graphregion(fcolor(white) ifcolor(none))  ///
  plotregion(fcolor(white) ifcolor(white))
-graph export "$output/ch14-figure-2b-lnp-age-lowess-Stata.png",replace
+graph export "${output}/ch14-figure-2b-lnp-age-lowess-Stata.png",replace
 
 
 
@@ -142,29 +149,29 @@ replace cond_excellent=1 if _n==`nplus1'
 replace cond_good=0 if _n==`nplus1'
 replace cylind6=0 if _n==`nplus1'
 replace dealer=0 if _n==`nplus1'
-lis if _n==`nplus1'
+list if _n==`nplus1'
 
  
 * ln y
 * M3
-reg lnprice $M3
+regress lnprice $M3
  predict lnpM3 if _n==`nplus1'
- gen lnpM3_sig = e(rmse) if _n==`nplus1'
+ generate lnpM3_sig = e(rmse) if _n==`nplus1'
  predict lnpM3_spe if _n==`nplus1', stdf
- gen lnpM3_80PIlow  = lnpM3 - 1.28*lnpM3_spe
- gen lnpM3_80PIhigh = lnpM3 + 1.28*lnpM3_spe
+ generate lnpM3_80PIlow  = lnpM3 - 1.28*lnpM3_spe
+ generate lnpM3_80PIhigh = lnpM3 + 1.28*lnpM3_spe
 * log correction
-gen pM3_log = exp(lnpM3) * exp(lnpM3_sig^2/2)
- gen pM3_log_80PIlow   = exp(lnpM3_80PIlow ) * exp(lnpM3_sig^2/2)
- gen pM3_log_80PIhigh  = exp(lnpM3_80PIhigh) * exp(lnpM3_sig^2/2)
+generate pM3_log = exp(lnpM3) * exp(lnpM3_sig^2/2)
+ generate pM3_log_80PIlow   = exp(lnpM3_80PIlow ) * exp(lnpM3_sig^2/2)
+ generate pM3_log_80PIhigh  = exp(lnpM3_80PIhigh) * exp(lnpM3_sig^2/2)
 
 * level y
 * M3
-reg price $M3
+regress price $M3
  predict pM3_level if _n==`nplus1'
  predict pM3_level_spe if _n==`nplus1', stdf
- gen pM3_level_80PIlow  = pM3_level - 1.28*pM3_level_spe
- gen pM3_level_80PIhigh = pM3_level + 1.28*pM3_level_spe
+ generate pM3_level_80PIlow  = pM3_level - 1.28*pM3_level_spe
+ generate pM3_level_80PIhigh = pM3_level + 1.28*pM3_level_spe
 
  
 * Table 14.1
