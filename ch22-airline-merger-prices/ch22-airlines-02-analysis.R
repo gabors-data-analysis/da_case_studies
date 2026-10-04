@@ -52,7 +52,7 @@ create_output_if_doesnt_exist(output)
 # This is the analysis file, you must run ch22-airlines-01-dataprep.R first
 
 
-# I.  Examining pre-treatment trends in avg ln price
+# I.  Examining pre-treatment trends in ln average price (log of the passenger-weighted mean price, not the mean of log prices)
 #------------------------------
 
 
@@ -94,7 +94,7 @@ ggplot(data_agg, aes(x = date, y = lnavgprice, color = factor(treated))) +
   geom_line(data = filter(data_agg, treated==1), linewidth = 1.3) +
   geom_line(data = filter(data_agg, treated==0), linewidth = 1.3) +
   annotate("text", x = as.yearqtr("2013-1"), y = 5.14, label = "Treated markets", size=3, color = color[2]) + 
-  annotate("text", x = as.yearqtr("2013-1"), y = 5.46, label = "Unreated markets", size=3, color = color[1]) +
+  annotate("text", x = as.yearqtr("2013-1"), y = 5.46, label = "Untreated markets", size=3, color = color[1]) +
   geom_vline(xintercept = as.yearqtr("2012-1"), color = color[3], linewidth = 0.9, linetype="longdash")+
   geom_vline(xintercept = as.yearqtr("2015-3"), color = color[3], linewidth = 0.9, linetype="longdash") +
   annotate("text", x = as.yearqtr("2011-1"), y = 5.57, label = "Announcement", size=2.5, color = color[3]) + 
@@ -127,7 +127,7 @@ data_agg <- data_agg %>%
 ggplot(data_agg, aes(x = date, y = lnavgprice, color = factor(treated))) +
   geom_line(data = filter(data_agg, treated==1),  linewidth = 0.7) +
   geom_line(data = filter(data_agg, treated==0), linewidth = 0.7) +
-  annotate("text", x = as.yearqtr("2013-1"), y = 5.59, label = "Unreated markets", size=2, color = color[1]) +
+  annotate("text", x = as.yearqtr("2013-1"), y = 5.59, label = "Untreated markets", size=2, color = color[1]) +
   annotate("text", x = as.yearqtr("2013-1"), y = 5.49, label = "Treated markets", size=2, color = color[2]) +
   geom_vline(xintercept = as.yearqtr("2012-1"), color = color[3], linewidth= 0.6, linetype="longdash")+
   geom_vline(xintercept = as.yearqtr("2015-3"), color = color[3], linewidth= 0.6, linetype="longdash") +
@@ -155,7 +155,7 @@ data_agg <- data_agg %>%
 ggplot(data_agg, aes(x = date, y = lnavgprice, color = factor(treated))) +
   geom_line(data = filter(data_agg, treated==1),  linewidth = 0.7) +
   geom_line(data = filter(data_agg, treated==0), linewidth = 0.7) +
-  annotate("text", x = as.yearqtr("2013-1"), y = 4.3, label = "Unreated markets", size=2, color = color[1]) +
+  annotate("text", x = as.yearqtr("2013-1"), y = 4.3, label = "Untreated markets", size=2, color = color[1]) +
   annotate("text", x = as.yearqtr("2013-1"), y = 4.9, label = "Treated markets", size=2, color = color[2]) +
   geom_vline(xintercept = as.yearqtr("2012-1"), color = color[3], linewidth= 0.6, linetype="longdash")+
   geom_vline(xintercept = as.yearqtr("2015-3"), color = color[3], linewidth= 0.6, linetype="longdash") +

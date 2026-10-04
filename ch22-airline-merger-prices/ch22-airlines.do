@@ -257,7 +257,7 @@ tabulate after treated [w=pass_bef], sum(lnavgp) mean noobs
 
 
 *****************************************************
-* Examining pre-treatment trends in avg ln price
+* Examining pre-treatment trends in ln average price (log of the passenger-weighted mean price, not the mean of log prices)
 
 * use workfile to identify treated and untreated markets
 use "${work}/ch22-airline-workfile.dta" ,replace
@@ -288,7 +288,7 @@ format yq %tq
 save "${work}/ch22-airline-trends",replace
 
 
-* aggreagete data to create average price by treated-untreated and year-quarter
+* aggregate data to create average price by treated-untreated and year-quarter
 * and draw time series graphs of log avg price
 * all markets
 use "${work}/ch22-airline-trends",replace
