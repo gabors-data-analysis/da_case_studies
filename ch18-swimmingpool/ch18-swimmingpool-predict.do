@@ -118,6 +118,7 @@ generate week=week(date)
 generate day=day(date)
 generate dayofweek=dow(date)
  recode dayofweek 0 = 7 /* sunday is 7 */
+generate weekend = (dayofweek==6 | dayofweek==7) /* Saturday and Sunday */
 label variable date "Date of operation"
 label def mo 1 Jan 2 Feb 3 mar 4 Apr 5 May 6 Jun 7 Jul 8 Aug 9 Sep 10 Oct 11 Nov 12 Dec
  label val month mo
@@ -224,7 +225,8 @@ local M1 t i.month
 local M2 t i.month i.dayofweek
 local M3 t i.month i.dayofweek i.natholiday
 local M4 t i.month i.dayofweek i.natholiday i.school_off##i.dayofweek
-local M5 t i.month i.dayofweek i.natholiday i.school_off##i.dayofweek i.month##i.dayofweek
+* M5 interacts months with the weekend dummy (not with all days of the week), as in the R and Python code and the textbook
+local M5 t i.month i.dayofweek i.natholiday i.school_off##i.dayofweek i.weekend##i.month
 
 forvalues i=1/5 {
 	forvalues y=2010/2015 {
