@@ -200,8 +200,8 @@ fd_lm_5_cumul <- feols( d_surv ~ l( d_imm , 5 )+ l( d2_imm , 0:4) ,
                         weights = data_balanced$pop,
                         cluster = "c" )
 
-# * FD, 5 lags, cumul, lead (!different than in book!)
-fd_lm_5_cumul_lead <- feols( d_surv ~ l( d_imm , 5 ) + l( d2_imm , -3:4 ) ,
+# * FD, 5 lags, cumul, 3 leads of d_imm (as in the book, Stata and Python)
+fd_lm_5_cumul_lead <- feols( d_surv ~ l( d_imm , 5 ) + l( d2_imm , 0:4 ) + f( d_imm , 1:3 ) ,
                              data = data_balanced, 
                              weights = data_balanced$pop,
                              cluster = "c" )
@@ -209,9 +209,9 @@ fd_lm_5_cumul_lead <- feols( d_surv ~ l( d_imm , 5 ) + l( d2_imm , -3:4 ) ,
 
 # Showing only the d_imm renamed
 dictName2 = c("l(d_imm,5)"="d_imm cumulative",
-              "f(d2_imm,1)"="d_imm lead 1",
-              "f(d2_imm,2)"="d_imm lead 2",
-              "f(d2_imm,3)"="d_imm lead 3",
+              "f(d_imm,1)"="d_imm lead 1",
+              "f(d_imm,2)"="d_imm lead 2",
+              "f(d_imm,3)"="d_imm lead 3",
               "(Intercept)"="Constant")
 etable( fd_lm_5_cumul, fd_lm_5_cumul_lead, dict=dictName2,
          digits = 3,drop="d2_imm")
