@@ -108,6 +108,13 @@ jobs:
           cache-version: 3
           bypass-cache: "never"
 
+      # The P3M macOS binary of MatchIt 4.7.2 expects the OpenMP runtime
+      # (___kmpc_critical) to be loaded already and fails to load. Rebuild it
+      # from source, same version.
+      - name: Rebuild MatchIt from source (macOS)
+        if: matrix.os_name == 'macos'
+        run: Rscript -e 'renv::install("MatchIt@4.7.2", type = "source", rebuild = TRUE, prompt = FALSE)'
+
       - name: Run R script tests
         shell: bash
         env:
