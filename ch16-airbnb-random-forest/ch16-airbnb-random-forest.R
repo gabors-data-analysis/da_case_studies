@@ -672,8 +672,9 @@ cart_model <- train(
 fancyRpartPlot(cart_model$finalModel, sub = "")
 
 # GBM  -------------------------------------------------------
-gbm_grid <-  expand.grid(interaction.depth = c(1, 5, 10), # complexity of the tree
-                         n.trees = c(200, 400, 500), # number of iterations, i.e. trees
+# GBM1 grid as described in the book (Section 16.A3); it reproduces the printed CV RMSE of 44.6
+gbm_grid <-  expand.grid(interaction.depth = c(1, 5, 9), # complexity of the tree
+                         n.trees = (1:10)*50, # number of iterations, i.e. trees
                          shrinkage = 0.1, # learning rate: how quickly the algorithm adapts
                          n.minobsinnode = 20 # the minimum number of training set samples in a node to commence splitting
 )
