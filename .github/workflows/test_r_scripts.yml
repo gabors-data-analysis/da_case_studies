@@ -91,11 +91,29 @@ jobs:
         if: matrix.os_name == 'macos'
         run: bash ch00-tech-prep/tests/ci/configure_r_macos.sh
 
+      # renv.lock was resolved against Posit Package Manager on 2026-06-17.
+      # Binaries from cran/latest are rebuilt against newer dependencies
+      # (e.g. rstan against RcppParallel 6 / oneTBB), which breaks loading
+      # them next to the locked versions. Use the matching dated snapshot.
+      - name: Pin package repository to renv.lock snapshot
+        shell: bash
+        run: |
+          snapshot=2026-06-17
+          echo "RSPM=${RSPM%/latest}/$snapshot" >> "$GITHUB_ENV"
+          echo "RENV_CONFIG_REPOS_OVERRIDE=${RENV_CONFIG_REPOS_OVERRIDE%/latest}/$snapshot" >> "$GITHUB_ENV"
+
       - name: Restore R packages (renv)
         uses: r-lib/actions/setup-renv@v2
         with:
-          cache-version: 2
+          cache-version: 3
           bypass-cache: "never"
+
+      # The P3M macOS binary of MatchIt 4.7.2 expects the OpenMP runtime
+      # (___kmpc_critical) to be loaded already and fails to load. Rebuild it
+      # from source, same version.
+      - name: Rebuild MatchIt from source (macOS)
+        if: matrix.os_name == 'macos'
+        run: Rscript -e 'renv::install("MatchIt@4.7.2", type = "source", rebuild = TRUE, prompt = FALSE)'
 
       - name: Run R script tests
         shell: bash
